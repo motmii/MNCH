@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة أمن المعلومات — الترم الثاني</title>
+  <meta name="description" content="منصة أمن المعلومات للدبلوم — اختبارات تجريبية، ملخصات، وبنوك أسئلة لكل مواد الترم الثاني." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    /* MODULE 36 · pre-paint theme restore — runs before first paint (no FOUC).
+       Dark (#0b0f19) is the default; a stored "light" choice re-applies instantly. */
+    (function () {
+      var t = null;
+      try { t = JSON.parse(localStorage.getItem("motmi-portal:theme") || "null"); } catch (e) {}
+      if (t === "light") document.documentElement.setAttribute("data-theme", "light");
+    })();
+  </script>
+  <meta name="theme-color" content="#0b0f19" />
+  <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
+  <noscript>
+    <style>
+      /* Without JS: never trap the user behind the preloader, and show
+         all reveal-on-scroll content immediately. */
+      .preloader, .cursor-dot, .cursor-ring { display: none !important; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    </style>
+  </noscript>
+</head>
+<body>
+
+  <!-- Salawat banner (MODULE 28) — slim, elegant, RTL-safe strip pinned to the top.
+       position:fixed → never affects layout/scroll (CLS-safe). Starts off-screen and
+       inert via CSS; JS slides it in. Non-intrusive: no autoplay audio, no focus steal. -->
+  <div id="salawatBanner" class="salawat-banner" role="region" aria-live="polite" aria-label="تذكير بالصلاة على النبي ﷺ">
+    <p class="salawat-banner-text">اللهم صلِّ وسلم وبارك على نبينا محمد ﷺ</p>
+    <button type="button" id="salawatBannerClose" class="salawat-banner-close" aria-label="إغلاق التذكير" title="إغلاق" aria-controls="salawatBanner">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+
+  <div class="preloader" id="preloader">
+    <div class="preloader-inner">
+      <span class="preloader-word">م</span><span class="preloader-word">ن</span><span class="preloader-word">ص</span><span class="preloader-word">ة</span>
+    </div>
+  </div>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">منصة<span class="logo-dot">.</span></a>
+      <ul class="nav-links">
+        <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
+        <li><a href="#subjects" data-i18n="nav.subjects">المواد الدراسية</a></li>
+        <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+        <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+        <li><a href="#flash" data-i18n="nav.flashcards">البطاقات التعليمية</a></li>
+        <li><a href="#games" data-i18n="nav.games">اللعبة</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">المساهمة</a></li>
+      </ul>
+      <button id="langToggle" class="lang-toggle" type="button" aria-pressed="true" aria-label="تغيير اللغة / Switch language" title="English">
+        <span class="lang-current" aria-hidden="true">EN</span>
+      </button>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="الوضع الفاتح / Light mode" title="الوضع الفاتح / Light mode">
+        <span class="theme-ico" aria-hidden="true">
+          <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6"/></svg>
+          <svg class="ico-moon" viewBox="0 0 24 24"><path d="M20.8 13.2A8.5 8.5 0 1 1 10.8 3.2a6.8 6.8 0 0 0 10 10z"/></svg>
+        </span>
+      </button>
+      <button class="nav-burger" id="navBurger" aria-label="فتح القائمة" aria-expanded="false">
+        <span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <ul>
+      <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
+      <li><a href="#subjects" data-i18n="nav.subjects">المواد الدراسية</a></li>
+      <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+      <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+      <li><a href="#flash" data-i18n="nav.flashcards">البطاقات التعليمية</a></li>
+      <li><a href="#contact" data-i18n="nav.contact">المساهمة</a></li>
+    </ul>
+    <a href="#quiz" class="btn btn-primary" data-i18n="nav.cta">ابدأ اختبار</a>
+  </div>
+
+  <main>
+  <header class="hero is-active" id="hero">
+      <div class="hero-glow hero-glow-a" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
+
+      <div class="hero-content">
+        <p class="hero-eyebrow reveal" data-i18n="hero.eyebrow">✦ &nbsp;دبلوم أمن المعلومات — الترم الثاني</p>
+        <h1 class="hero-title">
+          <span class="line"><span class="reveal-line" data-i18n="hero.title1">منصة أمن</span></span>
+          <span class="line"><span class="reveal-line" data-i18n="hero.title2">المعلومات </span><em class="grad" data-i18n="hero.titleAccent">الترم الثاني</em></span>
+        </h1>
+        <p class="hero-sub reveal" data-i18n="hero.sub">مصدرك المتكامل لطلاب دبلوم أمن المعلومات: اختبارات تجريبية بنتائج فورية، ملخصات جاهزة، وبنوك أسئلة لكل مادة — راجع، اختبر، وثبّت درجتك.</p>
+        <div class="hero-actions reveal">
+          <a href="#quiz" class="btn btn-primary magnetic" data-i18n="hero.ctaQuiz">ابدأ الاختبار</a>
+          <a href="#subjects" class="btn btn-ghost magnetic" data-i18n="hero.ctaSubjects">تصفح المواد</a>
+        </div>
+        <p class="hero-credit reveal" data-i18n-html="hero.credit">صُمّم وطُوّر بواسطة <em class="grad">أحمد مطمي</em></p>
+        <div class="hero-meta reveal">
+          <div class="hero-stat"><strong data-count="questions">0</strong><span data-i18n="hero.statq">سؤال تدريبي</span></div>
+          <div class="hero-stat"><strong data-count="subjects">0</strong><span data-i18n="hero.stats">مواد دراسية</span></div>
+          <div class="hero-stat"><strong data-count="tools">0</strong><span data-i18n="hero.statTools">أدوات تفاعلية</span></div>
+        </div>
+
+        <ul class="hero-features reveal" aria-label="ماذا تقدم المنصة">
+          <li><span data-feat="materials" aria-hidden="true">📚</span><span data-i18n="features.materials">مواد دراسية</span></li>
+          <li><span aria-hidden="true">✍️</span><span data-i18n="features.quizzes">اختبارات تدريبية</span></li>
+          <li><span aria-hidden="true">📄</span><span data-i18n="features.summaries">ملخصات</span></li>
+          <li><span aria-hidden="true">🃏</span><span data-i18n="features.flashcards">بطاقات تعليمية</span><b class="res-count" data-flash-count>18</b></li>
+          <li><span aria-hidden="true">🛠️</span><span data-i18n="features.tools">أدوات أمنية تفاعلية</span></li>
+        </ul>
+      </div>
+
+      <div class="scroll-hint" aria-hidden="true"><span></span></div>
+    </header>
+
+    <!-- MARQUEE -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>أمن المعلومات&nbsp;✦</span><span>الشبكات&nbsp;✦</span><span>التشفير&nbsp;✦</span><span>أنظمة التشغيل&nbsp;✦</span><span>قواعد البيانات&nbsp;✦</span><span>الاختبارات&nbsp;✦</span>
+        <span>أمن المعلومات&nbsp;✦</span><span>الشبكات&nbsp;✦</span><span>التشفير&nbsp;✦</span><span>أنظمة التشغيل&nbsp;✦</span><span>قواعد البيانات&nbsp;✦</span><span>الاختبارات&nbsp;✦</span>
+      </div>
+    </div>
+
+    <!-- SUBJECTS & RESOURCES -->
+    <section class="section subjects" id="subjects">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="subjects.eyebrow">المواد الدراسية والتجميعات</p>
+        <h2 class="section-title" data-i18n-html="subjects.title">مواد <em class="grad">الترم الثاني</em> وملفاتها</h2>
+        <p class="section-sub" data-i18n="subjects.sub">اختر مادتك لتحميل التجميعات، بنوك الأسئلة، والملخصات الجاهزة للمراجعة والطباعة.</p>
+      </div>
+
+      <div class="work-toolbar reveal">
+        <div class="work-search">
+          <input id="subjectSearch" type="search" placeholder="ابحث عن مادة أو موضوع…" aria-label="بحث في المواد الدراسية" />
+        </div>
+        <div class="tag-row" role="group" aria-label="تصفية المواد حسب التصنيف">
+          <button type="button" class="tag-chip" data-tag="all" aria-pressed="true">الكل</button>
+          <button type="button" class="tag-chip" data-tag="networks" aria-pressed="false">الشبكات</button>
+          <button type="button" class="tag-chip" data-tag="os" aria-pressed="false">الأنظمة</button>
+          <button type="button" class="tag-chip" data-tag="crypto" aria-pressed="false">التشفير</button>
+          <button type="button" class="tag-chip" data-tag="db" aria-pressed="false">قواعد البيانات</button>
+          <button type="button" class="tag-chip" data-tag="code" aria-pressed="false">البرمجة</button>
+          <button type="button" class="tag-chip" data-tag="ethical" aria-pressed="false">الاختراق</button>
+        </div>
+        <p class="results-count" id="resultsCount" aria-live="polite"></p>
+      </div>
+
+      <div class="work-grid">
+<article class="work-card reveal tilt" data-tags="networks" data-quiz="networks">
+          <div class="work-card-inner">
+            <div class="work-thumb" style="--hue: 265"><span class="thumb-label">مادة 01</span><img class="thumb-img" src="images/network-sec.svg" alt="الشبكات وأمنها" onerror="this.onerror=null;this.src='images/icon-maskable.svg'" width="800" height="600" loading="lazy" decoding="async" /></div>
+            <div class="work-info">
+              <h3>الشبكات وأمنها <span class="arrow">↖</span></h3>
+              <p>أساسيات الشبكات، جدران الحماية، أدوات الكشف عن الاختراق، والاتصال الآمن.</p>
+              <span class="work-year">الترم الثاني</span>
+              <div class="card-links"><a href="#quiz" class="card-link" data-quiz-jump="networks">بنك الأسئلة <span class="res-count" data-res="networks">4</span></a><span class="card-link is-soon" title="قريبًا — التجميعات قيد الإعداد">تحميل التجميعات ⬇</span><span class="card-link is-soon" title="قريبًا — الملخصات قيد الإعداد">الملخصات</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="work-card reveal tilt" data-tags="os" data-quiz="os">
+          <div class="work-card-inner">
+            <div class="work-thumb" style="--hue: 200"><span class="thumb-label">مادة 02</span><img class="thumb-img" src="images/os-sec.svg" alt="أمن أنظمة التشغيل" onerror="this.onerror=null;this.src='images/icon-maskable.svg'" width="800" height="600" loading="lazy" decoding="async" /></div>
+            <div class="work-info">
+              <h3>أمن أنظمة التشغيل <span class="arrow">↖</span></h3>
+              <p>إدارة الصلاحيات، التحديثات الدورية، التحكم في الحسابات، والحماية من البرمجيات الضارة.</p>
+              <span class="work-year">الترم الثاني</span>
+              <div class="card-links"><a href="#quiz" class="card-link" data-quiz-jump="os">بنك الأسئلة <span class="res-count" data-res="os">3</span></a><span class="card-link is-soon" title="قريبًا — التجميعات قيد الإعداد">تحميل التجميعات ⬇</span><span class="card-link is-soon" title="قريبًا — الملخصات قيد الإعداد">الملخصات</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="work-card reveal tilt" data-tags="crypto" data-quiz="crypto">
+          <div class="work-card-inner">
+            <div class="work-thumb" style="--hue: 320"><span class="thumb-label">مادة 03</span><img class="thumb-img" src="images/crypto-viz.svg" alt="التشفير وتطبيقاته" onerror="this.onerror=null;this.src='images/icon-maskable.svg'" width="800" height="600" loading="lazy" decoding="async" /></div>
+            <div class="work-info">
+              <h3>التشفير وتطبيقاته <span class="arrow">↖</span></h3>
+              <p>التشفير المتماثل وغير المتماثل، دوال التجزئة، الشهادات الرقمية، وأسس التوقيع الإلكتروني.</p>
+              <span class="work-year">الترم الثاني</span>
+              <div class="card-links"><a href="#quiz" class="card-link" data-quiz-jump="crypto">بنك الأسئلة <span class="res-count" data-res="crypto">4</span></a><span class="card-link is-soon" title="قريبًا — التجميعات قيد الإعداد">تحميل التجميعات ⬇</span><span class="card-link is-soon" title="قريبًا — الملخصات قيد الإعداد">الملخصات</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="work-card reveal tilt" data-tags="db" data-quiz="db">
+          <div class="work-card-inner">
+            <div class="work-thumb" style="--hue: 150"><span class="thumb-label">مادة 04</span><img class="thumb-img" src="images/db-sec.svg" alt="قواعد البيانات وأمنها" onerror="this.onerror=null;this.src='images/icon-maskable.svg'" width="800" height="600" loading="lazy" decoding="async" /></div>
+            <div class="work-info">
+              <h3>قواعد البيانات وأمنها <span class="arrow">↖</span></h3>
+              <p>الحماية من حقن SQL، تشفير البيانات المخزنة، إدارة الصلاحيات، والنسخ الاحتياطي الآمن.</p>
+              <span class="work-year">الترم الثاني</span>
+              <div class="card-links"><a href="#quiz" class="card-link" data-quiz-jump="db">بنك الأسئلة <span class="res-count" data-res="db">3</span></a><span class="card-link is-soon" title="قريبًا — التجميعات قيد الإعداد">تحميل التجميعات ⬇</span><span class="card-link is-soon" title="قريبًا — الملخصات قيد الإعداد">الملخصات</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="work-card reveal tilt" data-tags="code" data-quiz="secureCode">
+          <div class="work-card-inner">
+            <div class="work-thumb" style="--hue: 30"><span class="thumb-label">مادة 05</span><img class="thumb-img" src="images/secure-code.svg" alt="البرمجة الآمنة" onerror="this.onerror=null;this.src='images/icon-maskable.svg'" width="800" height="600" loading="lazy" decoding="async" /></div>
+            <div class="work-info">
+              <h3>البرمجة الآمنة <span class="arrow">↖</span></h3>
+              <p>التحقق من المدخلات، تجنّب الثغرات الشائعة OWASP، وممارسات كتابة الكود الآمن.</p>
+              <span class="work-year">الترم الثاني</span>
+              <div class="card-links"><a href="#quiz" class="card-link" data-quiz-jump="secureCode">بنك الأسئلة <span class="res-count" data-res="secureCode">3</span></a><span class="card-link is-soon" title="قريبًا — التجميعات قيد الإعداد">تحميل التجميعات ⬇</span><span class="card-link is-soon" title="قريبًا — الملخصات قيد الإعداد">الملخصات</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="work-card reveal tilt" data-tags="ethical" data-quiz="ethical">
+          <div class="work-card-inner">
+            <div class="work-thumb" style="--hue: 45"><span class="thumb-label">مادة 06</span><img class="thumb-img" src="images/hack-viz.svg" alt="الاختراق الأخلاقي والفحص" onerror="this.onerror=null;this.src='images/icon-maskable.svg'" width="800" height="600" loading="lazy" decoding="async" /></div>
+            <div class="work-info">
+              <h3>الاختراق الأخلاقي والفحص <span class="arrow">↖</span></h3>
+              <p>جمع المعلومات، أدوات الفحص الأمني، واختبار الاختراق بشكل آمن وقانوني وأخلاقي.</p>
+              <span class="work-year">الترم الثاني</span>
+              <div class="card-links"><a href="#quiz" class="card-link" data-quiz-jump="ethical">بنك الأسئلة <span class="res-count" data-res="ethical">3</span></a><span class="card-link is-soon" title="قريبًا — التجميعات قيد الإعداد">تحميل التجميعات ⬇</span><span class="card-link is-soon" title="قريبًا — الملخصات قيد الإعداد">الملخصات</span></div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <p class="empty-state" id="emptyState" hidden>لا توجد مواد مطابقة — جرّب كلمة بحث أخرى أو تصنيفًا مختلفًا.</p>
+    </section>
+<!-- TOOLS -->
+    <section class="section tools" id="tools">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="tools.eyebrow">أدوات الأمن السيبراني</p>
+        <h2 class="section-title" data-i18n-html="tools.title">جرّب <em class="grad">الأدوات</em> مباشرة</h2>
+        <p class="section-sub" data-i18n="tools.sub">ستّ أدوات تفاعلية تعمل بالكامل في متصفحك — من تشفير Caesar إلى تحليل JWT وحساب الشبكات.</p>
+      </div>
+
+      <div class="tools-grid">
+        <article class="tool-card reveal">
+          <h3 class="tool-title">مولّد بصمة SHA-256</h3>
+          <p class="tool-desc">احسب بصمة التشفير لأي نص فورًا، مع شبكة بصرية ملوّنة للبصمة.</p>
+          <textarea id="hashInput" class="tool-input" rows="3" placeholder="اكتب النص هنا…" aria-label="نص إدخال البصمة"></textarea>
+          <code id="hashOut" class="tool-out hash-hex" dir="ltr">—</code>
+          <div id="hashFp" class="hash-fp" aria-hidden="true"></div>
+          <button type="button" id="hashCopy" class="btn btn-sm btn-ghost copy-btn">نسخ البصمة</button>
+        </article>
+
+        <article class="tool-card reveal">
+          <h3 class="tool-title">تشفير Caesar</h3>
+          <p class="tool-desc">شفرة الإزاحة الكلاسيكية تدعم العربية واللاتينية.</p>
+          <input id="cipherIn" class="tool-input" type="text" placeholder="مرحباً…" aria-label="نص التشفير" />
+          <div class="cipher-controls">
+            <input id="shiftRange" class="shift-range" type="range" min="-13" max="13" value="3" aria-label="مقدار الإزاحة" />
+            <span id="shiftVal" class="shift-val" aria-live="polite">3</span>
+          </div>
+          <p id="cipherOut" class="tool-out" dir="auto">—</p>
+          <button type="button" id="cipherCopy" class="btn btn-sm btn-ghost copy-btn">نسخ النتيجة</button>
+        </article>
+
+        <article class="tool-card reveal">
+          <h3 class="tool-title">محلّل JWT</h3>
+          <p class="tool-desc">فكّ رموز JWT وافحص الترويسة والحمولة وتاريخ الانتهاء.</p>
+          <textarea id="jwtIn" class="tool-input" rows="4" dir="ltr" placeholder="eyJhbGciOiJIUzI1NiIs…"></textarea>
+          <p id="jwtWarn" class="jwt-warn" role="status"></p>
+          <div id="jwtParts" hidden>
+            <div class="jwt-seg"><span class="jwt-tag jwt-h">Header</span><pre id="jwtHeader" class="tool-out"></pre></div>
+            <div class="jwt-seg"><span class="jwt-tag jwt-p">Payload</span><pre id="jwtPayload" class="tool-out"></pre></div>
+            <div class="jwt-seg"><span class="jwt-tag jwt-s">Signature</span><pre id="jwtSig" class="tool-out"></pre></div>
+          </div>
+        </article>
+
+        <article class="tool-card reveal">
+          <h3 class="tool-title">حاسبة الشبكات CIDR</h3>
+          <p class="tool-desc">قناع، نطاق، بث، وعدد المضيفين لأي عنوان IPv4.</p>
+          <div class="cidr-row">
+            <div><label class="tool-label" for="cidrIp">العنوان</label><input id="cidrIp" class="tool-input" type="text" inputmode="decimal" value="192.168.10.7" /></div>
+            <div><label class="tool-label" for="cidrPrefix">البادئة</label><input id="cidrPrefix" class="tool-input" type="number" min="0" max="32" value="24" /></div>
+          </div>
+          <p id="cidrError" class="tool-desc" hidden role="alert"></p>
+          <table class="cidr-table"><tbody id="cidrTableBody"></tbody></table>
+        </article>
+
+        <article class="tool-card reveal">
+          <h3 class="tool-title">تحليل قوة كلمة المرور</h3>
+          <p class="tool-desc">إنتروبيا، قواعد أمان، وزمن كسر تقديري — دون إرسال أي شيء للخارج.</p>
+          <div class="pw-row">
+            <input id="pwInput" class="tool-input" type="password" dir="ltr" aria-label="كلمة المرور" />
+            <button type="button" id="pwEye" class="btn btn-sm btn-ghost" aria-pressed="false" aria-label="إظهار كلمة المرور">👁</button>
+          </div>
+          <div class="pw-meter" aria-hidden="true"><span id="pwFill" class="pw-meter-fill"></span></div>
+          <p id="pwVerdict" class="pw-verdict" role="status">ابدأ بالكتابة لتحليل القوة…</p>
+          <ul id="pwList" class="pw-checklist">
+            <li data-rule="len12">12 حرفًا على الأقل</li>
+            <li data-rule="case">أحرف كبيرة وصغيرة</li>
+            <li data-rule="digit">رقم واحد على الأقل</li>
+            <li data-rule="symbol">رمز خاص</li>
+            <li data-rule="common">ليست كلمة شائعة</li>
+          </ul>
+        </article>
+
+        <article class="tool-card reveal">
+          <h3 class="tool-title">مشفّرات Base64 / Hex / URL</h3>
+          <p class="tool-desc">حوّل النصوص بين الصيغ الشائعة ثنائي الاتجاه.</p>
+          <div class="enc-tabs" role="group" aria-label="صيغة التحويل">
+            <button type="button" class="btn btn-sm btn-ghost enc-tab active" data-enc="b64" aria-pressed="true">Base64</button>
+            <button type="button" class="btn btn-sm btn-ghost enc-tab" data-enc="hex" aria-pressed="false">Hex</button>
+            <button type="button" class="btn btn-sm btn-ghost enc-tab" data-enc="url" aria-pressed="false">URL</button>
+          </div>
+          <textarea id="encIn" class="tool-input" rows="3" dir="ltr" aria-label="نص الترميز"></textarea>
+          <p id="encErr" class="tool-desc" hidden role="alert"></p>
+          <p id="encOut" class="tool-out" dir="ltr">—</p>
+          <div class="enc-actions">
+            <button type="button" id="encEncode" class="btn btn-sm btn-primary">ترميز ←</button>
+            <button type="button" id="encDecode" class="btn btn-sm btn-ghost">→ فك الترميز</button>
+            <button type="button" id="encCopy" class="btn btn-sm btn-ghost copy-btn">نسخ</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+    <!-- FLASHCARDS -->
+    <section class="section flash-sec" id="flash">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="flash.eyebrow">البطاقات التعليمية</p>
+        <h2 class="section-title" data-i18n-html="flash.title">راجع المصطلحات <em class="grad">بالبطاقات</em></h2>
+        <p class="section-sub" data-i18n="flash.sub">اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.</p>
+      </div>
+      <div class="flash-toolbar reveal">
+        <input id="flashSearch" type="search" class="flash-search" placeholder="ابحث عن مصطلح…" aria-label="بحث في البطاقات التعليمية" />
+        <button type="button" id="flashShuffle" class="btn btn-sm btn-ghost" data-i18n="flash.shuffle">خلط البطاقات</button>
+      </div>
+      <div id="flashGrid" class="flash-grid"></div>
+      <p class="empty-state" id="flashEmpty" hidden>لا توجد بطاقات مطابقة لبحثك.</p>
+    </section>
+    <!-- QUIZ -->
+    <section class="section quiz-sec" id="quiz">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="quiz.eyebrow">الاختبارات التجريبية</p>
+        <h2 class="section-title" data-i18n="quiz.title">اختبر نفسك في كل مادة</h2>
+        <p class="section-sub" data-i18n="quiz.sub">أسئلة لكل مادة مع شرح فوري لكل إجابة، وضع مؤقّت اختياري، وحفظ تلقائي للنتائج.</p>
+      </div>
+      <div id="quizApp" class="quiz-grid reveal"></div>
+      <p class="quiz-hint reveal" data-i18n="quiz.hint">💡 اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
+    </section>
+
+    <!-- GAMES -->
+    <section class="section games" id="games" aria-labelledby="gamesTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="games.eyebrow">مختبر الحوادث + التحدي (CTF)</p>
+        <h2 class="section-title" id="gamesTitle" data-i18n-html="games.title">قائد <em class="grad">الاستجابة للحوادث</em></h2>
+        <p class="section-sub" data-i18n="games.sub">محاكاة حقيقية: تستقبل تنبيهات هجمات (SQLi، فحص منافذ، DDoS، تشفير)، وتتعامل معها عبر طرفية أوامر — حلّل، خفّف، ثم استخرج العَلَم.</p>
+      </div>
+
+      <div class="games-app" id="gamesApp">
+        <!-- شاشة القائمة -->
+        <div class="games-panel" id="gameMenu">
+          <p class="games-intro">🛰️ تجهيزاتُ رصد الشبكة رصدت نشاطًا خبيثًا في نطاقات متعددة. اختر سيناريو واحبِ اللغز — كل سيناريو مسجّل يتطلب أسلوب تحليل مختلف.</p>
+          <div class="games-scenarios" id="gamesScenarios" role="list"></div>
+          <p class="games-progress-title" id="gamesProgressTitle" role="status"></p>
+          <div class="games-progress" id="gamesProgress" role="list"></div>
+        </div>
+
+        <!-- شاشة اللعب: طرفية + معلومات -->
+        <div class="games-panel is-hidden" id="gamePlay">
+          <div class="games-topbar">
+            <div class="games-meta">
+              <span class="games-title" id="gameTitle"></span>
+              <span class="games-domain" id="gameDomain"></span>
+            </div>
+            <div class="games-top-actions">
+              <span class="games-timer" id="gameTimer" role="timer">00:00</span>
+              <button type="button" class="btn btn-ghost" id="gameQuit">قائمة السيناريوهات</button>
+            </div>
+          </div>
+          <p class="games-brief" id="gameBrief"></p>
+
+          <div class="games-layout">
+            <aside class="games-side hide-mobile" id="gameSide" aria-label="حالة الخادم"></aside>
+            <div class="games-console">
+              <div class="console-shell">
+                <div class="console-head">
+                  <span class="console-title" dir="ltr">sec-lab &gt; ir-console</span>
+                  <span class="console-led" aria-hidden="true"></span>
+                </div>
+                <div class="console-log" id="gameConsoleLog" role="log" aria-live="polite"></div>
+                <form class="console-form" id="gameConsoleForm">
+                  <span class="console-prompt" aria-hidden="true">root@ev</span>
+                  <input class="console-input" id="gameConsoleInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr" aria-label="أمر الطرفية" />
+                </form>
+              </div>
+              <p class="console-help">اكتب <kbd>help</kbd> للأوامر و <kbd>hint</kbd> لتلميح (يكلف نقاطًا).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section about" id="about">
+      <div class="about-inner reveal">
+        <p class="eyebrow" data-i18n="about.eyebrow">عن المنصة</p>
+        <h2 class="section-title" data-i18n-html="about.title">لماذا هذه <em class="grad">المنصة؟</em></h2>
+        <p class="section-sub">جُمعت هنا كل ما يحتاجه طالب دبلوم أمن المعلومات في الترم الثاني: تجميعات منظّمة، بنوك أسئلة قابلة للتحميل، واختبارات تدريبية بتجربة استخدام حديثة وسريعة.</p>
+        <ul class="about-points">
+          <li><strong>محتوى منظم</strong><span>لكل مادة: تجميعة، ملخصات، وبنك أسئلة جاهز للطباعة.</span></li>
+          <li><strong>اختبارات ذكية</strong><span>شرح فوري لكل إجابة، تتبّع أفضل نتيجة، واستكمال المحاولة السابقة.</span></li>
+          <li><strong>يعمل دون إنترنت</strong><span>تقنية PWA — ثبّت المنصة على هاتفك واستخدمها بدون اتصال.</span></li>
+          <li><strong>خصوصية كاملة</strong><span>لا حسابات ولا تتبّع — نتائجك تُحفظ على جهازك فقط.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section contact" id="contact">
+      <div class="contact-grid">
+        <div class="contact-info reveal">
+          <p class="eyebrow" data-i18n="contact.eyebrow">تواصل معنا</p>
+          <h2 class="section-title" data-i18n-html="contact.title">سؤال أو <em class="grad">اقتراح؟</em></h2>
+          <p class="section-sub" data-i18n="contact.sub">نسعد بملاحظاتك ومساهماتك في المحتوى — أرسل رسالتك وسنعود إليك بأسرع وقت.</p>
+          <a class="contact-mail" href="mailto:motmi757@gmail.com" dir="ltr">motmi757@gmail.com</a>
+        </div>
+        <form class="contact-form reveal" id="contactForm" action="https://formspree.io/f/movkqjzz" method="POST" novalidate>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp-guard" aria-hidden="true" />
+          <div class="form-field">
+            <label for="cfName" data-i18n="contact.name">اسمك</label>
+            <input id="cfName" name="name" required minlength="2" placeholder="الاسم الكامل" autocomplete="name" />
+            <small class="error-msg">فضلاً أدخل اسمك (حرفان على الأقل).</small>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="cfEmail" data-i18n="contact.email">بريدك الإلكتروني</label>
+              <input id="cfEmail" type="email" name="email" required placeholder="you@example.com" dir="ltr" autocomplete="email" />
+              <small class="error-msg">فضلاً أدخل بريدًا إلكترونيًا صحيحًا.</small>
+            </div>
+            <div class="form-field">
+              <label for="cfService" data-i18n="contact.type">نوع الرسالة</label>
+              <select id="cfService" name="service">
+                <option value="اقتراح عام">اقتراح عام</option>
+                <option value="تلخيص مادة">تلخيص مادة</option>
+                <option value="بنك أسئلة">بنك أسئلة</option>
+                <option value="تصحيح خطأ">تصحيح خطأ</option>
+              </select>
+              <small class="error-msg">اختر نوع الرسالة.</small>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="cfMessage" data-i18n="contact.message">رسالتك</label>
+            <textarea id="cfMessage" name="message" rows="5" required minlength="10" placeholder="اكتب رسالتك هنا…"></textarea>
+            <small class="error-msg">فضلاً اكتب رسالة من 10 أحرف على الأقل.</small>
+          </div>
+          <button class="btn btn-primary form-submit" type="submit"><span class="submit-text" data-i18n="contact.submit">إرسال المساهمة ✦</span></button>
+          <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">منصة<span class="logo-dot">.</span></a>
+      <ul class="footer-links">
+        <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
+        <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
+        <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+        <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
+      </ul>
+      <div class="footer-social">
+        <a href="https://github.com/motmii" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GH</a>
+        <a href="mailto:motmi757@gmail.com" aria-label="البريد الإلكتروني">✉</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p data-i18n="footer.copy">© 2026 منصة أمن المعلومات — صُمّم وطُوّر بواسطة أحمد مطمي.</p>
+      <p class="footer-local" data-i18n="footer.local">دبلوم أمن المعلومات • الترم الثاني</p>
+    </div>
+  </footer>
+
+  <!-- Back-to-top (MODULE 31). Fixed & out of flow → zero CLS. -->
+  <button type="button" id="toTop" class="to-top" aria-label="العودة إلى أعلى الصفحة" disabled>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 4l8 8h-5v8h-6v-8H4z" fill="currentColor"/></svg>
+  </button>
+
+  <!-- ============================================================
+       مساعد المنصة (MODULE 33 · AI.Assistant)
+       Floating Arabic-first assistant. Works fully offline via the
+       local knowledge engine; can proxy to a real LLM through a
+       configurable endpoint (window.PLATFORM_AI.endpoint, e.g.
+       "/api/chat") — never a provider key in frontend code.
+       ============================================================ -->
+  <div id="assistantRoot" class="assistant-root">
+    <section id="assistantPanel" class="assistant-panel" role="dialog" aria-modal="false"
+             aria-label="مساعد المنصة — المحادثة" aria-hidden="true">
+      <header class="assistant-head">
+        <span class="assistant-avatar" aria-hidden="true">✦</span>
+        <div class="assistant-id">
+          <strong>مساعد المنصة</strong>
+          <span id="assistantStatus" class="assistant-status">يعمل محليًا داخل متصفحك</span>
+        </div>
+        <button type="button" id="assistantClose" class="assistant-x" aria-label="إغلاق المساعد" title="إغلاق">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
+      </header>
+      <div id="assistantLog" class="assistant-log" role="log" aria-live="polite" aria-label="سجل المحادثة"></div>
+      <div id="assistantChips" class="assistant-chips" aria-label="أسئلة مقترحة"></div>
+      <form id="assistantForm" class="assistant-form">
+        <input id="assistantInput" class="assistant-input" type="text" autocomplete="off"
+               placeholder="اسأل عن أي شيء في المنصة…" aria-label="اكتب سؤالك للمساعد" maxlength="500" />
+        <button type="submit" class="assistant-send" aria-label="إرسال السؤال">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path d="M3 11.5L21 3l-8.5 18-2.4-7.1L3 11.5z" fill="currentColor"/>
+          </svg>
+        </button>
+      </form>
+      <p class="assistant-note">إجابات مبنية على محتوى المنصة — للمراجعة الأكاديمية اعتمد على مذكرات المادة.</p>
+    </section>
+    <button type="button" id="assistantFab" class="assistant-fab" aria-expanded="false"
+            aria-controls="assistantPanel" aria-label="افتح مساعد المنصة">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+        <path d="M12 3a8 8 0 0 1 8 8 8 8 0 0 1-8 8H8l-4 3v-4.6A8 8 0 0 1 12 3z" fill="currentColor" opacity="0.95"/>
+        <circle cx="9" cy="11" r="1.3" fill="var(--bg, #0b1020)"/><circle cx="12.5" cy="11" r="1.3" fill="var(--bg, #0b1020)"/><circle cx="16" cy="11" r="1.3" fill="var(--bg, #0b1020)"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Salawat reminder toast (MODULE 27). Fixed & out of flow → zero CLS.
+       Visible only via JS adding .is-visible; localStorage-backed 24h dismissal. -->
+  <div id="salawatToast" class="salawat-toast" role="region" aria-label="تذكير بالصلاة على النبي ﷺ">
+    <p class="salawat-text">اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ</p>
+    <button type="button" id="salawatClose" class="salawat-close" aria-label="إغلاق التذكير" title="إغلاق">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="assistant.js"></script>
+</body>
+</html>
