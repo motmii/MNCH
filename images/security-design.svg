@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bgDES" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060a10"/><stop offset="1" stop-color="#0a1218"/></linearGradient>
+    <filter id="gD1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgDES)"/>
+  <rect x="120" y="70" width="560" height="470" rx="10" fill="#0a0f16" stroke="#3a2a4a" stroke-width="2"/>
+  <rect x="120" y="70" width="560" height="36" rx="10" fill="#111820"/>
+  <circle cx="145" cy="88" r="6" fill="#ef4444" opacity="0.8"/>
+  <circle cx="168" cy="88" r="6" fill="#f59e0b" opacity="0.8"/>
+  <circle cx="191" cy="88" r="6" fill="#22c55e" opacity="0.8"/>
+  <text x="220" y="93" font-family="monospace" font-size="12" fill="#8a6a9a">design-principles — defense in depth</text>
+  <path d="M400 390 m-95-30 a95 95 0 1 1 190 0" fill="none" stroke="#f472b6" stroke-width="2.5" filter="url(#gD1)"/>
+  <path d="M400 390 m-70-22 a70 70 0 1 1 140 0" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
+  <path d="M400 390 m-45-14 a45 45 0 1 1 90 0" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
+  <path d="M400 390 m-22-7 a22 22 0 1 1 44 0" fill="none" stroke="#00ff41" stroke-width="2.5"/>
+  <circle cx="400" cy="390" r="5" fill="#00ff41"/>
+  <text x="268" y="336" font-family="monospace" font-size="10" fill="#f472b6" text-anchor="middle">البيانات</text>
+  <text x="268" y="352" font-family="monospace" font-size="10" fill="#8b5cf6" text-anchor="middle">التطبيق</text>
+  <text x="268" y="368" font-family="monospace" font-size="10" fill="#22d3ee" text-anchor="middle">الشبكة</text>
+  <text x="268" y="384" font-family="monospace" font-size="10" fill="#00ff41" text-anchor="middle">المحيط</text>
+  <text x="520" y="352" font-family="monospace" font-size="10" fill="#7a9aea" text-anchor="middle">أقل صلاحية</text>
+  <text x="520" y="368" font-family="monospace" font-size="10" fill="#7a9aea" text-anchor="middle">تقسيم وفصل</text>
+  <text x="520" y="384" font-family="monospace" font-size="10" fill="#7a9aea" text-anchor="middle">مراجعة دورية</text>
+  <g font-family="monospace" font-size="9" fill="#f472b6" opacity="0.16">
+    <text x="150" y="480">SECURITY BY DESIGN — الخصوصية والأمان من التصميم</text>
+    <text x="330" y="505">PRINCIPLE: LEAST PRIVILEGE · ZERO TRUST · DEFENSE IN DEPTH</text>
+  </g>
+</svg>

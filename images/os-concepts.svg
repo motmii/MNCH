@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bgOSC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060a10"/><stop offset="1" stop-color="#0a1218"/></linearGradient>
+    <filter id="gO1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgOSC)"/>
+  <rect x="120" y="70" width="560" height="460" rx="10" fill="#0a0f16" stroke="#1a2a3a" stroke-width="2"/>
+  <rect x="120" y="70" width="560" height="36" rx="10" fill="#111820"/>
+  <circle cx="145" cy="88" r="6" fill="#ef4444" opacity="0.8"/>
+  <circle cx="168" cy="88" r="6" fill="#f59e0b" opacity="0.8"/>
+  <circle cx="191" cy="88" r="6" fill="#22c55e" opacity="0.8"/>
+  <text x="220" y="93" font-family="monospace" font-size="12" fill="#5a7a8a">kernel — process &amp; memory</text>
+  <rect x="160" y="130" width="480" height="52" rx="6" fill="#0c1620" stroke="#00d4ff" stroke-width="1.5"/>
+  <text x="185" y="158" font-family="monospace" font-size="12" fill="#00d4ff" filter="url(#gO1)">App → System Call Interface</text>
+  <rect x="160" y="200" width="480" height="52" rx="6" fill="#0c1620" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="185" y="228" font-family="monospace" font-size="12" fill="#00ff41">Kernel: scheduling</text>
+  <rect x="160" y="270" width="480" height="52" rx="6" fill="#0c1620" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="185" y="298" font-family="monospace" font-size="12" fill="#00ff41">Memory mgmt · virtual memory</text>
+  <rect x="160" y="340" width="480" height="52" rx="6" fill="#0c1620" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="185" y="368" font-family="monospace" font-size="12" fill="#f59e0b">Filesystem · Devices · Drivers</text>
+  <path d="M400 380 v34" stroke="#f472b6" stroke-width="1.5"/>
+  <g font-family="monospace" font-size="9" fill="#00d4ff" opacity="0.14">
+    <text x="150" y="470">PID 1: init  •  PID 2048: browser  •  PID 512: sshd</text>
+    <text x="320" y="495">STATE: NEW → READY → RUNNING → BLOCKED</text>
+  </g>
+</svg>

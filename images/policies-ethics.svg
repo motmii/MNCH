@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bgPOL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060a10"/><stop offset="1" stop-color="#0a1218"/></linearGradient>
+    <filter id="gP1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgPOL)"/>
+  <rect x="120" y="70" width="560" height="460" rx="10" fill="#0a0f16" stroke="#2a2a4a" stroke-width="2"/>
+  <rect x="120" y="70" width="560" height="36" rx="10" fill="#111820"/>
+  <circle cx="145" cy="88" r="6" fill="#ef4444" opacity="0.8"/>
+  <circle cx="168" cy="88" r="6" fill="#f59e0b" opacity="0.8"/>
+  <circle cx="191" cy="88" r="6" fill="#22c55e" opacity="0.8"/>
+  <text x="220" y="93" font-family="monospace" font-size="12" fill="#7a6a9a">gov-info-policy.md — مراجعة الالتزام</text>
+  <rect x="160" y="130" width="480" height="120" rx="6" fill="#0c1420" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="185" y="158" font-family="monospace" font-size="12" fill="#a78bfa" filter="url(#gP1)">§ السياسات واللوائح التنظيمية</text>
+  <text x="185" y="182" font-family="monospace" font-size="11" fill="#7a9aea">✓ الامتثال للمعايير والإلزام بها</text>
+  <text x="185" y="204" font-family="monospace" font-size="11" fill="#7a9aea">✓ مسؤولية الإفصاح عن الحوادث</text>
+  <text x="185" y="226" font-family="monospace" font-size="11" fill="#7a9aea">✓ أخلاقيات المهنة وحماية الخصوصية</text>
+  <rect x="160" y="270" width="480" height="120" rx="6" fill="#0c1420" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="185" y="298" font-family="monospace" font-size="12" fill="#67e8f9">§ الإطار القانوني لأمن المعلومات</text>
+  <text x="185" y="322" font-family="monospace" font-size="11" fill="#7a9aea">✓ الحقوق والصلاحيات والمسؤوليات</text>
+  <text x="185" y="344" font-family="monospace" font-size="11" fill="#7a9aea">✓ التوثيق والسجلات والتدقيق</text>
+  <text x="185" y="366" font-family="monospace" font-size="11" fill="#7a9aea">✓ آليات التبليغ والتعامل مع المخالفات</text>
+  <g font-family="monospace" font-size="9" fill="#8b5cf6" opacity="0.16">
+    <text x="150" y="470">COMPLIANCE REVIEW — الشفافية والمساءلة والأخلاقيات المهنية</text>
+    <text x="330" y="495">التاريخ: الفصل الحالي • الحالة: قيد المراجعة</text>
+  </g>
+</svg>

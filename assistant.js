@@ -93,11 +93,22 @@
 
   function readPlatformDom() {
     try {
-      subjects = Array.prototype.map.call(document.querySelectorAll("[data-quiz-jump]"), (a) => {
-        const card = a.closest("article, .subject-card, .card");
-        const h = card ? card.querySelector("h3") : null;
-        return { key: a.getAttribute("data-quiz-jump"), name: h ? h.textContent.trim() : a.getAttribute("data-quiz-jump") };
-      });
+      /* Prefer the official subject registry (single source of truth).
+         Fall back to scraping live subject cards as before. */
+      const reg = window.PLATFORM_SUBJECTS;
+      if (reg && reg.length) {
+        subjects = reg.map((s) => ({
+          key: s.id, name: s.nameAr,
+          semester: s.semester, quizKey: s.quizKey || "",
+          code: s.code || ""
+        }));
+      } else {
+        subjects = Array.prototype.map.call(document.querySelectorAll("[data-quiz-jump]"), (a) => {
+          const card = a.closest("article, .subject-card, .card");
+          const h = card ? card.querySelector("h3") : null;
+          return { key: a.getAttribute("data-quiz-jump"), name: h ? h.textContent.trim() : a.getAttribute("data-quiz-jump") };
+        });
+      }
       toolNames = Array.prototype.map.call(
         document.querySelectorAll(".tool-card .tool-title"), (h) => h.textContent.trim());
     } catch {}
@@ -117,7 +128,19 @@
 
     /* Greetings */
     if (/^(السلام|سلام|مرحبا|اهلا|أهلا|هاي|هلا|hi|hello)/.test(q)) {
-      return "أهلاً بك 👋 أنا **مساعد المنصة** — أساعدك في المواد، الاختبارات، البطاقات التعليمية، الأدوات الأمنية، ومختبر الاستجابة للحوادث. اسألني مثلًا: «كيف أبدأ اختبار شبكات؟» أو «اشرح لي الجدار الناري».";
+      return "أهلاً بك 👋 أنا **مساعد المنصة** — أساعدك في المواد، الاختبارات، البطاقات التعليمية، الأدوات الأمنية، ومختبر الاستجابة للحوادث. اسألني مثلًا: «كيف أبدأ اختبار الخوارزميات؟» أو «اشرح لي الجدار الناري».";
+    }
+
+    /* Safety refusal — unauthorized access, credential theft, malware, real-system attacks */
+    if (has("اختراق", "hack", "سرقة كلمة مرور", "سرقة حساب", "malware", "فيروس", "ransomware", "فدية", "exploit", "ثغرة حقيقية", "موقع حقيقي", "نظام حقيقي", "ip حقيقي", "جهاز حقيقي", "هاكر", "penetration test حقيقي", "scan حقيقي")) {
+      return "⚠️ **مساعد المنصة للأغراض التعليمية فقط** — لا أستطيع المساعدة في أي شيء يستهدف أنظمة أو حسابات أو أشخاص حقيقيين بدون إذن صريح. ما أستطيع فعله:\n• **شرح** كيف تعمل الهجمات نظريًا وكيف تُمنع.\n• **تدريبك** على معامل محاكاة آمنة داخل المنصة (مختبر الاستجابة للحوادث، المختبر الهجومي).\n• **توجيهك** للمسارات الأخلاقية: الاختراق الأخلاقي يبدأ بالإذن القانوني الكتابي.\n\nجرّب أن تسأل: «اشرح لي حقن SQL» أو «ما المسار المناسب للمبتدئ؟»";
+    }
+
+    /* Level-aware: beginner asks for a recommendation */
+    if (has("مبتدئ", "beginner", "new", "جديد", "اين ابدأ", "من أين أبدأ", "كيف أبدأ")) {
+      if (has("مسار", "path", "طريق", "تعلم")) {
+        return "للمبتدئين أنصح بالبدء بمسار **أساسيات أمن المعلومات** (#path/fundamentals) — يغطي مثلث CIA، المصطلحات الأساسية، كلمات المرور القوية، ثم يختبرك.\n\nالخطوات المقترحة:\n1) افتح **مسارات التعلم** (#paths) وابدأ بالمسار الموصى به ★.\n2) استخدم **البطاقات التعليمية** (#flash) لحفظ المصطلحات.\n3) **اختبر نفسك** (#quiz) بعد كل مسار.\n4) **طبّق** بالأدوات (#tools) والمعامل (#labs).\n\nالمسار منظم من البسيط للمعقد — لا تحتاج خبرة سابقة.";
+      }
     }
 
     /* How to use the platform / where to start */
@@ -141,6 +164,9 @@
     /* Subject lookup */
     for (const s of subjects) {
       if (s.name && s.name.length > 2 && q.indexOf(s.name.toLowerCase()) !== -1) {
+        if (s.semester === "current" && !s.quizKey) {
+          return "المادة **" + s.name + "** من مواد **الترم الحالي** (رمز المقرر " + s.code + ") وفق الخطة الرسمية — المحتوى التدريبي لها (بنك الأسئلة، التجميعات، الملخصات) سيُضاف قريبًا. يمكنك إلى حينه المراجعة عبر البطاقات التعليمية (#flash) والأدوات (#tools) والمعامل (#labs) العامة.";
+        }
         return "مادة **" + s.name + "** موجودة في قسم **المواد الدراسية** (#subjects) — ستجد فيها زر «بنك الأسئلة» في بطاقة المادة (ينقلك لاختبارها مباشرة). التجميعات والملخصات قيد الإعداد وستُضاف لاحقًا.";
       }
     }
@@ -156,8 +182,11 @@
     }
 
     if (has("مواد", "مادة", "مقرر", "ترم")) {
-      const names = subjects.map((s) => s.name).filter(Boolean).join("، ") || "المواد الست للترم";
-      return "مواد الترم الثاني المتوفرة: " + names + ". كل بطاقة تحتوي زر «بنك الأسئلة» للانتقال لاختبار المادة مباشرة، وسيُضاف التجميعات والملخصات قريبًا.";
+      const currentNames = subjects.filter((s) => s.semester === "current").map((s) => s.name).filter(Boolean).join("، ");
+      let reply = "";
+      if (currentNames) reply += "مواد الترم الحالي وفق الخطة الرسمية: " + currentNames + ".";
+      else reply += "لم تُحمّل قائمة المواد بعد.";
+      return reply + " لكل مادة بنك أسئلة تدريبي كامل (20 سؤالًا بشرح لكل إجابة) متاح في قسم الاختبارات (#quiz).";
     }
 
     /* Tools */
@@ -205,6 +234,15 @@
       return "نسعد بمساهماتك! استخدم نموذج **التواصل** (#contact) — اختر نوع الرسالة (سؤال، اقتراح، تلخيص مادة، تصحيح خطأ) وأرسلها، أو راسلنا مباشرة: motmi757@gmail.com";
     }
 
+    /* Lesson content — the previous-semester lessons were removed with
+       migration 2; current-semester lessons are in preparation (honest state). */
+    if (has("درس", "lesson")) {
+      return "الدروس النصية للمواد الحالية قيد الإعداد — ولن أنشر رابطًا لدرس غير متوفر. في الأثناء: بنك أسئلة كل مادة (#quiz) يعرض شرح الإجابة الصحيحة بعد كل سؤال، والبطاقات التعليمية (#flash) تغطي المصطلحات الأساسية، والمعامل (#labs) للتطبيق العملي.";
+    }
+    if (has("شرح", "اشرح", "explain")) {
+      return "أشرح لك أي مفهوم من محتوى المنصة! جرّب: «اشرح الجدار الناري» أو «اشرح مبدأ أقل الصلاحيات». وللمراجعة المنظمة: بنك أسئلة المادة (#quiz) يعرض شرحًا بعد كل إجابة.";
+    }
+
     /* Fallback — stay honest about scope */
     return "أساعدك في: المواد الدراسية وبنوك الأسئلة، طريقة الاختبارات وحساب النتائج، شرح المصطلحات الأمنية، الأدوات التفاعلية، مختبر الاستجابة للحوادث/CTF، والتنقل في المنصة. جرّب: «كيف أبدأ اختبار؟» أو «اشرح التصيّد الاحتيالي».";
   }
@@ -239,12 +277,12 @@
      Rendering & wiring
      ------------------------------------------------------------ */
   const CHIPS = [
-    "كيف أستخدم المنصة؟",
+    "اشرح لي الفرق بين التشفير والترميز",
+    "اختبرني في أساسيات الشبكات",
+    "اشرح لي معنى هذا الجزء من JWT بشكل آمن",
+    "ما المسار المناسب للمبتدئ في أمن المعلومات؟",
     "كيف أبدأ اختبار؟",
-    "كيف تُحسب النتيجة؟",
-    "اشرح لي الجدار الناري",
-    "ما الأدوات المتوفرة؟",
-    "ماذا يوجد في مختبر CTF؟"
+    "ما الأدوات المتوفرة؟"
   ];
 
   /** Markdown-lite: fenced ```code``` blocks, inline `code`, **bold**,
