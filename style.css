@@ -1,5 +1,5 @@
 /* ============================================================
-   منصة أمن المعلومات — الترم الثاني | stylesheet
+   منصة أمن المعلومات — الترم الحالي | stylesheet
    ============================================================ */
 
 :root {
@@ -34,6 +34,7 @@
   --ok: #4ade80;              /* green-400  (≈9:1 on surface) */
   --bad: #f87171;             /* red-400    (≈5.5:1 on surface) */
   --warn: #fbbf24;            /* amber-400  (≈9:1 on surface) */
+  --glow: rgba(34, 211, 238, 0.22);   /* focus/hover halo (cyan on dark) */
   --font-display: "Tajawal", "Space Grotesk", system-ui, sans-serif;
   --font-body: "Tajawal", "Inter", system-ui, sans-serif;
   --radius: 18px;
@@ -70,6 +71,7 @@
   --ok: #15803d;
   --bad: #b91c1c;
   --warn: #b45309;
+  --glow: rgba(14, 116, 144, 0.16);   /* softer teal halo on light surfaces */
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -237,6 +239,7 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
 }
 .btn-ghost:hover { border-color: rgba(255, 255, 255, 0.35); transform: translateY(-3px); }
 .btn-sm { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
+.btn-block { display: flex; width: 100%; justify-content: center; }
 
 /* ---------- Navigation ---------- */
 .nav {
@@ -268,12 +271,21 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
   font-size: 1.5rem;
 }
 .logo-dot { color: var(--accent-2); }
-.nav-links { display: flex; gap: 2.4rem; }
+.nav-links {
+  display: flex;
+  gap: clamp(0.9rem, 1.3vw, 1.5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex-wrap: nowrap; /* single-line layout — never wrap items */
+  min-width: 0;
+}
 .nav-links a {
   font-size: 0.95rem;
   color: var(--muted);
   position: relative;
   transition: color 0.25s;
+  white-space: nowrap; /* labels like "مختبر التشفير" stay on one line */
 }
 .nav-links a::after {
   content: "";
@@ -419,6 +431,52 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
   gap: 1rem;
   align-items: center;
   justify-content: center;
+}
+/* ---------- Hero continue card (returning students · MODULE 37b) ---------- */
+.hero-continue {
+  width: min(100%, 760px);
+  margin: 1.6rem auto 0;
+}
+.hero-continue-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem 1.1rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(103, 232, 249, 0.28);
+  background: linear-gradient(165deg, rgba(34, 211, 238, 0.12), rgba(139, 92, 246, 0.10));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: heroContinueIn 0.5s ease both;
+}
+.hero-continue-ico {
+  font-size: 1.15rem;
+  color: #67e8f9;
+  flex: 0 0 auto;
+}
+.hero-continue-text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  text-align: start;
+}
+.hero-continue-text strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: #f5f6fa;
+}
+.hero-continue-meta {
+  font-size: 0.85rem;
+  color: rgba(220, 226, 240, 0.85);
+}
+@keyframes heroContinueIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-continue-inner { animation: none; }
 }
 .hero-credit {
   margin-top: 2.4rem;
@@ -689,6 +747,14 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
 .q-actions { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.2rem; flex-wrap: wrap; }
 
 .q-result { text-align: center; padding: 1rem 0 0.4rem; }
+/* Wrapper holds the drop-shadow so the inner text element's
+   -webkit-background-clip:text + -webkit-text-fill-color:transparent
+   is never mangled by a filter (known WebKit compositing bug that
+   renders the text invisible). */
+.q-result-score-wrap {
+  display: inline-block;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
 .q-result-score {
   font-family: var(--font-display);
   font-size: 3rem;
@@ -889,10 +955,18 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
   .work-grid { grid-template-columns: repeat(2, 1fr); gap: 1.8rem; }
   .about-cols { grid-template-columns: 1fr; gap: 2.5rem; }
 }
-@media (max-width: 700px) {
+/* Nav density — keep all 10 links readable on one line */
+@media (max-width: 1320px) {
+  .nav-links { gap: 0.75rem; }
+  .nav-links a { font-size: 0.86rem; }
+}
+/* Drawer takes over before the single-line nav could ever overflow */
+@media (max-width: 1180px) {
   .nav-links { display: none; }
   .nav-cta { display: none; }
   .nav-burger { display: flex; }
+}
+@media (max-width: 700px) {
   .work-grid { grid-template-columns: 1fr; }
   .hero-title { font-size: clamp(2rem, 9vw, 3.4rem); }
   .hero-meta { flex-wrap: wrap; gap: 1.6rem; }
@@ -1861,92 +1935,6 @@ details.q-explain {
 }
 
 /* ============================================================
-   MODULE 27 · Salawat reminder toast
-   Subtle, non-intrusive notification pinned to the bottom-right
-   corner. position: fixed keeps it out of the document flow, so
-   appearing/dismissing causes zero layout shift (CLS = 0). No
-   audio. Contrast + ARIA handled in the markup.
-   ============================================================ */
-.salawat-toast {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 1000;
-  width: auto;
-  max-width: min(380px, calc(100vw - 40px));
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 14px 12px 14px 18px;
-  border-radius: var(--radius);
-  background: var(--surface, #12121e);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 18px 48px -14px rgba(0, 0, 0, 0.65);
-  color: var(--text, #f4f4f7);
-  font-family: var(--font-body, "Tajawal", "Inter", system-ui, sans-serif);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(14px);
-  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s;
-}
-.salawat-toast.is-visible {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-.salawat-toast .salawat-text {
-  margin: 0;
-  min-width: 0;
-  font-size: 1.04rem;
-  line-height: 1.8;
-  font-weight: 500;
-  color: var(--text, #f4f4f7);
-}
-.salawat-toast .salawat-close {
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  margin: -4px -6px 0 0;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.salawat-toast .salawat-close:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-}
-.salawat-toast .salawat-close:focus-visible {
-  outline: 2px solid var(--accent-2);
-  outline-offset: 2px;
-  border-radius: 50%;
-}
-.salawat-toast .salawat-close svg {
-  width: 15px;
-  height: 15px;
-  display: block;
-}
-
-@media (max-width: 480px) {
-  .salawat-toast {
-    right: 12px;
-    bottom: 12px;
-    max-width: calc(100vw - 24px);
-    padding: 12px 10px 12px 14px;
-  }
-  .salawat-toast .salawat-text { font-size: 0.98rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .salawat-toast { transition: none; }
-}
-
-/* ============================================================
    Live-data UI: stats error, resource chips, quiz counter
    ============================================================ */
 .stats-error {
@@ -2050,11 +2038,12 @@ details.q-explain {
 
 /* ============================================================
    v9 · MODULE 33 · مساعد المنصة — AI assistant widget
-   Floating FAB + panel. Physical right side is free (to-top lives
-   bottom-left). Panel animates in only when opened.
+   Floating FAB + panel, anchored to the physical right side
+   (RTL & LTR) as an independent, standalone widget — it no longer
+   shares a corner with any notification (the salawat toast was
+   removed); the back-to-top button lives bottom-left.
+   Panel animates in only when opened.
    ============================================================ */
-/* Physical right side (RTL & LTR) — mirrors the toast; z-index above
-   the salawat toast (1000) so the assistant stays on top if both show. */
 .assistant-root { position: fixed; z-index: 1100; right: 1.25rem; bottom: 1.25rem; }
 .assistant-fab {
   display: grid; place-items: center;
@@ -2266,17 +2255,63 @@ details.q-explain {
   border-radius: var(--radius);
 }
 .flash-face-back { transform: rotateY(180deg); border-color: rgba(139, 92, 246, 0.4); }
-.flash-term { font-size: 1.12rem; font-weight: 700; color: var(--text); }
+.flash-term { font-size: 1.12rem; font-weight: 700; line-height: 1.3; color: var(--text); }
 .flash-term-en { font-family: "Space Grotesk", monospace; font-size: 1rem; font-weight: 700; color: var(--accent-2); }
 .flash-ex { font-size: 0.82rem; line-height: 1.6; color: var(--muted); }
-.flash-hint { font-size: 0.72rem; color: var(--dim); }
+.flash-hint { font-size: 0.72rem; line-height: 1.5; color: var(--dim); }
+
+/* ---------- Flashcard illustration (optional per-card `img` field) ----------
+   Rounded wash panel on the front face. The <img> gets a DEFINITE box
+   (width/height 100% + max-height cap) so SVGs carrying only a viewBox
+   — no intrinsic width/height — still render correctly via
+   object-fit: contain letterboxing (never cropped, never collapsed).
+   A missing file is hidden via .is-broken (delegated error listener in
+   MODULE 29) — the card falls back to its text-only layout with zero
+   grid shift (card heights are fixed). */
+.flash-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  height: 70px;
+  padding: 8px;
+  overflow: visible;
+  background: var(--wash-neutral);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+/* Definite box + contain: the SVG scales to the largest size that fits
+   ENTIRELY inside the panel — safe for every fixed viewBox aspect ratio. */
+.flash-img,
+.flash-media svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 56px;
+  object-fit: contain;
+  transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
+}
+.flash-card:hover .flash-img,
+.flash-card:focus-visible .flash-img { transform: scale(1.05); }
+.flash-media.is-broken { display: none; }
+/* Cards carrying an illustration tighten the face gap so media + term +
+   hint always fit the fixed card height — even when the Arabic term
+   wraps to two lines (desktop worst case ≈ 181px of 190px; mobile
+   ≈ 167px of 176px). Explicit line-heights above keep the math stable. */
+.flash-face.has-media { gap: 0.4rem; }
 @media (max-width: 520px) {
-  .flash-card { height: 170px; }
+  .flash-media { height: 56px; border-radius: 10px; }
+  .flash-face.has-media { gap: 0.4rem; }
+}
+@media (max-width: 520px) {
+  .flash-card { height: 176px; }
   .flash-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.8rem; }
 }
 
 /* ============================================================
-   MODULE 31 · Back-to-top (bottom-left — mirrors the toast)
+   MODULE 31 · Back-to-top (bottom-left — clear of the assistant FAB)
    ============================================================ */
 .to-top {
   position: fixed;
@@ -2614,7 +2649,7 @@ details.q-explain p { color: var(--muted); }
 }
 @media (max-width: 520px) {
   .flash-grid { grid-template-columns: 1fr; }
-  .flash-card { height: 160px; }
+  .flash-card { height: 176px; }
   .tag-row { justify-content: flex-start; }
   .work-card-inner { padding: 0.7rem; }
 }
@@ -2631,6 +2666,48 @@ details.q-explain p { color: var(--muted); }
   display: none;
 }
 /* END MODULE 35 */
+
+/* ============================================================
+   MODULE 40 · Lesson view
+   Clean, readable lesson layout with bilingual terminology grid,
+   concept cards, example box, and common-mistakes list.
+   ============================================================ */
+.lesson-body { max-width: 820px; margin: 0 auto; }
+.lesson-shell { display: flex; flex-direction: column; gap: 1.4rem; }
+.lesson-header h2 { font-size: clamp(1.4rem, 4vw, 2rem); color: var(--text); margin: 0; }
+.lesson-block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.2rem 1.4rem; box-shadow: 0 1px 2px rgba(23,32,52,0.04); }
+.lesson-block h3 { font-size: 1.05rem; color: var(--accent); margin: 0 0 0.7rem; }
+.lesson-explain { color: var(--text); line-height: 1.8; margin: 0; }
+.lesson-concepts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.7rem; }
+.lesson-concept { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.6rem 0.8rem; background: var(--tint-accent); border-radius: 8px; }
+.lesson-concept strong { color: var(--accent); font-size: 0.95rem; }
+.lesson-concept span { color: var(--muted); font-size: 0.85rem; }
+.lesson-example { background: var(--tint-accent2); border-right: 3px solid var(--accent-2); padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; color: var(--text); line-height: 1.7; }
+html[lang="en"] .lesson-example { border-right: none; border-left: 3px solid var(--accent-2); border-radius: 8px 0 0 8px; }
+.lesson-mistakes { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.lesson-mistakes li { position: relative; padding-right: 1.5rem; color: var(--text); line-height: 1.6; }
+.lesson-mistakes li::before { content: "⚠"; position: absolute; right: 0; color: var(--warn); }
+.lesson-term-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; }
+.lesson-term { display: flex; justify-content: space-between; gap: 0.5rem; padding: 0.4rem 0.7rem; background: var(--wash-neutral); border-radius: 6px; font-size: 0.85rem; }
+.lesson-term-ar { color: var(--text); }
+.lesson-term-en { color: var(--accent-2); font-family: ui-monospace, monospace; direction: ltr; text-align: left; }
+.lesson-next { align-self: flex-start; padding: 0.6rem 1.2rem; background: var(--tint-accent); border: 1px solid rgba(109,40,217,0.3); border-radius: 999px; color: var(--accent); font-weight: 600; text-decoration: none; transition: background 0.2s; }
+.lesson-next:hover { background: var(--wash-accent); }
+.lesson-practice-links { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.path-chip.is-lesson:hover { border-color: var(--ok); color: var(--ok); background: rgba(74, 222, 128, 0.08); }
+.lesson-placeholder { text-align: center; padding: 2rem; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+.lesson-ico { font-size: 2.5rem; }
+.lesson-placeholder h2 { color: var(--text); margin: 0; }
+.lesson-placeholder p { color: var(--muted); max-width: 400px; margin: 0; }
+@media (max-width: 600px) {
+  .lesson-concepts, .lesson-term-grid { grid-template-columns: 1fr; }
+  .lesson-block { padding: 1rem; }
+  .lesson-next { width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lesson-next { transition: none; }
+  .lesson-next:hover { background: var(--tint-accent); }
+}
 
 /* ============================================================
    MODULE 36 · Theme switcher — dark default / light persisted
@@ -2662,13 +2739,1052 @@ details.q-explain p { color: var(--muted); }
 .theme-ico .ico-moon { opacity: 0; transform: rotate(-90deg) scale(0.6); }
 [data-theme="light"] .theme-ico .ico-moon { opacity: 1; transform: none; }
 [data-theme="light"] .theme-ico .ico-sun { opacity: 0; transform: rotate(90deg) scale(0.6); }
+/* Adaptive halo + playful icon micro-interactions (transform-only → no layout shift).
+   Declared after the [data-theme] rules so hover wins the equal-specificity tie. */
+.theme-toggle:hover,
+.theme-toggle:focus-visible { box-shadow: 0 0 0 4px var(--glow); }
+.theme-toggle:hover .ico-sun { transform: rotate(40deg) scale(1.08); }
+.theme-toggle:hover .ico-moon { transform: rotate(-14deg) scale(1.08); }
+@media (prefers-reduced-motion: reduce) {
+  .theme-ico svg { transition: none; }
+  .theme-toggle:hover .ico-sun,
+  .theme-toggle:hover .ico-moon { transform: none; }
+}
 @media (max-width: 700px) { .theme-toggle { display: grid; } }
 /* Transparent nav floats over the dark hero photo (both themes) — bright chrome there */
 .nav:not(.is-scrolled) .theme-toggle { color: #fff; border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.12); }
+.nav:not(.is-scrolled) .theme-toggle:hover { border-color: rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.2); }
 
 /* --- Light-theme specificity fixes (original dark base rules that outrank
    the MODULE 35 overrides): quiz hover badge + switch track contrast --- */
 [data-theme="light"] .q-option:hover:not(:disabled)::before { color: #fff; background: var(--accent); }
 [data-theme="light"] .q-switch .track { background: #64748b; }
 [data-theme="light"] .q-switch .track::after { border: 1px solid rgba(30, 41, 59, 0.25); }
+
+/* ============================================================
+   MODULES 45-48 · Red Team labs · IR · Crypto · new tools
+   ============================================================ */
+.lab-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
+.lab-card h3 { margin-bottom: 8px; }
+.lab-hint { color: var(--muted); font-size: .9rem; margin-bottom: 12px; }
+.lab-card code { background: var(--code-bg); border-radius: 6px; padding: 1px 6px; font-size: .86em; }
+.rt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.rt-layout { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.bash-schema { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: .8rem; color: var(--muted); line-height: 1.6; overflow: auto; }
+.net-form { display: grid; gap: 8px; margin-bottom: 10px; }
+.net-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.net-row label, .net-form label { display: grid; gap: 4px; font-size: .82rem; color: var(--muted); }
+.net-actions { margin-top: 4px; }
+.net-svg { width: 100%; height: 120px; border: 1px solid var(--line); border-radius: 12px; background: var(--code-bg); }
+.net-check { color: var(--ok); font-size: .88rem; margin-top: 8px; }
+.net-hex { background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: .76rem; direction: ltr; text-align: left; white-space: pre-wrap; word-break: break-all; margin-top: 8px; }
+
+/* IR */
+.ir-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.ir-tabs button { appearance: none; border: 1px solid var(--line); background: transparent; color: var(--muted); padding: 8px 16px; border-radius: 999px; cursor: pointer; font: inherit; }
+.ir-tabs button[aria-selected="true"] { background: var(--tint-accent); border-color: var(--accent); color: var(--text); font-weight: 700; }
+.ir-panel[hidden] { display: none; }
+.siem-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: end; }
+.siem-toolbar .tool-input { min-width: 150px; }
+.siem-query { flex: 1; min-width: 260px; }
+.siem-charts { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-bottom: 14px; }
+.siem-bar, .siem-donut { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.siem-donut { min-height: 150px; }
+.sbar-row { display: grid; grid-template-columns: 90px 1fr 30px; gap: 8px; align-items: center; font-size: .82rem; margin-bottom: 6px; }
+.sbar-label { color: var(--muted); }
+.sbar-track { background: var(--code-bg); border-radius: 999px; height: 10px; overflow: hidden; }
+.sbar-track i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; transition: width .3s; }
+.sbar-n { text-align: end; color: var(--muted); }
+.siem-table-wrap { overflow: auto; }
+.siem-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.siem-table th, .siem-table td { padding: 8px 10px; text-align: start; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.siem-table th { color: var(--muted); font-size: .78rem; }
+.sev-crit { color: var(--bad); font-weight: 800; }
+.sev-high { color: var(--warn); font-weight: 700; }
+.sev-med { color: #fb923c; }
+.sev-low { color: var(--ok); }
+.tl-actions { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.tl-note { color: var(--muted); font-size: .85rem; }
+.tl-total { color: var(--muted); font-size: .85rem; margin-bottom: 10px; }
+.tl-buckets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.bucket { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+.bucket h4 { font-size: .92rem; margin-bottom: 8px; color: var(--accent-2); }
+.bucket h4 span { color: var(--muted); font-weight: 400; }
+.tl-ev { display: block; width: 100%; text-align: start; padding: 6px 8px; margin: 4px 0; border-radius: 8px; background: var(--code-bg); border: 1px solid transparent; color: var(--text); font-size: .8rem; cursor: pointer; }
+.tl-ev:hover { border-color: var(--accent); }
+.tl-detail { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 14px; font-size: .88rem; }
+.tl-detail .tl-cam { color: var(--muted); margin-top: 6px; }
+.live-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+.ir-team { display: flex; flex-direction: column; min-height: 320px; }
+.team-head { font-weight: 700; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
+.team-badge { background: var(--tint-accent); color: var(--accent); border-radius: 999px; font-size: .78rem; padding: 3px 10px; }
+.team-log { flex: 1; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px; overflow: auto; max-height: 270px; font-size: .84rem; }
+.team-line { margin-bottom: 6px; }
+.team-line b { color: var(--accent); }
+.team-line.is-me b { color: var(--accent-2); }
+.team-line.is-ok b { color: var(--ok); }
+.team-line.is-warn b { color: var(--warn); }
+.team-form { display: flex; gap: 8px; margin-top: 8px; }
+.rca-card { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.rca-snippet { background: var(--code-bg); border-radius: 10px; padding: 10px; font-size: .84rem; white-space: pre-wrap; direction: ltr; text-align: left; margin: 8px 0; }
+.rca-opts label { display: block; padding: 6px 4px; font-size: .9rem; }
+.rca-fb { margin-top: 8px; font-size: .88rem; color: var(--muted); }
+.rca-fb.is-ok { color: var(--ok); }
+.rca-fb.is-bad { color: var(--bad); }
+.rca-fb.is-warn { color: var(--warn); }
+/* crypto lab */
+.crypto-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.c-form { display: grid; gap: 8px; margin-bottom: 8px; }
+.c-actions { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.freq-svg { display: flex; align-items: flex-end; gap: 3px; height: 110px; margin: 10px 0; }
+.freq-bar { flex: 1; background: linear-gradient(180deg, var(--accent-2), var(--accent)); border-radius: 4px 4px 0 0; min-height: 2px; }
+
+/* new tools */
+.regex-actions, .fw-probe { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.regex-svg { width: 100%; height: 90px; border: 1px solid var(--line); border-radius: 10px; background: var(--code-bg); margin-top: 8px; }
+.fw-edit { display: grid; grid-template-columns: 90px 90px 1fr 90px auto; gap: 8px; margin-bottom: 10px; }
+.vuln-f { font-size: .84rem; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.vuln-f.is-crit { color: var(--bad); }
+.vuln-f.is-high { color: var(--warn); }
+.vuln-f.is-med { color: #fb923c; }
+.vuln-f.is-low { color: var(--muted); }
+.sniff-octets { display: flex; flex-wrap: wrap; gap: 3px; margin: 10px 0; }
+.oct { font-family: ui-monospace, Consolas, monospace; font-size: .72rem; padding: 2px 5px; border-radius: 4px; background: var(--code-bg); }
+.oct.o-eth { color: #c4b5fd; }
+.oct.o-ip { color: #7dd3fc; }
+.oct.o-tr { color: #f9a8d4; }
+.port-viz { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; margin: 10px 0; }
+.port-cell { text-align: center; padding: 8px 4px; border-radius: 10px; border: 1px solid var(--line); background: var(--code-bg); font-size: .78rem; animation: portPop .25s ease backwards; }
+.port-cell b { display: block; font-size: 1rem; }
+.port-cell span { display: block; color: var(--muted); }
+.port-cell em { display: block; font-style: normal; font-weight: 700; }
+.port-cell.is-open { border-color: var(--ok); } .port-cell.is-open em { color: var(--ok); }
+.port-cell.is-closed { border-color: var(--dim); } .port-cell.is-closed em { color: var(--muted); }
+.port-cell.is-filtered { border-color: var(--warn); } .port-cell.is-filtered em { color: var(--warn); }
+@keyframes portPop { from { opacity: 0; transform: scale(.8); } }
+
+/* lab toasts */
+.lab-toast-stack { position: fixed; z-index: 1200; inset-inline-end: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+.lab-toast { background: var(--surface-2); border: 1px solid var(--accent); border-radius: 12px; padding: 10px 16px; font-size: .9rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); opacity: 0; transform: translateY(12px); transition: opacity .3s, transform .3s; max-width: 340px; }
+.lab-toast.is-in { opacity: 1; transform: none; }
+.lab-toast.is-ok { border-color: var(--ok); }
+.lab-toast.is-bad { border-color: var(--bad); }
+.lab-toast.is-warn { border-color: var(--warn); }
+@media (max-width: 760px) { .rt-grid, .siem-charts, .live-layout { grid-template-columns: 1fr; } .fw-edit { grid-template-columns: 1fr 1fr; } }
+@media (prefers-reduced-motion: reduce) { .lab-toast, .port-cell, .sbar-track i { transition: none; animation: none; } }
 /* END MODULE 36 */
+/* ============================================================
+   MODULE 37 · Learning Paths, Labs hub, Progress hub & About
+   Additive homepage/navigation layer. Reuses existing tokens;
+   RTL-safe (logical properties), responsive, reduced-motion aware.
+   ============================================================ */
+.paths-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 2rem; }
+.path-card, .beginner-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; }
+.path-card { display: flex; flex-direction: column; gap: 0.9rem; }
+.path-ico { font-size: 1.7rem; line-height: 1; }
+.path-card h3 { font-size: 1.15rem; font-family: var(--font-display); }
+/* (.path-tag/.path-steps/.path-actions removed with the static cards —
+   MODULE 39 owns the structured path-card styles now.) */
+
+.beginner-box { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-inline-start: 3px solid var(--accent-2); }
+.beginner-head { display: flex; align-items: center; gap: 0.6rem; }
+.beginner-head h3 { font-size: 1.05rem; font-family: var(--font-display); }
+.beginner-ico { font-size: 1.4rem; flex: none; }
+.beginner-steps { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem 1.4rem; }
+.beginner-steps li { display: flex; gap: 0.6rem; align-items: flex-start; color: var(--muted); font-size: 0.92rem; line-height: 1.7; }
+.beginner-steps b { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 0.8rem; font-weight: 800; flex: none; }
+.beginner-box > .btn { align-self: flex-start; }
+
+.labs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-top: 2rem; }
+.lab-link { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.4rem; display: flex; flex-direction: column; gap: 0.7rem; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; }
+.lab-link:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 14px 30px -18px var(--glow); }
+.lab-link-ico { font-size: 1.6rem; line-height: 1; }
+.lab-link h3 { font-size: 1.05rem; font-family: var(--font-display); }
+.lab-link p { color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
+.lab-link .btn { margin-top: auto; align-self: flex-start; }
+
+.progress-grid { display: grid; gap: 1.1rem; margin-top: 2rem; }
+.progress-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.3rem; }
+.progress-resume { border-inline-start: 3px solid var(--accent-2); display: flex; flex-direction: column; gap: 0.8rem; }
+.progress-card-head { display: flex; align-items: center; gap: 0.6rem; }
+.progress-card-head h3 { font-size: 1.05rem; font-family: var(--font-display); }
+.progress-ico { font-size: 1.3rem; flex: none; }
+.progress-subject { font-weight: 700; font-size: 1.05rem; }
+.progress-meta { color: var(--muted); font-size: 0.9rem; }
+.progress-bar { height: 8px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.progress-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; }
+.progress-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.progress-results { display: grid; gap: 0.6rem; }
+.progress-subhead { font-size: 1rem; color: var(--muted); }
+.progress-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+.progress-result { display: flex; flex-direction: column; gap: 0.6rem; }
+.progress-result-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.progress-result-head h3 { font-size: 0.98rem; }
+.progress-pct { font-weight: 800; font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+.progress-pct.is-high { color: var(--ok); }
+.progress-pct.is-mid { color: var(--warn); }
+.progress-pct.is-low { color: var(--bad); }
+.progress-empty { text-align: center; padding: 2rem 1rem; display: grid; gap: 0.8rem; justify-items: center; background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius); }
+.progress-empty-ico { font-size: 2rem; }
+.progress-empty h3 { font-size: 1.15rem; font-family: var(--font-display); }
+.progress-empty p { color: var(--muted); max-width: 46ch; }
+
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.progress-stat {
+  display: grid;
+  gap: 0.15rem;
+  text-align: center;
+  padding: 0.45rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--wash-neutral);
+}
+.progress-stat b { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); }
+.progress-stat span { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
+.progress-stat.is-overall { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.35); }
+.progress-stat.is-overall b { color: var(--ok); }
+
+.progress-review {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.progress-review-rows { display: grid; gap: 0.6rem; }
+.progress-review-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.progress-review-subject { font-weight: 700; font-size: 0.95rem; }
+.progress-review-subject b { color: var(--bad); }
+
+.about-lead { margin-top: 1rem; color: var(--muted); max-width: 72ch; line-height: 1.8; font-size: 0.98rem; }
+.about-points { margin-top: 1.6rem; }
+
+/* ---------- Responsive (RTL-safe single-column flows) ---------- */
+@media (max-width: 1024px) {
+  .labs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+  .labs-grid { grid-template-columns: 1fr; }
+  .beginner-steps { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lab-link { transition: none; }
+}
+/* END MODULE 37 */
+/* ============================================================
+   MODULE 39 · Structured Learning Paths (Phase 2)
+   Path-card grid + shared #path detail view. Reuses design
+   tokens (works in dark & light themes), RTL-safe logical
+   properties, responsive down to small phones, reduced-motion
+   aware. Additive layer — MODULE 37 baseline rules still apply.
+   ============================================================ */
+
+/* ---------- Container widths (match .section-head) ---------- */
+.paths .paths-grid,
+.paths .beginner-box,
+.path-back,
+.path-detail-body {
+  width: min(var(--maxw), 92%);
+  margin-inline: auto;
+}
+
+/* ---------- Grid of path cards (auto-fill → responsive, no MQs) ---------- */
+.paths-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 1.4rem;
+  margin-top: 2rem;
+}
+
+.path-card {
+  position: relative;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.path-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px -18px var(--glow);
+}
+.path-card:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.path-card.is-recommended { border-inline-start: 3px solid var(--accent); }
+.path-card.is-soon { border-style: dashed; }
+.path-card.is-soon:hover { transform: none; box-shadow: none; border-color: var(--line); }
+
+.path-card-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+
+/* Difficulty level chip */
+.path-level {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: var(--wash-neutral);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.path-level.is-beginner { color: var(--ok); background: rgba(74, 222, 128, 0.10); border-color: rgba(74, 222, 128, 0.35); }
+.path-level.is-intermediate { color: var(--accent-2); background: var(--wash-accent2); border-color: rgba(34, 211, 238, 0.35); }
+.path-level.is-advanced { color: var(--accent-3); background: var(--tint-accent3); border-color: rgba(244, 114, 182, 0.35); }
+
+.path-card-title { font-size: 1.12rem; line-height: 1.5; }
+.path-card-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.75; flex-grow: 1; }
+
+.path-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.path-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.path-badge.is-rec { color: var(--on-accent); background: var(--accent); }
+.path-badge.is-soon { color: var(--warn); background: rgba(251, 191, 36, 0.10); border: 1px solid rgba(251, 191, 36, 0.4); }
+
+.path-card-meta { color: var(--dim); font-size: 0.8rem; font-weight: 600; }
+.path-meta-dot { padding-inline: 0.35rem; }
+
+.path-card-progress { display: flex; align-items: center; gap: 0.6rem; }
+.path-card-progress .progress-bar { flex: 1; }
+.path-card-progress-n {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.path-card-next {
+  color: var(--accent-2);
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path-card-cta { margin-top: 0.2rem; color: var(--accent-2); font-size: 0.85rem; font-weight: 800; }
+.path-card-cta::after { content: "←"; display: inline-block; margin-inline-start: 0.4rem; transition: transform 0.25s; }
+.path-card:hover .path-card-cta::after { transform: translateX(-4px); }
+[dir="ltr"] .path-card-cta::after { content: "→"; }
+[dir="ltr"] .path-card:hover .path-card-cta::after { transform: translateX(4px); }
+
+
+/* ---------- Detail view (#path) ---------- */
+.path-back { display: inline-flex; margin-bottom: 1.4rem; }
+.path-back::before { content: "⟶"; margin-inline-end: 0.5rem; }
+[dir="ltr"] .path-back::before { content: "⟵"; }
+
+.path-detail-head { display: flex; gap: 1.1rem; align-items: flex-start; }
+.path-detail-ico { font-size: 2.4rem; line-height: 1; flex: none; }
+.path-detail-head-txt { display: grid; gap: 0.5rem; min-width: 0; }
+.path-detail-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.path-detail-title { font-family: var(--font-display); font-size: clamp(1.4rem, 3.5vw, 1.9rem); line-height: 1.4; }
+.path-detail-title:focus { outline: none; }
+.path-detail-desc { color: var(--muted); line-height: 1.8; max-width: 75ch; }
+
+.path-detail-progress {
+  margin-top: 1.6rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 0.7rem;
+}
+.path-detail-progress-txt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem 0.9rem; }
+.path-detail-progress-txt span { color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.path-detail-bar { height: 10px; }
+.path-detail-done { color: var(--ok); font-weight: 800; font-size: 0.92rem; }
+.path-next-chip {
+  justify-self: start;
+  max-width: 100%;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: var(--wash-accent2);
+  color: var(--accent-2);
+  font-size: 0.82rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path-detail-subhead { margin: 2rem 0 0.9rem; font-size: 1.02rem; font-family: var(--font-display); }
+
+/* Ordered topics */
+.path-topics { list-style: none; display: grid; gap: 0.55rem; }
+.path-topic {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color 0.25s;
+}
+.path-topic.is-done { border-color: rgba(74, 222, 128, 0.4); }
+
+.path-topic-num {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  background: var(--wash-neutral);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.path-topic.is-done .path-topic-num { background: rgba(74, 222, 128, 0.14); color: var(--ok); }
+
+.path-topic-txt { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.7rem; flex: 1; min-width: 0; }
+.path-topic-title { font-weight: 600; font-size: 0.94rem; line-height: 1.6; }
+.path-topic.is-done .path-topic-title { color: var(--muted); }
+.path-topic-res { display: inline-flex; }
+
+/* Completion toggle — 34px hit area, ✓ appears when done */
+.path-topic-check {
+  flex: none;
+  width: 2.15rem;
+  height: 2.15rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--wash-neutral);
+  color: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
+}
+.path-topic-check:hover { border-color: var(--accent); transform: translateY(-1px); }
+.path-topic-check:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.path-topic-check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.path-topic-check:disabled { cursor: default; opacity: 0.9; }
+.path-topic-check:disabled:hover { border-color: var(--ok); transform: none; }
+
+/* ---------- Related resources ---------- */
+.path-related { margin-top: 2rem; display: grid; gap: 1.2rem; }
+.path-related-group h4 { font-size: 0.9rem; color: var(--muted); font-family: var(--font-display); margin-bottom: 0.6rem; }
+.path-related-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.path-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.2s;
+}
+.path-chip:hover { transform: translateY(-2px); }
+.path-chip:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.path-chip.is-quiz:hover { border-color: var(--accent); color: var(--accent); background: var(--tint-accent); }
+.path-chip.is-tool:hover { border-color: var(--accent-2); color: var(--accent-2); background: var(--wash-accent2); }
+.path-chip.is-lab:hover { border-color: var(--accent-3); color: var(--accent-3); background: var(--tint-accent3); }
+.path-chip.is-flash:hover { border-color: var(--ok); color: var(--ok); }
+.path-chip-n {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding-inline: 0.3rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.7rem;
+}
+
+/* ---------- Coming-soon placeholder & empty states ---------- */
+.path-soon-box {
+  margin-top: 1.6rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  display: grid;
+  gap: 0.7rem;
+  justify-items: center;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+.path-soon-box h3 { font-family: var(--font-display); font-size: 1.1rem; }
+.path-soon-box p { color: var(--muted); max-width: 52ch; line-height: 1.8; }
+.path-soon-while { font-size: 0.85rem; color: var(--dim); margin-top: 0.4rem; }
+
+.path-detail-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  display: grid;
+  gap: 0.8rem;
+  justify-items: center;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+.path-detail-empty .path-detail-ico { font-size: 2.2rem; }
+.path-detail-empty h2 { font-family: var(--font-display); font-size: 1.2rem; }
+.path-detail-empty p { color: var(--muted); }
+
+/* Tool card flash when jumped-to from a path topic */
+.tool-card.is-flashed { border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--wash-accent2-hover); }
+
+/* Beginner box CTA row (recommended path + first step) */
+.beginner-cta-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 700px) {
+  .path-detail-head { flex-direction: column; gap: 0.7rem; }
+  .path-topic { gap: 0.6rem; padding: 0.7rem 0.75rem; }
+  .path-topic-title { font-size: 0.9rem; }
+  .path-detail-progress { padding: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .path-card, .path-chip, .path-topic, .path-topic-check { transition: none; }
+  .path-card:hover, .path-chip:hover { transform: none; }
+  .path-card:hover .path-card-cta::after { transform: none; }
+}
+/* END MODULE 39 */
+
+/* ============================================================
+   MODULE 40 · Cyber Neon Modernization — principal UI/UX pass
+   ------------------------------------------------------------
+   ADDITIVE LAYER: appended after every module, so it refines
+   (never removes) existing rules. Strictly visual overrides:
+   shadows, borders, transitions, masks — no layout mutations.
+   Tokens: deep-dark canvas · cyan/green neon glow · glass
+   hairlines · cubic-bezier motion · logical properties only.
+   NOTE (Arabic-first): no letter-spacing is introduced on
+   Arabic text — tracking breaks cursive glyph joining.
+   ============================================================ */
+
+:root {
+  /* -- deep dark canvas (default-theme refinement) -- */
+  --bg: #05070d;
+  --bg-soft: #090d17;
+  --surface: #0c111f;
+  --surface-2: #141c2f;
+  --line: rgba(148, 163, 184, 0.16);
+  --line-strong: rgba(148, 163, 184, 0.30);
+  --nav-bg: rgba(7, 10, 18, 0.82);
+  --panel-wash: #0a0f1c;
+  --code-bg: #070b15;
+  --track: #2b3a52;
+
+  /* -- shared motion & depth tokens (theme-agnostic) -- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --shadow-sm: 0 1px 2px rgba(2, 4, 10, 0.4), 0 10px 28px -20px rgba(2, 4, 10, 0.5);
+  --shadow-md: 0 2px 4px rgba(2, 4, 10, 0.35), 0 24px 48px -28px rgba(2, 4, 10, 0.65);
+  --shadow-lg: 0 40px 80px -40px rgba(2, 4, 10, 0.8);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --well-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.35);
+
+  /* -- neon accents (cyan/green glow, subtle) -- */
+  --glow-cyan: rgba(34, 211, 238, 0.28);
+  --glow-green: rgba(52, 211, 153, 0.22);
+  --ring: 0 0 0 3px rgba(34, 211, 238, 0.22);
+  --grad-cyber: linear-gradient(100deg, #22d3ee 0%, #34d399 100%); /* decorative only */
+  --text-glow: drop-shadow(0 0 22px rgba(34, 211, 238, 0.20));
+
+  /* -- ambient canvas (aurora washes + faint cyber grid) -- */
+  --aurora-1: radial-gradient(52rem 32rem at 12% -6%, rgba(34, 211, 238, 0.075), transparent 62%);
+  --aurora-2: radial-gradient(46rem 30rem at 88% 108%, rgba(139, 92, 246, 0.085), transparent 60%);
+  --grid-line: rgba(148, 163, 184, 0.045);
+
+  /* -- bilingual type stack: Latin → Inter/Space Grotesk,
+        Arabic glyphs fall through to Tajawal (per index.html) -- */
+  --font-display: "Space Grotesk", "Tajawal", system-ui, sans-serif;
+  --font-body: "Inter", "Tajawal", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Space Grotesk", SFMono-Regular, Consolas, monospace;
+}
+
+/* Light theme re-assertion — MUST follow the :root block above so
+   the light palette keeps winning over the dark refinements. */
+[data-theme="light"] {
+  --bg: #f4f5f7;
+  --bg-soft: #eceef2;
+  --surface: #ffffff;
+  --surface-2: #f7f8fa;
+  --line: rgba(30, 41, 59, 0.14);
+  --line-strong: rgba(30, 41, 59, 0.26);
+  --nav-bg: rgba(244, 245, 247, 0.9);
+  --panel-wash: #f8f9fb;
+  --code-bg: #f1f5f9;
+  --track: #cbd5e1;
+  --shadow-sm: 0 1px 2px rgba(23, 32, 52, 0.05), 0 10px 28px -22px rgba(23, 32, 52, 0.25);
+  --shadow-md: 0 2px 4px rgba(23, 32, 52, 0.05), 0 24px 48px -30px rgba(23, 32, 52, 0.3);
+  --shadow-lg: 0 40px 80px -44px rgba(23, 32, 52, 0.4);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --well-shadow: inset 0 2px 8px rgba(23, 32, 52, 0.08);
+  --glow-cyan: rgba(14, 116, 144, 0.22);
+  --glow-green: rgba(21, 128, 61, 0.18);
+  --ring: 0 0 0 3px rgba(14, 116, 144, 0.18);
+  --text-glow: none;
+  --aurora-1: radial-gradient(52rem 32rem at 12% -6%, rgba(14, 116, 144, 0.06), transparent 62%);
+  --aurora-2: radial-gradient(46rem 30rem at 88% 108%, rgba(109, 40, 217, 0.055), transparent 60%);
+  --grid-line: rgba(30, 41, 59, 0.035);
+}
+/* ---------- Typography, rendering & ambient canvas ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  scrollbar-width: thin;                       /* Firefox */
+  scrollbar-color: var(--track) transparent;   /* inherits downstream */
+}
+
+body {
+  font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg);
+  background-image: var(--aurora-1), var(--aurora-2);
+  background-repeat: no-repeat;
+}
+
+/* Mobile-first: fixed ambient attachment only where it performs */
+@media (min-width: 700px) {
+  body { background-attachment: fixed; }
+}
+/* Desktop: faint engineering grid over the aurora washes */
+@media (min-width: 1024px) {
+  body {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      var(--aurora-1),
+      var(--aurora-2);
+    background-size: 56px 56px, 56px 56px, auto, auto;
+  }
+}
+
+/* Balanced Arabic/Latin headings + comfortable ragged edges */
+h1, h2, h3 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+
+/* Numeric rhythm: digits stay monospaced inside running text */
+.hero-stat strong,
+.q-count,
+.path-card-progress-n,
+.games-timer {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slim, rounded neon scrollbar (WebKit) */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-color: var(--track);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--accent-2); }
+
+/* Focus baseline — component-specific rings below still win */
+:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
+/* ---------- Actions: buttons, chips, toggles ---------- */
+.btn {
+  transition:
+    transform 0.28s var(--ease-out),
+    box-shadow 0.28s var(--ease-out),
+    border-color 0.2s,
+    background-color 0.2s,
+    filter 0.2s;
+  will-change: transform;
+}
+.btn:active {
+  transform: translateY(0) scale(0.985);
+  transition-duration: 0.12s;
+}
+.btn:focus-visible { box-shadow: var(--ring); }
+
+@media (hover: hover) {
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glass-hi), 0 16px 34px -14px var(--glow-cyan);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 18px 40px -14px var(--glow-cyan), 0 0 24px -8px var(--glow-green);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(34, 211, 238, 0.5);
+    box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.16), 0 12px 26px -16px var(--glow-cyan);
+  }
+  .nav-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -12px var(--glow-cyan);
+  }
+  .tag-btn:hover { transform: translateY(-1px); }
+  .tag-btn.is-active { box-shadow: 0 8px 20px -10px var(--glow-cyan); }
+  .lang-toggle:hover { box-shadow: 0 10px 24px -12px var(--glow-cyan); }
+  .to-top:hover {
+    box-shadow: 0 0 0 1px var(--line-strong), 0 14px 30px -14px var(--glow-cyan);
+  }
+  .path-chip:hover {
+    box-shadow: 0 10px 22px -14px var(--glow-cyan);
+  }
+  .q-option:hover { border-color: rgba(34, 211, 238, 0.45); }
+}
+
+/* ---------- Glass surfaces: cards, hero, navbar ---------- */
+.work-card-inner,
+.tool-card,
+.quiz-shell,
+.path-card {
+  box-shadow: var(--glass-hi), var(--shadow-md);
+  transition:
+    transform 0.32s var(--ease-out),
+    border-color 0.25s,
+    box-shadow 0.32s var(--ease-out),
+    background-color 0.25s;
+}
+
+@media (hover: hover) {
+  .work-card-inner:hover,
+  .tool-card:hover,
+  .quiz-shell:hover,
+  .path-card:hover {
+    box-shadow: var(--glass-hi), var(--shadow-md), 0 24px 52px -26px var(--glow-cyan);
+  }
+  .work-card-inner:hover { border-color: var(--line-strong); }
+  .tool-card:hover { border-color: rgba(34, 211, 238, 0.42); }
+  .quiz-shell:hover { border-color: rgba(139, 92, 246, 0.45); }
+}
+
+.hero-content {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: var(--glass-hi), var(--shadow-lg);
+}
+
+.nav.is-scrolled {
+  box-shadow: 0 12px 32px -18px rgba(2, 4, 10, 0.6), inset 0 -1px 0 var(--line);
+}
+
+/* Gradient-clipped headings get a whisper of cyan bloom
+   (token-driven: --text-glow is `none` in the light theme) */
+.grad { filter: var(--text-glow); }
+
+/* ---------- Progress indicators & output wells ---------- */
+.q-progress-fill,
+.q-timer-fill,
+.pw-meter-fill,
+.progress-bar > * {
+  box-shadow: 0 0 12px -2px var(--glow-cyan);
+  transition-timing-function: var(--ease-out);
+}
+
+.tool-out {
+  border-color: rgba(34, 211, 238, 0.14);
+  box-shadow: var(--well-shadow);
+}
+
+/* ---------- Marquee edge fade (direction-agnostic) ---------- */
+.marquee {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+/* ---------- Mobile-first touch mechanics ---------- */
+@media (max-width: 700px) {
+  .q-option { min-height: 44px; }  /* comfortable touch target */
+}
+
+/* ---------- Reduced motion: strip the new flourishes ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .work-card-inner,
+  .tool-card,
+  .quiz-shell,
+  .path-card,
+  .path-chip,
+  .nav-cta,
+  .lang-toggle,
+  .tag-btn,
+  .to-top {
+    transition: none;
+  }
+  .btn:hover, .btn-primary:hover, .btn-ghost:hover, .nav-cta:hover,
+  .tag-btn:hover, .path-chip:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+  .grad { filter: none; }
+}
+/* END MODULE 40 */
+/* ============================================================
+   MODULE 41 · Phase 3 — quiz mode selector + deferred review
+   Practice/timed-exam switch and the result-screen mistake
+   review. Logical properties only → RTL-safe; design tokens
+   only → both themes. Layered last so these rules win.
+   ============================================================ */
+
+/* ---------- Mode selector: practice vs timed exam ---------- */
+.q-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  margin: 1.1rem 0 0.4rem;
+}
+.q-mode-selector {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.q-mode-btn {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  padding: 0.42rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.q-mode-btn:hover { color: var(--text); background: var(--wash-neutral); }
+.q-mode-btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.q-mode-btn.is-active {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px -6px rgba(109, 40, 217, 0.5);
+}
+
+/* ---------- Category breakdown hook (spacing accent) ---------- */
+.q-cat-breakdown { margin-top: 0.5rem; }
+
+/* ---------- Deferred review: missed questions + explanations ---------- */
+.q-review { margin-top: 1.2rem; }
+.q-review h4 { margin: 0 0 0.6rem; color: var(--text); }
+.q-review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+.q-review-item {
+  background: var(--tint-accent3);
+  border: 1px solid rgba(190, 24, 93, 0.28);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+.q-review-item p { margin: 0; color: var(--muted); }
+.q-review-q { font-weight: 600; color: var(--text); }
+.q-review-item .q-explain { background: var(--surface); }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 520px) {
+  .q-mode-row { flex-direction: column; align-items: stretch; }
+  .q-mode-selector { width: 100%; }
+  .q-mode-btn { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .q-mode-btn { transition: none; }
+}
+
+/* ============================================================
+   MODULE 43 · Phase 4 — tools educational layer + lab meta
+   Logical properties only (RTL-safe) · design tokens only
+   (both themes) · layered last so these rules win.
+   ============================================================ */
+.tool-safety-notice {
+  margin: 0 auto 1.6rem;
+  padding: 0.85rem 1.15rem;
+  max-width: 980px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius);
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.tool-edu {
+  margin: 0.2rem 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  display: grid;
+  gap: 0.5rem;
+}
+.tool-edu-row { display: flex; flex-wrap: wrap; gap: 0.5rem 0.9rem; align-items: center; justify-content: space-between; }
+.tool-edu-name { display: inline-flex; gap: 0.45rem; align-items: baseline; color: var(--muted); font-size: 0.9rem; }
+.tool-edu-name b { color: var(--text); }
+.tool-en-name { color: var(--accent-2); font-weight: 600; }
+.tool-edu-purpose, .tool-edu-safety { margin: 0; font-size: 0.92rem; line-height: 1.75; color: var(--muted); }
+.tool-edu-purpose b, .tool-edu-safety b { color: var(--text); }
+.tool-edu-safety { padding-inline-start: 0.75rem; border-inline-start: 3px solid rgba(245, 158, 11, 0.55); }
+.tool-edu-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.tool-edu-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; font-size: 0.85rem; }
+.tool-edu-related { color: var(--dim); }
+.tool-edu .path-chip { font-size: 0.8rem; }
+.tool-edu .path-level { font-size: 0.75rem; }
+.lab-meta-mount { margin: 0 0 1.6rem; }
+.lab-meta {
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  display: grid;
+  gap: 0.65rem;
+}
+.lab-meta.is-done { border-color: rgba(34, 197, 94, 0.4); }
+.lab-meta-skills, .lab-meta-hints { font-size: 0.92rem; color: var(--muted); }
+.lab-meta-skills b, .lab-meta-hints summary { color: var(--text); }
+.lab-meta-hints summary { cursor: pointer; }
+.lab-meta-skills ul, .lab-meta-hints ul { margin: 0.35rem 0 0; padding-inline-start: 1.2rem; display: grid; gap: 0.3rem; }
+.lab-done-badge {
+  color: var(--ok);
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.lab-meta-explain {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: var(--radius);
+  background: rgba(34, 197, 94, 0.07);
+  color: var(--muted);
+  line-height: 1.75;
+}
+.lab-meta-explain b { color: var(--ok); }
+.lab-responsible {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius);
+  background: rgba(245, 158, 11, 0.07);
+  color: var(--warn);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+@media (max-width: 700px) {
+  .tool-edu-row { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tool-edu, .lab-meta { transition: none; }
+}
+/* ============================================================
+   MODULE 38 · Onboarding — first-time wizard overlay
+   Fixed full-screen modal; RTL-first; mobile responsive;
+   reduced-motion aware. Hidden state is driven by the
+   aria-hidden attribute (JS) so it never traps users.
+   ============================================================ */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(11, 15, 25, 0.55);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.onboarding-overlay[aria-hidden="true"] { display: none; }
+
+.onboarding-panel {
+  width: min(560px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(23, 32, 52, 0.05), 0 24px 60px -32px rgba(23, 32, 52, 0.35);
+  padding: 1.5rem;
+}
+.onboarding-head { text-align: center; }
+.onboarding-head h2 { font-size: 1.35rem; color: var(--text); }
+.onboarding-sub { color: var(--muted); margin: 0.35rem 0 0; font-size: 0.92rem; }
+
+.onboarding-step h3 { font-size: 1.1rem; color: var(--text); margin-top: 1rem; }
+.onboarding-step-sub { color: var(--muted); margin: 0.2rem 0 0.9rem; }
+
+.onboarding-levels,
+.onboarding-styles {
+  display: grid;
+  gap: 0.7rem;
+}
+.btn-level, .btn-style { width: 100%; text-align: start; justify-content: center; }
+.btn-level.is-active, .btn-style.is-active {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px -6px rgba(109, 40, 217, 0.5);
+}
+.onboarding-subjects { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.btn-subject.is-active {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.onboarding-skip-sub { margin-top: 0.8rem; text-align: center; }
+
+.onboarding-summary {
+  background: var(--tint-accent);
+  border: 1px solid rgba(109, 40, 217, 0.25);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+.onboarding-summary b { color: var(--accent); }
+
+.onboarding-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-overlay { transition: none; }
+}

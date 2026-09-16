@@ -1,6 +1,6 @@
 /* ============================================================
-   منصة أمن المعلومات — الترم الثاني | Service Worker
-   Strategy (v1.6):
+   منصة أمن المعلومات — الترم الحالي | Service Worker
+   Strategy (v1.9):
    - Precache the app shell on install (versioned cache).
    - Navigations: network-first with cached-shell fallback.
    - Static assets + JSON: Stale-While-Revalidate.
@@ -13,7 +13,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.7.0";
+const CACHE_VERSION = "v1.20.0";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
@@ -25,18 +25,35 @@ const PRECACHE_ASSETS = [
   "./script.js",
   "./assistant.js",
   "./nova-api.js",
-  "./nova-ui.js",
   "./nova-ui.css",
   "./manifest.json",
   "./data/quizzes.json",
   "./worker.js",
   "./images/icon-maskable.svg",
-  "./images/network-sec.svg",
-  "./images/os-sec.svg",
-  "./images/crypto-viz.svg",
-  "./images/db-sec.svg",
-  "./images/secure-code.svg",
-  "./images/hack-viz.svg"
+  "./images/algorithms.svg",
+  "./images/os-concepts.svg",
+  "./images/policies-ethics.svg",
+  "./images/it-components.svg",
+  "./images/security-design.svg",
+  "./images/backweb.jpg",
+  "./images/flashcards/firewall.svg",
+  "./images/flashcards/vpn.svg",
+  "./images/flashcards/hash.svg",
+  "./images/flashcards/phishing.svg",
+  "./images/flashcards/two-factor.svg",
+  "./images/flashcards/sql-injection.svg",
+  "./images/flashcards/confidentiality.svg",
+  "./images/flashcards/integrity.svg",
+  "./images/flashcards/availability.svg",
+  "./images/flashcards/symmetric-encryption.svg",
+  "./images/flashcards/asymmetric-encryption.svg",
+  "./images/flashcards/ransomware.svg",
+  "./images/flashcards/ddos.svg",
+  "./images/flashcards/man-in-the-middle.svg",
+  "./images/flashcards/social-engineering.svg",
+  "./images/flashcards/vulnerability.svg",
+  "./images/flashcards/reconnaissance.svg",
+  "./images/flashcards/malware.svg"
 ];
 
 /**
