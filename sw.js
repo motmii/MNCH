@@ -13,7 +13,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.20.0";
+const CACHE_VERSION = "v1.21.0";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
@@ -111,8 +111,12 @@ function isCacheable(response) {
 async function handleNavigation(request) {
   try {
     const fresh = await fetch(request);
-    const cache = await caches.open(CACHE_NAME);
-    cache.put("./index.html", fresh.clone()).catch(() => {});
+    /* Never cache a non-OK page (e.g. a host 404 for a wrong path) as the
+       app shell — that would poison offline mode until the next release. */
+    if (fresh && fresh.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put("./index.html", fresh.clone()).catch(() => {});
+    }
     return fresh;
   } catch {
     const cache = await caches.open(CACHE_NAME);

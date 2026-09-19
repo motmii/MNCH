@@ -12,7 +12,7 @@
  *   - index.html mounts #subjectsGrid and no longer hard-codes cards
  *   - assistant.js reads window.PLATFORM_SUBJECTS (single source)
  *   - service worker precaches the 5 current subject SVGs, no longer
- *     precaches the 6 deleted legacy SVGs, and pins CACHE_VERSION v1.20.0
+ *     precaches the 6 deleted legacy SVGs, and pins CACHE_VERSION v1.21.0
  * Run: node tests/subjects-smoke.test.js
  */
 const fs = require("fs");
@@ -144,7 +144,7 @@ for (const n of NEW_SVGS) {
   check("sw.js precaches images/" + n + ".svg", sw.includes('"./images/' + n + '.svg"'));
 }
 const verMatch = sw.match(/CACHE_VERSION\s*=\s*"v(\d+)\.(\d+)\.(\d+)"/);
-check("cache version is exactly v1.20.0 (migration-2 bump)", !!verMatch && verMatch[0] === 'CACHE_VERSION = "v1.20.0"');
+check("cache version is exactly v1.21.0 (current revision)", !!verMatch && verMatch[0] === 'CACHE_VERSION = "v1.21.0"');
 const DELETED_SVGS = ["network-sec", "os-sec", "crypto-viz", "db-sec", "secure-code", "hack-viz"];
 for (const n of DELETED_SVGS) {
   check("sw.js no longer precaches the deleted images/" + n + ".svg", sw.indexOf("./images/" + n + ".svg") < 0);

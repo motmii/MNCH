@@ -920,6 +920,9 @@ if (pointerFine && !prefersReducedMotion) {
   if (!form || !statusEl) return;
   const fields = $$("input:not([type=hidden]), select, textarea", form);
 
+  /** In-flight guard — blocks a second submit while a request is open. */
+  let sending = false;
+
   /**
    * Render a status line under the form.
    * @param {string} msg Arabic message.
@@ -947,6 +950,9 @@ if (pointerFine && !prefersReducedMotion) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    /* Duplicate-submission guard (double click / Enter while in flight). */
+    if (sending) return;
+
     /* Honeypot: silently accept but discard bot submissions. */
     const honeypot = form.querySelector('[name="_gotcha"]');
     if (honeypot && honeypot.value.trim()) return;
@@ -963,6 +969,7 @@ if (pointerFine && !prefersReducedMotion) {
     }
 
     setLoading(true);
+    sending = true;
     const data = Object.fromEntries(new FormData(form));
 
     try {
@@ -983,6 +990,7 @@ if (pointerFine && !prefersReducedMotion) {
     } catch (err) {
       showStatus(Lang.t("contact.error"), true);
     } finally {
+      sending = false;
       setLoading(false);
     }
   });
@@ -995,7 +1003,7 @@ if (pointerFine && !prefersReducedMotion) {
 })(); 
  
 /* ============================================================
-   MODULE 13 · QuizEngine — question bank (6 subjects)
+   MODULE 13 · QuizEngine — question bank (5 current-semester courses)
    Question shape: { q, ex, opts[4], a, t? (per-question seconds) }
    ============================================================ */
 /* ============================================================
@@ -2468,7 +2476,8 @@ const Lang = (() => {
   const DICT = {
     ar: {
       "meta.title": "منصة أمن المعلومات — الترم الحالي",
-      "nav.home": "الرئيسية", "nav.paths": "مسارات التعلم", "nav.subjects": "المواد",
+      "nav.home": "الرئيسية", "nav.semester": "الترم الحالي",
+      "nav.paths": "مسارات التعلم", "nav.subjects": "المواد",
       "nav.quiz": "الاختبارات", "nav.tools": "الأدوات", "nav.labs": "المعامل",
       "nav.flashcards": "البطاقات", "nav.progress": "تقدمك", "nav.about": "حول المنصة", "nav.contact": "التواصل",
       "nav.games": "تحديات CTF", "nav.redteam": "المختبر الهجومي", "nav.ir": "الاستجابة للحوادث", "nav.cryptolab": "مختبر التشفير",
@@ -2492,7 +2501,7 @@ const Lang = (() => {
       "subjects.sub": "مواد الفصل الدراسي الحالي وفق الخطة الرسمية: رمز المقرر والساعات والجدول، ولكل مادة بنك أسئلة تدريبي كامل مع شرح لكل إجابة.",
       "tools.eyebrow": "أدوات الأمن السيبراني",
       "tools.title": "جرّب <em class=\"grad\">الأدوات</em> مباشرة",
-      "tools.sub": "ستّ أدوات تفاعلية تعمل بالكامل في متصفحك — من تشفير Caesar إلى تحليل JWT وحساب الشبكات.",
+      "tools.sub": "اثنتا عشرة أداة تفاعلية تعمل بالكامل في متصفحك — من تشفير Caesar إلى تحليل JWT وحساب الشبكات.",
       "quiz.eyebrow": "الاختبارات التجريبية", "quiz.title": "اختبر نفسك في كل مادة",
       "quiz.sub": "أسئلة لكل مادة مع شرح فوري لكل إجابة، وضع مؤقّت اختياري، وحفظ تلقائي للنتائج.",
       "quiz.hint": "💡 اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.",
@@ -2623,7 +2632,8 @@ const Lang = (() => {
     },
     en: {
       "meta.title": "Information Security Platform — Current Semester",
-      "nav.home": "Home", "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
+      "nav.home": "Home", "nav.semester": "Current Semester",
+      "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
       "nav.quiz": "Quizzes", "nav.tools": "Tools", "nav.labs": "Labs",
       "nav.flashcards": "Flashcards", "nav.progress": "Your Progress", "nav.about": "About", "nav.contact": "Contact",
       "nav.games": "CTF Lab", "nav.redteam": "Red Team Lab", "nav.ir": "Incident Response", "nav.cryptolab": "Crypto Lab",
@@ -2647,7 +2657,7 @@ const Lang = (() => {
       "subjects.sub": "The current semester's official study-plan courses — course code, credit hours and schedule — each with a full practice question bank and an explanation for every answer.",
       "tools.eyebrow": "Cybersecurity Tools",
       "tools.title": "Try the <em class=\"grad\">Tools</em> Live",
-      "tools.sub": "Six interactive tools running entirely in your browser — from Caesar cipher to JWT decoding and subnet math.",
+      "tools.sub": "Twelve interactive tools running entirely in your browser — from Caesar cipher to JWT decoding and subnet math.",
       "quiz.eyebrow": "Practice Exams", "quiz.title": "Test yourself in every course",
       "quiz.sub": "Questions per course with instant explanations, an optional timer and automatic progress saving.",
       "quiz.hint": "💡 Pick a course to begin — you can resume a previous attempt or retake it from scratch.",
@@ -4107,12 +4117,41 @@ let cur = "ar";
   /** Set of valid view IDs for hash validation. @type {Set<string>} */
   const VIEW_IDS = new Set(VIEWS.map((v) => v.id));
 
+  /**
+   * Hash aliases → real view ids. "semester" is the platform's own
+   * current-semester entry point: it points at the #subjects view whose
+   * heading is «مواد الترم الحالي وملفاتها». Aliases resolve before the
+   * unknown-route fallback (so they never warn) and are rewritten to the
+   * canonical hash on activation.
+   * @type {Object<string,string>}
+   */
+  const VIEW_ALIASES = { semester: "subjects" };
+
   /** Currently active view ID. @type {string|null} */
   let activeView = null;
+
+  /** Unknown-route ids already announced (one notice per hash). @type {Set<string>} */
+  const unknownRoutesNotified = new Set();
 
   /* Enable JS-only view-switching CSS (progressive enhancement:
      without JS the class is absent → all views visible, normal scroll). */
   document.body.classList.add("js-view-switcher");
+
+  /**
+   * Announce — once per hash — that a hash route does not exist. Static
+   * hosting has no 404 page for fragments, so the router silently falls
+   * back to the home view; this makes the fallback explicit instead.
+   * @param {string} rawId Unknown id without the leading "#".
+   * @returns {void}
+   */
+  function notifyUnknownRoute(rawId) {
+    if (!rawId || unknownRoutesNotified.has(rawId)) return;
+    unknownRoutesNotified.add(rawId);
+    const msg = Lang.current === "en"
+      ? "The page \"" + rawId + "#\" does not exist — you were taken back to the home view."
+      : "الصفحة «#" + rawId + "» غير موجودة — تم الرجوع إلى الصفحة الرئيسية.";
+    if (typeof labToast === "function") labToast(msg, "warn");
+  }
 
   /**
    * Resolve a hash fragment to a valid view ID.
@@ -4126,6 +4165,7 @@ let cur = "ar";
        and is read from the hash by MODULE 39 (LearningPaths). */
     if (/^path\//.test(id)) return "path";
      if (/^lesson\//.test(id)) return "lesson";
+    if (VIEW_ALIASES[id]) return VIEW_ALIASES[id];
     return VIEW_IDS.has(id) ? id : "hero";
   }
 
@@ -4141,7 +4181,13 @@ let cur = "ar";
    */
   function activate(viewId, opts) {
     opts = opts || {};
+    const requestedId = String(viewId == null ? "" : viewId).replace(/^#/, "").trim();
     viewId = resolveViewId(viewId);
+    /* Unknown hash route? Say so (the fallback view still renders). */
+    if (requestedId && !VIEW_IDS.has(requestedId) && !VIEW_ALIASES[requestedId] &&
+        !/^(?:path|lesson)\//.test(requestedId)) {
+      notifyUnknownRoute(requestedId);
+    }
     if (activeView === viewId && !opts.force) return false;
 
     /* Show target, hide the rest */
@@ -4212,12 +4258,13 @@ let cur = "ar";
     const link = e.target.closest("a[href^='#']:not([href='#'])");
     if (!link) return;
     /* Membership test on the RAW id (not resolveViewId, which defaults
-       unknown hashes to "hero" and would hijack non-view anchors). */
+       unknown hashes to "hero" and would hijack non-view anchors).
+       Aliases (e.g. "#semester") count as view links too. */
     const rawId = (link.getAttribute("href") || "").replace(/^#/, "").trim();
-    if (!VIEW_IDS.has(rawId)) return; /* not a view link — allow default */
+    if (!VIEW_IDS.has(rawId) && !VIEW_ALIASES[rawId]) return; /* not a view link — allow default */
 
     e.preventDefault();
-    activate(rawId);
+    activate(VIEW_ALIASES[rawId] || rawId);
 
     /* Close the mobile menu drawer if it's currently open */
     const menu = $id("mobileMenu");
@@ -4241,8 +4288,10 @@ let cur = "ar";
   window.addEventListener("popstate", onPopState);
   window.addEventListener("hashchange", onPopState);
 
-  /* --- Initialize: activate view from URL hash or default to hero --- */
-  activate(resolveViewId(location.hash), { replace: true });
+  /* --- Initialize: activate view from URL hash or default to hero ---
+     The RAW hash is passed so an unknown deep link is detected and
+     announced (activate() resolves it to the fallback view). */
+  activate(location.hash, { replace: true });
 
   /* Public API so other modules (e.g. ProgressHub) can switch views
      programmatically and read the current view. Additive, no behavior change. */
