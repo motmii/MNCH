@@ -273,6 +273,20 @@
       <div id="lessonBody" class="lesson-body"></div>
     </section>
 
+    <!-- CURRENT SEMESTER DASHBOARD — the real #semester view. Rendered
+         by MODULE 43 from window.PLATFORM_CURRENT_SEMESTER
+         (current-semester.js — single source of curriculum truth). -->
+    <section class="section semester-dashboard" id="semester" aria-labelledby="semesterTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="semester.eyebrow">دليل الترم الحالي</p>
+        <h2 class="section-title" id="semesterTitle" data-i18n-html="semester.title">لوحة <em class="grad">الترم الحالي</em></h2>
+        <p class="section-sub" data-i18n="semester.sub">خطة الترم الحالي كاملة في مكان واحد: المواد الرسمية، الجدول الأسبوعي، الساعات المعتمدة، وحلقات الوصول إلى الاختبارات والأدوات والمعامل.</p>
+      </div>
+
+      <div class="semester-summary reveal" id="semesterMeta"></div>
+      <div class="semester-grid" id="semesterGrid"></div>
+    </section>
+
     <!-- SUBJECTS & RESOURCES -->
     <section class="section subjects" id="subjects">
       <div class="section-head reveal">
@@ -928,6 +942,7 @@
     </button>
   </div>
 
+  <script src="current-semester.js"></script>
   <script src="current-semester.js"></script>
   <script src="script.js"></script>
   <script src="assistant.js"></script>

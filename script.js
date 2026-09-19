@@ -2628,10 +2628,52 @@ const Lang = (() => {
       "progress.paths": "إنجاز المسارات",
       "progress.attempts": "محاولات الاختبار",
       "progress.reviewWrong": "راجع أخطاءك",
-      "progress.overall": "التقدم الكلي"
+      "progress.overall": "التقدم الكلي",
+      "semester.eyebrow": "دليل الترم الحالي",
+      "semester.title": "لوحة <em class=\"grad\">الترم الحالي</em>",
+      "semester.sub": "خطة الترم الحالي كاملة في مكان واحد: المواد الرسمية، الجدول الأسبوعي، الساعات المعتمدة، وحلقات الوصول إلى الاختبارات والأدوات والمعامل.",
+      "semester.program": "البرنامج",
+      "semester.subjectsCount": "المواد",
+      "semester.credits": "الساعات المعتمدة",
+      "semester.code": "رمز المقرر",
+      "semester.schedule": "الجدول",
+      "semester.creditHours": "ساعات معتمدة",
+      "semester.estHours": "ساعات دراسة تقديرية",
+      "semester.prerequisites": "المتطلبات السابقة",
+      "semester.prerequisitesNone": "لا توجد متطلبات سابقة لهذه المادة.",
+      "semester.outcomes": "مخرجات التعلم",
+      "semester.mistakes": "أخطاء شائعة",
+      "semester.terms": "مصطلحات أساسية",
+      "semester.lessons": "الدروس",
+      "semester.lessonsSoon": "سيتم إضافة الدروس قريبًا.",
+      "semester.quizChip": "بنك الأسئلة",
+      "semester.tools": "أدوات ذات صلة",
+      "semester.labs": "معامل ذات صلة",
+      "semester.missingData": "بيانات الترم الحالي غير متوفرة حاليًا."
     },
     en: {
       "meta.title": "Information Security Platform — Current Semester",
+      "semester.eyebrow": "Current semester guide",
+      "semester.title": "The <em class=\"grad\">Current Semester</em> board",
+      "semester.sub": "The full current-semester plan in one place: official subjects, weekly schedule, credit hours, and gateways to quizzes, tools and labs.",
+      "semester.program": "Program",
+      "semester.subjectsCount": "Subjects",
+      "semester.credits": "Credit hours",
+      "semester.code": "Course code",
+      "semester.schedule": "Schedule",
+      "semester.creditHours": "credit hours",
+      "semester.estHours": "estimated study hours",
+      "semester.prerequisites": "Prerequisites",
+      "semester.prerequisitesNone": "No prerequisites for this subject.",
+      "semester.outcomes": "Learning outcomes",
+      "semester.mistakes": "Common mistakes",
+      "semester.terms": "Key terms",
+      "semester.lessons": "Lessons",
+      "semester.lessonsSoon": "Lessons will be added soon.",
+      "semester.quizChip": "Question bank",
+      "semester.tools": "Related tools",
+      "semester.labs": "Related labs",
+      "semester.missingData": "Current-semester data is not available right now.",
       "nav.home": "Home", "nav.semester": "Current Semester",
       "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
       "nav.quiz": "Quizzes", "nav.tools": "Tools", "nav.labs": "Labs",
@@ -4108,7 +4150,7 @@ let cur = "ar";
 
   /** All switchable views: hero header + section elements. @type {HTMLElement[]} */
   const VIEWS = [
-    $id("hero"), $id("paths"), $id("path"), $id("subjects"), $id("tools"),
+    $id("hero"), $id("semester"), $id("paths"), $id("path"), $id("subjects"), $id("tools"),
     $id("labs"), $id("flash"), $id("quiz"), $id("progress"),
     $id("games"), $id("redteam"), $id("ir"), $id("cryptolab"),
     $id("about"), $id("contact"), $id("lesson"),
@@ -4118,14 +4160,14 @@ let cur = "ar";
   const VIEW_IDS = new Set(VIEWS.map((v) => v.id));
 
   /**
-   * Hash aliases → real view ids. "semester" is the platform's own
-   * current-semester entry point: it points at the #subjects view whose
-   * heading is «مواد الترم الحالي وملفاتها». Aliases resolve before the
-   * unknown-route fallback (so they never warn) and are rewritten to the
-   * canonical hash on activation.
+   * Hash aliases → real view ids. Empty today: the #semester nav link
+   * used to alias to #subjects, but #semester is now a REAL view (the
+   * Current Semester dashboard, rendered by MODULE 43 from
+   * window.PLATFORM_CURRENT_SEMESTER), so it resolves directly as a
+   * member of VIEW_IDS and needs no alias.
    * @type {Object<string,string>}
    */
-  const VIEW_ALIASES = { semester: "subjects" };
+  const VIEW_ALIASES = {};
 
   /** Currently active view ID. @type {string|null} */
   let activeView = null;
@@ -7343,4 +7385,254 @@ const LABS_META = {
 
 /* @@TOOLS_D@@ */
 })();
+})();
+
+/* ============================================================
+   MODULE 43 · SemesterDashboard — لوحة الترم الحالي (#semester)
+   ------------------------------------------------------------
+   Renders the real Current Semester dashboard view from
+   window.PLATFORM_CURRENT_SEMESTER (current-semester.js) — the
+   single source of curriculum truth. No data duplicated here.
+   - Summary: semester title, program name, description, subject
+     count and total credit hours (computed from the data).
+   - One card per official subject: name, course code, credit
+     hours, day/time schedule, difficulty, estimated study hours,
+     short description, prerequisites, learning outcomes, common
+     mistakes, key terms, and links to EXISTING platform assets
+     only (quiz banks via the data-quiz-jump flow, tool cards via
+     data-tool-jump, lab views) — no fake links.
+   - Honest empty states: no lessons → «سيتم إضافة الدروس
+     قريبًا» (never invented); empty prerequisites → explicit
+     empty note; missing quiz/tool/lab entries are simply not
+     rendered. Missing data object → honest status message.
+   - Re-renders on locale switch (Lang.onSwitch). Arabic and
+     English text each render from their own field — never mixed.
+   ============================================================ */
+(function initSemesterDashboard() {
+  "use strict";
+  const grid = document.getElementById("semesterGrid");
+  const metaMount = document.getElementById("semesterMeta");
+  if (!grid || !metaMount) return;
+
+  const DATA = window.PLATFORM_CURRENT_SEMESTER;
+  if (!DATA || !Array.isArray(DATA.subjects)) {
+    /* Data source absent — say so instead of rendering nothing. */
+    metaMount.innerHTML = '<p class="sem-empty" role="status">' +
+      escHtml(Lang.t("semester.missingData")) + "</p>";
+    return;
+  }
+
+  /** Escape HTML-significant characters. @param {unknown} v @returns {string} */
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  }
+
+  /**
+   * Pick the active-locale string from a bilingual { ar, en } field.
+   * Arabic and English never mix: each language renders its own text.
+   * @param {{ar?:string, en?:string}|string} field @returns {string}
+   */
+  function T(field) {
+    if (field == null) return "";
+    if (typeof field !== "object") return String(field);
+    const cur = Lang.current;
+    const v = (field[cur] != null) ? field[cur] : (field.ar != null ? field.ar : field.en);
+    return v == null ? "" : String(v);
+  }
+
+  /** Bilingual item label (t/title/name/term or plain field). @param {object} item @returns {string} */
+  function TT(item) {
+    if (!item || typeof item !== "object") return "";
+    return T(item.t || item.title || item.name || item.term || item);
+  }
+
+  /**
+   * Human label for a related tool card. Uses TOOLS_META names when
+   * reachable (same-file registry), otherwise the live tool-card title
+   * in the DOM. Never invents a tool that does not exist.
+   * @param {string} id Tool-card id (e.g. "tool-hash"). @returns {string}
+   */
+  function toolLabel(id) {
+    try {
+      if (typeof TOOLS_META !== "undefined" && TOOLS_META[id] && TOOLS_META[id].t) {
+        const n = T(TOOLS_META[id].t);
+        if (n) return n;
+      }
+    } catch (e) { /* different scope — fall through to the DOM */ }
+    const card = document.getElementById(id);
+    const h3 = card && card.querySelector(".tool-title");
+    return h3 ? h3.textContent.trim() : id;
+  }
+
+  /** Guard so unknown tool ids never render a dead chip. @param {string} id @returns {boolean} */
+  function toolLabelIsKnown(id) {
+    try {
+      if (typeof TOOLS_META !== "undefined" && TOOLS_META[id]) return true;
+    } catch (e) { /* scope guard */ }
+    const card = document.getElementById(id);
+    return !!(card && card.querySelector(".tool-title"));
+  }
+
+  /** Question-bank count for a quiz key (0 when unknown). @param {string} k @returns {number} */
+  function quizCount(k) {
+    try {
+      if (typeof QUIZZES !== "undefined" && QUIZZES[k] && QUIZZES[k].questions) {
+        return QUIZZES[k].questions.length;
+      }
+    } catch (e) { /* ignore — count is cosmetic */ }
+    return 0;
+  }
+
+  /* ---------- summary ---------- */
+
+  function renderSummary() {
+    const credits = DATA.subjects.reduce((sum, s) => {
+      const c = s.meta && s.meta.creditHours;
+      return sum + (typeof c === "number" ? c : 0);
+    }, 0);
+    metaMount.innerHTML =
+      '<div class="sem-sum">' +
+      '<div class="sem-sum-main">' +
+      '<h3 class="sem-sum-title">' + esc(T(DATA.title)) + "</h3>" +
+      '<p class="sem-sum-program"><span>' + escHtml(Lang.t("semester.program")) +
+      "</span> — " + esc(T(DATA.meta && DATA.meta.program)) + "</p>" +
+      '<p class="sem-sum-desc">' + esc(T(DATA.description)) + "</p>" +
+      "</div>" +
+      '<dl class="sem-sum-stats">' +
+      "<div class=\"sem-stat\"><dt>" + escHtml(Lang.t("semester.subjectsCount")) + "</dt><dd>" +
+      DATA.subjects.length + "</dd></div>" +
+      "<div class=\"sem-stat\"><dt>" + escHtml(Lang.t("semester.credits")) + "</dt><dd>" +
+      credits + "</dd></div>" +
+      "</dl></div>";
+  }
+
+  /* ---------- subject cards ---------- */
+
+  /** <details> block for a labeled list. @param {string} i18nKey @param {string[]} items @returns {string} */
+  function detailsList(i18nKey, items) {
+    const lis = items.map((x) => "<li>" + x + "</li>").join("");
+    return (
+      '<details class="sem-details"><summary>' + escHtml(Lang.t(i18nKey)) +
+      ' <span class="sem-count">' + items.length + "</span></summary>" +
+      '<ul class="sem-list">' + lis + "</ul></details>"
+    );
+  }
+
+  /** Prerequisites — empty state is explicit, never hidden silently. @param {object} s @returns {string} */
+  function prereqHtml(s) {
+    const items = (Array.isArray(s.prerequisites) ? s.prerequisites : [])
+      .map((p) => esc(TT(p) || String(p))).filter(Boolean);
+    if (!items.length) {
+      return '<div class="sem-lessons"><p class="sem-empty">' +
+        escHtml(Lang.t("semester.prerequisitesNone")) + "</p></div>";
+    }
+    return detailsList("semester.prerequisites", items);
+  }
+
+  /** Lesson items — rendered only if the data really has them. @param {object} s @returns {string} */
+  function lessonsHtml(s) {
+    const lessons = Array.isArray(s.lessons) ? s.lessons : [];
+    if (!lessons.length) {
+      return '<div class="sem-lessons"><p class="sem-empty">' +
+        escHtml(Lang.t("semester.lessonsSoon")) + "</p></div>";
+    }
+    return detailsList("semester.lessons", lessons.map((l) => esc(TT(l))).filter(Boolean));
+  }
+
+  /** Links to EXISTING quiz banks / tool cards / lab views (or ""). @param {object} s @returns {string} */
+  function linksHtml(s) {
+    let html = "";
+    (Array.isArray(s.quizzes) ? s.quizzes : []).forEach((k) => {
+      const n = quizCount(k);
+      html += '<a class="path-chip is-quiz" href="#quiz" data-quiz-jump="' + esc(k) + '">' +
+        escHtml(Lang.t("semester.quizChip")) +
+        (n ? ' <b class="path-chip-n">' + n + "</b>" : "") + "</a>";
+    });
+    (Array.isArray(s.relatedTools) ? s.relatedTools : []).forEach((id) => {
+      if (!toolLabelIsKnown(id)) return; /* no fake links */
+      html += '<a class="path-chip is-tool" href="#tools" data-tool-jump="' + esc(id) + '"' +
+        ' aria-label="' + escHtml(Lang.t("semester.tools")) + ": " + esc(toolLabel(id)) + '">' +
+        esc(toolLabel(id)) + "</a>";
+    });
+    (Array.isArray(s.relatedLabs) ? s.relatedLabs : []).forEach((view) => {
+      if (!document.getElementById(view)) return; /* no fake links */
+      html += '<a class="path-chip is-lab" href="#' + esc(view) + '">' +
+        escHtml(Lang.t("nav." + view)) + "</a>";
+    });
+    return html;
+  }
+
+  function scheduleHtml(s) {
+    const sch = s.meta && s.meta.schedule;
+    if (!sch) return "";
+    const day = T(sch.day);
+    return day ? day + " · " + esc(sch.startTime) + " – " + esc(sch.endTime) : "";
+  }
+
+  function cardHtml(s) {
+    const meta = s.meta || {};
+    const hue = meta.hue || 260;
+    const diffKey = "paths.level." + (s.difficulty || "");
+    const diffRaw = Lang.t(diffKey);
+    const diffLabel = (diffRaw !== diffKey) ? esc(diffRaw) : esc(s.difficulty || "");
+    const icon = meta.icon || "images/icon-maskable.svg";
+    const schedule = scheduleHtml(s);
+
+    return (
+      '<article class="work-card sem-card" style="--hue: ' + hue + '">' +
+      '<div class="work-card-inner">' +
+      '<div class="work-thumb" style="--hue: ' + hue + '">' +
+      '<img class="thumb-img" src="' + esc(icon) + '" alt="' + esc(T(s.name)) + '"' +
+      ' onerror="this.onerror=null;this.src=\'images/icon-maskable.svg\'" width="800" height="600" loading="lazy" decoding="async" /></div>' +
+      '<div class="sem-body">' +
+      '<header class="sem-head">' +
+      "<h3>" + esc(T(s.name)) + "</h3>" +
+      '<p class="sem-code" dir="ltr">' + escHtml(Lang.t("semester.code")) + ": " + esc(s.code || s.id) + "</p>" +
+      "</header>" +
+      '<ul class="sem-meta">' +
+      '<li class="sem-chip is-credit"><b>' + (meta.creditHours == null ? "—" : meta.creditHours) + "</b> " + escHtml(Lang.t("semester.creditHours")) + "</li>" +
+      (s.difficulty ? '<li class="sem-chip is-diff is-' + esc(s.difficulty) + '">' + diffLabel + "</li>" : "") +
+      (s.estimatedHours ? '<li class="sem-chip is-hours"><b>' + s.estimatedHours + "</b> " + escHtml(Lang.t("semester.estHours")) + "</li>" : "") +
+      (schedule ? '<li class="sem-chip is-sched">🗓 ' + schedule + "</li>" : "") +
+      "</ul>" +
+      '<p class="sem-desc">' + esc(T(s.shortDescription)) + "</p>" +
+      '<div class="sem-blocks">' + prereqHtml(s) +
+      (Array.isArray(s.learningOutcomes) && s.learningOutcomes.length
+        ? detailsList("semester.outcomes", s.learningOutcomes.map((o) => esc(T(o))))
+        : "") +
+      (Array.isArray(s.commonMistakes) && s.commonMistakes.length
+        ? detailsList("semester.mistakes", s.commonMistakes.map((m) => esc(T(m))))
+        : "") +
+      (Array.isArray(s.keyTerms) && s.keyTerms.length
+        ? detailsList("semester.terms", s.keyTerms.map((t) => esc(TT(t))))
+        : "") +
+      lessonsHtml(s) +
+      "</div>" +
+      '<nav class="sem-links" aria-label="' + esc(T(s.name)) + '">' + linksHtml(s) + "</nav>" +
+      "</div></div></article>"
+    );
+  }
+
+  function render() {
+    renderSummary();
+    grid.innerHTML = DATA.subjects.map(cardHtml).join("");
+  }
+
+  render();
+  if (typeof Lang !== "undefined" && Lang.onSwitch) Lang.onSwitch(render);
+
+  /* Question-bank counts paint asynchronously (fetch/cache/fallback).
+     MODULE 13's loadQuizData dispatches "nova:progress-changed" when the
+     bank arrives — re-render only if a visible count actually changed,
+     so user-opened <details> blocks are not reset needlessly. */
+  let lastQuizCounts = "";
+  document.addEventListener("nova:progress-changed", () => {
+    const counts = (Array.isArray(DATA.subjects) ? DATA.subjects : [])
+      .map((s) => (Array.isArray(s.quizzes) ? s.quizzes : []).map(quizCount).join(",")).join("|");
+    if (counts !== lastQuizCounts) {
+      lastQuizCounts = counts;
+      render();
+    }
+  });
 })();
