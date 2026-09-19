@@ -26,8 +26,8 @@
      future lessons are added here in the same shape without
      touching the rendering code.
 
-   Exposed on `window` as PLATFORM_CURRENT_SEMESTER so the
-   semester dashboard (script.js MODULE 43) can consume it.
+   Exposed on `window` as PLATFORM_CURRENT_SEMESTER; it is consumed
+   by the live semester dashboard (script.js MODULE 43 · #semester).
    ============================================================ */
 
 const CURRENT_SEMESTER = {
@@ -400,10 +400,14 @@ const CURRENT_SEMESTER = {
 };
 
 /* Expose as a plain data registry (window.PLATFORM_CURRENT_SEMESTER).
-   NOTE: no view consumes it yet — the UI renders its own SUBJECTS
-   registry (script.js MODULE 00b) and there is no semester-dashboard
-   module. Kept as the single-source curriculum object for future UI. */
-window.PLATFORM_CURRENT_SEMESTER = CURRENT_SEMESTER;
+   CONSUMED by the live Current Semester dashboard: index.html loads
+   this file before script.js, and script.js MODULE 43
+   (SemesterDashboard) renders the #semester view from it — the
+   subject cards, summary counters and quiz/tool/lab links on the
+   dashboard all come from this object (single source of truth). */
+if (typeof window !== "undefined") {
+  window.PLATFORM_CURRENT_SEMESTER = CURRENT_SEMESTER;
+}
 
 /* Lightweight CommonJS export used by the smoke tests (Node without DOM).
    In the browser `module` is undefined so this is a harmless no-op. */
