@@ -399,7 +399,10 @@ const CURRENT_SEMESTER = {
   ]
 };
 
-/* Expose for the semester dashboard (script.js MODULE 43). */
+/* Expose as a plain data registry (window.PLATFORM_CURRENT_SEMESTER).
+   NOTE: no view consumes it yet — the UI renders its own SUBJECTS
+   registry (script.js MODULE 00b) and there is no semester-dashboard
+   module. Kept as the single-source curriculum object for future UI. */
 window.PLATFORM_CURRENT_SEMESTER = CURRENT_SEMESTER;
 
 /* Lightweight CommonJS export used by the smoke tests (Node without DOM).
