@@ -370,6 +370,9 @@
             <li data-rule="digit">رقم واحد على الأقل</li>
             <li data-rule="symbol">رمز خاص</li>
             <li data-rule="common">ليست كلمة شائعة</li>
+            <li data-rule="keyboardPattern">بدون أنماط لوحة مفاتيح</li>
+            <li data-rule="sequentialPattern">بدون متتاليات مألوفة</li>
+            <li data-rule="repeatedChars">بدون تكرار حرفي مفرط</li>
           </ul>
         </article>
 
@@ -928,5 +931,23 @@
   <script src="current-semester.js"></script>
   <script src="script.js"></script>
   <script src="assistant.js"></script>
+  <!-- SW registration must happen after script.js so navigator.serviceWorker is available.
+       Scope is intentionally relative (./) so it works under GH Pages project paths. -->
+  <script>
+    (function () {
+      "use strict";
+      var scope = "./";
+      var swPath = "./sw.js";
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register(swPath, { scope: scope })
+            .then(function (reg) {
+              if (reg.active) { window.dispatchEvent(new CustomEvent("nova:sw-ready", { detail: { reg: reg } })); }
+            })
+            .catch(function (err) { console.warn("[SW] registration skipped:", err && err.message); });
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

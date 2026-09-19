@@ -17,18 +17,20 @@ const CACHE_VERSION = "v1.20.0";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
-/** Static app-shell assets precached at install time. @type {string[]} */
+/**
+ * Static app-shell assets precached at install time. Backend-only files (nova-api.js, nova-ui.css) are intentionally NOT precached because they are not loaded by the static site. @type {string[]}
+ */
 const PRECACHE_ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./assistant.js",
-  "./nova-api.js",
-  "./nova-ui.css",
+  "./current-semester.js",
   "./manifest.json",
   "./data/quizzes.json",
   "./worker.js",
+  "./images/icon.svg",
   "./images/icon-maskable.svg",
   "./images/algorithms.svg",
   "./images/os-concepts.svg",
@@ -53,20 +55,19 @@ const PRECACHE_ASSETS = [
   "./images/flashcards/social-engineering.svg",
   "./images/flashcards/vulnerability.svg",
   "./images/flashcards/reconnaissance.svg",
-  "./images/flashcards/malware.svg"
-];
+  "./images/flashcards/malware.svg"];
+
 
 /**
  * Same-origin API endpoints cached for offline study.
+ * NOTE: These patterns exist only for documentation. There is no backend
+ * at /api/v1 on this static GitHub Pages site, so the fetch handler never
+ * matches them. If a future deployment adds a static-data endpoint, add the
+ * URL here and cache it under API_CACHE_NAME.
  * @type {RegExp[]}
  */
 const OFFLINE_API_PATTERNS = [
-  /\/api\/v1\/sync\/manifest$/,
-  /\/api\/v1\/tools\/catalog$/,
-  /\/api\/v1\/analytics\/(dashboard|streaks)$/,
-  /\/api\/v1\/materials(\?|$)/,
-  /\/api\/v1\/flashcards\/decks(\?|$)/,
-  /\/api\/v1\/achievements$/
+  // disabled — no /api/v1 backend on this static site
 ];
 
 const SYNC_TAG = "nova-progress-sync";
@@ -148,7 +149,48 @@ async function staleWhileRevalidate(request, event) {
 
   /* First visit / evicted entry: block on the network. */
   await refresh;
-  return networkResponse || Response.error();
+  if (networkResponse) return networkResponse;
+
+  /* Offline fallback: if this is a navigation or a cached-independent
+     asset that failed to load, return a friendly offline shell instead of
+     a browser error page — but only for same-origin HTML/JS/CSS/JSON/image
+     requests the site itself owns. */
+  if (request.mode === "navigate") {
+    const offline = await makeOfflineFallback(request);
+    if (offline) return offline;
+  }
+
+  return Response.error();
+}
+
+/**
+ * Build a same-origin offline fallback response for the requested URL when
+ * the network is unavailable and nothing is cached yet.
+ * This keeps the main UI, lessons, quizzes, flashcards and tools usable
+ * after the precache has installed, without pretending that every asset is
+ * available offline.
+ * @param {Request} request
+ * @returns {Promise<Response|undefined>} A fallback response, or undefined.
+ */
+async function makeOfflineFallback(request) {
+  const url = new URL(request.url);
+  const path = (url.pathname.split("/").pop() || "").toLowerCase();
+
+  /* Only serve fallbacks for navigate requests and common static types
+     that the site itself controls. */
+  const isNavigate = request.mode === "navigate";
+  const isStaticType = /\.(html|js|css|json|png|jpg|jpeg|svg|ico|webp)$/i.test(path);
+
+  if (!isNavigate && !isStaticType) return undefined;
+
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const fallbackUrl = isNavigate ? "./index.html" : request.url;
+    const response = await cache.match(fallbackUrl);
+    if (response) return response.clone();
+  } catch {}
+
+  return undefined;
 }
 /* ============================================================
    Background Sync — replay the page-queued outbox.
@@ -160,7 +202,7 @@ async function staleWhileRevalidate(request, event) {
    closed — and we replay the queue to /api/v1/sync/progress.
    ============================================================ */
 
-const SYNC_API_URL = "/api/v1/sync/progress";
+// disabled on GitHub Pages: const SYNC_API_URL = "/api/v1/sync/progress";
 
 /** @returns {Promise<IDBDatabase>} current-version handle (no upgrade) */
 function openSharedDB() {
@@ -178,8 +220,14 @@ function idbReq(request) {
   });
 }
 
-/** Mirrored credentials written by nova-api.js on every login/refresh. */
-async function readAuthTokens() {
+/* Disabled on GitHub Pages: this site has no backend for JWT refresh or
+   background sync replay, so these helpers cannot do anything useful. */
+// disabled on GitHub Pages: async function readAuthTokens() {
+// disabled on GitHub Pages: async function refreshAccessToken(refreshToken) {
+// disabled on GitHub Pages: async function replayOutbox() {
+
+/** Disabled on GitHub Pages: there is no backend to read auth tokens from. */
+async function readAuthTokensDisabled() {
   try {
     const db = await openSharedDB();
     if (!db.objectStoreNames.contains("auth")) { db.close(); return null; }
@@ -191,95 +239,98 @@ async function readAuthTokens() {
   } catch { return null; }
 }
 
-/** Refresh the access token directly from the SW (single attempt). */
-async function refreshAccessToken(refreshToken) {
-  const res = await fetch("/api/v1/auth/refresh", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
-  });
-  if (!res.ok) throw new Error("refresh failed: " + res.status);
-  const json = await res.json();
-  const tokens = json && json.data;
-  if (!tokens || !tokens.accessToken) throw new Error("malformed refresh response");
-  /* Persist the rotated tokens so the page picks them up next run. */
-  try {
-    const db = await openSharedDB();
-    if (db.objectStoreNames.contains("auth")) {
-      db.transaction("auth", "readwrite")
-        .objectStore("auth")
-        .put({ id: "current", tokens });
-    }
-    db.close();
-  } catch { /* best-effort */ }
-  return tokens.accessToken;
-}
+/**
+ * Refresh the access token directly from the SW (single attempt).
+ * DISABLED on GitHub Pages: this site has no /api/v1/auth/refresh endpoint.
+ */
+// disabled on GitHub Pages: async function refreshAccessToken(refreshToken) {
+//   const res = await fetch("/api/v1/auth/refresh", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ refreshToken }),
+//   });
+//   if (!res.ok) throw new Error("refresh failed: " + res.status);
+//   const json = await res.json();
+//   const tokens = json && json.data;
+//   if (!tokens || !tokens.accessToken) throw new Error("malformed refresh response");
+//   /* Persist the rotated tokens so the page picks them up next run. */
+//   try {
+//     const db = await openSharedDB();
+//     if (db.objectStoreNames.contains("auth")) {
+//       db.transaction("auth", "readwrite")
+//         .objectStore("auth")
+//         .put({ id: "current", tokens });
+//     }
+//     db.close();
+//   } catch { /* best-effort */ }
+//   return tokens.accessToken;
+// }
 
 /**
  * Replay every queued event batch. Throws on transient failures so the
  * browser reschedules the sync; deletes only server-acked events.
  * @returns {Promise<number>} acknowledged event count
+ * DISABLED on GitHub Pages: this site has no /api/v1/sync/progress endpoint.
  */
-async function replayOutbox() {
-  const db = await openSharedDB();
-  if (!db.objectStoreNames.contains(OUTBOX_STORE)) { db.close(); return 0; }
-  const events = await idbReq(
-    db.transaction(OUTBOX_STORE, "readonly").objectStore(OUTBOX_STORE).getAll()
-  );
-  db.close();
-  if (!events.length) return 0;
+// disabled on GitHub Pages: async function replayOutbox() {
+//   const db = await openSharedDB();
+//   if (!db.objectStoreNames.contains(OUTBOX_STORE)) { db.close(); return 0; }
+//   const events = await idbReq(
+//     db.transaction(OUTBOX_STORE, "readonly").objectStore(OUTBOX_STORE).getAll()
+//   );
+//   db.close();
+//   if (!events.length) return 0;
+//
+//   let creds = await readAuthTokensDisabled();
+//   if (!creds || !creds.accessToken) throw new Error("no credentials for sync replay");
+//
+//   let acked = 0;
+//   for (let i = 0; i < events.length; i += 100) {
+//     const batch = events.slice(i, i + 100);
+//     const res = await fetch(SYNC_API_URL, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: "Bearer " + creds.accessToken,
+//       },
+//       body: JSON.stringify({ events: batch }),
+//     });
+//
+//     if (res.status === 401 && creds.refreshToken) {
+//       /* Rotate once per replay; the retry below uses the fresh token. */
+//       creds.accessToken = await refreshAccessToken(creds.refreshToken);
+//       const retry = await fetch(SYNC_API_URL, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: "Bearer " + creds.accessToken,
+//         },
+//         body: JSON.stringify({ events: batch }),
+//       });
+//       if (!retry.ok) throw new Error("sync replay failed: " + retry.status);
+//     } else if (res.status >= 400 && res.status < 500) {
+//       /* Poison batch (bad payload): drop it so it can't wedge the queue. */
+//     } else if (!res.ok) {
+//       /* Network / 5xx → throw so Background Sync retries later. */
+//       throw new Error("sync replay failed: " + res.status);
+//     }
+//
+//     acked += batch.length;
+//     const db2 = await openSharedDB();
+//     const store = db2.transaction(OUTBOX_STORE, "readwrite").objectStore(OUTBOX_STORE);
+//     await Promise.all(batch.map((ev) => idbReq(store.delete(ev.eventId))));
+//     db2.close();
+//   }
+//   return acked;
+// }
 
-  let creds = await readAuthTokens();
-  if (!creds || !creds.accessToken) throw new Error("no credentials for sync replay");
-
-  let acked = 0;
-  for (let i = 0; i < events.length; i += 100) {
-    const batch = events.slice(i, i + 100);
-    const res = await fetch(SYNC_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + creds.accessToken,
-      },
-      body: JSON.stringify({ events: batch }),
-    });
-
-    if (res.status === 401 && creds.refreshToken) {
-      /* Rotate once per replay; the retry below uses the fresh token. */
-      creds.accessToken = await refreshAccessToken(creds.refreshToken);
-      const retry = await fetch(SYNC_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + creds.accessToken,
-        },
-        body: JSON.stringify({ events: batch }),
-      });
-      if (!retry.ok) throw new Error("sync replay failed: " + retry.status);
-    } else if (res.status >= 400 && res.status < 500) {
-      /* Poison batch (bad payload): drop it so it can't wedge the queue. */
-    } else if (!res.ok) {
-      /* Network / 5xx → throw so Background Sync retries later. */
-      throw new Error("sync replay failed: " + res.status);
-    }
-
-    acked += batch.length;
-    const db2 = await openSharedDB();
-    const store = db2.transaction(OUTBOX_STORE, "readwrite").objectStore(OUTBOX_STORE);
-    await Promise.all(batch.map((ev) => idbReq(store.delete(ev.eventId))));
-    db2.close();
-  }
-  return acked;
-}
-
+/* Disabled on GitHub Pages: Background Sync would only replay to a backend
+   that does not exist here. Keep the listener as a no-op to avoid runtime
+   errors if the browser fires a sync event. */
 self.addEventListener("sync", (event) => {
   if (event.tag !== SYNC_TAG) return;
-  event.waitUntil(
-    replayOutbox().catch((err) => {
-      console.warn("[SW] background sync replay failed:", err.message);
-      throw err; /* rethrow → browser reschedules the sync */
-    })
-  );
+  event.waitUntil(Promise.resolve());
+  console.log("[SW] background sync tag ignored on static GitHub Pages site");
 });
 
 self.addEventListener("fetch", (event) => {

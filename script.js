@@ -1822,15 +1822,31 @@ async function loadLessonData() {
 
   /**
    * Compute a SHA-256 hex digest via Web Crypto, with an FNV-1a×4
-   * fallback so the demo works on non-secure contexts too.
+   * fallback that is ALWAYS labeled as a fallback, never shown as SHA-256.
    * @param {string} text Input text.
-   * @returns {Promise<string>} Hex digest (64 chars).
+   * @returns {Promise<string>} Hex digest or FNV-1a×4 fallback string.
    */
   async function sha256Hex(text) {
-    if (window.crypto && window.crypto.subtle) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-      return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (window.crypto && window.crypto.subtle && crypto.subtle.digest) {
+      try {
+        const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+        return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+      } catch (err) {
+        console.warn("[Tools.Hash] Web Crypto SHA-256 failed:", err && err.message);
+      }
     }
+    // Web Crypto unavailable or failed — do NOT pretend this is SHA-256.
+    return "FNV-1a×4-FALLBACK:" + fnv1a32x4(text);
+  }
+
+  /**
+   * FNV-1a×4 fallback used only when Web Crypto is unavailable.
+   * Returns 4 concatenated 32-bit FNV-1a fingerprints as hex.
+   * This is NOT a cryptographic hash and is NOT SHA-256.
+   * @param {string} text
+   * @returns {string} hex fingerprint
+   */
+  function fnv1a32x4(text) {
     let out = "";
     for (let r = 0; r < 4; r++) {
       let h = (0x811c9dc5 ^ Math.imul(r + 1, 0x9e3779b9)) >>> 0;
@@ -1853,6 +1869,32 @@ async function loadLessonData() {
     const cells = [];
     for (let i = 0; i < hex.length; i += 2) {
       const b = parseInt(hex.slice(i, i + 2), 16);
+      if (Number.isNaN(b)) {
+        cells.push(`<i style="background:#334155"></i>`);
+        continue;
+      }
+      cells.push(
+        `<i style="background:hsl(${b % 360} 85% ${28 + (b % 35)}%);animation-delay:${(i / 2) * 8}ms"></i>`
+      );
+    }
+    fp.innerHTML = cells.join("");
+  }
+
+  /**
+   * Render a fallback fingerprint (FNV-1a×4) without pretending it is SHA-256.
+   * @param {string} fallback Hex string with the FNV prefix removed.
+   * @returns {void}
+   */
+  function visualizeFallback(fallback) {
+    if (!fp) return;
+    const hex = fallback.replace(/^FNV-1a×4-FALLBACK:/, "");
+    const cells = [];
+    for (let i = 0; i < hex.length; i += 2) {
+      const b = parseInt(hex.slice(i, i + 2), 16);
+      if (Number.isNaN(b)) {
+        cells.push(`<i style="background:#334155"></i>`);
+        continue;
+      }
       cells.push(
         `<i style="background:hsl(${b % 360} 85% ${28 + (b % 35)}%);animation-delay:${(i / 2) * 8}ms"></i>`
       );
@@ -1865,7 +1907,14 @@ async function loadLessonData() {
     try {
       const hex = await sha256Hex(input.value);
       out.textContent = hex;
-      visualize(hex);
+      if (hex.startsWith("FNV-1a×4-FALLBACK:")) {
+        // Never display the FNV fallback as if it were SHA-256.
+        out.classList.add("is-fallback");
+        visualizeFallback(hex);
+      } else {
+        out.classList.remove("is-fallback");
+        visualize(hex);
+      }
     } catch { out.textContent = "تعذّر توليد البصمة في هذا المتصفح."; }
   }, 150);
 
@@ -2119,14 +2168,80 @@ async function loadLessonData() {
    * @param {string} pw Candidate password.
    * @returns {{rules:Object<string,boolean>,entropy:number}} Analysis.
    */
+  /**
+   * Keyboard / sequential / repeated-character patterns that indicate a
+   * weak, predictable password regardless of raw entropy.
+   * @param {string} pw
+   * @returns {{keyboard:boolean, sequential:boolean, repeated:boolean, dedupe:number}}
+   */
+  function patternFlags(pw) {
+    const lower = pw.toLowerCase();
+    const keyboardRows = ["qwertyuiop", "asdfghjkl", "zxcvbnm", "1234567890"];
+    let keyboard = false, sequential = false, repeated = false, runs = 0;
+    const letters = lower.replace(/[^a-z]/g, "");
+    const digits = lower.replace(/[^0-9]/g, "");
+
+    // Repeated characters anywhere (e.g. "aaa", "111", "abab")
+    for (let i = 0; i < pw.length - 1; i++) {
+      if (pw[i] === pw[i + 1]) {
+        repeated = true;
+        runs++;
+      }
+    }
+
+    // Keyboard runs (same row, adjacent keys) of length >= 4
+    if (letters.length >= 4) {
+      for (const row of keyboardRows) {
+        for (let i = 0; i <= letters.length - 4; i++) {
+          const slice = letters.slice(i, i + 4);
+          if (row.includes(slice)) {
+            // Allow forward or backward runs (e.g. "asdf" or "fghj" or "poiu")
+            const forward = row.indexOf(slice) >= 0;
+            const backward = row.indexOf(slice.split("").reverse().join("")) >= 0;
+            if (forward || backward) keyboard = true;
+          }
+        }
+      }
+    }
+
+    // Sequential letters or digits (abc, cba, 123, 321, etc.), length >= 3
+    function hasSequential(str) {
+      if (str.length < 3) return false;
+      for (let i = 0; i <= str.length - 3; i++) {
+        const a = str.charCodeAt(i), b = str.charCodeAt(i + 1), c = str.charCodeAt(i + 2);
+        if (b - a === 1 && c - b === 1) return true;
+        if (a - b === 1 && b - c === 1) return true;
+      }
+      return false;
+    }
+    if (hasSequential(letters)) sequential = true;
+    if (hasSequential(digits)) sequential = true;
+
+    return { keyboard, sequential, repeated, runs, short: pw.length < 8 };
+  }
+
+  /**
+   * Analyse a password: rules, character pool, entropy bits, pattern flags.
+   * @param {string} pw Candidate password.
+   * @returns {{rules:Object<string,boolean>,entropy:number,flags:object}} Analysis.
+   */
   function analyze(pw) {
     const rules = {
       len12: pw.length >= 12,
+      len8: pw.length >= 8,
       case: /[a-z]/.test(pw) && /[A-Z]/.test(pw),
       digit: /\d/.test(pw),
       symbol: /[^A-Za-z0-9\s]/.test(pw),
-      common: pw.length > 0 && !COMMON.some((c) => pw.toLowerCase().includes(c))
+      common: pw.length > 0 && !COMMON.some((c) => pw.toLowerCase().includes(c)),
+      keyboardPattern: false,
+      sequentialPattern: false,
+      repeatedChars: false,
     };
+    const flags = patternFlags(pw);
+    rules.keyboardPattern = flags.keyboard;
+    rules.sequentialPattern = flags.sequential;
+    rules.repeatedChars = flags.repeated;
+
     let pool = 0;
     if (/[a-z]/.test(pw)) pool += 26;
     if (/[A-Z]/.test(pw)) pool += 26;
@@ -2135,7 +2250,7 @@ async function loadLessonData() {
     if (/[\u0600-\u06FF]/.test(pw)) pool += 36; // Arabic letters
     const bits = pool > 0 ? Math.log2(pool) : 0; // guard: zero-pool input
     const entropy = pw.length ? +(pw.length * bits).toFixed(1) : 0;
-    return { rules, entropy };
+    return { rules, entropy, flags };
   }
 
   /**
@@ -2189,8 +2304,13 @@ async function loadLessonData() {
     fill.style.width = pw ? `${Math.min(100, Math.round(entropy))}%` : "0%";
 
     var crackLabel = analysis.crackTime || crackTime(Math.pow(2, Math.min(entropy, 128)) / 2 / 10000);
+    // Downgrade strength when predictable patterns exist, even if entropy is high.
+    if (pw && (rules.keyboardPattern || rules.sequentialPattern || rules.repeatedChars || !rules.common)) {
+      if (cls === "is-strong") { cls = "is-fair"; label = "مقبولة 🟠 (ب존속 أنماط متوقعة)"; }
+      else if (cls === "is-good") { cls = "is-fair"; label = "مقبولة 🟠 (ب존속 أنماط متوقعة)"; }
+    }
     verdict.textContent = pw
-      ? `${label} — الإنتروبيا: ${entropy} بت · زمن الكسر التقديري: ${crackLabel}`
+      ? `${label} — الإنتروبيا: ${entropy} بت · زمن الكسر التقديري: ${crackLabel} (تقديري — يعتمد على قوة الجهاز وهجوم القاموس)`
       : label;
   }
 
