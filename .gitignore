@@ -1,2 +1,21 @@
+# Optional backend (maintained separately — not part of the static site)
 backend/
+
+# Tooling / agent workspaces
 .kerno/
+.agents/
+
+# Dependencies & env
+node_modules/
+.env
+.env.*
+
+# Dev scratch files
+__*.js
+out.txt
+
+# Logs & OS junk
+*.log
+.DS_Store
+Thumbs.db
+

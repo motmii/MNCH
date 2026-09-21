@@ -13,12 +13,12 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.21.0";
+const CACHE_VERSION = "v1.22.2";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
 /**
- * Static app-shell assets precached at install time. Backend-only files (nova-api.js, nova-ui.css) are intentionally NOT precached because they are not loaded by the static site. @type {string[]}
+ * Static app-shell assets precached at install time. Only files actually loaded by the site belong here — CI (`.github/workflows/ci.yml`) fails if any listed asset goes missing. @type {string[]}
  */
 const PRECACHE_ASSETS = [
   "./",
