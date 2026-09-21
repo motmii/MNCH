@@ -30,6 +30,16 @@ A responsive, dark-themed cybersecurity education platform for Information Secur
 - **Documentation** — this README + ARCHITECTURE cover purpose, audience, features, setup (frontend/backend), env vars, database, deployment, testing, project structure, security limitations, responsible-use and known limitations
 - **No unnecessary personal data** — onboarding collects only learning preferences, stored locally
 
+### Phase 6 — UI/UX refresh
+- **Simplified homepage** — one primary CTA («ابدأ التعلم» / Start Learning), a bilingual platform identity block (العربية + English) with a short tagline, and a decluttered hero.
+- **"Start Here" strip for new users** — a hero card pointing at the beginner-friendly **Fundamentals** learning path plus a button to replay the intro tour (MODULE 49 reopens the onboarding wizard on demand).
+- **Compact learning dashboard (MODULE 47)** — on the homepage: overall progress %, last viewed lesson, next recommended quiz, and a Continue-Learning shortcut. Read-only: quiz/progress logic is untouched.
+- **Global search (MODULE 48)** — a command palette (`/` or `Ctrl+K`, or the navbar button) that searches lessons, learning paths, tools, quizzes, flashcards and glossary terms. Fully keyboard navigable (combobox + listbox).
+- **Collapsible hubs** — the quiz bank and flashcard grids are wrapped in expandable/collapsible sections to reduce page clutter.
+- **Accessibility & mobile** — skip-to-content link, a standardized button system (44px touch targets, one clear primary style), improved mobile drawer, modal and assistant panel behavior, and RTL-safe logical properties throughout.
+- **SEO** — bilingual `<title>` + meta description, Open Graph / Twitter cards, canonical URL, JSON-LD structured data, and a preloaded hero image.
+- **Honest "Coming Soon" states preserved** — empty lessons/paths still show the Arabic «قريبًا» placeholders; no fake content.
+
 ### Cyber Tools Suite (6 cybersecurity tools)
 | Tool | Description |
 |------|-------------|
@@ -113,21 +123,40 @@ nova-studio/
 ├── images/
 │   ├── icon.svg        # Favicon
 │   ├── icon-maskable.svg # PWA icon
-│   ├── network-sec.svg # Subject thumbnails (×6 previous-semester SVGs)
-│   ├── os-sec.svg
-│   ├── crypto-viz.svg
-│   ├── db-sec.svg
-│   ├── secure-code.svg
-│   └── hack-viz.svg
+│   ├── backweb.jpg     # Hero background
 │   ├── algorithms.svg  # Current-semester subject thumbnails (×5)
 │   ├── os-concepts.svg
 │   ├── policies-ethics.svg
 │   ├── it-components.svg
-│   └── security-design.svg
+│   ├── security-design.svg
+│   └── flashcards/     # Flashcard illustrations (×18 SVGs)
+├── tests/              # Zero-dependency Node test suites (run: npm test)
+├── .github/workflows/  # CI — runs all suites on every push/PR
 ├── ASSISTANT.md        # AI assistant setup & optional LLM proxy guide
 ├── ARCHITECTURE.md     # Module map & data contracts
+├── CONTRIBUTING.md     # How to contribute (bilingual)
+├── LICENSE             # MIT
 └── README.md
 ```
+
+## 🧪 Testing
+
+Zero-dependency test suites (plain Node.js, nothing to install):
+
+```bash
+npm test                     # runs every suite in tests/
+node tests/full-boot.test.js # or run a single suite
+```
+
+CI runs the same suites on every push and pull request, plus a guard that verifies every asset precached by the service worker actually exists.
+
+## 🤝 Contributing
+
+Contributions are welcome — this repo is open source for students! See [CONTRIBUTING.md](CONTRIBUTING.md) for content rules (bilingual strings, honest «قريبًا» states, safety wording), local setup, and PR guidelines.
+
+## 📄 License
+
+Released under the [MIT License](LICENSE) — free to use, study, modify and share.
 
 ## 🎨 Design System
 
@@ -158,23 +187,14 @@ Designed & Developed by **Ahmed Motmi** — `motmi757@gmail.com`
 
 ---
 
-## 🚀 Backend API
+## 🌐 Deployment
 
-A production-grade REST backend for this platform lives in [`backend/`](backend/README.md):
+This is a **fully static site** — no build step, no server, no dependencies. It works on any static host:
 
-- **Node.js + Express + PostgreSQL** with JWT auth (refresh-token rotation) and RBAC (Student / Instructor / Admin)
-- **5 domains**: users & roles · question bank & exams · student progress & tracking · SRS flashcards · CTF lab
-- Full schema in `backend/db/schema.sql`, seeded demo data via `npm run db:init`, live at `http://localhost:5000`
+- **GitHub Pages**: push to `main`, then enable *Settings → Pages → Deploy from branch* (root). All asset paths and the service-worker scope are relative, so project sites (`user.github.io/repo/`) work out of the box.
+- Any static server locally: `npx serve .` or `python -m http.server 8080`.
 
-Quick start:
-
-```bash
-cd backend
-cp .env.example .env
-npm install
-npm run db:init   # needs PostgreSQL (docker compose up -d db)
-npm run dev
-```
+An optional Node.js/Express backend (accounts, synced progress) is maintained separately and is **not required** — the platform is fully functional offline-first without it.
 
 ---
 

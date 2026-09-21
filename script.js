@@ -160,6 +160,12 @@ const Store = {
     try { localStorage.removeItem(`${Store.NS}:${key}`); } catch {}
   }
 };
+
+/* Store bridge — the top-level modules that live OUTSIDE this IIFE
+   (MODULE 47 · HeroDash) read the same namespaced keys (lessons / paths /
+   labs / flash) through this reference instead of re-implementing storage. */
+window.PLATFORM_STORE = Store;
+
 /* ============================================================
    MODULE 38 · Onboarding — optional first-time learning-path
    wizard. Shows a 3-step modal asking for the student's level,
@@ -175,7 +181,20 @@ const Store = {
     /* Don't auto-show if the user dismissed it before. */
   var done = false;
   try { done = JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); done = done && done.done; } catch { done = false; }
-  if (done) { overlay.setAttribute("aria-hidden", "true"); return; }
+
+  /* Reopen bridge (MODULE 49 · ReopenOnboarding): the wizard stays fully
+     wired even when it was finished/dismissed, so the "جولة التعريف" button
+     in the Start-Here strip can replay it. Only the AUTOMATIC first-visit
+     show is suppressed (see the guard at the end of this module). */
+  window.NovaOnboarding = {
+    open: function () {
+      state = { level: null, subjects: [], styles: [] };
+      var act = document.querySelectorAll(".btn-level.is-active, .btn-subject.is-active, .btn-style.is-active");
+      for (var a = 0; a < act.length; a++) act[a].classList.remove("is-active");
+      showStep(1);
+    },
+    isOpen: function () { return overlay.getAttribute("aria-hidden") === "false"; }
+  };
 
   /* State collected during onboarding */
   var state = { level: null, subjects: [], styles: [] };
@@ -327,6 +346,11 @@ const Store = {
     }
   });
 
+  /* Auto-show only for first-time visitors. A finished/dismissed wizard stays
+     hidden until [data-onboarding-reopen] (MODULE 49) replays it — the module
+     itself keeps running above, so every control still works after a reopen. */
+  if (done) { overlay.setAttribute("aria-hidden", "true"); return; }
+
   /* Render localized step 1 on load, keep the panel closed until mounted. */
   showStep(1);
 })();
@@ -337,6 +361,11 @@ const Store = {
    unavailable state; new lessons for the current-semester subjects
    will be added here later (same embedded structure). */
 const LESSONS = {};
+
+/* Expose the lesson registry so the top-level modules (MODULE 48 · search)
+   can index authored lessons without duplicating content. It is empty today
+   — so the search simply renders no lesson group instead of inventing one. */
+window.PLATFORM_LESSONS = LESSONS;
 
 
 /* ============================================================
@@ -1116,6 +1145,22 @@ var isShowingResult = false;
 function readStore() {
   return JSON.parse(JSON.stringify(quizCache));
 }
+
+/* Expose the shared quiz helpers for the top-level modules (MODULE
+   43/47/48) that live outside this IIFE's scope. QUIZZES is exposed by
+   reference: loadQuizData() mutates the same object, so the alias stays
+   in sync. */
+window.readStore = readStore;
+window.QUIZZES = QUIZZES;
+window.startQuiz = startQuiz;
+
+/* Live accessor for the AI assistant (assistant.js reads window.quizCache
+   for progress-aware answers). A getter is required because quizCache is
+   re-assigned on hydration/write — a plain alias would go stale and the
+   assistant would keep answering from an empty store. */
+try {
+  Object.defineProperty(window, "quizCache", { get: () => quizCache, configurable: true });
+} catch (e) { /* older engines: assistant falls back to {} as before */ }
 
 /**
  * Persist the quiz store: update cache immediately, then
@@ -2476,6 +2521,8 @@ const Lang = (() => {
   const DICT = {
     ar: {
       "meta.title": "منصة أمن المعلومات — الترم الحالي",
+      "meta.description": "منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال.",
+      "a11y.skip": "تخطي إلى المحتوى الرئيسي",
       "nav.home": "الرئيسية", "nav.semester": "الترم الحالي",
       "nav.paths": "مسارات التعلم", "nav.subjects": "المواد",
       "nav.quiz": "الاختبارات", "nav.tools": "الأدوات", "nav.labs": "المعامل",
@@ -2487,12 +2534,28 @@ const Lang = (() => {
       "hero.sub": "منصة عربية متكاملة لطلاب أمن المعلومات: تعلّم أساسيات كل مادة، راجِع المصطلحات بالبطاقات، اختبر نفسك بأسئلة عملية، وطبّق ما تعلّمته بأدوات أمنية ومعامل محاكاة حقيقية — كل ذلك يعمل داخل متصفحك وبدون إنترنت.",
       "hero.ctaStart": "ابدأ رحلة التعلم", "hero.ctaTools": "جرّب الأدوات", "hero.ctaLabs": "ادخل المعامل العملية",
       "hero.ctaQuiz": "ابدأ الاختبار", "hero.ctaSubjects": "تصفح المواد",
+      "hero.tagline": "منصة عربية تعليمية لطلاب دبلوم أمن المعلومات — تعلّم، اختبر نفسك، وتدرّب عمليًا داخل متصفحك ودون اتصال.",
+      "hero.ctaSemester": "استكشف الترم الحالي",
       "hero.credit": "صُمّم وطُوّر بواسطة <em class=\"grad\">أحمد مطمي</em>",
       "hero.statq": "سؤال تدريبي", "hero.stats": "مواد دراسية",
       "hero.statTools": "أدوات تفاعلية",
       "hero.continueLabel": "متابعة التعلم", "hero.continueBtn": "تابع من حيث توقفت",
       "hero.continueAt": "عند السؤال {i} من {total}",
       "hero.continueResults": "لديك نتائج محفوظة — أكمل مراجعتك", "hero.continueReviewBtn": "اعرض تقدمك",
+      /* ---------- MODULE 47/49 · Start-Here strip + HeroDash (Phase 6) ---------- */
+      "starthere.title": "جديد هنا؟ ابدأ من هنا",
+      "starthere.desc": "مسار «الأساسيات» مصمم للمبتدئين — خمس خطوات قصيرة تنقلك من الصفر إلى أول اختبار.",
+      "starthere.cta": "ابدأ مسار الأساسيات",
+      "starthere.wizard": "جولة التعريف",
+      "dash.progressLabel": "تقدمك",
+      "dash.lastLesson": "آخر درس",
+      "dash.nextQuiz": "الاختبار التالي",
+      "dash.continue": "متابعة التعلم",
+      "dash.continueFresh": "ابدأ الآن",
+      "dash.noLesson": "لا يوجد درس مفتوح بعد",
+      "dash.resumeQuiz": "استئناف: {sub}",
+      "dash.newQuiz": "اختبار جديد: {sub}",
+      "dash.allDone": "أكملت جميع الاختبارات 🎉",
       "features.materials": "مواد دراسية", "features.quizzes": "اختبارات تدريبية",
       "features.summaries": "ملخصات", "features.flashcards": "بطاقات تعليمية",
       "features.tools": "أدوات أمنية تفاعلية", "features.labs": "معامل عملية",
@@ -2509,6 +2572,7 @@ const Lang = (() => {
       "flash.title": "راجع المصطلحات <em class=\"grad\">بالبطاقات</em>",
       "flash.sub": "اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.",
       "flash.shuffle": "خلط البطاقات", "flash.tap": "اضغط للقلب",
+      "collapsible.showQuizzes": "عرض بنوك الأسئلة", "collapsible.showCards": "عرض كل البطاقات (18)",
       "games.eyebrow": "مختبر الحوادث + التحدي (CTF)",
       "games.title": "قائد <em class=\"grad\">الاستجابة للحوادث</em>",
       "games.sub": "محاكاة حقيقية: تستقبل تنبيهات هجمات (SQLi، فحص منافذ، DDoS، تشفير)، وتتعامل معها عبر طرفية أوامر — حلّل، خفّف، ثم استخرج العَلَم.",
@@ -2649,10 +2713,24 @@ const Lang = (() => {
       "semester.quizChip": "بنك الأسئلة",
       "semester.tools": "أدوات ذات صلة",
       "semester.labs": "معامل ذات صلة",
-      "semester.missingData": "بيانات الترم الحالي غير متوفرة حاليًا."
+      "semester.missingData": "بيانات الترم الحالي غير متوفرة حاليًا.",
+      /* ---------- MODULE 48 · GlobalSearch (Phase 6) ---------- */
+      "search.title": "بحث في المنصة",
+      "search.placeholder": "ابحث: درس، مسار، أداة، اختبار، مصطلح…",
+      "search.hint": "أو Ctrl+K للفتح · Esc للإغلاق · ↑↓ للتنقل",
+      "search.empty": "لا نتائج مطابقة — جرّب كلمة أخرى.",
+      "search.start": "اكتب للبحث في الدروس والمسارات والأدوات والاختبارات والمصطلحات.",
+      "search.group.lesson": "الدروس",
+      "search.group.path": "المسارات",
+      "search.group.tool": "الأدوات",
+      "search.group.quiz": "الاختبارات",
+      "search.group.flash": "البطاقات",
+      "search.group.term": "المصطلحات والشرح"
     },
     en: {
       "meta.title": "Information Security Platform — Current Semester",
+      "meta.description": "Information Security Platform — an Arabic-first educational platform for Information Security diploma students: structured learning paths, interactive quizzes, security tools and simulation labs that work offline.",
+      "a11y.skip": "Skip to main content",
       "semester.eyebrow": "Current semester guide",
       "semester.title": "The <em class=\"grad\">Current Semester</em> board",
       "semester.sub": "The full current-semester plan in one place: official subjects, weekly schedule, credit hours, and gateways to quizzes, tools and labs.",
@@ -2685,12 +2763,28 @@ const Lang = (() => {
       "hero.sub": "An Arabic-first platform for Information Security students: learn the fundamentals of every subject, review terms with flashcards, quiz yourself with practical questions, then apply what you learned with security tools and real simulation labs — all in your browser, even offline.",
       "hero.ctaStart": "Start Learning", "hero.ctaTools": "Try the Tools", "hero.ctaLabs": "Enter the Labs",
       "hero.ctaQuiz": "Start the Quiz", "hero.ctaSubjects": "Browse Subjects",
+      "hero.tagline": "An Arabic-first learning platform for Information Security diploma students — learn, test yourself and practise hands-on in your browser, even offline.",
+      "hero.ctaSemester": "Explore the Current Semester",
       "hero.credit": "Designed &amp; developed by <em class=\"grad\">Ahmed Motmi</em>",
       "hero.statq": "practice questions", "hero.stats": "courses",
       "hero.statTools": "interactive tools",
       "hero.continueLabel": "Continue learning", "hero.continueBtn": "Resume quiz",
       "hero.continueAt": "At question {i} of {total}",
       "hero.continueResults": "You have saved results — keep up the review", "hero.continueReviewBtn": "View my progress",
+      /* ---------- MODULE 47/49 · Start-Here strip + HeroDash (Phase 6) ---------- */
+      "starthere.title": "New here? Start here",
+      "starthere.desc": "The «Fundamentals» path is built for beginners — five short steps from zero to your first quiz.",
+      "starthere.cta": "Start the Fundamentals path",
+      "starthere.wizard": "Intro tour",
+      "dash.progressLabel": "Your progress",
+      "dash.lastLesson": "Last lesson",
+      "dash.nextQuiz": "Next quiz",
+      "dash.continue": "Continue learning",
+      "dash.continueFresh": "Start now",
+      "dash.noLesson": "No lesson opened yet",
+      "dash.resumeQuiz": "Resume: {sub}",
+      "dash.newQuiz": "New quiz: {sub}",
+      "dash.allDone": "All quizzes completed 🎉",
       "features.materials": "Study materials", "features.quizzes": "Practice quizzes",
       "features.summaries": "Summaries", "features.flashcards": "Flashcards",
       "features.tools": "Interactive security tools", "features.labs": "Practical labs",
@@ -2707,6 +2801,7 @@ const Lang = (() => {
       "flash.title": "Review Terms with <em class=\"grad\">Flashcards</em>",
       "flash.sub": "Tap any card to flip it — a security term in English with its Arabic meaning and a short explanation.",
       "flash.shuffle": "Shuffle cards", "flash.tap": "Tap to flip",
+      "collapsible.showQuizzes": "Show question banks", "collapsible.showCards": "Show all cards (18)",
       "games.eyebrow": "Incident Lab + CTF",
       "games.title": "Incident <em class=\"grad\">Response</em> Commander",
       "games.sub": "A real simulation: receive attack alerts (SQLi, port scans, DDoS, crypto) and respond through a command console — analyse, mitigate, then capture the flag.",
@@ -2824,7 +2919,19 @@ const Lang = (() => {
       "progress.paths": "Path progress",
       "progress.attempts": "Quiz attempts",
       "progress.reviewWrong": "Review incorrect answers",
-      "progress.overall": "Overall progress"
+      "progress.overall": "Overall progress",
+      /* ---------- MODULE 48 · GlobalSearch (Phase 6) ---------- */
+      "search.title": "Search the platform",
+      "search.placeholder": "Search: lesson, path, tool, quiz, term…",
+      "search.hint": "or Ctrl+K to open · Esc to close · ↑↓ to navigate",
+      "search.empty": "No matching results — try another word.",
+      "search.start": "Start typing to search lessons, learning paths, tools, quizzes and glossary terms.",
+      "search.group.lesson": "Lessons",
+      "search.group.path": "Learning paths",
+      "search.group.tool": "Tools",
+      "search.group.quiz": "Quizzes",
+      "search.group.flash": "Flashcards",
+      "search.group.term": "Glossary terms"
     },
   };
 
@@ -2922,6 +3029,11 @@ let cur = "ar";
     document.title = t("meta.title");
     $$("[data-i18n]").forEach((el) => { el.textContent = t(el.getAttribute("data-i18n")); });
     $$("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.getAttribute("data-i18n-html")); });
+    /* Placeholder text (e.g. the search box) — same t() contract. */
+    $$("[data-i18n-placeholder]").forEach((el) => { el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder"))); });
+    /* Localized SEO description — kept in sync with the interface language. */
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", t("meta.description"));
     const btn = $id("langToggle");
     if (btn) {
       const label = btn.querySelector(".lang-current");
@@ -2954,6 +3066,22 @@ let cur = "ar";
 
   return { t, qt, apply, toggle, onSwitch, get current() { return cur; } };
 })();
+  /* MODULE 43 · SemesterDashboard — وي hijack safety note:
+     The module sits OUTSIDE the main IIFE (which closes around the line
+     where MODULE 22 returns). When it runs as a classic sibling script it
+     sees the top-level Lang, QUIZZES, Store, escHtml, etc. by scope
+     chaining. When any of those are undefined it falls back safely and
+     never emits raw dot-notation keys into the DOM. */
+
+
+
+/* Expose Lang globally: the top-level modules that follow the main IIFE
+   (MODULE 43 · SemesterDashboard, MODULE 47 · HeroDash, MODULE 48 ·
+   GlobalSearch) sit OUTSIDE the IIFE scope and cannot see the module-level
+   `const Lang`. Without this exposure they would fall back to a raw-key
+   stub and render dot-notation keys ("semester.program") instead of
+   translated text. */
+window.Lang = Lang;
 
 /* ============================================================
    MODULE 23 · PWA — service worker registration
@@ -3965,6 +4093,11 @@ let cur = "ar";
     { ar: "الاستطلاع", en: "Reconnaissance", img: "images/flashcards/reconnaissance.svg", ex: "جمع معلومات عن الهدف قبل أي هجوم — خطوة أساسية في الاختراق الأخلاقي." },
     { ar: "برمجية خبيثة", en: "Malware", img: "images/flashcards/malware.svg", ex: "أي برنامج مصمم لإلحاق الضرر: فيروسات، أحصنة طروادة، تجسس، وفدية." }
   ];
+
+  /* Expose the flashcard glossary (term + explanation + icon) so
+     MODULE 48 · GlobalSearch can index flashcards and glossary terms from
+     the real data instead of a duplicated list. */
+  window.PLATFORM_FLASH_TERMS = TERMS;
 
   let query = "";
 
@@ -6798,16 +6931,19 @@ function showLesson(subjectKey,topicKey){
 
   /* Lightweight completion tracking for the Progress hub: opening an
      authored lesson marks it as reviewed locally (motmi-portal:lessons).
-     Additive; never touches the lesson rendering. */
+     Additive; never touches the lesson rendering. The same record carries
+     a `last` pointer so MODULE 47 · HeroDash can show the last opened
+     lesson (read back through window.PLATFORM_STORE). */
   try {
     const lkey = subjectKey + "/" + topicKey;
     const curL = Store.get("lessons", null);
     const st = (curL && typeof curL === "object" && curL.done && typeof curL.done === "object") ? curL : { v: 1, done: {} };
-    if (!st.done[lkey]) {
-      st.done[lkey] = true;
-      Store.set("lessons", st);
-      if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed"));
-    }
+    const st2ok = st;
+    st2ok.last = { key: lkey, sub: subjectKey, topic: topicKey, ts: Date.now() };
+    const isNew = !st.done[lkey];
+    if (isNew) st.done[lkey] = true;
+    Store.set("lessons", st2ok);
+    if (isNew && typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed"));
   } catch {}
 
   const B=lesson;
@@ -7085,6 +7221,11 @@ const TOOLS_META = {
     copy: "cpOut"
   }
 };
+
+/* Expose the tool metadata (bilingual names + owning path/lesson) so
+   MODULE 48 · GlobalSearch can index the 12 real tools without scraping.
+   Guarded: isolated module slices run without a `window` object. */
+if (typeof window !== "undefined") window.PLATFORM_TOOLS_META = TOOLS_META;
 
 const LABS_META = {
   games: {
@@ -7414,11 +7555,56 @@ const LABS_META = {
   const metaMount = document.getElementById("semesterMeta");
   if (!grid || !metaMount) return;
 
+  /* --- Locale helper resolution (MODULE 43) ---
+     This module sits OUTSIDE the main IIFE (which closes around line 7477),
+     so it cannot see the IIFE-internal `const Lang` or `escHtml`. Resolution
+     order — in-scope identifier → window bridge (window.Lang, set by
+     MODULE 22) → honest no-op fallback that never emits dot-notation keys.
+     NOTE: the fallback `t()` below deliberately avoids returning the raw
+     key: it renders an empty string instead so a missing translation can
+     never leak "semester.program"-style text into the UI. */
+
+  /**
+   * Resolve the real Lang helper when reachable.
+   * @returns {{current:string,t:function,qt:function,onSwitch:function}|null}
+   */
+  function resolveLang() {
+    try {
+      if (typeof Lang !== "undefined" && Lang) return Lang; // classic same-scope load
+    } catch (e) { /* TDZ/unreachable — fall through to the bridge */ }
+    try {
+      if (typeof window !== "undefined" && window.Lang) return window.Lang;
+    } catch (e2) { /* unreachable — fall through to the fallback */ }
+    return null;
+  }
+
+  const L10N = resolveLang();
+  const cur = (L10N && L10N.current) || "ar";
+
+  /**
+   * Translation lookup with proper fallbacks (never returns the raw key).
+   * @param {string} key Dictionary key.
+   * @param {Object=} params {slot} substitutions.
+   * @returns {string} Translated text (or "" when truly unknown).
+   */
+  function T10(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    /* L10N.t() itself falls back to the key when the dictionary misses —
+       swallow that case too so raw keys never reach the DOM. */
+    if (!s || s === key) return "";
+    return s;
+  }
+
+  /* Local escHtml — this module cannot see the IIFE-internal helper either. */
+  const escHtmlL = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (m) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+
   const DATA = window.PLATFORM_CURRENT_SEMESTER;
   if (!DATA || !Array.isArray(DATA.subjects)) {
     /* Data source absent — say so instead of rendering nothing. */
     metaMount.innerHTML = '<p class="sem-empty" role="status">' +
-      escHtml(Lang.t("semester.missingData")) + "</p>";
+      escHtmlL(T10("semester.missingData", null, "…")) + "</p>";
     return;
   }
 
@@ -7436,7 +7622,6 @@ const LABS_META = {
   function T(field) {
     if (field == null) return "";
     if (typeof field !== "object") return String(field);
-    const cur = Lang.current;
     const v = (field[cur] != null) ? field[cur] : (field.ar != null ? field.ar : field.en);
     return v == null ? "" : String(v);
   }
@@ -7477,9 +7662,8 @@ const LABS_META = {
   /** Question-bank count for a quiz key (0 when unknown). @param {string} k @returns {number} */
   function quizCount(k) {
     try {
-      if (typeof QUIZZES !== "undefined" && QUIZZES[k] && QUIZZES[k].questions) {
-        return QUIZZES[k].questions.length;
-      }
+      const BANK = WL.QUIZZES || {};
+      if (BANK[k] && BANK[k].questions) return BANK[k].questions.length;
     } catch (e) { /* ignore — count is cosmetic */ }
     return 0;
   }
@@ -7495,14 +7679,14 @@ const LABS_META = {
       '<div class="sem-sum">' +
       '<div class="sem-sum-main">' +
       '<h3 class="sem-sum-title">' + esc(T(DATA.title)) + "</h3>" +
-      '<p class="sem-sum-program"><span>' + escHtml(Lang.t("semester.program")) +
+      '<p class="sem-sum-program"><span>' + escHtmlL(T10("semester.program")) +
       "</span> — " + esc(T(DATA.meta && DATA.meta.program)) + "</p>" +
       '<p class="sem-sum-desc">' + esc(T(DATA.description)) + "</p>" +
       "</div>" +
       '<dl class="sem-sum-stats">' +
-      "<div class=\"sem-stat\"><dt>" + escHtml(Lang.t("semester.subjectsCount")) + "</dt><dd>" +
+      "<div class=\"sem-stat\"><dt>" + escHtmlL(T10("semester.subjectsCount")) + "</dt><dd>" +
       DATA.subjects.length + "</dd></div>" +
-      "<div class=\"sem-stat\"><dt>" + escHtml(Lang.t("semester.credits")) + "</dt><dd>" +
+      "<div class=\"sem-stat\"><dt>" + escHtmlL(T10("semester.credits")) + "</dt><dd>" +
       credits + "</dd></div>" +
       "</dl></div>";
   }
@@ -7513,7 +7697,7 @@ const LABS_META = {
   function detailsList(i18nKey, items) {
     const lis = items.map((x) => "<li>" + x + "</li>").join("");
     return (
-      '<details class="sem-details"><summary>' + escHtml(Lang.t(i18nKey)) +
+      '<details class="sem-details"><summary>' + escHtmlL(T10(i18nKey)) +
       ' <span class="sem-count">' + items.length + "</span></summary>" +
       '<ul class="sem-list">' + lis + "</ul></details>"
     );
@@ -7525,7 +7709,7 @@ const LABS_META = {
       .map((p) => esc(TT(p) || String(p))).filter(Boolean);
     if (!items.length) {
       return '<div class="sem-lessons"><p class="sem-empty">' +
-        escHtml(Lang.t("semester.prerequisitesNone")) + "</p></div>";
+        escHtmlL(T10("semester.prerequisitesNone")) + "</p></div>";
     }
     return detailsList("semester.prerequisites", items);
   }
@@ -7535,7 +7719,7 @@ const LABS_META = {
     const lessons = Array.isArray(s.lessons) ? s.lessons : [];
     if (!lessons.length) {
       return '<div class="sem-lessons"><p class="sem-empty">' +
-        escHtml(Lang.t("semester.lessonsSoon")) + "</p></div>";
+        escHtmlL(T10("semester.lessonsSoon")) + "</p></div>";
     }
     return detailsList("semester.lessons", lessons.map((l) => esc(TT(l))).filter(Boolean));
   }
@@ -7546,19 +7730,19 @@ const LABS_META = {
     (Array.isArray(s.quizzes) ? s.quizzes : []).forEach((k) => {
       const n = quizCount(k);
       html += '<a class="path-chip is-quiz" href="#quiz" data-quiz-jump="' + esc(k) + '">' +
-        escHtml(Lang.t("semester.quizChip")) +
+        escHtmlL(T10("semester.quizChip")) +
         (n ? ' <b class="path-chip-n">' + n + "</b>" : "") + "</a>";
     });
     (Array.isArray(s.relatedTools) ? s.relatedTools : []).forEach((id) => {
       if (!toolLabelIsKnown(id)) return; /* no fake links */
       html += '<a class="path-chip is-tool" href="#tools" data-tool-jump="' + esc(id) + '"' +
-        ' aria-label="' + escHtml(Lang.t("semester.tools")) + ": " + esc(toolLabel(id)) + '">' +
+        ' aria-label="' + escHtmlL(T10("semester.tools")) + ": " + esc(toolLabel(id)) + '">' +
         esc(toolLabel(id)) + "</a>";
     });
     (Array.isArray(s.relatedLabs) ? s.relatedLabs : []).forEach((view) => {
       if (!document.getElementById(view)) return; /* no fake links */
       html += '<a class="path-chip is-lab" href="#' + esc(view) + '">' +
-        escHtml(Lang.t("nav." + view)) + "</a>";
+        escHtmlL(T10("nav." + view)) + "</a>";
     });
     return html;
   }
@@ -7574,8 +7758,8 @@ const LABS_META = {
     const meta = s.meta || {};
     const hue = meta.hue || 260;
     const diffKey = "paths.level." + (s.difficulty || "");
-    const diffRaw = Lang.t(diffKey);
-    const diffLabel = (diffRaw !== diffKey) ? esc(diffRaw) : esc(s.difficulty || "");
+    const diffRaw = T10(diffKey);
+    const diffLabel = diffRaw ? esc(diffRaw) : esc(s.difficulty || "");
     const icon = meta.icon || "images/icon-maskable.svg";
     const schedule = scheduleHtml(s);
 
@@ -7588,12 +7772,12 @@ const LABS_META = {
       '<div class="sem-body">' +
       '<header class="sem-head">' +
       "<h3>" + esc(T(s.name)) + "</h3>" +
-      '<p class="sem-code" dir="ltr">' + escHtml(Lang.t("semester.code")) + ": " + esc(s.code || s.id) + "</p>" +
+      '<p class="sem-code" dir="ltr">' + escHtmlL(T10("semester.code")) + ": " + esc(s.code || s.id) + "</p>" +
       "</header>" +
       '<ul class="sem-meta">' +
-      '<li class="sem-chip is-credit"><b>' + (meta.creditHours == null ? "—" : meta.creditHours) + "</b> " + escHtml(Lang.t("semester.creditHours")) + "</li>" +
+      '<li class="sem-chip is-credit"><b>' + (meta.creditHours == null ? "—" : meta.creditHours) + "</b> " + escHtmlL(T10("semester.creditHours")) + "</li>" +
       (s.difficulty ? '<li class="sem-chip is-diff is-' + esc(s.difficulty) + '">' + diffLabel + "</li>" : "") +
-      (s.estimatedHours ? '<li class="sem-chip is-hours"><b>' + s.estimatedHours + "</b> " + escHtml(Lang.t("semester.estHours")) + "</li>" : "") +
+      (s.estimatedHours ? '<li class="sem-chip is-hours"><b>' + s.estimatedHours + "</b> " + escHtmlL(T10("semester.estHours")) + "</li>" : "") +
       (schedule ? '<li class="sem-chip is-sched">🗓 ' + schedule + "</li>" : "") +
       "</ul>" +
       '<p class="sem-desc">' + esc(T(s.shortDescription)) + "</p>" +
@@ -7620,7 +7804,12 @@ const LABS_META = {
   }
 
   render();
-  if (typeof Lang !== "undefined" && Lang.onSwitch) Lang.onSwitch(render);
+  /* Live locale switching — resolved via the bridge so both the classic
+     same-scope load and the isolated/eval load re-render correctly. */
+  try {
+    const LS = resolveLang();
+    if (LS && typeof LS.onSwitch === "function") LS.onSwitch(render);
+  } catch (e) { /* locale switching is enhancement, never fatal */ }
 
   /* Question-bank counts paint asynchronously (fetch/cache/fallback).
      MODULE 13's loadQuizData dispatches "nova:progress-changed" when the
@@ -7636,3 +7825,661 @@ const LABS_META = {
     }
   });
 })();
+
+/* ============================================================
+   MODULE 47 · HeroDash — لوحة التقدم المصغّرة (#heroDash)
+   ------------------------------------------------------------
+   Compact, strictly READ-ONLY homepage dashboard: overall
+   progress %, last opened lesson, next recommended quiz and a
+   Continue-Learning shortcut. Every value is derived from data
+   the platform already owns — nothing is duplicated or invented:
+   - overall %  → the SAME formula as the Progress hub (mean of
+     the saved best scores), so the two views can never disagree.
+   - last lesson → "motmi-portal:lessons.last", written by
+     MODULE 40 showLesson; its title is resolved from the real
+     learning-path topic linked to it (SUBJECT_TO_PATH), else the
+     honest «no lesson opened yet» label is rendered.
+   - next quiz  → the first subject bank with no saved result,
+     otherwise the lowest-scoring one (name from the registry).
+   This module lives OUTSIDE the main IIFE, so every access goes
+   through the window bridges published there (Lang, QUIZZES,
+   readStore, startQuiz, getLearningPaths, SUBJECT_TO_PATH,
+   PLATFORM_STORE, PLATFORM_SUBJECTS, NovaViews) — the same
+   pattern as MODULE 43.
+   ============================================================ */
+(function initHeroDash() {
+  "use strict";
+  const pctEl = document.getElementById("heroDashPct");
+  const barEl = document.getElementById("heroDashBar");
+  const lessonEl = document.getElementById("heroDashLesson");
+  const quizEl = document.getElementById("heroDashQuiz");
+  const ctaEl = document.getElementById("heroDashContinue");
+  if (!pctEl || !lessonEl || !quizEl) return;
+
+  /* ---------- locale + storage helpers (outside the IIFE) ---------- */
+  /** @returns {{current:string,t:function,onSwitch:function}|null} */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+
+  /**
+   * Translation that never leaks a raw key into the dashboard.
+   * @param {string} key Dictionary key.
+   * @param {Object=} params Slot values.
+   * @returns {string} Localized text, or "" when unknown.
+   */
+  function T(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+
+  /**
+   * Read a namespaced value (Store bridge, then a direct localStorage read).
+   * @param {string} key Store key.
+   * @returns {*} Value or null.
+   */
+  function storeGet(key) {
+    try {
+      const S = window.PLATFORM_STORE;
+      if (S && typeof S.get === "function") return S.get(key, null);
+    } catch (e) { /* fall through to localStorage */ }
+    try { const raw = localStorage.getItem("motmi-portal:" + key); return raw ? JSON.parse(raw) : null; } catch (e2) { return null; }
+  }
+
+  /** @returns {Object} The subject question banks (possibly still empty). */
+  function banks() {
+    try { return (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {}; } catch (e) { return {}; }
+  }
+
+  /** @returns {{results:Object,progress:Object}} Saved quiz store snapshot. */
+  function saved() {
+    try { return (typeof window.readStore === "function") ? (window.readStore() || {}) : {}; } catch (e) { return {}; }
+  }
+
+  /**
+   * Mean of the saved best scores — identical to the Progress hub's
+   * "Overall" figure so both views always agree.
+   * @param {Object} results Saved results map.
+   * @param {Object} qb Question banks.
+   * @returns {number} Overall percentage (integer).
+   */
+  function overallPct(results, qb) {
+    const keys = Object.keys(results || {}).filter((k) => qb[k]);
+    if (!keys.length) return 0;
+    const vals = keys.map((k) => {
+      const r = results[k] || {};
+      const qs = (qb[k] && qb[k].questions) ? qb[k].questions.length : 0;
+      return typeof r.pct === "number" ? r.pct : (qs ? Math.round(((r.score || 0) / qs) * 100) : 0);
+    });
+    return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+  }
+
+  /**
+   * Resumable subject key (mid-quiz session), else "".
+   * @param {Object} progress Saved progress map.
+   * @param {Object} qb Question banks.
+   * @returns {string} Subject key or "".
+   */
+  function resumeKey(progress, qb) {
+    const keys = Object.keys(progress || {}).filter((k) => {
+      const p = progress[k];
+      return qb[k] && p && typeof p.idx === "number" && p.idx > 0 &&
+        p.idx < (qb[k].questions || []).length;
+    });
+    return keys[0] || "";
+  }
+
+  /**
+   * Next recommended quiz: an un-attempted bank first, otherwise the
+   * lowest saved score.
+   * @param {Object} results Saved results map.
+   * @param {Object} qb Question banks.
+   * @returns {string} Subject key or "" when no bank is available.
+   */
+  function nextQuizKey(results, qb) {
+    const keys = Object.keys(qb).filter((k) => qb[k] && Array.isArray(qb[k].questions) && qb[k].questions.length);
+    if (!keys.length) return "";
+    const fresh = keys.filter((k) => !results[k]);
+    if (fresh.length) return fresh[0];
+    let worst = "", worstPct = 101;
+    keys.forEach((k) => {
+      const qs = qb[k].questions.length;
+      const r = results[k] || {};
+      const pct = typeof r.pct === "number" ? r.pct : (qs ? Math.round(((r.score || 0) / qs) * 100) : 0);
+      if (pct < worstPct) { worstPct = pct; worst = k; }
+    });
+    return worst;
+  }
+
+  /**
+   * Display name for a bank: the official subject name when the registry
+   * knows it (EN when one is authored, else Arabic), else the bank name.
+   * @param {string} key Subject key / course code.
+   * @returns {string} Human-readable subject label.
+   */
+  function bankLabel(key) {
+    try {
+      const reg = window.PLATFORM_SUBJECTS;
+      if (Array.isArray(reg)) {
+        const s = reg.filter((x) => x && (x.quizKey === key || x.id === key))[0];
+        if (s) {
+          const en = (s.nameEn && L10N && L10N.current === "en") ? s.nameEn : "";
+          return en || s.nameAr || key;
+        }
+      }
+    } catch (e) { /* registry unavailable — fall back to the bank name */ }
+    const b = banks()[key];
+    return (b && b.name) || key;
+  }
+
+  /**
+   * Title of the last opened lesson, resolved from the real learning-path
+   * topic that links to it (never invented).
+   * @returns {string} Localized lesson title or "" when unresolvable.
+   */
+  function lastLessonLabel() {
+    const st = storeGet("lessons");
+    const last = st && st.last ? st.last : null;
+    if (!last || !last.sub || !last.topic) return "";
+    try {
+      const paths = (typeof window.getLearningPaths === "function") ? (window.getLearningPaths() || []) : [];
+      const map = window.SUBJECT_TO_PATH || {};
+      const pathId = map[last.sub];
+      const path = pathId ? paths.filter((p) => p && p.id === pathId)[0] : null;
+      const topic = (path && Array.isArray(path.topics))
+        ? path.topics.filter((t) => t && t.lsn && t.lsn.sub === last.sub && t.lsn.key === last.topic)[0]
+        : null;
+      if (topic && topic.t) return topic.t[(L10N && L10N.current) || "ar"] || topic.t.ar || "";
+    } catch (e) { /* unresolvable → honest empty state */ }
+    return "";
+  }
+
+  /* ---------- render ---------- */
+
+  /** Paint the dashboard from the saved data. Read-only. @returns {void} */
+  function render() {
+    const qb = banks();
+    const store = saved();
+    const results = store.results || {};
+    const progress = store.progress || {};
+
+    const pct = overallPct(results, qb);
+    pctEl.textContent = String(pct);
+    if (barEl && barEl.style) barEl.style.width = pct + "%";
+
+    const lessonLabel = lastLessonLabel();
+    lessonEl.textContent = lessonLabel || T("dash.noLesson") || "—";
+
+    const resume = resumeKey(progress, qb);
+    const next = nextQuizKey(results, qb);
+    const attempted = Object.keys(results).some((k) => qb[k]);
+
+    if (resume) {
+      quizEl.textContent = T("dash.resumeQuiz", { sub: bankLabel(resume) }) || bankLabel(resume);
+    } else if (next) {
+      quizEl.textContent = attempted
+        ? (T("dash.newQuiz", { sub: bankLabel(next) }) || bankLabel(next))
+        : bankLabel(next);
+    } else {
+      quizEl.textContent = T("dash.allDone") || "—";
+    }
+
+    if (ctaEl) {
+      if (resume) {
+        ctaEl.setAttribute("href", "#quiz");
+        ctaEl.setAttribute("data-action", "resume");
+        ctaEl.setAttribute("data-subject", resume);
+        ctaEl.removeAttribute("data-quiz");
+        ctaEl.textContent = T("dash.continue") || ctaEl.textContent;
+      } else if (next) {
+        ctaEl.setAttribute("href", "#quiz");
+        ctaEl.setAttribute("data-action", "quiz");
+        ctaEl.setAttribute("data-quiz", next);
+        ctaEl.removeAttribute("data-subject");
+        ctaEl.textContent = (attempted ? T("dash.continue") : T("dash.continueFresh")) || ctaEl.textContent;
+      } else {
+        ctaEl.setAttribute("href", "#paths");
+        ctaEl.setAttribute("data-action", "paths");
+        ctaEl.removeAttribute("data-quiz");
+        ctaEl.removeAttribute("data-subject");
+        ctaEl.textContent = T("dash.continueFresh") || ctaEl.textContent;
+      }
+    }
+  }
+
+  /* Continue-Learning shortcut: resume the saved session, deep-start the
+     recommended bank (data-quiz) or fall back to the plain anchor hop. */
+  if (ctaEl && ctaEl.addEventListener) {
+    ctaEl.addEventListener("click", (ev) => {
+      const d = ctaEl.dataset || {};
+      const key = d.action === "resume" ? (d.subject || "") : (d.action === "quiz" ? (d.quiz || "") : "");
+      if (!key) return; /* data-action="paths" → let the anchor navigate */
+      ev.preventDefault();
+      if (window.NovaViews && typeof window.NovaViews.activate === "function") window.NovaViews.activate("quiz");
+      const start = (typeof window.startQuiz === "function") ? window.startQuiz : null;
+      if (typeof start === "function" && banks()[key]) start(key, true);
+    });
+  }
+
+  document.addEventListener("nova:progress-changed", render);
+  document.addEventListener("nova:view-changed", render);
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) { /* locale hook optional */ }
+
+  render();
+})();
+
+/* ============================================================
+   MODULE 48 · GlobalSearch — بحث شامل (لوحة أوامر)
+   ------------------------------------------------------------
+   Command-palette style search over the platform's REAL data —
+   no duplicated index files:
+   - lessons            → window.PLATFORM_LESSONS (empty today)
+   - learning paths/topics → window.getLearningPaths()
+   - the 12 tools       → window.PLATFORM_TOOLS_META
+   - subject banks      → window.QUIZZES (+ PLATFORM_SUBJECTS names)
+   - flashcards + glossary explanations → PLATFORM_FLASH_TERMS
+   Keyboard: "/" or Ctrl/⌘+K opens, Esc closes, ↑↓ move, Enter
+   picks; combobox + listbox ARIA stay in sync. Picking a result
+   activates the owning view, keeps the platform's own deep-link
+   flow (#path/<id>, #lesson/<sub>/<key>), deep-starts a bank
+   (data-quiz) and flashes the landed-on card (.search-flash).
+   Honest states: groups without real entries are never rendered,
+   and an unmatched query says so instead of showing filler.
+   ============================================================ */
+(function initGlobalSearch() {
+  "use strict";
+  const openBtn = document.getElementById("searchOpenBtn");
+  const overlay = document.getElementById("searchOverlay");
+  const dialog = document.getElementById("searchDialog");
+  const input = document.getElementById("searchInput");
+  const list = document.getElementById("searchResults");
+  const closeBtn = document.getElementById("searchClose");
+  if (!dialog || !input || !list) return; /* no markup → honest no-op */
+
+  /* ---------- locale + helpers (outside the main IIFE) ---------- */
+  /** @returns {{current:string,t:function,onSwitch:function}|null} */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  const loc = () => (L10N && L10N.current) || "ar";
+
+  /** Translation that never returns a raw key. @param {string} k @param {Object=} p @returns {string} */
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+
+  /** Escape HTML-significant characters. @param {unknown} v @returns {string} */
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  }
+
+  /**
+   * Fold a string for matching: lowercase, strip Arabic diacritics/tatweel and
+   * unify alef/ya/ta-marbuta variants so «التشفير» and «التشفير» both match.
+   * @param {unknown} s Raw text.
+   * @returns {string} Comparable text.
+   */
+  function norm(s) {
+    return String(s == null ? "" : s).toLowerCase()
+      .replace(/[\u064b-\u0652\u0640]/g, "")
+      .replace(/[\u0623\u0625\u0622\u0671]/g, "\u0627")
+      .replace(/\u0649/g, "\u064a").replace(/\u0626/g, "\u064a")
+      .replace(/\u0624/g, "\u0648").replace(/\u0629/g, "\u0647")
+      .replace(/\s+/g, " ").trim();
+  }
+
+  /** Display name of a quiz subject (registry first). @param {string} key @returns {string} */
+  function subjectLabel(key) {
+    try {
+      const reg = window.PLATFORM_SUBJECTS;
+      if (Array.isArray(reg)) {
+        const s = reg.filter((x) => x && (x.quizKey === key || x.id === key))[0];
+        if (s) {
+          const en = (s.nameEn && loc() === "en") ? s.nameEn : "";
+          return en || s.nameAr || key;
+        }
+      }
+    } catch (e) { /* registry unavailable */ }
+    const b = (window.QUIZZES || {})[key];
+    return (b && b.name) || key;
+  }
+
+  /* ---------- index (built from real data on every open) ---------- */
+  const GROUPS = ["lesson", "path", "tool", "quiz", "flash", "term"];
+  const MAX_HITS = 40;
+
+  /** Group label from the dictionary. @param {string} kind @returns {string} */
+  function groupLabel(kind) {
+    return T("search.group." + kind) || kind;
+  }
+
+  /**
+   * Build the searchable index from the platform's live data.
+   * @returns {Array<{kind:string,title:string,sub:string,view:string,data:Object}>} Entries.
+   */
+  function buildIndex() {
+    const out = [];
+    /** @param {string} kind @param {string} title @param {string} sub @param {string} view @param {Object=} data */
+    const push = (kind, title, sub, view, data) => {
+      const t = String(title == null ? "" : title).trim();
+      if (!t) return;
+      out.push({ kind: kind, title: t, sub: sub ? String(sub).trim() : "", view: view || "", data: data || {} });
+    };
+
+    /* 1 · authored lessons (registry is empty until content ships) */
+    try {
+      const lessons = window.PLATFORM_LESSONS || {};
+      Object.keys(lessons).forEach((sub) => {
+        const byKey = lessons[sub] || {};
+        Object.keys(byKey).forEach((k) => {
+          const b = byKey[k] || {};
+          const t = (b.title && (b.title[loc()] || b.title.ar)) || k;
+          push("lesson", t, sub + " / " + k, "lesson", { hash: "#lesson/" + sub + "/" + k });
+        });
+      });
+    } catch (e) { /* registry unavailable → no lesson results */ }
+
+    /* 2 · learning paths and their ordered topics */
+    try {
+      const paths = (typeof window.getLearningPaths === "function") ? (window.getLearningPaths() || []) : [];
+      paths.forEach((p) => {
+        if (!p || !p.id) return;
+        const pathTitle = (p.title && (p.title[loc()] || p.title.ar)) || p.id;
+        const pathDesc = (p.desc && (p.desc[loc()] || p.desc.ar)) || "";
+        push("path", pathTitle, pathDesc, "path", { hash: "#path/" + p.id });
+        (Array.isArray(p.topics) ? p.topics : []).forEach((tp) => {
+          if (!tp || !tp.t) return;
+          const tt = tp.t[loc()] || tp.t.ar || tp.t.en || "";
+          if (!tt) return;
+          if (tp.lsn && tp.lsn.sub && tp.lsn.key) {
+            push("lesson", tt, pathTitle, "lesson", { hash: "#lesson/" + tp.lsn.sub + "/" + tp.lsn.key });
+          } else {
+            push("path", tt, pathTitle, "path", { hash: "#path/" + p.id });
+          }
+        });
+      });
+    } catch (e) { /* path data unavailable */ }
+
+    /* 3 · the 12 interactive tools */
+    try {
+      const meta = window.PLATFORM_TOOLS_META || {};
+      Object.keys(meta).forEach((id) => {
+        const m = meta[id] || {};
+        const n = m.name ? (m.name[loc()] || m.name.ar || m.name.en) : "";
+        const purpose = m.purpose ? (m.purpose[loc()] || m.purpose.ar || m.purpose.en) : "";
+        push("tool", n, purpose, "tools", { tool: id });
+      });
+    } catch (e) { /* tool metadata unavailable */ }
+
+    /* 4 · subject question banks (real names, course code as the subtitle) */
+    const quizEntries = [];
+    try {
+      const qb = (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {};
+      Object.keys(qb).forEach((key) => {
+        quizEntries.push({ key: key, name: subjectLabel(key), count: (qb[key] && qb[key].questions) ? qb[key].questions.length : 0 });
+      });
+    } catch (e) { /* bank unavailable */ }
+    quizEntries.forEach((q) => {
+      push("quiz", q.name, q.key, "quiz", { quiz: q.key, extra: String(q.count) + " " + (q.key || "") });
+    });
+
+    /* 5 · flashcards (term) + 6 · glossary explanations (term text) */
+    try {
+      const terms = Array.isArray(window.PLATFORM_FLASH_TERMS) ? window.PLATFORM_FLASH_TERMS : [];
+      terms.forEach((tm, i) => {
+        if (!tm) return;
+        const ar = tm.ar || "", en = tm.en || "";
+        const title = (loc() === "en") ? (en || ar) : (ar || en);
+        const other = (loc() === "en") ? ar : en;
+        push("flash", title, other, "flash", { flash: i, extra: tm.ex || "" });
+        if (tm.ex) push("term", tm.ex, title, "flash", { flash: i });
+      });
+    } catch (e) { /* glossary unavailable */ }
+
+    return out;
+  }
+
+  /* ---------- matching + rendering ---------- */
+  let entries = [];
+  let hits = [];
+  let sel = -1;
+
+  /**
+   * Rank indexed entries for a query (prefix title hits first).
+   * @param {string} q Raw query.
+   * @returns {Array<Object>} Matching entries (max MAX_HITS).
+   */
+  function find(q) {
+    const nq = norm(q);
+    if (!nq) return [];
+    const scored = [];
+    entries.forEach((e) => {
+      const hay = norm(e.title + " " + e.sub + " " + ((e.data && e.data.extra) || ""));
+      if (hay.indexOf(nq) < 0) return;
+      scored.push({ e: e, rank: norm(e.title).indexOf(nq) === 0 ? 0 : 1 });
+    });
+    scored.sort((a, b) => a.rank - b.rank);
+    return scored.map((s) => s.e).slice(0, MAX_HITS);
+  }
+
+  /**
+   * Mark the active option (aria-selected + aria-activedescendant).
+   * @param {number} i Option index (wraps).
+   * @returns {void}
+   */
+  function setSel(i) {
+    if (!list.querySelectorAll) return;
+    const opts = list.querySelectorAll(".search-option");
+    if (!opts || !opts.length) {
+      sel = -1;
+      if (input.setAttribute) input.setAttribute("aria-activedescendant", "");
+      return;
+    }
+    if (i < 0) i = opts.length - 1;
+    if (i >= opts.length) i = 0;
+    sel = i;
+    for (let k = 0; k < opts.length; k++) opts[k].setAttribute("aria-selected", k === i ? "true" : "false");
+    const cur = opts[i];
+    if (cur && cur.scrollIntoView) { try { cur.scrollIntoView({ block: "nearest" }); } catch (e) { /* no-op */ } }
+    if (input.setAttribute) input.setAttribute("aria-activedescendant", (cur && cur.id) ? cur.id : "");
+  }
+
+  /**
+   * Paint the grouped listbox or the honest empty state.
+   * @param {string} q Raw query.
+   * @returns {void}
+   */
+  function renderResults(q) {
+    hits = [];
+    sel = -1;
+    if (!q || !norm(q)) {
+      list.innerHTML = '<li class="search-empty-msg">' + esc(T("search.start")) + "</li>";
+      if (input.setAttribute) input.setAttribute("aria-activedescendant", "");
+      return;
+    }
+    const found = find(q);
+    if (!found.length) {
+      list.innerHTML = '<li class="search-empty-msg">' + esc(T("search.empty")) + "</li>";
+      if (input.setAttribute) input.setAttribute("aria-activedescendant", "");
+      return;
+    }
+    let html = "";
+    GROUPS.forEach((kind) => {
+      const rows = found.filter((e) => e.kind === kind);
+      if (!rows.length) return;
+      html += '<li class="search-group" role="presentation">' + esc(groupLabel(kind)) + "</li>";
+      rows.forEach((e) => {
+        const idx = hits.length;
+        hits.push(e);
+        html += '<li class="search-option" role="option" id="searchOpt' + idx + '" aria-selected="false" data-i="' + idx + '">' +
+          '<span class="search-option-title">' + esc(e.title) + "</span>" +
+          (e.sub ? '<span class="search-option-sub">' + esc(e.sub) + "</span>" : "") +
+          "</li>";
+      });
+    });
+    list.innerHTML = html;
+    setSel(0);
+  }
+
+  /**
+   * Briefly highlight the card a result points at (a missing target is simply
+   * not highlighted — nothing is invented).
+   * @param {Object} e Picked entry.
+   * @returns {void}
+   */
+  function flashTarget(e) {
+    try {
+      const d = e.data || {};
+      let node = null;
+      if (d.tool) node = document.getElementById(d.tool);
+      else if (typeof d.flash === "number") {
+        const grid = document.getElementById("flashGrid");
+        node = (grid && grid.querySelector) ? grid.querySelector('[data-i="' + d.flash + '"]') : null;
+      } else if (e.view) node = document.getElementById(e.view);
+      if (!node) return;
+      if (node.scrollIntoView) { try { node.scrollIntoView({ block: "center" }); } catch (err) { /* no-op */ } }
+      if (node.classList) {
+        node.classList.add("search-flash");
+        setTimeout(() => { try { node.classList.remove("search-flash"); } catch (err2) { /* no-op */ } }, 1900);
+      }
+    } catch (err) { /* highlight is an enhancement, never fatal */ }
+  }
+
+  /**
+   * Activate the owning view, keep the platform's deep-link flow, deep-start a
+   * quiz bank and highlight the landed-on card.
+   * @param {number} i Index inside the current hits.
+   * @returns {void}
+   */
+  function pick(i) {
+    const e = hits[i];
+    if (!e) return;
+    close();
+    const d = e.data || {};
+    const NV = window.NovaViews;
+    if (e.view && NV && typeof NV.activate === "function") { try { NV.activate(e.view); } catch (err) { /* no-op */ } }
+    if (d.hash) { try { if (location.hash !== d.hash) location.hash = d.hash; } catch (err2) { /* no-op */ } }
+    if (d.quiz) {
+      const qb = (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {};
+      if (qb[d.quiz] && typeof window.startQuiz === "function") { try { window.startQuiz(d.quiz, true); } catch (err3) { /* no-op */ } }
+    }
+    flashTarget(e);
+  }
+
+  /* ---------- open / close ---------- */
+  let isOpen = false;
+
+  /** Open the dialog, rebuild the index and show the start hint. @returns {void} */
+  function open() {
+    if (isOpen) { if (input.focus) input.focus(); return; }
+    isOpen = true;
+    try { entries = buildIndex(); } catch (e) { entries = []; }
+    if (dialog.classList) dialog.classList.add("is-open");
+    dialog.setAttribute("aria-hidden", "false");
+    if (overlay) overlay.hidden = false;
+    try { if (document.body && document.body.classList) document.body.classList.add("search-open"); } catch (e2) { /* no-op */ }
+    if (input.setAttribute) input.setAttribute("aria-expanded", "true");
+    try { if ("value" in input) input.value = ""; } catch (e3) { /* read-only input in tests */ }
+    renderResults("");
+    if (input.focus) input.focus();
+  }
+
+  /** Close the dialog and hand focus back to the navbar button. @returns {void} */
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+    if (dialog.classList) dialog.classList.remove("is-open");
+    dialog.setAttribute("aria-hidden", "true");
+    if (overlay) overlay.hidden = true;
+    try { if (document.body && document.body.classList) document.body.classList.remove("search-open"); } catch (e) { /* no-op */ }
+    if (input.setAttribute) {
+      input.setAttribute("aria-expanded", "false");
+      input.setAttribute("aria-activedescendant", "");
+    }
+    if (openBtn && openBtn.focus) openBtn.focus();
+  }
+
+  /* ---------- wiring ---------- */
+  if (openBtn && openBtn.addEventListener) openBtn.addEventListener("click", (ev) => { ev.preventDefault(); open(); });
+  if (closeBtn && closeBtn.addEventListener) closeBtn.addEventListener("click", close);
+  if (overlay && overlay.addEventListener) overlay.addEventListener("click", close);
+
+  if (input.addEventListener) {
+    input.addEventListener("input", () => renderResults(input.value || ""));
+    input.addEventListener("keydown", (ev) => {
+      const k = ev.key;
+      if (k === "ArrowDown") { ev.preventDefault(); setSel(sel + 1); }
+      else if (k === "ArrowUp") { ev.preventDefault(); setSel(sel - 1); }
+      else if (k === "Home") { ev.preventDefault(); setSel(0); }
+      else if (k === "End") { ev.preventDefault(); setSel(hits.length - 1); }
+      else if (k === "Enter") { if (sel >= 0 && hits.length) { ev.preventDefault(); pick(sel); } }
+      else if (k === "Escape") { ev.preventDefault(); close(); }
+    });
+  }
+
+  if (list.addEventListener) {
+    list.addEventListener("click", (ev) => {
+      const li = (ev.target && ev.target.closest) ? ev.target.closest(".search-option") : null;
+      if (!li || !li.getAttribute) return;
+      pick(parseInt(li.getAttribute("data-i"), 10));
+    });
+  }
+
+  /* Global shortcuts: "/" (never while typing in a field) and Ctrl/⌘+K. */
+  document.addEventListener("keydown", (ev) => {
+    if (isOpen) { if (ev.key === "Escape") close(); return; }
+    const combined = (ev.ctrlKey || ev.metaKey) && String(ev.key).toLowerCase() === "k";
+    if (combined) { ev.preventDefault(); open(); return; }
+    const el = ev.target;
+    const tag = (el && el.tagName) ? String(el.tagName).toLowerCase() : "";
+    const typing = tag === "input" || tag === "textarea" || tag === "select" || (el && el.isContentEditable === true);
+    if (!typing && ev.key === "/") { ev.preventDefault(); open(); }
+  });
+
+  /* Re-index on locale switch so titles and group labels follow the UI. */
+  try {
+    if (L10N && typeof L10N.onSwitch === "function") {
+      L10N.onSwitch(() => {
+        if (!isOpen) return;
+        try { entries = buildIndex(); } catch (e) { /* keep the previous index */ }
+        renderResults(input.value || "");
+      });
+    }
+  } catch (e) { /* locale hook optional */ }
+})();
+
+/* ============================================================
+   MODULE 49 · ReopenOnboarding — إعادة تشغيل جولة التعريف
+   ------------------------------------------------------------
+   The Start-Here strip's «جولة التعريف» button replays the
+   onboarding wizard at any time (not just on a first visit).
+   It talks to MODULE 38 exclusively through the window bridge
+   `window.NovaOnboarding`, so the wizard stays encapsulated:
+   - bridge present → reopen the wizard from step 1 (state reset,
+     option highlights cleared by MODULE 38).
+   - bridge missing (e.g. overlay absent) → the trigger stays an
+     honest no-op instead of throwing.
+   ============================================================ */
+(function initReopenOnboarding() {
+  "use strict";
+  document.addEventListener("click", (ev) => {
+    const trigger = (ev.target && ev.target.closest) ? ev.target.closest("[data-onboarding-reopen]") : null;
+    if (!trigger) return;
+    const api = window.NovaOnboarding;
+    if (!api || typeof api.open !== "function") return;
+    ev.preventDefault();
+    api.open();
+  });
+})();
+
+

@@ -1,0 +1,24 @@
+{
+  "name": "infosec-platform",
+  "version": "1.22.1",
+  "description": "منصة أمن المعلومات — الترم الحالي · A zero-dependency Arabic-first cybersecurity education platform (quizzes, tools, labs, learning paths) for Information Security diploma students.",
+  "private": true,
+  "scripts": {
+    "test": "node tests/run-all.js",
+    "start": "node -e \"console.log('Static site — serve with: npx serve .  OR  python -m http.server 8080')\""
+  },
+  "keywords": [
+    "cybersecurity",
+    "education",
+    "arabic",
+    "quiz",
+    "ctf",
+    "pwa",
+    "vanilla-js"
+  ],
+  "author": "Ahmed Motmi <motmi757@gmail.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

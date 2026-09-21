@@ -3,8 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>منصة أمن المعلومات — الترم الحالي</title>
-  <meta name="description" content="منصة أمن المعلومات للدبلوم (تجسير مهني) — اختبارات تجريبية، ملخصات، وبنوك أسئلة لمواد الخطة الدراسية الحالية." />
+  <title>منصة أمن المعلومات | Information Security Platform — الترم الحالي</title>
+  <meta name="description" content="منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال. An Arabic-first learning platform for Information Security diploma students: learning paths, quizzes, security tools and labs — offline-ready." />
+  <meta name="keywords" content="أمن المعلومات, منصة تعليمية, اختبارات, سيبراني, information security, cybersecurity, learning platform, quizzes" />
+  <link rel="canonical" href="https://motmii.github.io/MNCH/" />
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="منصة أمن المعلومات — Information Security Platform" />
+  <meta property="og:title" content="منصة أمن المعلومات | Information Security Platform" />
+  <meta property="og:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال. An Arabic-first infosec learning platform: paths, quizzes, tools and labs — offline-ready." />
+  <meta property="og:url" content="https://motmii.github.io/MNCH/" />
+  <meta property="og:image" content="https://motmii.github.io/MNCH/images/icon.svg" />
+  <meta property="og:locale" content="ar_SA" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="منصة أمن المعلومات | Information Security Platform" />
+  <meta name="twitter:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال." />
+  <meta name="twitter:image" content="https://motmii.github.io/MNCH/images/icon.svg" />
+  <!-- Structured data (JSON-LD) — language switchable via Lang hook in script.js -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "منصة أمن المعلومات — Information Security Platform",
+    "alternateName": "Information Security Platform — منصة أمن المعلومات",
+    "url": "https://motmii.github.io/MNCH/",
+    "inLanguage": ["ar", "en"],
+    "description": "منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال."
+  }
+  </script>
+  <link rel="preload" as="image" href="images/backweb.jpg" fetchpriority="high" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -33,6 +61,9 @@
   </noscript>
 </head>
 <body>
+
+  <!-- Keyboard accessibility: first tabbable element jumps to the main view. -->
+  <a href="#hero" class="skip-link" data-i18n="a11y.skip">تخطي إلى المحتوى الرئيسي</a>
 
   <!-- Salawat banner (MODULE 28) — slim, elegant, RTL-safe strip pinned to the top.
        position:fixed → never affects layout/scroll (CLS-safe). Starts off-screen and
@@ -69,6 +100,9 @@
         <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
         <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
       </ul>
+      <button type="button" id="searchOpenBtn" class="search-toggle" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="بحث في المنصة / Search the platform" title="بحث — / أو Ctrl+K">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
       <button id="langToggle" class="lang-toggle" type="button" aria-pressed="true" aria-label="تغيير اللغة / Switch language" title="English">
         <span class="lang-current" aria-hidden="true">EN</span>
       </button>
@@ -173,16 +207,57 @@
       <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
 
       <div class="hero-content">
-        <p class="hero-eyebrow reveal" data-i18n="hero.eyebrow">✦ &nbsp;منصة تعليمية وتدريبية عملية — دبلوم أمن المعلومات (تجسير مهني)</p>
+        <!-- Platform identity — clear name in Arabic & English + short description -->
+        <div class="hero-brand reveal" aria-label="اسم المنصة بالعربية والإنجليزية">
+          <strong class="hero-brand-ar">منصة أمن المعلومات</strong>
+          <span class="hero-brand-sep" aria-hidden="true">·</span>
+          <span class="hero-brand-en" lang="en" dir="ltr">Information Security Platform</span>
+        </div>
+        <p class="hero-tagline reveal" data-i18n="hero.tagline">منصة عربية تعليمية لطلاب دبلوم أمن المعلومات — تعلّم، اختبر نفسك، وتدرّب عمليًا داخل متصفحك ودون اتصال.</p>
         <h1 class="hero-title">
           <span class="line"><span class="reveal-line" data-i18n="hero.title1">منصة تعليمية</span></span>
           <span class="line"><span class="reveal-line" data-i18n="hero.title2">وتدريبية عملية </span><em class="grad" data-i18n="hero.titleAccent">لطلاب أمن المعلومات</em></span>
         </h1>
         <p class="hero-sub reveal" data-i18n="hero.sub">منصة عربية متكاملة لطلاب أمن المعلومات: تعلّم أساسيات كل مادة، راجِع المصطلحات بالبطاقات، اختبر نفسك بأسئلة عملية، وطبّق ما تعلّمته بأدوات أمنية ومعامل محاكاة حقيقية — كل ذلك يعمل داخل متصفحك وبدون إنترنت.</p>
         <div class="hero-actions reveal">
-          <a href="#paths" class="btn btn-primary magnetic" data-i18n="hero.ctaStart">ابدأ رحلة التعلم</a>
-          <a href="#tools" class="btn btn-ghost magnetic" data-i18n="hero.ctaTools">جرّب الأدوات</a>
-          <a href="#labs" class="btn btn-ghost magnetic" data-i18n="hero.ctaLabs">ادخل المعامل العملية</a>
+          <a href="#paths" class="btn btn-primary btn-lg magnetic" data-i18n="hero.ctaStart">ابدأ رحلة التعلم</a>
+          <a href="#semester" class="btn btn-ghost magnetic" data-i18n="hero.ctaSemester">استكشف الترم الحالي</a>
+        </div>
+
+        <!-- Start Here — new users: beginner-friendly entry point pointing at
+             the Fundamentals path + the existing onboarding wizard. -->
+        <div class="hero-start reveal" id="heroStartHere">
+          <span class="hero-start-ico" aria-hidden="true">🧭</span>
+          <div class="hero-start-text">
+            <strong data-i18n="starthere.title">جديد هنا؟ ابدأ من هنا</strong>
+            <span data-i18n="starthere.desc">مسار «الأساسيات» مصمم للمبتدئين — خمس خطوات قصيرة تنقلك من الصفر إلى أول اختبار.</span>
+          </div>
+          <div class="hero-start-actions">
+            <a href="#path/fundamentals" class="btn btn-primary btn-sm" data-i18n="starthere.cta">ابدأ مسار الأساسيات</a>
+            <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
+          </div>
+        </div>
+
+        <!-- Compact dashboard (MODULE 47). Always visible on the homepage:
+             overall progress %, last viewed lesson, next recommended quiz,
+             and a Continue-Learning shortcut. JS fills it in. -->
+        <div class="hero-dash reveal" id="heroDash" aria-label="ملخص تقدمك في التعلم">
+          <div class="hero-dash-cell">
+            <span class="hero-dash-label" data-i18n="dash.progressLabel">تقدمك</span>
+            <strong class="hero-dash-value"><span id="heroDashPct">0</span>%</strong>
+            <div class="hero-dash-bar" role="progressbar" aria-hidden="true"><i id="heroDashBar" style="width:0%"></i></div>
+          </div>
+          <div class="hero-dash-cell">
+            <span class="hero-dash-label" data-i18n="dash.lastLesson">آخر درس</span>
+            <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
+          </div>
+          <div class="hero-dash-cell">
+            <span class="hero-dash-label" data-i18n="dash.nextQuiz">الاختبار التالي</span>
+            <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
+          </div>
+          <div class="hero-dash-cell hero-dash-cta">
+            <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
+          </div>
         </div>
 
         <!-- Continue-learning card (MODULE 37b). Hidden until the quiz store
@@ -199,20 +274,11 @@
         </div>
 
         <p class="hero-credit reveal" data-i18n-html="hero.credit">صُمّم وطُوّر بواسطة <em class="grad">أحمد مطمي</em></p>
-        <div class="hero-meta reveal">
+        <div class="hero-meta hero-meta--compact reveal">
           <div class="hero-stat"><strong data-count="questions">0</strong><span data-i18n="hero.statq">سؤال تدريبي</span></div>
           <div class="hero-stat"><strong data-count="subjects">0</strong><span data-i18n="hero.stats">مواد دراسية</span></div>
           <div class="hero-stat"><strong data-count="tools">0</strong><span data-i18n="hero.statTools">أدوات تفاعلية</span></div>
         </div>
-
-        <ul class="hero-features reveal" aria-label="ماذا تقدم المنصة">
-          <li><span data-feat="materials" aria-hidden="true">📚</span><span data-i18n="features.materials">مواد دراسية</span></li>
-          <li><span aria-hidden="true">✍️</span><span data-i18n="features.quizzes">اختبارات تدريبية</span></li>
-          <li><span aria-hidden="true">📄</span><span data-i18n="features.summaries">ملخصات</span></li>
-          <li><span aria-hidden="true">🃏</span><span data-i18n="features.flashcards">بطاقات تعليمية</span><b class="res-count" data-flash-count>18</b></li>
-          <li><span aria-hidden="true">🛠️</span><span data-i18n="features.tools">أدوات أمنية تفاعلية</span></li>
-          <li><span aria-hidden="true">🧪</span><span data-i18n="features.labs">معامل عملية</span><b class="res-count">4</b></li>
-        </ul>
       </div>
 
       <div class="scroll-hint" aria-hidden="true"><span></span></div>
@@ -525,12 +591,21 @@
         <h2 class="section-title" data-i18n-html="flash.title">راجع المصطلحات <em class="grad">بالبطاقات</em></h2>
         <p class="section-sub" data-i18n="flash.sub">اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.</p>
       </div>
-      <div class="flash-toolbar reveal">
-        <input id="flashSearch" type="search" class="flash-search" placeholder="ابحث عن مصطلح…" aria-label="بحث في البطاقات التعليمية" />
-        <button type="button" id="flashShuffle" class="btn btn-sm btn-ghost" data-i18n="flash.shuffle">خلط البطاقات</button>
-      </div>
-      <div id="flashGrid" class="flash-grid"></div>
-      <p class="empty-state" id="flashEmpty" hidden>لا توجد بطاقات مطابقة لبحثك.</p>
+      <!-- Collapsible hub: the full card grid expands on demand to keep the page light. -->
+      <details class="collapsible reveal" open>
+        <summary class="collapsible-summary">
+          <span data-i18n="collapsible.showCards">عرض كل البطاقات (18)</span>
+          <span class="collapsible-chev" aria-hidden="true">▾</span>
+        </summary>
+        <div class="collapsible-body">
+          <div class="flash-toolbar">
+            <input id="flashSearch" type="search" class="flash-search" placeholder="ابحث عن مصطلح…" aria-label="بحث في البطاقات التعليمية" />
+            <button type="button" id="flashShuffle" class="btn btn-sm btn-ghost" data-i18n="flash.shuffle">خلط البطاقات</button>
+          </div>
+          <div id="flashGrid" class="flash-grid"></div>
+          <p class="empty-state" id="flashEmpty" hidden>لا توجد بطاقات مطابقة لبحثك.</p>
+        </div>
+      </details>
     </section>
     <!-- QUIZ -->
     <section class="section quiz-sec" id="quiz">
@@ -539,8 +614,18 @@
         <h2 class="section-title" data-i18n="quiz.title">اختبر نفسك في كل مادة</h2>
         <p class="section-sub" data-i18n="quiz.sub">أسئلة لكل مادة مع شرح فوري لكل إجابة، وضع مؤقّت اختياري، وحفظ تلقائي للنتائج.</p>
       </div>
-      <div id="quizApp" class="quiz-grid reveal"></div>
-      <p class="quiz-hint reveal" data-i18n="quiz.hint">💡 اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
+      <!-- Collapsible hub: the quiz surface expands on demand; default open
+           so keyboard/screen-reader users land directly on the picker. -->
+      <details class="collapsible reveal" open>
+        <summary class="collapsible-summary">
+          <span data-i18n="collapsible.showQuizzes">عرض بنوك الأسئلة</span>
+          <span class="collapsible-chev" aria-hidden="true">▾</span>
+        </summary>
+        <div class="collapsible-body">
+          <div id="quizApp" class="quiz-grid"></div>
+          <p class="quiz-hint" data-i18n="quiz.hint">💡 اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
+        </div>
+      </details>
     </section>
 
     <!-- PROGRESS -->
@@ -942,10 +1027,33 @@
     </button>
   </div>
 
-  <script src="current-semester.js"></script>
-  <script src="current-semester.js"></script>
-  <script src="script.js"></script>
-  <script src="assistant.js"></script>
+  <!-- ============================================================
+       GLOBAL SEARCH (MODULE 48) — command-palette style dialog.
+       Searches lessons, learning paths, tools, quizzes, flashcards
+       and glossary terms (flashcard explanations). Fully keyboard
+       navigable: / or Ctrl+K opens, Esc closes, ↑↓ + Enter pick.
+       ============================================================ -->
+  <div id="searchOverlay" class="search-overlay" hidden></div>
+  <div id="searchDialog" class="search-dialog" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="searchDialogTitle">
+    <div class="search-panel" role="document">
+      <h2 id="searchDialogTitle" class="sr-only" data-i18n="search.title">بحث في المنصة</h2>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="searchInput" type="search" autocomplete="off" spellcheck="false"
+               data-i18n-placeholder="search.placeholder" placeholder="ابحث: درس، مسار، أداة، اختبار، مصطلح…"
+               aria-label="بحث في المنصة" role="combobox" aria-expanded="false" aria-controls="searchResults" aria-activedescendant="" />
+        <button type="button" id="searchClose" class="search-close" aria-label="إغلاق البحث" title="إغلاق">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <ul id="searchResults" class="search-results" role="listbox" aria-label="نتائج البحث"></ul>
+      <p class="search-foot"><kbd>/</kbd> <span data-i18n="search.hint">أو Ctrl+K للفتح · Esc للإغلاق · ↑↓ للتنقل</span></p>
+    </div>
+  </div>
+
+  <script src="current-semester.js" defer></script>
+  <script src="script.js" defer></script>
+  <script src="assistant.js" defer></script>
   <!-- SW registration must happen after script.js so navigator.serviceWorker is available.
        Scope is intentionally relative (./) so it works under GH Pages project paths. -->
   <script>
