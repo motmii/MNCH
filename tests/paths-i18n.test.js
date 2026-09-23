@@ -100,7 +100,7 @@ check("no stale paths.found/prac/exam keys in HTML", !/paths\.(found|prac|exam)\
 
 /* ---------- ViewSwitcher + mount wiring ---------- */
 console.log("\u2014 view-switcher & mount wiring \u2014");
-check("VIEWS registers the #path detail view", js.includes('$id("paths"), $id("path"), $id("subjects")'));
+check("VIEWS registers the #path detail view", js.includes('$id("paths"), $id("skills")') && js.includes('$id("path"), $id("subjects")'));
 check("resolveViewId maps the path/ prefix", js.includes('if (/^path\\//.test(id)) return "path";'));
 check("activate() preserves #path/<id> deep-link hashes", js.includes('/^#path\\//.test(location.hash)'));
 check("pathsGrid mount present", html.includes('id="pathsGrid"'));

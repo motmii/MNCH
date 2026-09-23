@@ -127,6 +127,22 @@ function sanitizeQuizPayload(raw) {
   return out;
 }
 
+/**
+ * Report one genuine completed action to the local motivation system.
+ * The bridge is optional and idempotent — awarding the same real action
+ * twice never grants duplicate XP. Failures are swallowed so learning
+ * features never break when storage is unavailable.
+ * @param {"lesson"|"quiz"|"flash"|"lab"} kind Action kind.
+ * @param {string|number} id Stable action id.
+ * @returns {void}
+ */
+function awardMotivation(kind, id) {
+  try {
+    const api = window.PlatformMotivation;
+    if (api && typeof api.award === "function") api.award(kind, id);
+  } catch (e) { /* motivation is additive, never fatal */ }
+}
+
 /* ---------- 02 · Store -------------------------------------- */
 const Store = {
   NS: "motmi-portal",
@@ -253,7 +269,7 @@ window.PLATFORM_STORE = Store;
 
   /** Close the overlay and mark onboarding as done. @returns {void} */
   function finishOnboarding() {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ done: true }));
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ done: true })); } catch { /* storage blocked — overlay must still close */ }
     overlay.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }
@@ -1574,6 +1590,8 @@ function showResult() {
     };
     if (d.progress) delete d.progress[curKey];
     writeStore(d);
+    /* Genuine quiz completion — idempotent per bank (retakes never farm XP). */
+    awardMotivation("quiz", curKey);
 
     /* Track wrong/timed-out question indices for the retry feature.
        The run position maps through questionOrder (null = natural), so
@@ -1734,9 +1752,23 @@ function bindQuizDelegation() {
   if (!app || app.dataset.qDelegated === "1") return;
   app.dataset.qDelegated = "1";
 
+  /* ONE delegated click listener per quiz mount — every branch below
+     guards on its own selector. Registering a second listener made
+     each click traverse two handlers; mode toggles now live here too. */
   app.addEventListener("click", (e) => {
     const t = e.target;
     if (!t || !t.closest) return;
+
+    const modeBtn = t.closest(".q-mode-btn");
+    if (modeBtn) {
+      const newMode = modeBtn.dataset.mode === "exam";
+      if (newMode !== timedMode) {
+        timedMode = newMode;
+        Store.set("timed", timedMode);
+        renderPicks();
+      }
+      return;
+    }
 
     const pick = t.closest(".q-pick");
     if (pick) {
@@ -1777,18 +1809,6 @@ function bindQuizDelegation() {
     if (opt && !opt.hasAttribute("disabled")) {
       Sfx.play("tick");
       handleAnswer(parseInt(opt.dataset.i, 10));
-    }
-  });
-
-  app.addEventListener("click", (e) => {
-    const modeBtn = e.target && e.target.closest && e.target.closest(".q-mode-btn");
-    if (modeBtn) {
-      const newMode = modeBtn.dataset.mode === "exam";
-      if (newMode !== timedMode) {
-        timedMode = newMode;
-        Store.set("timed", timedMode);
-        renderPicks();
-      }
     }
   });
 }
@@ -2525,6 +2545,7 @@ const Lang = (() => {
       "a11y.skip": "تخطي إلى المحتوى الرئيسي",
       "nav.home": "الرئيسية", "nav.semester": "الترم الحالي",
       "nav.paths": "مسارات التعلم", "nav.subjects": "المواد",
+      "nav.skills": "شجرة المهارات",
       "nav.quiz": "الاختبارات", "nav.tools": "الأدوات", "nav.labs": "المعامل",
       "nav.flashcards": "البطاقات", "nav.progress": "تقدمك", "nav.about": "حول المنصة", "nav.contact": "التواصل",
       "nav.games": "تحديات CTF", "nav.redteam": "المختبر الهجومي", "nav.ir": "الاستجابة للحوادث", "nav.cryptolab": "مختبر التشفير",
@@ -2556,6 +2577,80 @@ const Lang = (() => {
       "dash.resumeQuiz": "استئناف: {sub}",
       "dash.newQuiz": "اختبار جديد: {sub}",
       "dash.allDone": "أكملت جميع الاختبارات 🎉",
+      /* Phase 1 · student command-center dashboard */
+      "dash.kicker": "لوحة الطالب",
+      "dash.welcomeNew": "مرحبًا بك في لوحة تعلّمك",
+      "dash.welcomeBack": "مرحبًا بعودتك — لوحة تعلّمك جاهزة",
+      "dash.welcomeEmpty": "ابدأ مسارًا أو اختبارًا وسيظهر تقدمك هنا — محفوظًا على جهازك فقط.",
+      "dash.welcomeActive": "لديك نشاط محفوظ. تابع من حيث توقفت أو راجع ما تبقى من الاختبارات والمعامل.",
+      "dash.overall": "التقدم العام في الاختبارات",
+      "dash.overallAria": "نسبة التقدم العامة في الاختبارات",
+      "dash.currentPath": "المسار الحالي",
+      "dash.pathAria": "نسبة إنجاز المسار الحالي",
+      "dash.pathProgress": "{done} من {total} موضوعًا",
+      "dash.pathNext": "التالي: {topic}",
+      "dash.pathComplete": "اكتمل المسار",
+      "dash.noPath": "لا يوجد مسار محدد بعد",
+      "dash.noPathBody": "افتح مسار تعلم لبدء تتبع الموضوعات.",
+      "dash.nextLesson": "الدرس التالي",
+      "dash.lessonSoon": "موضوع حقيقي من المسار؛ محتوى الدرس سيُضاف قريبًا.",
+      "dash.lessonReady": "درس متاح الآن داخل هذا المسار.",
+      "dash.pending": "عمل غير مكتمل",
+      "dash.pendingCounts": "{quizzes} اختبارات · {labs} معامل متبقية",
+      "dash.readyCounts": "{quizzes} اختبارات · {labs} معامل جاهزة للبدء",
+      "dash.pendingQuiz": "اختبار: {name}",
+      "dash.pendingLab": "مختبر: {name}",
+      "dash.allCaughtUp": "كل الاختبارات والمعامل مكتملة",
+      "dash.emptyBody": "لا يوجد تقدم محفوظ بعد. ابدأ بالمسار المقترح أو أول اختبار — ستظهر خطوتك التالية هنا تلقائيًا.",
+      "dash.emptyCta": "استكشف مسارات التعلم",
+      "dash.openPath": "افتح المسار",
+      "dash.lastOpened": "آخر درس: {title}",
+      "dash.continueLabel": "متابعة التعلم",
+      /* Phase 2 · local motivation system */
+      "motivation.kicker": "نظام التحفيز المحلي",
+      "motivation.level": "المستوى",
+      "motivation.levelTitle.1": "مستكشف",
+      "motivation.levelTitle.2": "متعلّم",
+      "motivation.levelTitle.3": "ممارس",
+      "motivation.levelTitle.4": "مدافع",
+      "motivation.levelTitle.5": "متخصص",
+      "motivation.levelTitle.6": "خبير",
+      "motivation.xp": "{xp} نقطة خبرة",
+      "motivation.xpNext": "تبقّى {remaining} نقطة للمستوى {next}",
+      "motivation.levelAria": "التقدم نحو المستوى التالي",
+      "motivation.dailyGoal": "هدف الدراسة اليومي",
+      "motivation.weeklyGoal": "هدف الدراسة الأسبوعي",
+      "motivation.goalValue": "{xp} / {goal} نقطة",
+      "motivation.dailyAria": "التقدم نحو هدف الدراسة اليومي",
+      "motivation.weeklyAria": "التقدم نحو هدف الدراسة الأسبوعي",
+      "motivation.streak": "سلسلة الدراسة",
+      "motivation.streakHint": "أيام متتالية من النشاط الحقيقي",
+      "motivation.streakDays": "{days} يوم",
+      "motivation.achievements": "الإنجازات",
+      "motivation.achievementsCount": "{done} من {total}",
+      "motivation.locked": "مقفل",
+      "motivation.unlocked": "مفتوح",
+      "motivation.reset": "إعادة ضبط التحفيز",
+      "motivation.resetNote": "تُحفظ بيانات التحفيز على جهازك فقط، وإعادة الضبط لا تحذف نتائج الاختبارات أو تقدم المسارات.",
+      "motivation.resetConfirm": "هل تريد إعادة ضبط نقاط الخبرة والإنجازات والسلسلة؟ لن تُحذف نتائج الاختبارات أو تقدم المسارات.",
+      "motivation.badge.firstLesson": "أول درس",
+      "motivation.badge.firstLessonDesc": "أكمل أول درس حقيقي.",
+      "motivation.badge.firstQuiz": "أول اختبار",
+      "motivation.badge.firstQuizDesc": "أكمل أول اختبار تجريبي.",
+      "motivation.badge.quizMaster": "إتقان الاختبارات",
+      "motivation.badge.quizMasterDesc": "اجتز جميع بنوك الأسئلة المتاحة بنسبة 80% أو أكثر.",
+      "motivation.badge.labExplorer": "مستكشف المعامل",
+      "motivation.badge.labExplorerDesc": "أكمل أول مختبر عملي.",
+      "motivation.badge.cryptoApprentice": "متدرّب التشفير",
+      "motivation.badge.cryptoApprenticeDesc": "أكمل اختبار مبادئ التصميم أو مختبر التشفير.",
+      "motivation.badge.networkNavigator": "ملّاح الشبكات",
+      "motivation.badge.networkNavigatorDesc": "أنجز نصف مسار الشبكات أو المختبر الهجومي.",
+      "motivation.badge.incidentResponder": "مستجيب الحوادث",
+      "motivation.badge.incidentResponderDesc": "أكمل مختبر الاستجابة أو نصف مسار الحوادث.",
+      "motivation.badge.streak7": "سلسلة سبعة أيام",
+      "motivation.badge.streak7Desc": "تعلّم سبعة أيام متتالية.",
+      "motivation.badge.semesterFinisher": "مُنجز الترم",
+      "motivation.badge.semesterFinisherDesc": "أكمل اختبارات مواد الترم الخمس.",
       "features.materials": "مواد دراسية", "features.quizzes": "اختبارات تدريبية",
       "features.summaries": "ملخصات", "features.flashcards": "بطاقات تعليمية",
       "features.tools": "أدوات أمنية تفاعلية", "features.labs": "معامل عملية",
@@ -2609,6 +2704,31 @@ const Lang = (() => {
       "paths.unknownBody": "لم نعثر على هذا المسار — ربما تغيّر رابطه. اختر مسارًا من القائمة.",
       "paths.viewAll": "عرض كل المسارات",
       "paths.lesson": "درس",
+      /* Phase 3 · cybersecurity skill tree */
+      "skills.eyebrow": "شجرة المهارات",
+      "skills.title": "خريطة <em class=\"grad\">المهارات</em>",
+      "skills.sub": "مساراتك الحالية معروضة كشجرة مهارات: النسبة، المتطلبات، الدروس والاختبارات والمعامل، والخطوة التالية — بدون تكرار بيانات المسارات.",
+      "skills.listAlt": "قائمة المهارات (بديل قابل للوصول)",
+      "skills.listIntro": "كل عنصر يمثل مسارًا حقيقيًا من مسارات التعلم.",
+      "skills.completion": "الإنجاز",
+      "skills.prerequisites": "المتطلبات السابقة",
+      "skills.prerequisitesNone": "لا توجد متطلبات سابقة.",
+      "skills.relatedLessons": "الدروس المرتبطة",
+      "skills.relatedQuizzes": "الاختبارات المرتبطة",
+      "skills.relatedLabs": "المعامل المرتبطة",
+      "skills.noLessons": "لا توجد دروس منشورة بعد.",
+      "skills.noQuizzes": "لا يوجد اختبار مرتبط بعد.",
+      "skills.noLabs": "لا يوجد مختبر مرتبط بعد.",
+      "skills.nextAction": "الخطوة التالية",
+      "skills.comingSoon": "قريبًا — لا محتوى منشورًا بعد.",
+      "skills.reviewPath": "مراجعة المسار",
+      "skills.startQuiz": "ابدأ الاختبار",
+      "skills.openLab": "افتح المعمل",
+      "skills.reviewFlashcards": "راجع البطاقات",
+      "skills.openPath": "افتح المسار",
+      "skills.nextTopic": "التالي: {topic}",
+      "skills.recommended": "الأنسب للبداية",
+      "skills.soon": "قريبًا",
       "lesson.back": "رجوع إلى المسارات",
       "lesson.soonTitle": "هذا الدرس قيد الإعداد",
       "lesson.soonBody": "محتوى هذا الدرس ليس منشورًا بعد — نفضّل أن نقول ذلك بوضوح.",
@@ -2620,6 +2740,120 @@ const Lang = (() => {
       "lesson.relatedPractice": "تدريب مرتبط",
       "lesson.takeQuiz": "اختبر نفسك في هذا الموضوع",
       "lesson.nextLesson": "الدرس التالي",
+      /* Phase 4 · lesson experience + local revision */
+      "lesson.objectives": "أهداف التعلم",
+      "lesson.noObjectives": "ستُضاف الأهداف مع محتوى الدرس.",
+      "lesson.time": "المدة التقريبية",
+      "lesson.minutes": "{minutes} د",
+      "lesson.timeNote": "تقدير من طول المحتوى الظاهر فقط.",
+      "lesson.difficulty": "الصعوبة",
+      "lesson.difficultyUnknown": "تظهر الصعوبة مع محتوى الدرس.",
+      "lesson.difficultyEasy": "سهلة",
+      "lesson.difficultyMedium": "متوسطة",
+      "lesson.difficultyHard": "متقدمة",
+      "lesson.fromQuizMix": "تقدير من مزيج الأسئلة المتاحة.",
+      "lesson.fromPath": "من مستوى المسار.",
+      "lesson.prerequisites": "المتطلبات السابقة",
+      "lesson.prerequisitesNone": "لا متطلبات إضافية في هذا المسار.",
+      "lesson.checks": "تحقق سريع",
+      "lesson.noChecks": "لا توجد أسئلة تحقق مرتبطة بعد.",
+      "lesson.showAnswer": "إظهار الإجابة",
+      "lesson.hideAnswer": "إخفاء الإجابة",
+      "lesson.checkCorrect": "إجابة صحيحة.",
+      "lesson.checkWrong": "ليست صحيحة — راجع الشرح.",
+      "lesson.markComplete": "تحديد كمكتمل",
+      "lesson.completed": "مكتمل ✓",
+      "lesson.markUndone": "إلغاء الإكمال",
+      "lesson.bookmark": "حفظ للاحقًا",
+      "lesson.bookmarked": "محفوظ ✓",
+      "lesson.unbookmark": "إزالة الحفظ",
+      "lesson.notes": "ملاحظاتي المحلية",
+      "lesson.notePlaceholder": "اكتب ملاحظة قصيرة هنا — تُحفظ على جهازك فقط.",
+      "lesson.saveNote": "حفظ الملاحظة",
+      "lesson.noteSaved": "تم حفظ الملاحظة محليًا.",
+      "lesson.clearNote": "مسح الملاحظة",
+      "lesson.noteTooLong": "الملاحظة طويلة؛ تم حفظ أول 2000 حرف.",
+      "lesson.relatedQuiz": "الاختبار المرتبط",
+      "lesson.relatedLab": "المعمل المرتبط",
+      "lesson.noRelated": "لا روابط إضافية بعد.",
+      "review.title": "مراجعة محلية شفافة",
+      "review.sub": "قائمة من الأخطاء والدروس غير المكتملة والمواضيع المحفوظة ومواعيد المراجعة السابقة — كلها من بيانات جهازك.",
+      "review.empty": "لا عناصر مراجعة بعد. أخطاؤك ودروسك غير المكتملة ومواضيعك المحفوظة ستظهر هنا.",
+      "review.reasonMissed": "سؤال أخطأت فيه",
+      "review.reasonUnfinished": "درس غير مكتمل",
+      "review.reasonBookmark": "موضوع محفوظ",
+      "review.reasonStale": "يحتاج مراجعة",
+      "review.lastReview": "آخر مراجعة: {date}",
+      "review.neverReviewed": "لم يُراجع بعد",
+      "review.showing": "عرض {shown} من {total}",
+      "review.startMistakes": "مراجعة الأخطاء",
+      "review.startFive": "تدريب خمس دقائق",
+      "review.close": "إغلاق المراجعة",
+      "review.next": "التالي",
+      "review.finish": "إنهاء",
+      "review.gotIt": "أجبت صحيحًا — إزالة من الأخطاء",
+      "review.markWrong": "تسجيل كخطأ",
+      "review.reveal": "إظهار الشرح",
+      "review.timeLeft": "المتبقي {time}",
+      "review.timeUp": "انتهت الخمس دقائق — تم حفظ ما أُجيب عنه فقط.",
+      "review.summary": "النتيجة: {correct} صحيحة من {answered} — المتبقي {remaining}",
+      "review.noMistakes": "لا توجد أخطاء محفوظة بعد.",
+      "review.backToQuiz": "العودة إلى الاختبارات",
+      "review.openLesson": "فتح الدرس",
+      "exam.title": "الاستعداد للاختبار",
+      "exam.sub": "خطّط بهدوء — تقدّم ثابت كل يوم أفضل من الحفظ في اللحظة الأخيرة.",
+      "exam.datePrompt": "حدّد تاريخ اختبارك (اختياري) ليظهر العدّ التنازلي وتوصيات يومية مبنية على تقدّمك الحقيقي.",
+      "exam.dateLabel": "تاريخ الاختبار",
+      "exam.save": "حفظ التاريخ",
+      "exam.skip": "لاحقًا",
+      "exam.edit": "تعديل التاريخ",
+      "exam.remove": "إزالة التاريخ",
+      "exam.dateSaved": "تم حفظ التاريخ — بالتوفيق، خطوة خطوة.",
+      "exam.dateRemoved": "تمت إزالة التاريخ — يمكنك تحديده مجددًا في أي وقت.",
+      "exam.invalidDate": "تعذّر قراءة التاريخ — اختره من حقل التاريخ.",
+      "exam.daysLeft": "تبقّى {days} يومًا — خطوة كل يوم تصنع فرقًا.",
+      "exam.dayLeft": "تبقّى يوم واحد — راجع بهدوء وثق بما تعلّمته.",
+      "exam.today": "الاختبار اليوم — خذ نفسًا عميقًا، أنت مستعد أكثر مما تظن.",
+      "exam.passed": "مرّ هذا التاريخ — حدّثه إن كان هناك اختبار قادم.",
+      "exam.dailyTitle": "تركيز اليوم",
+      "exam.dailyEmpty": "لا توصيات الآن — استمر على نفس الوتيرة الهادئة.",
+      "exam.recReview": "راجع {count} من أسئلة أخطأت فيها — تصحيحها أسرع طريق للتحسّن.",
+      "exam.recWeak": "أعد النظر في «{topic}» ({subject}) — ظهر في أخطائك.",
+      "exam.recLesson": "أكمل الدرس: {lesson}",
+      "exam.recSubject": "امنح {subject} بعض الوقت اليوم (الجاهزية {pct}%).",
+      "exam.recPractice": "جرّب اختبارًا تدريبيًا عندما تشعر بالجاهزية.",
+      "exam.readinessTitle": "جاهزية المواد",
+      "exam.readinessSub": "نِسَب حقيقية من بياناتك: الاختبار 50% · الدروس 30% · الخلو من الأخطاء 20%",
+      "exam.breakdown": "اختبار {quiz}% · دروس {lessons}% · خالٍ من الأخطاء {mistakes}%",
+      "exam.notTested": "لم يُختبر بعد",
+      "exam.noLessons": "لا دروس مرتبطة — أُعيد توزيع الوزن على الاختبار والأخطاء.",
+      "exam.weakTitle": "مواضيع تحتاج مراجعة لطيفة",
+      "exam.weakEmpty": "لا مواضيع ضعيفة مسجلة — عمل رائع!",
+      "exam.missedCount": "{count} أخطاء",
+      "exam.practiceTitle": "اختبار تدريبي",
+      "exam.practiceSub": "أسئلة حقيقية من كل المواد — بلا مؤقّت ولا ضغط.",
+      "exam.start": "ابدأ الاختبار التدريبي",
+      "exam.progress": "السؤال {i} من {total}",
+      "exam.from": "من: {subject}",
+      "exam.next": "التالي",
+      "exam.finish": "إنهاء",
+      "exam.correct": "إجابة صحيحة ✓",
+      "exam.wrong": "ليست الإجابة — اقرأ الشرح بهدوء.",
+      "exam.summaryTitle": "نتيجة الاختبار التدريبي",
+      "exam.summaryLine": "{correct} صحيحة من {total} ({pct}%)",
+      "exam.encHigh": "ممتاز! حافظ على هذا المستوى بمراجعة خفيفة.",
+      "exam.encMid": "جيد جدًا — ركّز على المواضيع التي أخطأت فيها.",
+      "exam.encLow": "بداية طيبة — كل خطأ اليوم نقطة إضافية غدًا.",
+      "exam.lastRun": "آخر محاولة تدريبية: {pct}% في {date}",
+      "exam.finalTitle": "خلاصة الجاهزية",
+      "exam.finalLine": "جاهزيتك العامة {pct}% — {note}",
+      "exam.finalNoteHigh": "استعداد قوي، يكفي مراجعة الأخطاء المتبقية.",
+      "exam.finalNoteMid": "على الطريق الصحيح — واصل التركيز على المواضيع الضعيفة.",
+      "exam.finalNoteLow": "كل يوم مراجعة يقرّبك — ابدأ بأقل مادة جاهزية.",
+      "exam.finalNoData": "ابدأ باختبار أو درس واحد وستظهر هنا جاهزيتك الحقيقية.",
+      "exam.openQuiz": "فتح الاختبارات",
+      "exam.openLessons": "فتح الدروس",
+
       "beginner.title": "مبتدئ؟ ابدأ من هنا — خطواتك الأربع",
       "beginner.s1": "اختر مادة من «المواد» واقرأ وصفها.", "beginner.s2": "احفظ المصطلحات ببطاقات الفلاش السريعة.", "beginner.s3": "اختبر نفسك في المادة واقرأ شرح كل إجابة.", "beginner.s4": "طبّق بأداة تفاعلية واحدة ثم جرّب معمل المحاكاة.",
       "beginner.cta": "ابدأ الخطوة الأولى", "beginner.pathCta": "ابدأ المسار الموصى به",
@@ -2754,6 +2988,7 @@ const Lang = (() => {
       "semester.missingData": "Current-semester data is not available right now.",
       "nav.home": "Home", "nav.semester": "Current Semester",
       "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
+      "nav.skills": "Skill Tree",
       "nav.quiz": "Quizzes", "nav.tools": "Tools", "nav.labs": "Labs",
       "nav.flashcards": "Flashcards", "nav.progress": "Your Progress", "nav.about": "About", "nav.contact": "Contact",
       "nav.games": "CTF Lab", "nav.redteam": "Red Team Lab", "nav.ir": "Incident Response", "nav.cryptolab": "Crypto Lab",
@@ -2785,6 +3020,80 @@ const Lang = (() => {
       "dash.resumeQuiz": "Resume: {sub}",
       "dash.newQuiz": "New quiz: {sub}",
       "dash.allDone": "All quizzes completed 🎉",
+      /* Phase 1 · student command-center dashboard */
+      "dash.kicker": "Student dashboard",
+      "dash.welcomeNew": "Welcome to your learning dashboard",
+      "dash.welcomeBack": "Welcome back — your learning hub is ready",
+      "dash.welcomeEmpty": "Start a path or quiz and your progress will appear here — saved only on this device.",
+      "dash.welcomeActive": "You have saved learning activity. Pick up where you left off or review your remaining quizzes and labs.",
+      "dash.overall": "Overall quiz progress",
+      "dash.overallAria": "Overall quiz progress percentage",
+      "dash.currentPath": "Current path",
+      "dash.pathAria": "Current path completion percentage",
+      "dash.pathProgress": "{done} of {total} topics",
+      "dash.pathNext": "Next: {topic}",
+      "dash.pathComplete": "Path complete",
+      "dash.noPath": "No path selected yet",
+      "dash.noPathBody": "Open a learning path to start tracking topics.",
+      "dash.nextLesson": "Next lesson",
+      "dash.lessonSoon": "A real path topic; authored lesson content is coming soon.",
+      "dash.lessonReady": "An authored lesson is available now in this path.",
+      "dash.pending": "Unfinished work",
+      "dash.pendingCounts": "{quizzes} quizzes · {labs} labs remaining",
+      "dash.readyCounts": "{quizzes} quizzes · {labs} labs ready to start",
+      "dash.pendingQuiz": "Quiz: {name}",
+      "dash.pendingLab": "Lab: {name}",
+      "dash.allCaughtUp": "All quizzes and labs are complete",
+      "dash.emptyBody": "No progress has been saved yet. Start the recommended path or first quiz — your next step will appear here automatically.",
+      "dash.emptyCta": "Explore learning paths",
+      "dash.openPath": "Open path",
+      "dash.lastOpened": "Last lesson: {title}",
+      "dash.continueLabel": "Continue learning",
+      /* Phase 2 · local motivation system */
+      "motivation.kicker": "Local motivation",
+      "motivation.level": "Level",
+      "motivation.levelTitle.1": "Explorer",
+      "motivation.levelTitle.2": "Learner",
+      "motivation.levelTitle.3": "Practitioner",
+      "motivation.levelTitle.4": "Defender",
+      "motivation.levelTitle.5": "Specialist",
+      "motivation.levelTitle.6": "Expert",
+      "motivation.xp": "{xp} XP",
+      "motivation.xpNext": "{remaining} XP to level {next}",
+      "motivation.levelAria": "Progress toward the next level",
+      "motivation.dailyGoal": "Daily study goal",
+      "motivation.weeklyGoal": "Weekly study goal",
+      "motivation.goalValue": "{xp} / {goal} XP",
+      "motivation.dailyAria": "Progress toward the daily study goal",
+      "motivation.weeklyAria": "Progress toward the weekly study goal",
+      "motivation.streak": "Study streak",
+      "motivation.streakHint": "Consecutive days of genuine activity",
+      "motivation.streakDays": "{days} days",
+      "motivation.achievements": "Achievements",
+      "motivation.achievementsCount": "{done} of {total}",
+      "motivation.locked": "Locked",
+      "motivation.unlocked": "Unlocked",
+      "motivation.reset": "Reset motivation",
+      "motivation.resetNote": "Motivation data is stored on this device only. Resetting it never deletes quiz results or learning-path progress.",
+      "motivation.resetConfirm": "Reset XP, achievements and streak? Quiz results and learning-path progress will not be deleted.",
+      "motivation.badge.firstLesson": "First Lesson",
+      "motivation.badge.firstLessonDesc": "Complete your first real lesson.",
+      "motivation.badge.firstQuiz": "First Quiz",
+      "motivation.badge.firstQuizDesc": "Complete your first practice quiz.",
+      "motivation.badge.quizMaster": "Quiz Master",
+      "motivation.badge.quizMasterDesc": "Score at least 80% in every available question bank.",
+      "motivation.badge.labExplorer": "Lab Explorer",
+      "motivation.badge.labExplorerDesc": "Complete your first hands-on lab.",
+      "motivation.badge.cryptoApprentice": "Cryptography Apprentice",
+      "motivation.badge.cryptoApprenticeDesc": "Complete the design-principles quiz or the crypto lab.",
+      "motivation.badge.networkNavigator": "Network Navigator",
+      "motivation.badge.networkNavigatorDesc": "Complete half of the networking path or the offensive lab.",
+      "motivation.badge.incidentResponder": "Incident Responder",
+      "motivation.badge.incidentResponderDesc": "Complete the incident-response lab or half of the incident path.",
+      "motivation.badge.streak7": "Seven-Day Streak",
+      "motivation.badge.streak7Desc": "Study on seven consecutive days.",
+      "motivation.badge.semesterFinisher": "Semester Finisher",
+      "motivation.badge.semesterFinisherDesc": "Complete the quizzes for all five semester subjects.",
       "features.materials": "Study materials", "features.quizzes": "Practice quizzes",
       "features.summaries": "Summaries", "features.flashcards": "Flashcards",
       "features.tools": "Interactive security tools", "features.labs": "Practical labs",
@@ -2838,6 +3147,31 @@ const Lang = (() => {
       "paths.unknownBody": "We couldn't find this path — its link may have changed. Pick one from the list.",
       "paths.viewAll": "View all paths",
       "paths.lesson": "Lesson",
+      /* Phase 3 · cybersecurity skill tree */
+      "skills.eyebrow": "Skill Tree",
+      "skills.title": "Your <em class=\"grad\">skill map</em>",
+      "skills.sub": "Your current paths shown as a skill tree: completion, prerequisites, related lessons/quizzes/labs and the next action — without duplicating path data.",
+      "skills.listAlt": "Skill list (accessible alternative)",
+      "skills.listIntro": "Each item is a real learning path.",
+      "skills.completion": "Completion",
+      "skills.prerequisites": "Prerequisites",
+      "skills.prerequisitesNone": "No prerequisites.",
+      "skills.relatedLessons": "Related lessons",
+      "skills.relatedQuizzes": "Related quizzes",
+      "skills.relatedLabs": "Related labs",
+      "skills.noLessons": "No authored lessons yet.",
+      "skills.noQuizzes": "No linked quiz yet.",
+      "skills.noLabs": "No linked lab yet.",
+      "skills.nextAction": "Recommended next action",
+      "skills.comingSoon": "Coming soon — no published content yet.",
+      "skills.reviewPath": "Review path",
+      "skills.startQuiz": "Start quiz",
+      "skills.openLab": "Open lab",
+      "skills.reviewFlashcards": "Review flashcards",
+      "skills.openPath": "Open path",
+      "skills.nextTopic": "Next: {topic}",
+      "skills.recommended": "Best starting point",
+      "skills.soon": "Coming soon",
       "lesson.back": "Back to paths",
       "lesson.soonTitle": "This lesson is in preparation",
       "lesson.soonBody": "This lesson's content isn't published yet — we'd rather say that openly.",
@@ -2849,6 +3183,119 @@ const Lang = (() => {
       "lesson.relatedPractice": "Related practice",
       "lesson.takeQuiz": "Quiz yourself on this topic",
       "lesson.nextLesson": "Next lesson",
+      /* Phase 4 · lesson experience + local revision */
+      "lesson.objectives": "Learning objectives",
+      "lesson.noObjectives": "Objectives will appear with authored lesson content.",
+      "lesson.time": "Estimated time",
+      "lesson.minutes": "{minutes} min",
+      "lesson.timeNote": "Estimate from the visible content length only.",
+      "lesson.difficulty": "Difficulty",
+      "lesson.difficultyUnknown": "Difficulty appears with authored content.",
+      "lesson.difficultyEasy": "Easy",
+      "lesson.difficultyMedium": "Medium",
+      "lesson.difficultyHard": "Advanced",
+      "lesson.fromQuizMix": "Estimate from the available question mix.",
+      "lesson.fromPath": "From the path level.",
+      "lesson.prerequisites": "Prerequisites",
+      "lesson.prerequisitesNone": "No extra prerequisites in this path.",
+      "lesson.checks": "Quick checks",
+      "lesson.noChecks": "No linked check questions yet.",
+      "lesson.showAnswer": "Show answer",
+      "lesson.hideAnswer": "Hide answer",
+      "lesson.checkCorrect": "Correct answer.",
+      "lesson.checkWrong": "Not correct — review the explanation.",
+      "lesson.markComplete": "Mark as complete",
+      "lesson.completed": "Complete ✓",
+      "lesson.markUndone": "Mark as not complete",
+      "lesson.bookmark": "Bookmark for later",
+      "lesson.bookmarked": "Bookmarked ✓",
+      "lesson.unbookmark": "Remove bookmark",
+      "lesson.notes": "My local notes",
+      "lesson.notePlaceholder": "Write a short note here — stored on this device only.",
+      "lesson.saveNote": "Save note",
+      "lesson.noteSaved": "Note saved locally.",
+      "lesson.clearNote": "Clear note",
+      "lesson.noteTooLong": "Note is long; the first 2000 characters were kept.",
+      "lesson.relatedQuiz": "Related quiz",
+      "lesson.relatedLab": "Related lab",
+      "lesson.noRelated": "No extra links yet.",
+      "review.title": "Transparent local review",
+      "review.sub": "A list of mistakes, unfinished lessons, bookmarked topics and previous review dates — all from your device.",
+      "review.empty": "No review items yet. Your mistakes, unfinished lessons and bookmarked topics will appear here.",
+      "review.reasonMissed": "Question you missed",
+      "review.reasonUnfinished": "Unfinished lesson",
+      "review.reasonBookmark": "Bookmarked topic",
+      "review.reasonStale": "Due for review",
+      "review.lastReview": "Last review: {date}",
+      "review.neverReviewed": "Not reviewed yet",
+      "review.showing": "Showing {shown} of {total}",
+      "review.startMistakes": "Review mistakes",
+      "review.startFive": "Five-minute practice",
+      "review.close": "Close review",
+      "review.next": "Next",
+      "review.finish": "Finish",
+      "review.gotIt": "Answered correctly — remove from mistakes",
+      "review.markWrong": "Record as wrong",
+      "review.reveal": "Reveal explanation",
+      "review.timeLeft": "Remaining {time}",
+      "review.timeUp": "Five minutes are up — only answered questions were saved.",
+      "review.summary": "Result: {correct} correct of {answered} — remaining {remaining}",
+      "review.noMistakes": "No saved mistakes yet.",
+      "review.backToQuiz": "Back to quizzes",
+      "review.openLesson": "Open lesson",
+      "exam.title": "Exam preparation",
+      "exam.sub": "Plan calmly — steady daily progress beats last-minute cramming.",
+      "exam.datePrompt": "Set your exam date (optional) to get a countdown and daily recommendations based on your real progress.",
+      "exam.dateLabel": "Exam date",
+      "exam.save": "Save date",
+      "exam.skip": "Maybe later",
+      "exam.edit": "Edit date",
+      "exam.remove": "Remove date",
+      "exam.dateSaved": "Date saved — good luck, one step at a time.",
+      "exam.dateRemoved": "Date removed — you can set it again any time.",
+      "exam.invalidDate": "Could not read the date — please pick one from the date field.",
+      "exam.daysLeft": "{days} days left — a small step every day adds up.",
+      "exam.dayLeft": "One day left — review calmly and trust what you have learned.",
+      "exam.today": "Exam day — take a deep breath, you are more ready than you think.",
+      "exam.passed": "This date has passed — update it if another exam is coming.",
+      "exam.dailyTitle": "Today's focus",
+      "exam.dailyEmpty": "No recommendations right now — keep your calm pace.",
+      "exam.recReview": "Review {count} questions you missed — fixing them is the fastest way to improve.",
+      "exam.recWeak": "Revisit «{topic}» ({subject}) — it showed up in your mistakes.",
+      "exam.recLesson": "Finish the lesson: {lesson}",
+      "exam.recSubject": "Give {subject} some time today (readiness {pct}%).",
+      "exam.recPractice": "Try a practice exam when you feel ready.",
+      "exam.readinessTitle": "Subject readiness",
+      "exam.readinessSub": "Real percentages from your data: quiz 50% · lessons 30% · mistake-free 20%",
+      "exam.breakdown": "Quiz {quiz}% · lessons {lessons}% · mistake-free {mistakes}%",
+      "exam.notTested": "Not tested yet",
+      "exam.noLessons": "No linked lessons — weight moved to quiz and mistakes.",
+      "exam.weakTitle": "Topics that deserve a gentle review",
+      "exam.weakEmpty": "No weak topics recorded — great work!",
+      "exam.missedCount": "{count} missed",
+      "exam.practiceTitle": "Practice exam",
+      "exam.practiceSub": "Real questions from every subject — no timer, no pressure.",
+      "exam.start": "Start practice exam",
+      "exam.progress": "Question {i} of {total}",
+      "exam.from": "From: {subject}",
+      "exam.next": "Next",
+      "exam.finish": "Finish",
+      "exam.correct": "Correct ✓",
+      "exam.wrong": "Not quite — read the explanation calmly.",
+      "exam.summaryTitle": "Practice exam result",
+      "exam.summaryLine": "{correct} correct out of {total} ({pct}%)",
+      "exam.encHigh": "Excellent! Keep this level with light review.",
+      "exam.encMid": "Very good — focus on the topics you missed.",
+      "exam.encLow": "A good start — every mistake today is a point tomorrow.",
+      "exam.lastRun": "Last practice run: {pct}% on {date}",
+      "exam.finalTitle": "Readiness summary",
+      "exam.finalLine": "Overall readiness {pct}% — {note}",
+      "exam.finalNoteHigh": "Strong readiness — just review your remaining mistakes.",
+      "exam.finalNoteMid": "On the right track — keep focusing on weak topics.",
+      "exam.finalNoteLow": "Every review day brings you closer — start with your least-ready subject.",
+      "exam.finalNoData": "Start with one quiz or lesson and your real readiness will appear here.",
+      "exam.openQuiz": "Open quizzes",
+      "exam.openLessons": "Open lessons",
       "beginner.title": "New here? Start with these four steps",
       "beginner.s1": "Pick a subject from «Subjects» and read its description.", "beginner.s2": "Memorize the terms with quick flashcards.", "beginner.s3": "Quiz yourself on the subject and read each explanation.", "beginner.s4": "Apply with one interactive tool, then try a simulation lab.",
       "beginner.cta": "Take the first step", "beginner.pathCta": "Start the recommended path",
@@ -4148,6 +4595,8 @@ window.Lang = Lang;
           if (!st.reviewed[k]) {
             st.reviewed[k] = true;
             Store.set("flash", st);
+            /* First real review of this card — later flips never re-award. */
+            awardMotivation("flash", i);
             if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed"));
           }
         }
@@ -4283,7 +4732,7 @@ window.Lang = Lang;
 
   /** All switchable views: hero header + section elements. @type {HTMLElement[]} */
   const VIEWS = [
-    $id("hero"), $id("semester"), $id("paths"), $id("path"), $id("subjects"), $id("tools"),
+    $id("hero"), $id("semester"), $id("paths"), $id("skills"), $id("path"), $id("subjects"), $id("tools"),
     $id("labs"), $id("flash"), $id("quiz"), $id("progress"),
     $id("games"), $id("redteam"), $id("ir"), $id("cryptolab"),
     $id("about"), $id("contact"), $id("lesson"),
@@ -6917,15 +7366,275 @@ function lessonResChips(subjectKey,topicKey){
   return "";
 }
 
+/* ---------- Phase 4 helpers: derived lesson metadata + local stores ---------- */
+/* Everything here is DERIVED from existing data (LESSONS, LEARNING_PATHS,
+   QUIZZES, SUBJECT_TO_PATH) or stored locally on the device. No invented
+   content; every helper degrades to null/[] so callers can show the honest
+   "appears with authored content" notes instead of fake metadata. */
+
+/** Find the learning-path row that owns this lesson topic. */
+function lessonPathRow(subjectKey,topicKey){
+  try{
+    const paths=(typeof getLearningPaths==="function")?(getLearningPaths()||[]):[];
+    for(const p of paths){
+      const ts=Array.isArray(p.topics)?p.topics:[];
+      for(let i=0;i<ts.length;i++){
+        const t=ts[i];if(!t)continue;
+        if(t.lsn&&t.lsn.sub===subjectKey&&t.lsn.key===topicKey)return {path:p,index:i,topic:t};
+        if(t.res&&t.res.k==="quiz"&&t.res.key===subjectKey&&(t.id===topicKey||(t.t&&t.t.ar===topicKey)))return {path:p,index:i,topic:t};
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
+/** All bilingual text of a lesson flattened (for the time estimate). */
+function lessonTopicText(L){
+  if(!L||typeof L!=="object")return "";
+  const bi=v=>(v&&typeof v==="object")?((v.ar||"")+" "+(v.en||"")):(typeof v==="string"?v:"");
+  let s=bi(L.title)+" "+bi(L.explanation);
+  (Array.isArray(L.concepts)?L.concepts:[]).forEach(c=>{s+=" "+bi(c&&c.term)+" "+bi(c&&c.def);});
+  if(L.example)s+=" "+bi(L.example);
+  (Array.isArray(L.mistakes)?L.mistakes:[]).forEach(m=>{s+=" "+bi(m);});
+  (Array.isArray(L.terminology)?L.terminology:[]).forEach(t2=>{s+=" "+bi(t2);});
+  return s;
+}
+
+/** Rough word count across both locales of the lesson. */
+function lessonWords(L){
+  const m=lessonTopicText(L).trim().match(/\S+/g);
+  return m?m.length:0;
+}
+
+/** Estimated reading minutes from word count; null when nothing authored. */
+function lessonMinutes(L){
+  const w=lessonWords(L);
+  if(!w)return null;
+  return Math.max(3,Math.ceil(w/160));
+}
+
+/**
+ * Difficulty: explicit authored level wins; else derived from the quiz mix
+ * (explicit q.level / q.difficulty fields when a bank carries them), else the
+ * owning path level; null when nothing can be derived.
+ * @returns {{level:string,source:string}|null}
+ */
+function lessonDifficulty(subjectKey,topicKey,L){
+  const norm=v=>{const s=String(v||"").toLowerCase();if(/easy|beginner|سهل/.test(s))return "easy";if(/hard|advanced|متقد/.test(s))return "hard";if(/med|interm|متوسط/.test(s))return "medium";return null;};
+  const lv=L&&norm(L.level||L.difficulty);
+  if(lv)return {level:lv,source:"authored"};
+  try{
+    const bank=(typeof QUIZZES!=="undefined"&&QUIZZES)?QUIZZES[subjectKey]:null;
+    const qs=bank&&Array.isArray(bank.questions)?bank.questions:[];
+    const levels=qs.map(q=>norm(q&&(q.level||q.difficulty))).filter(Boolean);
+    if(levels.length){
+      const hard=levels.filter(x=>x==="hard").length,med=levels.filter(x=>x==="medium").length;
+      const level=hard*2>=levels.length?"hard":(hard+med)*2>=levels.length?"medium":"easy";
+      return {level:level,source:"quiz-mix"};
+    }
+  }catch(e){}
+  const row=lessonPathRow(subjectKey,topicKey);
+  if(row&&row.path&&row.path.level){
+    const lv2=norm(row.path.level);
+    if(lv2)return {level:lv2,source:"path"};
+  }
+  return null;
+}
+
+/** Prerequisite topics = earlier topics of the owning path (max 3). */
+function lessonPrereqs(subjectKey,topicKey){
+  const row=lessonPathRow(subjectKey,topicKey);
+  if(!row||row.index<=0)return [];
+  const out=[];
+  for(let i=Math.max(0,row.index-3);i<row.index;i++){
+    const t=row.path.topics[i];if(!t)continue;
+    out.push({title:t.t,lesson:(t.lsn&&t.lsn.sub&&t.lsn.key)?{sub:t.lsn.sub,key:t.lsn.key}:null});
+  }
+  return out;
+}
+
+/** Quick checks: real questions from the subject bank whose topic matches. */
+function lessonChecks(subjectKey,topicKey,limit){
+  const max=typeof limit==="number"?limit:3;
+  try{
+    const bank=(typeof QUIZZES!=="undefined"&&QUIZZES)?QUIZZES[subjectKey]:null;
+    const qs=bank&&Array.isArray(bank.questions)?bank.questions:[];
+    if(!qs.length)return [];
+    const match=qs.map((q,i)=>({q:q,i:i})).filter(x=>x.q&&typeof x.q.topic==="string"&&x.q.topic.trim()===topicKey);
+    const pool=match.length?match:qs.map((q,i)=>({q:q,i:i}));
+    return pool.slice(0,max);
+  }catch(e){}
+  return [];
+}
+
+/** Related quiz key: the topic's quiz resource, else the subject bank itself. */
+function lessonRelatedQuiz(subjectKey,topicKey){
+  try{
+    const row=lessonPathRow(subjectKey,topicKey);
+    if(row&&row.topic&&row.topic.res&&row.topic.res.k==="quiz"&&row.topic.res.key)return row.topic.res.key;
+    const has=(typeof QUIZZES!=="undefined"&&QUIZZES&&QUIZZES[subjectKey]&&QUIZZES[subjectKey].questions&&QUIZZES[subjectKey].questions.length);
+    if(has)return subjectKey;
+  }catch(e){}
+  return null;
+}
+
+/** Related lab hash: topic's lab resource, else the first lab of the owning path.
+    Lab resources point at an app view ({ k:"lab", view:"redteam" }). */
+function lessonRelatedLab(subjectKey,topicKey){
+  try{
+    const row=lessonPathRow(subjectKey,topicKey);
+    if(!row)return null;
+    if(row.topic.res&&row.topic.res.k==="lab"&&row.topic.res.view)return "#"+row.topic.res.view;
+    const labs=(Array.isArray(row.path.topics)?row.path.topics:[]).map(t=>t&&t.res)
+      .concat(Array.isArray(row.path.related)?row.path.related:[])
+      .filter(r=>r&&r.k==="lab"&&r.view);
+    return labs.length?("#"+labs[0].view):null;
+  }catch(e){}
+  return null;
+}
+
+/** Defensive Store read — never throws inside the lesson view. */
+function lessonStore(key,fallback){
+  try{ return Store.get(key,fallback); }catch(e){ return fallback; }
+}
+
+/** Lesson completion map (shared "lessons" store used by Progress). */
+function lessonDoneMap(){
+  const v=lessonStore("lessons",null);
+  return (v&&typeof v==="object"&&v.done&&typeof v.done==="object")?v.done:{};
+}
+
+/** Bookmarks: { v:1, items: { "sub/topic": true } } */
+function lessonBookmarks(){
+  const v=lessonStore("bookmarks",null);
+  return (v&&typeof v==="object"&&v.items&&typeof v.items==="object")?v.items:{};
+}
+
+/** Local note text for a lesson key ("" when none). */
+function lessonNotesText(lkey){
+  const v=lessonStore("lesson-notes",null);
+  const notes=(v&&typeof v==="object"&&v.notes&&typeof v.notes==="object")?v.notes:{};
+  return typeof notes[lkey]==="string"?notes[lkey]:"";
+}
+
+/** Review timestamps for the transparent revision engine. */
+function lessonReviewedMap(){
+  const v=lessonStore("revision",null);
+  return (v&&typeof v==="object"&&v.last&&typeof v.last==="object")?v.last:{};
+}
+
+/** Persist bookmarks; fires the shared progress-changed event. */
+function saveLessonBookmarks(items){
+  try{
+    Store.set("bookmarks",{v:1,items:items});
+    if(typeof CustomEvent==="function"&&document&&typeof document.dispatchEvent==="function"){
+      document.dispatchEvent(new CustomEvent("nova:progress-changed"));
+    }
+  }catch(e){}
+}
+
+/** Persist one local note (capped at 2000 chars). */
+function saveLessonNote(lkey,text){
+  try{
+    const cur=lessonStore("lesson-notes",null);
+    const st=(cur&&typeof cur==="object"&&cur.notes&&typeof cur.notes==="object")?cur:{v:1,notes:{}};
+    const s=String(text==null?"":text).slice(0,2000);
+    if(s.trim())st.notes[lkey]=s;else delete st.notes[lkey];
+    Store.set("lesson-notes",st);
+    if(typeof CustomEvent==="function"&&document&&typeof document.dispatchEvent==="function"){
+      document.dispatchEvent(new CustomEvent("nova:progress-changed"));
+    }
+  }catch(e){}
+}
+
+/** Record a review timestamp for a revision-queue item. */
+function saveLessonReview(id){
+  try{
+    const cur=lessonStore("revision",null);
+    const st=(cur&&typeof cur==="object"&&cur.last&&typeof cur.last==="object")?cur:{v:1,last:{}};
+    st.last[id]=Date.now();
+    Store.set("revision",st);
+  }catch(e){}
+}
+
+
 function showLesson(subjectKey,topicKey){
   const root=lessonBody();if(!root)return;
   const lesson=(LESSONS[subjectKey]&&LESSONS[subjectKey][topicKey])||null;
   const cur=Lang.current;
   window.NovaViews.activate("lesson");
 
+  const lkey=subjectKey+"/"+topicKey;
+
+  /* Phase 4 shared sections — every block derives from REAL data (question
+     bank, learning path, local stores) and degrades to an honest note when
+     nothing exists yet. No invented content. */
+  const relatedQuiz=lessonRelatedQuiz(subjectKey,topicKey);
+  const relatedLab=lessonRelatedLab(subjectKey,topicKey);
+  const isBm=!!lessonBookmarks()[lkey];
+  const isDone=!!lessonDoneMap()[lkey];
+  const checks=lessonChecks(subjectKey,topicKey,3);
+  const prereqs=lessonPrereqs(subjectKey,topicKey);
+
+  const actionsHtml=`<div class="lesson-actions">`+
+    `<button type="button" class="btn btn-sm ${isDone?"btn-ghost":"btn-primary"}" data-lsn-complete="1" aria-pressed="${isDone}">${escHtml(Lang.t(isDone?"lesson.markUndone":"lesson.markComplete"))}</button>`+
+    `<button type="button" class="btn btn-sm btn-ghost" data-lsn-bookmark="1" aria-pressed="${isBm}">${escHtml(Lang.t(isBm?"lesson.unbookmark":"lesson.bookmark"))}</button>`+
+    `</div>`;
+
+  const prereqHtml=`<div class="lesson-block"><h3>${escHtml(Lang.t("lesson.prerequisites"))}</h3>`+
+    (prereqs.length
+      ?`<div class="lesson-prereqs">`+prereqs.map(p2=>{
+          const t2=(p2.title&&(p2.title[cur]||p2.title.ar))||"";
+          return p2.lesson
+            ?`<a class="lesson-prereq" href="#lesson/${escHtml(p2.lesson.sub)}/${escHtml(p2.lesson.key)}">${escHtml(t2)}</a>`
+            :`<span class="lesson-prereq is-plain">${escHtml(t2)}</span>`;
+        }).join("")+`</div>`
+      :`<p class="lesson-muted">${escHtml(Lang.t("lesson.prerequisitesNone"))}</p>`)+
+    `</div>`;
+
+  let checksHtml="";
+  if(checks.length){
+    checksHtml=`<div class="lesson-block"><h3>${escHtml(Lang.t("lesson.checks"))}</h3><div class="lesson-checks">`+
+      checks.map(c=>{
+        const q=c.q||{};
+        const opts=Array.isArray(q.opts)?q.opts:(Array.isArray(q.options)?q.options:[]);
+        const correct=(typeof q.a==="number")?q.a:((typeof q.correct==="number")?q.correct:0);
+        return `<div class="lesson-check">`+
+          `<p class="lesson-check-q">${escHtml(q.q||"")}</p>`+
+          `<div class="lesson-check-opts">`+opts.map((o,oi)=>`<button type="button" class="lesson-check-opt" data-lsn-opt="${oi===correct?1:0}">${escHtml((o&&typeof o==="object")?(o[cur]||o.ar||""):o)}</button>`).join("")+`</div>`+
+          `<p class="lesson-check-fb" role="status" aria-live="polite"></p>`+
+        `</div>`;
+      }).join("")+`</div></div>`;
+  }
+
+  const relLinks=[];
+  if(relatedQuiz)relLinks.push(`<a href="#quiz" class="btn btn-sm btn-primary" data-quiz-jump="${escHtml(relatedQuiz)}">${escHtml(Lang.t("lesson.relatedQuiz"))}</a>`);
+  if(relatedLab)relLinks.push(`<a href="${escHtml(relatedLab)}" class="btn btn-sm btn-ghost">${escHtml(Lang.t("lesson.relatedLab"))}</a>`);
+  const relHtml=`<div class="lesson-block"><h3>${escHtml(Lang.t("lesson.relatedQuiz"))} · ${escHtml(Lang.t("lesson.relatedLab"))}</h3>`+
+    (relLinks.length?`<div class="lesson-practice-links">${relLinks.join("")}</div>`:`<p class="lesson-muted">${escHtml(Lang.t("lesson.noRelated"))}</p>`)+
+    `</div>`;
+
+  const notesHtml=`<div class="lesson-block"><h3>${escHtml(Lang.t("lesson.notes"))}</h3>`+
+    `<textarea class="lesson-note-input" maxlength="2000" rows="3" data-lsn-note="1" placeholder="${escHtml(Lang.t("lesson.notePlaceholder"))}">${escHtml(lessonNotesText(lkey))}</textarea>`+
+    `<div class="lesson-note-actions">`+
+    `<button type="button" class="btn btn-sm btn-primary" data-lsn-save-note="1">${escHtml(Lang.t("lesson.saveNote"))}</button>`+
+    `<button type="button" class="btn btn-sm btn-ghost" data-lsn-clear-note="1">${escHtml(Lang.t("lesson.clearNote"))}</button>`+
+    `<span class="lesson-note-status" role="status" aria-live="polite"></span></div></div>`;
+
+  const reviewHtml=`<div class="lesson-block lesson-review-row">`+
+    `<a href="#progress" class="btn btn-sm btn-ghost" data-review-start="mistakes">${escHtml(Lang.t("review.startMistakes"))}</a>`+
+    `<a href="#progress" class="btn btn-sm btn-ghost" data-review-start="five">${escHtml(Lang.t("review.startFive"))}</a>`+
+    `</div>`;
+
   if(!lesson){
-    // Honest placeholder for topics without authored lessons
-    root.innerHTML=`<div class="lesson-shell"><div class="lesson-placeholder"><span class="lesson-ico" aria-hidden="true">📝</span><h2>${escHtml(Lang.t("lesson.soonTitle"))}</h2><p>${escHtml(Lang.t("lesson.soonBody"))}</p><a href="#quiz" class="btn btn-primary">${escHtml(Lang.t("lesson.backToQuiz"))}</a></div></div>`;
+    /* Honest placeholder for topics without authored lessons — plus the
+       derived sections that work from real data without authored content. */
+    root.innerHTML=`<div class="lesson-shell" data-lsn-sub="${escHtml(subjectKey)}" data-lsn-topic="${escHtml(topicKey)}">`+
+      `<div class="lesson-placeholder"><span class="lesson-ico" aria-hidden="true">📝</span><h2>${escHtml(Lang.t("lesson.soonTitle"))}</h2><p>${escHtml(Lang.t("lesson.soonBody"))}</p><a href="#quiz" class="btn btn-primary">${escHtml(Lang.t("lesson.backToQuiz"))}</a></div>`+
+      `<div class="lesson-block"><h3>${escHtml(Lang.t("lesson.objectives"))}</h3><p class="lesson-muted">${escHtml(Lang.t("lesson.noObjectives"))}</p></div>`+
+      `<div class="lesson-meta"><span class="lesson-meta-chip">${escHtml(Lang.t("lesson.difficulty"))}: ${escHtml(Lang.t("lesson.difficultyUnknown"))}</span></div>`+
+      prereqHtml+checksHtml+relHtml+actionsHtml+notesHtml+reviewHtml+
+      `</div>`;
     return;
   }
 
@@ -6940,15 +7649,38 @@ function showLesson(subjectKey,topicKey){
     const st = (curL && typeof curL === "object" && curL.done && typeof curL.done === "object") ? curL : { v: 1, done: {} };
     const st2ok = st;
     st2ok.last = { key: lkey, sub: subjectKey, topic: topicKey, ts: Date.now() };
-    const isNew = !st.done[lkey];
+    const isNew = !st.done[lkey] && !(st.undone && st.undone[lkey]);
     if (isNew) st.done[lkey] = true;
     Store.set("lessons", st2ok);
+    /* Reuse the existing "lesson reviewed" semantic as completion. */
+    if (isNew) awardMotivation("lesson", lkey);
     if (isNew && typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed"));
   } catch {}
 
   const B=lesson;
   const title=B.title[cur]||B.title.ar||"";
   const expl=B.explanation[cur]||B.explanation.ar||"";
+
+  /* Phase 4 · derived meta row: estimated time (word count) + difficulty
+     (authored → quiz mix → path level). Chips carry an honest source note. */
+  const mins=lessonMinutes(B);
+  const diff=lessonDifficulty(subjectKey,topicKey,B);
+  const metaChips=[];
+  if(mins)metaChips.push(`<span class="lesson-meta-chip" title="${escHtml(Lang.t("lesson.timeNote"))}">⏱ ${escHtml(Lang.t("lesson.minutes",{minutes:mins}))}</span>`);
+  if(diff){
+    const dk="lesson.difficulty"+diff.level.charAt(0).toUpperCase()+diff.level.slice(1);
+    const ds=diff.source==="quiz-mix"?"lesson.fromQuizMix":(diff.source==="path"?"lesson.fromPath":dk);
+    metaChips.push(`<span class="lesson-meta-chip" title="${escHtml(Lang.t(ds))}">◈ ${escHtml(Lang.t("lesson.difficulty"))}: ${escHtml(Lang.t(dk))}</span>`);
+  }
+  const metaHtml=metaChips.length?`<div class="lesson-meta">${metaChips.join("")}</div>`:"";
+
+  /* Objectives: rendered only when authored — never invented. */
+  let objectivesHtml="";
+  if(Array.isArray(B.objectives)&&B.objectives.length){
+    objectivesHtml=`<div class="lesson-block"><h3>${escHtml(Lang.t("lesson.objectives"))}</h3><ul class="lesson-objectives">`+
+      B.objectives.map(o=>`<li>${escHtml((o&&typeof o==="object")?(o[cur]||o.ar||""):o)}</li>`).join("")+
+      `</ul></div>`;
+  }
 
   // Concepts
   let conceptsHtml="";
@@ -6993,13 +7725,77 @@ function showLesson(subjectKey,topicKey){
     nextHtml=`<a href="#lesson/${escHtml(subjectKey)}/${escHtml(nextL.key)}" class="lesson-next">${escHtml(Lang.t("lesson.nextLesson"))}: ${escHtml(nextL.title[cur]||nextL.title.ar)} →</a>`;
   }
 
-  root.innerHTML=`<div class="lesson-shell">
+  root.innerHTML=`<div class="lesson-shell" data-lsn-sub="${escHtml(subjectKey)}" data-lsn-topic="${escHtml(topicKey)}">
     <div class="lesson-header"><h2>${escHtml(title)}</h2></div>
+    ${metaHtml}${actionsHtml}
+    ${objectivesHtml}
     <div class="lesson-block"><p class="lesson-explain">${escHtml(expl)}</p></div>
     ${conceptsHtml}${exampleHtml}${mistakesHtml}${termHtml}
+    ${prereqHtml}${checksHtml}
     ${practiceHtml}
+    ${notesHtml}${reviewHtml}
     ${nextHtml}
   </div>`;
+}
+
+/* Phase 4 · ONE delegated click listener for the lesson view actions
+   (bookmark / completion / quick checks / notes). #lessonBody itself is
+   never replaced — only its innerHTML — so this binding survives every
+   re-render, same pattern as bindQuizDelegation(). */
+function bindLessonDelegation(){
+  const root=lessonBody();if(!root)return;
+  try{ if(window.__lsnDelegated)return; window.__lsnDelegated=1; }catch(e){ return; }
+  root.addEventListener("click",(e)=>{
+    const t=e.target;if(!t||!t.closest)return;
+    const shell=t.closest("[data-lsn-sub]");
+    if(!shell)return;
+    const sub=shell.getAttribute("data-lsn-sub"),topic=shell.getAttribute("data-lsn-topic");
+    if(!sub||!topic)return;
+    const lkey=sub+"/"+topic;
+    const rerender=()=>showLesson(sub,topic);
+
+    if(t.closest("[data-lsn-bookmark]")){
+      const items=lessonBookmarks();
+      if(items[lkey])delete items[lkey];else items[lkey]=true;
+      saveLessonBookmarks(items);
+      rerender();return;
+    }
+    if(t.closest("[data-lsn-complete]")){
+      try{
+        const curL=lessonStore("lessons",null);
+        const st=(curL&&typeof curL==="object"&&curL.done&&typeof curL.done==="object")?curL:{v:1,done:{}};
+        if(st.done[lkey]){delete st.done[lkey];if(!st.undone||typeof st.undone!=="object")st.undone={};st.undone[lkey]=true;}
+        else{st.done[lkey]=true;if(st.undone&&typeof st.undone==="object")delete st.undone[lkey];}
+        Store.set("lessons",st);
+        if(typeof CustomEvent==="function"&&document&&typeof document.dispatchEvent==="function"){
+          document.dispatchEvent(new CustomEvent("nova:progress-changed"));
+        }
+      }catch(e2){}
+      rerender();return;
+    }
+    const opt=t.closest("[data-lsn-opt]");
+    if(opt){
+      const card=opt.closest(".lesson-check");if(!card)return;
+      const ok=opt.getAttribute("data-lsn-opt")==="1";
+      card.classList.add(ok?"is-correct":"is-wrong");
+      card.querySelectorAll(".lesson-check-opt").forEach(b=>{b.disabled=true;});
+      opt.classList.add(ok?"is-correct":"is-wrong");
+      const fb=card.querySelector(".lesson-check-fb");
+      if(fb)fb.textContent=Lang.t(ok?"lesson.checkCorrect":"lesson.checkWrong");
+      try{ Sfx.play("tick"); }catch(e2){}
+      return;
+    }
+    if(t.closest("[data-lsn-save-note]")||t.closest("[data-lsn-clear-note]")){
+      const block=t.closest(".lesson-block");if(!block)return;
+      const ta=block.querySelector("[data-lsn-note]");if(!ta)return;
+      const status=block.querySelector(".lesson-note-status");
+      if(t.closest("[data-lsn-clear-note]"))ta.value="";
+      const truncated=String(ta.value||"").length>2000;
+      saveLessonNote(lkey,ta.value);
+      if(status)status.textContent=Lang.t(truncated?"lesson.noteTooLong":"lesson.noteSaved");
+      return;
+    }
+  });
 }
 
 function initLessons(){
@@ -7023,6 +7819,7 @@ function initLessons(){
   window.addEventListener('hashchange', function(){
     if(/^#lesson/.test(location.hash)) handleLessonHash();
   });
+  bindLessonDelegation();
   handleLessonHash();
 }
 initLessons();
@@ -7505,8 +8302,13 @@ const LABS_META = {
     if (lab) {
       var view = lab.getAttribute("data-lab-done");
       var st = labsStore();
-      if (st.done[view]) delete st.done[view];
-      else st.done[view] = true;
+      if (st.done[view]) {
+        delete st.done[view];
+      } else {
+        st.done[view] = true;
+        /* Award only on the genuine "mark complete" transition. */
+        awardMotivation("lab", view);
+      }
       Store.set("labs", st);
       renderLabPanels();
     }
@@ -7827,18 +8629,23 @@ const LABS_META = {
 })();
 
 /* ============================================================
-   MODULE 47 · HeroDash — لوحة التقدم المصغّرة (#heroDash)
+   MODULE 47 · HeroDash — لوحة الطالب (#heroDash · Phase 1)
    ------------------------------------------------------------
-   Compact, strictly READ-ONLY homepage dashboard: overall
-   progress %, last opened lesson, next recommended quiz and a
-   Continue-Learning shortcut. Every value is derived from data
-   the platform already owns — nothing is duplicated or invented:
+   Personal, strictly READ-ONLY student command center: welcome
+   state, overall progress, current learning path, next learning
+   step, unfinished quizzes/labs and a Continue-Learning shortcut.
+   Every value is derived from data the platform already owns —
+   nothing is duplicated or invented:
    - overall %  → the SAME formula as the Progress hub (mean of
      the saved best scores), so the two views can never disagree.
-   - last lesson → "motmi-portal:lessons.last", written by
-     MODULE 40 showLesson; its title is resolved from the real
-     learning-path topic linked to it (SUBJECT_TO_PATH), else the
-     honest «no lesson opened yet» label is rendered.
+   - path progress → manual checks plus quiz-linked completion,
+     matching MODULE 39's rule.
+   - next learning step → the next real topic in the current path;
+     if no authored lesson exists, the UI says so honestly.
+   - unfinished work → real question banks without results plus
+     path-referenced labs not marked complete.
+   - last lesson → "motmi-portal:lessons.last", resolved through
+     real learning-path data (never a fake title).
    - next quiz  → the first subject bank with no saved result,
      otherwise the lowest-scoring one (name from the registry).
    This module lives OUTSIDE the main IIFE, so every access goes
@@ -7851,13 +8658,125 @@ const LABS_META = {
   "use strict";
   const pctEl = document.getElementById("heroDashPct");
   const barEl = document.getElementById("heroDashBar");
+  const meterEl = document.getElementById("heroDashOverallMeter");
   const lessonEl = document.getElementById("heroDashLesson");
   const quizEl = document.getElementById("heroDashQuiz");
   const ctaEl = document.getElementById("heroDashContinue");
+  const titleEl = document.getElementById("heroDashTitle");
+  const welcomeEl = document.getElementById("heroDashWelcome");
+  const pathEl = document.getElementById("heroDashPath");
+  const pathMetaEl = document.getElementById("heroDashPathMeta");
+  const pathBarEl = document.getElementById("heroDashPathBar");
+  const pathMeterEl = document.getElementById("heroDashPathMeter");
+  const pathLinkEl = document.getElementById("heroDashPathLink");
+  const lessonMetaEl = document.getElementById("heroDashLessonMeta");
+  const tasksEl = document.getElementById("heroDashTasks");
+  const tasksMetaEl = document.getElementById("heroDashTasksMeta");
+  const lastEl = document.getElementById("heroDashLast");
+  const emptyEl = document.getElementById("heroDashEmpty");
   if (!pctEl || !lessonEl || !quizEl) return;
 
   /* ---------- locale + storage helpers (outside the IIFE) ---------- */
-  /** @returns {{current:string,t:function,onSwitch:function}|null} */
+
+  /** Current locale code. @returns {"ar"|"en"|string} */
+  function locale() { return (L10N && L10N.current) || "ar"; }
+  /** Localized side of a bilingual field. @param {*} v Field. @returns {string} */
+  function bi(v) {
+    if (!v) return "";
+    if (typeof v !== "object") return String(v);
+    return v[locale()] || v.ar || v.en || "";
+  }
+  /** Safe text paint. @param {HTMLElement|null} el Target. @param {string} text Text. @returns {void} */
+  function setText(el, text) { if (el) el.textContent = text || "—"; }
+
+  /** Live learning paths exposed by MODULE 39. @returns {Array} */
+  function pathData() {
+    try { return (typeof window.getLearningPaths === "function") ? (window.getLearningPaths() || []) : []; }
+    catch (e) { return []; }
+  }
+
+  /**
+   * Progress for one path using the same rule as MODULE 39: a quiz-linked
+   * topic is complete after a saved result; other topics use manual checks.
+   * @param {Object} p Path record.
+   * @param {Object} results Quiz results.
+   * @param {Object} doneMap Manual topic map.
+   * @returns {{path:Object,total:number,done:number,pct:number,next:Object|null}}
+   */
+  function pathSnapshot(p, results, doneMap) {
+    const topics = Array.isArray(p.topics) ? p.topics.filter((t) => t && t.id) : [];
+    let done = 0, next = null;
+    topics.forEach((t) => {
+      const auto = !!(t.res && t.res.k === "quiz" && results && results[t.res.key]);
+      const manual = !!(doneMap && doneMap[p.id] && doneMap[p.id][t.id] === true);
+      if (auto || manual) done++;
+      else if (!next) next = t;
+    });
+    const pct = topics.length ? Math.round((done / topics.length) * 100) : 0;
+    return { path: p, total: topics.length, done, pct, next };
+  }
+
+  /** Snapshots of live paths in authored order. @param {Object} results @returns {Array} */
+  function pathSnapshots(results) {
+    const stored = storeGet("paths");
+    const doneMap = stored && typeof stored.done === "object" && stored.done ? stored.done : {};
+    return pathData()
+      .filter((p) => p && p.id && p.status !== "soon")
+      .map((p) => pathSnapshot(p, results, doneMap));
+  }
+
+  /**
+   * Pick the current path: owning path of the last opened lesson first,
+   * then the first started/incomplete path, then the recommended starter.
+   * @param {Array} snaps Path snapshots.
+   * @returns {Object|null} Current snapshot.
+   */
+  function currentPathSnapshot(snaps) {
+    if (!snaps.length) return null;
+    const st = storeGet("lessons");
+    const last = st && st.last ? st.last : null;
+    if (last && last.sub) {
+      const owner = (window.SUBJECT_TO_PATH || {})[last.sub];
+      const owned = snaps.filter((s) => s.path.id === owner)[0];
+      if (owned) return owned;
+    }
+    return snaps.filter((s) => s.done > 0 && s.done < s.total)[0] ||
+      snaps.filter((s) => s.path.recommended)[0] || snaps[0];
+  }
+
+  /** Lab IDs referenced by real path resources. @returns {string[]} */
+  function pathLabIds() {
+    const ids = [];
+    pathData().forEach((p) => {
+      if (!p || p.status === "soon") return;
+      const rows = (Array.isArray(p.topics) ? p.topics.map((t) => t && t.res) : [])
+        .concat(Array.isArray(p.related) ? p.related : []);
+      rows.forEach((r) => { if (r && r.k === "lab" && r.view && ids.indexOf(r.view) < 0) ids.push(r.view); });
+    });
+    return ids;
+  }
+
+  /** Localized lab name from the existing dictionary. @param {string} id @returns {string} */
+  function labLabel(id) {
+    const key = id === "cryptolab" ? "labs.crypto" : "labs." + id;
+    return T(key) || id;
+  }
+
+  /** Any real local learning activity? Used only to choose welcome/empty copy. */
+  function hasActivity(store, snaps) {
+    const qb = banks();
+    const lessons = storeGet("lessons");
+    const labs = storeGet("labs");
+    const flash = storeGet("flash");
+    return Object.keys(store.results || {}).some((k) => qb[k]) ||
+      Object.keys(store.progress || {}).some((k) => qb[k]) ||
+      snaps.some((s) => s.done > 0) ||
+      !!(lessons && lessons.done && Object.keys(lessons.done).length) ||
+      !!(labs && labs.done && Object.keys(labs.done).length) ||
+      !!(flash && flash.reviewed && Object.keys(flash.reviewed).length);
+  }
+
+
   function resolveLang() {
     try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
     try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
@@ -7998,34 +8917,126 @@ const LABS_META = {
     return "";
   }
 
-  /* ---------- render ---------- */
+  /**
+   * Next recommended lesson/topic from the current path. A topic title is
+   * shown only with an explicit "content coming soon" note until the real
+   * lesson exists in PLATFORM_LESSONS — nothing is invented.
+   * @param {Object|null} snap Current path snapshot.
+   * @returns {{title:string,meta:string}}
+   */
+  function nextLessonInfo(snap) {
+    if (!snap) return { title: T("dash.noPath"), meta: T("dash.noPathBody") };
+    const topic = snap.next;
+    if (!topic) return { title: T("dash.pathComplete"), meta: bi(snap.path.title) };
+    let authored = false;
+    try {
+      const lsn = topic.lsn;
+      const lessons = window.PLATFORM_LESSONS || {};
+      authored = !!(lsn && lessons[lsn.sub] && lessons[lsn.sub][lsn.key]);
+    } catch (e) { authored = false; }
+    return {
+      title: bi(topic.t) || T("dash.noLesson"),
+      meta: authored ? T("dash.lessonReady") : T("dash.lessonSoon")
+    };
+  }
 
-  /** Paint the dashboard from the saved data. Read-only. @returns {void} */
+
+  /** Paint the command center from saved local data. Read-only. @returns {void} */
   function render() {
     const qb = banks();
     const store = saved();
     const results = store.results || {};
     const progress = store.progress || {};
+    const snaps = pathSnapshots(results);
+    const current = currentPathSnapshot(snaps);
+    const active = hasActivity(store, snaps);
 
+    /* Welcome area: new students get orientation, returning students get a
+       concise status message. No identity or engagement metric is invented. */
+    setText(titleEl, active ? T("dash.welcomeBack") : T("dash.welcomeNew"));
+    setText(welcomeEl, active ? T("dash.welcomeActive") : T("dash.welcomeEmpty"));
+    if (emptyEl) emptyEl.hidden = active;
+
+    /* Overall progress deliberately keeps the existing ProgressHub formula:
+       the mean of saved best quiz percentages across known banks. */
     const pct = overallPct(results, qb);
     pctEl.textContent = String(pct);
     if (barEl && barEl.style) barEl.style.width = pct + "%";
+    if (meterEl) {
+      meterEl.setAttribute("aria-valuenow", String(pct));
+      meterEl.setAttribute("aria-label", T("dash.overallAria") || T("dash.overall") || "Overall progress");
+    }
 
-    const lessonLabel = lastLessonLabel();
-    lessonEl.textContent = lessonLabel || T("dash.noLesson") || "—";
+    /* Current/recommended path progress. */
+    if (current) {
+      setText(pathEl, bi(current.path.title));
+      const state = current.next
+        ? T("dash.pathNext", { topic: bi(current.next.t) })
+        : T("dash.pathComplete");
+      setText(pathMetaEl, (T("dash.pathProgress", { done: current.done, total: current.total }) || "") +
+        (state ? " · " + state : ""));
+      if (pathBarEl && pathBarEl.style) pathBarEl.style.width = current.pct + "%";
+      if (pathMeterEl) {
+        pathMeterEl.setAttribute("aria-valuenow", String(current.pct));
+        pathMeterEl.setAttribute("aria-label", T("dash.pathAria") || "Path progress");
+      }
+      if (pathLinkEl) pathLinkEl.setAttribute("href", "#path/" + current.path.id);
+    } else {
+      setText(pathEl, T("dash.noPath"));
+      setText(pathMetaEl, T("dash.noPathBody"));
+      if (pathBarEl && pathBarEl.style) pathBarEl.style.width = "0%";
+      if (pathMeterEl) pathMeterEl.setAttribute("aria-valuenow", "0");
+      if (pathLinkEl) pathLinkEl.setAttribute("href", "#paths");
+    }
 
+    /* Next recommended lesson: a real path topic, with an explicit coming-soon
+       note until authored lesson content exists. */
+    const nextLesson = nextLessonInfo(current);
+    setText(lessonEl, nextLesson.title);
+    setText(lessonMetaEl, nextLesson.meta);
+
+    /* Unfinished real work: un-attempted quizzes plus path-referenced labs
+       that have not been manually marked complete. */
+    const quizKeys = Object.keys(qb).filter((k) => qb[k] && Array.isArray(qb[k].questions) && qb[k].questions.length);
+    const pendingQuizzes = quizKeys.filter((k) => !results[k]);
+    const labsStore = storeGet("labs");
+    const labDone = labsStore && typeof labsStore.done === "object" && labsStore.done ? labsStore.done : {};
+    const pendingLabs = pathLabIds().filter((id) => !labDone[id]);
+    if (pendingQuizzes.length || pendingLabs.length) {
+      setText(tasksEl, T(active ? "dash.pendingCounts" : "dash.readyCounts", {
+        quizzes: pendingQuizzes.length,
+        labs: pendingLabs.length
+      }));
+      const examples = [];
+      if (pendingQuizzes[0]) examples.push(T("dash.pendingQuiz", { name: bankLabel(pendingQuizzes[0]) }));
+      if (pendingLabs[0]) examples.push(T("dash.pendingLab", { name: labLabel(pendingLabs[0]) }));
+      setText(tasksMetaEl, examples.filter(Boolean).join(" · "));
+    } else if (quizKeys.length || pathLabIds().length) {
+      setText(tasksEl, T("dash.allCaughtUp"));
+      setText(tasksMetaEl, "");
+    } else {
+      setText(tasksEl, "—");
+      setText(tasksMetaEl, "");
+    }
+
+    /* Continue learning: preserve the existing resume → recommended-quiz →
+       paths behavior, while also retaining the last real lesson context. */
     const resume = resumeKey(progress, qb);
     const next = nextQuizKey(results, qb);
     const attempted = Object.keys(results).some((k) => qb[k]);
+    const lastLesson = lastLessonLabel();
+    setText(lastEl, lastLesson
+      ? T("dash.lastOpened", { title: lastLesson })
+      : T("dash.noLesson"));
 
     if (resume) {
-      quizEl.textContent = T("dash.resumeQuiz", { sub: bankLabel(resume) }) || bankLabel(resume);
+      setText(quizEl, T("dash.resumeQuiz", { sub: bankLabel(resume) }) || bankLabel(resume));
     } else if (next) {
-      quizEl.textContent = attempted
+      setText(quizEl, attempted
         ? (T("dash.newQuiz", { sub: bankLabel(next) }) || bankLabel(next))
-        : bankLabel(next);
+        : bankLabel(next));
     } else {
-      quizEl.textContent = T("dash.allDone") || "—";
+      setText(quizEl, T("dash.allDone"));
     }
 
     if (ctaEl) {
@@ -8482,4 +9493,1809 @@ const LABS_META = {
   });
 })();
 
+/* @@MOTIVATION_START@@ */
+/* ============================================================
+   MODULE 50 · Motivation — local XP, levels, goals, streak, badges
+   ------------------------------------------------------------
+   Purely local, non-competitive motivation layer built ONLY from
+   genuine completed actions:
+   - lesson completion (MODULE 40 first-time review)
+   - quiz completion (once per real question bank)
+   - flashcard first review (once per real card)
+   - lab completion (once per real lab, only on mark-complete)
+   State: namespaced localStorage key "motmi-portal:motivation".
+   Corrupt/missing data is sanitized to safe defaults. Existing
+   progress is backfilled idempotently so no genuine past action
+   is lost and no action can be awarded twice.
+   ============================================================ */
+(function initMotivation() {
+  "use strict";
+
+  var STORE_KEY = "motivation";
+  var VERSION = 1;
+  var LEVEL_STEP = 100;
+  var XP_VALUES = { lesson: 25, quiz: 40, flash: 5, lab: 60 };
+  var DAILY_GOAL = 40;
+  var WEEKLY_GOAL = 200;
+  var SEMESTER_CODES = ["260210030702", "260210030802", "260210030902", "260210031002", "260210031102"];
+
+  /** @returns {Object|null} Namespaced Store bridge when available. */
+  function store() {
+    try {
+      var s = window.PLATFORM_STORE;
+      if (s && typeof s.get === "function" && typeof s.set === "function") return s;
+    } catch (e) { /* fall through to localStorage */ }
+    return null;
+  }
+
+  /** @returns {*} Raw persisted value or null. */
+  function readRaw() {
+    try {
+      var s = store();
+      if (s) return s.get(STORE_KEY, null);
+    } catch (e) { /* fall through */ }
+    try {
+      var raw = localStorage.getItem("motmi-portal:" + STORE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e2) { return null; }
+  }
+
+  /** @param {Object} st State to persist. @returns {void} */
+  function writeRaw(st) {
+    try {
+      var s = store();
+      if (s) { s.set(STORE_KEY, st); return; }
+    } catch (e) { /* fall through */ }
+    try { localStorage.setItem("motmi-portal:" + STORE_KEY, JSON.stringify(st)); } catch (e2) { /* private mode */ }
+  }
+
+  /** Remove the motivation key only. @returns {void} */
+  function removeRaw() {
+    try {
+      var s = store();
+      if (s && typeof s.remove === "function") { s.remove(STORE_KEY); return; }
+    } catch (e) { /* fall through */ }
+    try { localStorage.removeItem("motmi-portal:" + STORE_KEY); } catch (e2) { /* private mode */ }
+  }
+
+  /** @param {*} v Candidate. @returns {boolean} Plain object? */
+  function isObj(v) { return !!v && typeof v === "object" && !Array.isArray(v); }
+  /** @param {*} v Candidate. @returns {boolean} Finite number >= 0? */
+  function num(v) { return typeof v === "number" && isFinite(v) && v >= 0; }
+  /** @param {number} n Number. @returns {string} 2-digit pad. */
+  function pad(n) { return n < 10 ? "0" + n : String(n); }
+
+  /** @returns {Object} Safe empty state. */
+  function defaults() {
+    return { v: VERSION, events: {}, days: {}, badges: {}, bestStreak: 0, updatedAt: 0 };
+  }
+
+  /**
+   * Sanitize persisted data. Invalid events/days/badges are dropped rather
+   * than throwing, so corrupted localStorage can never break the app.
+   * @param {*} raw Persisted value.
+   * @returns {Object} Safe state.
+   */
+  function sanitize(raw) {
+    var out = defaults();
+    if (!isObj(raw)) return out;
+    if (isObj(raw.events)) {
+      var keys = Object.keys(raw.events);
+      if (keys.length > 500) keys = keys.slice(-500);
+      keys.forEach(function (k) {
+        var e = raw.events[k];
+        if (!k || !isObj(e) || !num(e.xp) || e.xp <= 0 || e.xp > 500) return;
+        out.events[k] = { xp: Math.round(e.xp), ts: num(e.ts) ? e.ts : 0 };
+      });
+    }
+    if (isObj(raw.days)) {
+      Object.keys(raw.days).forEach(function (k) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !num(raw.days[k]) || raw.days[k] <= 0 || raw.days[k] > 10000) return;
+        out.days[k] = Math.round(raw.days[k]);
+      });
+    }
+    if (isObj(raw.badges)) {
+      Object.keys(raw.badges).forEach(function (k) {
+        if (!k || !num(raw.badges[k])) return;
+        out.badges[k] = Math.round(raw.badges[k]);
+      });
+    }
+    if (num(raw.bestStreak)) out.bestStreak = Math.floor(raw.bestStreak);
+    if (num(raw.updatedAt)) out.updatedAt = Math.round(raw.updatedAt);
+    return out;
+  }
+
+  var state = sanitize(readRaw());
+
+  /** Persist the current state with a fresh timestamp. @returns {void} */
+  function save() {
+    state.updatedAt = Date.now();
+    writeRaw(state);
+  }
+
+  /** @returns {number} Total XP derived from awarded events only. */
+  function totalXp() {
+    var sum = 0;
+    Object.keys(state.events).forEach(function (k) { sum += state.events[k].xp || 0; });
+    return sum;
+  }
+
+  /** @param {Date=} d Date. @returns {string} Local YYYY-MM-DD key. */
+  function dateKey(d) {
+    var x = d || new Date();
+    return x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate());
+  }
+
+  /** @returns {string} Today's local date key. */
+  function todayKey() { return dateKey(new Date()); }
+
+  /** @param {string} key Date key. @param {number} delta Days. @returns {string} Shifted key. */
+  function shiftDay(key, delta) {
+    var p = String(key).split("-");
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    d.setDate(d.getDate() + delta);
+    return dateKey(d);
+  }
+
+  /**
+   * Current streak: consecutive genuine activity days ending today or
+   * yesterday (a student who has not studied yet today keeps the streak).
+   * @returns {number} Streak length.
+   */
+  function computeStreak() {
+    var today = todayKey();
+    var yesterday = shiftDay(today, -1);
+    var start = state.days[today] ? today : (state.days[yesterday] ? yesterday : "");
+    if (!start) return 0;
+    var count = 0, cur = start, guard = 0;
+    while (state.days[cur] > 0 && guard < 10000) { count++; cur = shiftDay(cur, -1); guard++; }
+    return count;
+  }
+
+  /** @returns {number} XP earned today. */
+  function dailyXp() { return state.days[todayKey()] || 0; }
+
+  /** @returns {number} XP earned today plus the previous six days. */
+  function weeklyXp() {
+    var sum = 0, key = todayKey();
+    for (var i = 0; i < 7; i++) sum += state.days[shiftDay(key, -i)] || 0;
+    return sum;
+  }
+
+  /**
+   * Level calculation: 100 XP per level, six localized titles; the level
+   * number keeps growing after the last title.
+   * @param {number=} xp Optional XP override.
+   * @returns {{level:number,titleLevel:number,into:number,next:number,remaining:number,pct:number}}
+   */
+  function getLevelInfo(xp) {
+    var value = num(xp) ? xp : totalXp();
+    var level = Math.floor(value / LEVEL_STEP) + 1;
+    var into = value % LEVEL_STEP;
+    return {
+      level: level,
+      titleLevel: Math.min(level, 6),
+      into: into,
+      next: level + 1,
+      remaining: LEVEL_STEP - into,
+      pct: Math.round((into / LEVEL_STEP) * 100)
+    };
+  }
+
+  /** @param {string} key Store key. @returns {*} Raw object value. */
+  function rawStoreValue(key) {
+    try {
+      var s = store();
+      if (s) return s.get(key, null);
+    } catch (e) { /* fall through */ }
+    try {
+      var raw = localStorage.getItem("motmi-portal:" + key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e2) { return null; }
+  }
+
+  /** @returns {Object} Saved quiz results. */
+  function savedResults() {
+    try {
+      var r = (typeof window.readStore === "function") ? window.readStore() : null;
+      return (r && isObj(r.results)) ? r.results : {};
+    } catch (e) { return {}; }
+  }
+
+  /** @returns {Object} Available question banks. */
+  function banks() {
+    try { return isObj(window.QUIZZES) ? window.QUIZZES : {}; } catch (e) { return {}; }
+  }
+
+  /** @returns {Object} Completed lab map. */
+  function labsDone() {
+    var st = rawStoreValue("labs");
+    return (st && isObj(st.done)) ? st.done : {};
+  }
+
+  /**
+   * Progress for one real learning path, matching MODULE 39's rule.
+   * @param {string} id Path id.
+   * @returns {number} Completion percentage (0 when unknown).
+   */
+  function pathPct(id) {
+    try {
+      var paths = (typeof window.getLearningPaths === "function") ? (window.getLearningPaths() || []) : [];
+      var path = paths.filter(function (p) { return p && p.id === id; })[0];
+      if (!path || !Array.isArray(path.topics) || !path.topics.length) return 0;
+      var stored = rawStoreValue("paths");
+      var done = (stored && isObj(stored.done)) ? stored.done : {};
+      var results = savedResults();
+      var total = 0, completed = 0;
+      path.topics.forEach(function (t) {
+        if (!t || !t.id) return;
+        total++;
+        var auto = !!(t.res && t.res.k === "quiz" && results[t.res.key]);
+        var manual = !!(done[path.id] && done[path.id][t.id] === true);
+        if (auto || manual) completed++;
+      });
+      return total ? Math.round((completed / total) * 100) : 0;
+    } catch (e) { return 0; }
+  }
+
+  /** @returns {Object} Real-data context used by achievement checks. */
+  function context() {
+    var results = savedResults();
+    var qb = banks();
+    var keys = Object.keys(qb).filter(function (k) {
+      return qb[k] && Array.isArray(qb[k].questions) && qb[k].questions.length;
+    });
+    var allAttempted = keys.length > 0 && keys.every(function (k) { return !!results[k]; });
+    var allMastered = allAttempted && keys.every(function (k) {
+      var r = results[k] || {};
+      var total = qb[k].questions.length;
+      var pct = num(r.pct) ? r.pct : (total ? Math.round(((r.score || 0) / total) * 100) : 0);
+      return pct >= 80;
+    });
+    var labs = labsDone();
+    return {
+      results: results,
+      hasQuiz: Object.keys(results).some(function (k) { return !!qb[k]; }),
+      quizMaster: allMastered,
+      semesterFinisher: SEMESTER_CODES.every(function (code) { return !!results[code]; }),
+      hasLab: Object.keys(labs).length > 0,
+      crypto: !!results["260210031102"] || !!labs.cryptolab,
+      network: pathPct("networking") >= 50 || !!labs.redteam,
+      incident: !!labs.ir || pathPct("incident") >= 50,
+      streak: computeStreak()
+    };
+  }
+
+  /** Achievement registry — each rule reads only real platform data. */
+  var BADGES = [
+    { id: "firstLesson", ico: "🌱", check: function () { return Object.keys(state.events).some(function (k) { return k.indexOf("lesson:") === 0; }); } },
+    { id: "firstQuiz", ico: "🎯", check: function (c) { return c.hasQuiz; } },
+    { id: "quizMaster", ico: "🏆", check: function (c) { return c.quizMaster; } },
+    { id: "labExplorer", ico: "🧪", check: function (c) { return c.hasLab; } },
+    { id: "cryptoApprentice", ico: "🔐", check: function (c) { return c.crypto; } },
+    { id: "networkNavigator", ico: "🌐", check: function (c) { return c.network; } },
+    { id: "incidentResponder", ico: "🚨", check: function (c) { return c.incident; } },
+    { id: "streak7", ico: "🔥", check: function (c) { return c.streak >= 7; } },
+    { id: "semesterFinisher", ico: "🎓", check: function (c) { return c.semesterFinisher; } }
+  ];
+
+  /**
+   * Unlock every achievement whose real-data rule now passes.
+   * @returns {boolean} True when at least one badge was newly unlocked.
+   */
+  function unlockBadges() {
+    var c = context();
+    var changed = false;
+    BADGES.forEach(function (b) {
+      if (state.badges[b.id]) return;
+      try {
+        if (b.check(c)) { state.badges[b.id] = Date.now(); changed = true; }
+      } catch (e) { /* a failing rule never breaks the dashboard */ }
+    });
+    return changed;
+  }
+
+  /**
+   * Add one genuine action event. Idempotent by event id, so the same real
+   * action can never grant XP twice.
+   * @param {string} id Stable event id.
+   * @param {number} xp XP value.
+   * @param {string|null} dayKey Local activity day to credit.
+   * @param {number} ts Event timestamp.
+   * @returns {boolean} True when the event was newly added.
+   */
+  function addEvent(id, xp, dayKey, ts) {
+    if (!id || state.events[id] || !num(xp) || xp <= 0) return false;
+    state.events[id] = { xp: Math.round(xp), ts: num(ts) && ts > 0 ? Math.round(ts) : 0 };
+    if (dayKey && /^\d{4}-\d{2}-\d{2}$/.test(dayKey)) {
+      state.days[dayKey] = (state.days[dayKey] || 0) + Math.round(xp);
+    }
+    state.bestStreak = Math.max(state.bestStreak, computeStreak());
+    return true;
+  }
+
+  /**
+   * Backfill XP for genuine actions that already exist in the platform's
+   * own stores (existing-progress compatibility). Idempotent: event ids
+   * prevent duplicates. Only quiz results carry a real date, so only those
+   * can credit a recent activity day; undated actions grant XP/badges only.
+   * @returns {boolean} True when anything was added.
+   */
+  function backfill() {
+    var changed = false;
+    var qb = banks();
+    var results = savedResults();
+    Object.keys(results).forEach(function (k) {
+      if (!qb[k]) return;
+      var r = results[k] || {};
+      var ts = 0, day = null;
+      if (typeof r.date === "string" && r.date) {
+        var parsed = Date.parse(r.date + "T00:00:00");
+        if (isFinite(parsed) && parsed > 0) {
+          ts = parsed;
+          var diff = Date.now() - parsed;
+          if (diff >= 0 && diff < 7 * 86400000) day = dateKey(new Date(parsed));
+        }
+      }
+      if (addEvent("quiz:" + k, XP_VALUES.quiz, day, ts)) changed = true;
+    });
+    var labs = labsDone();
+    Object.keys(labs).forEach(function (view) {
+      if (addEvent("lab:" + view, XP_VALUES.lab, null, 0)) changed = true;
+    });
+    var lessons = rawStoreValue("lessons");
+    if (lessons && isObj(lessons.done)) {
+      Object.keys(lessons.done).forEach(function (key) {
+        if (addEvent("lesson:" + key, XP_VALUES.lesson, null, 0)) changed = true;
+      });
+    }
+    var flash = rawStoreValue("flash");
+    if (flash && isObj(flash.reviewed)) {
+      Object.keys(flash.reviewed).forEach(function (key) {
+        if (addEvent("flash:" + key, XP_VALUES.flash, null, 0)) changed = true;
+      });
+    }
+    return changed;
+  }
+
+  /** Re-read real progress, backfill once, refresh badges and repaint. @returns {void} */
+  function sync() {
+    var before = state.bestStreak;
+    var changed = backfill();
+    var current = computeStreak();
+    if (current > state.bestStreak) { state.bestStreak = current; changed = true; }
+    if (state.bestStreak > before) changed = true;
+    if (unlockBadges()) changed = true;
+    if (changed) save();
+    render();
+  }
+
+  /**
+   * Award XP for one genuine completed action.
+   * @param {"lesson"|"quiz"|"flash"|"lab"} kind Action kind.
+   * @param {string|number} id Stable action id.
+   * @returns {boolean} True when XP was granted.
+   */
+  function award(kind, id) {
+    var value = XP_VALUES[kind];
+    if (!value) return false;
+    var clean = (id === null || id === undefined) ? "" : String(id).trim();
+    if (!clean) return false;
+    var added = addEvent(kind + ":" + clean, value, todayKey(), Date.now());
+    if (added) {
+      unlockBadges();
+      save();
+      render();
+    }
+    return added;
+  }
+
+  /** @returns {Object} Deep-cloned state for tests/diagnostics. */
+  function getState() {
+    try { return JSON.parse(JSON.stringify(state)); } catch (e) { return defaults(); }
+  }
+
+  /** Remove only the motivation key; learning progress is untouched. @returns {void} */
+  function resetMotivation() {
+    removeRaw();
+    state = defaults();
+    render();
+  }
+
+  /* Public bridge used by the lesson/quiz/flashcard/lab hooks. */
+  window.PlatformMotivation = {
+    award: award,
+    sync: sync,
+    getState: getState,
+    reset: resetMotivation,
+    getLevelInfo: getLevelInfo,
+    XP_VALUES: XP_VALUES,
+    LEVEL_STEP: LEVEL_STEP,
+    DAILY_GOAL: DAILY_GOAL,
+    WEEKLY_GOAL: WEEKLY_GOAL
+  };
+
+  /* ---------- bilingual helpers ---------- */
+  /** @returns {Object|null} Lang bridge when available. */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  var L10N = resolveLang();
+  /**
+   * @param {string} key Dictionary key.
+   * @param {Object=} params Slot values.
+   * @returns {string} Localized text or "".
+   */
+  function tx(key, params) {
+    var s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+  /** @param {*} v Raw. @returns {string} Escaped HTML. */
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (m) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]);
+    });
+  }
+  /** @param {number} level Level number. @returns {string} Localized title. */
+  function levelTitle(level) { return tx("motivation.levelTitle." + Math.min(Math.max(level, 1), 6)) || "—"; }
+  /** @param {Object} b Badge definition. @returns {string} Localized name. */
+  function badgeName(b) { return tx("motivation.badge." + b.id) || b.id; }
+  /** @param {Object} b Badge definition. @returns {string} Localized description. */
+  function badgeDesc(b) { return tx("motivation.badge." + b.id + "Desc") || ""; }
+
+  /* ---------- dashboard UI (optional mount) ---------- */
+  var levelEl = document.getElementById("heroDashLevel");
+  var levelTitleEl = document.getElementById("heroDashLevelTitle");
+  var xpEl = document.getElementById("heroDashXp");
+  var xpBarEl = document.getElementById("heroDashXpBar");
+  var xpMeterEl = document.getElementById("heroDashXpMeter");
+  var xpNextEl = document.getElementById("heroDashXpNext");
+  var dailyEl = document.getElementById("heroDashDaily");
+  var dailyBarEl = document.getElementById("heroDashDailyBar");
+  var dailyMeterEl = document.getElementById("heroDashDailyMeter");
+  var weeklyEl = document.getElementById("heroDashWeekly");
+  var weeklyBarEl = document.getElementById("heroDashWeeklyBar");
+  var weeklyMeterEl = document.getElementById("heroDashWeeklyMeter");
+  var streakEl = document.getElementById("heroDashStreak");
+  var badgesEl = document.getElementById("heroDashBadges");
+  var badgeCountEl = document.getElementById("heroDashBadgeCount");
+  var resetBtn = document.getElementById("heroDashReset");
+  var hasUI = !!(badgesEl && levelEl && xpEl && dailyEl && weeklyEl && streakEl);
+
+  /** @param {HTMLElement|null} el Target. @param {string} text Value. @returns {void} */
+  function setText(el, text) { if (el) el.textContent = text || "—"; }
+  /**
+   * @param {HTMLElement|null} bar Fill element.
+   * @param {HTMLElement|null} meter Progressbar element.
+   * @param {number} value Current value.
+   * @param {number} max Maximum value.
+   * @param {string} label Accessible label.
+   * @returns {void}
+   */
+  function setBar(bar, meter, value, max, label) {
+    var pct = max > 0 ? Math.max(0, Math.min(100, Math.round((value / max) * 100))) : 0;
+    if (bar && bar.style) bar.style.width = pct + "%";
+    if (meter) {
+      meter.setAttribute("aria-valuenow", String(Math.max(0, Math.min(value, max))));
+      if (label) meter.setAttribute("aria-label", label);
+    }
+  }
+
+  /** Repaint the motivation UI from real state/data only. @returns {void} */
+  function render() {
+    if (!hasUI) return;
+    var xp = totalXp();
+    var info = getLevelInfo(xp);
+    var daily = dailyXp();
+    var weekly = weeklyXp();
+    var streak = computeStreak();
+
+    setText(levelEl, String(info.level));
+    setText(levelTitleEl, levelTitle(info.titleLevel));
+    setText(xpEl, tx("motivation.xp", { xp: xp }) || (xp + " XP"));
+    setText(xpNextEl, tx("motivation.xpNext", { remaining: info.remaining, next: info.next }));
+    setBar(xpBarEl, xpMeterEl, info.into, LEVEL_STEP, tx("motivation.levelAria"));
+
+    setText(dailyEl, tx("motivation.goalValue", { xp: daily, goal: DAILY_GOAL }) || (daily + " / " + DAILY_GOAL));
+    setBar(dailyBarEl, dailyMeterEl, daily, DAILY_GOAL, tx("motivation.dailyAria"));
+    setText(weeklyEl, tx("motivation.goalValue", { xp: weekly, goal: WEEKLY_GOAL }) || (weekly + " / " + WEEKLY_GOAL));
+    setBar(weeklyBarEl, weeklyMeterEl, weekly, WEEKLY_GOAL, tx("motivation.weeklyAria"));
+    setText(streakEl, tx("motivation.streakDays", { days: streak }) || String(streak));
+
+    var unlocked = 0;
+    var html = BADGES.map(function (b) {
+      var isOn = !!state.badges[b.id];
+      if (isOn) unlocked++;
+      var name = badgeName(b);
+      var desc = badgeDesc(b);
+      var stateLabel = tx(isOn ? "motivation.unlocked" : "motivation.locked");
+      return '<div class="motivation-badge ' + (isOn ? "is-unlocked" : "is-locked") + '" role="listitem"' +
+        ' aria-label="' + esc(name + " — " + desc + " (" + stateLabel + ")") + '">' +
+        '<span class="motivation-badge-ico" aria-hidden="true">' + (isOn ? b.ico : "🔒") + "</span>" +
+        '<span class="motivation-badge-text"><b>' + esc(name) + "</b><span>" + esc(desc) + "</span></span></div>";
+    }).join("");
+    badgesEl.innerHTML = html;
+    if (badgeCountEl) {
+      setText(badgeCountEl, tx("motivation.achievementsCount", { done: unlocked, total: BADGES.length }) ||
+        (unlocked + " / " + BADGES.length));
+    }
+  }
+
+  /* Reset only the motivation key, after an explicit confirmation. */
+  if (resetBtn && resetBtn.addEventListener) {
+    resetBtn.addEventListener("click", function () {
+      var ok = false;
+      try { ok = typeof window.confirm === "function" && window.confirm(tx("motivation.resetConfirm")); }
+      catch (e) { ok = false; }
+      if (ok) resetMotivation();
+    });
+  }
+
+  /* Refresh from genuine progress events and locale switches. */
+  if (document.addEventListener) {
+    document.addEventListener("nova:progress-changed", sync);
+    document.addEventListener("nova:view-changed", sync);
+  }
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) { /* optional */ }
+  try {
+    if (window.addEventListener) {
+      window.addEventListener("storage", function (ev) {
+        if (!ev || ev.key !== "motmi-portal:" + STORE_KEY) return;
+        state = sanitize(readRaw());
+        sync();
+      });
+    }
+  } catch (e2) { /* cross-tab sync is optional */ }
+
+  sync();
+})();
+/* @@MOTIVATION_END@@ */
+
+/* @@SKILL_TREE_START@@ */
+/* ============================================================
+   MODULE 51 · SkillTree — cybersecurity skill map
+   One node per existing learning path. Titles, topics, resources
+   and completion come from LEARNING_PATHS and platform stores.
+   PREREQS is only an edge map (path-id → prerequisite path-ids).
+   ============================================================ */
+(function initSkillTree() {
+  "use strict";
+
+  const treeEl = document.getElementById("skillsTree");
+  const listEl = document.getElementById("skillsList");
+  if (!treeEl || !listEl) return;
+
+  /** Prerequisite edges only; every value must resolve to a real path id. */
+  const PREREQS = {
+    fundamentals: [],
+    networking: ["fundamentals"],
+    "operating-systems": ["fundamentals"],
+    cryptography: ["fundamentals"],
+    websec: ["fundamentals", "operating-systems"],
+    pentest: ["networking", "operating-systems", "websec"],
+    incident: ["networking", "websec"],
+    forensics: ["incident", "operating-systems"],
+    riskgov: ["fundamentals", "incident"],
+    ctf: ["pentest", "incident"]
+  };
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]
+    ));
+  }
+
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+
+  function T(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+
+  function bi(field) {
+    if (!field) return "";
+    if (typeof field !== "object") return String(field);
+    const cur = (L10N && L10N.current) || "ar";
+    return field[cur] || field.ar || field.en || "";
+  }
+
+  function paths() {
+    try { return (typeof window.getLearningPaths === "function") ? (window.getLearningPaths() || []) : []; }
+    catch (e) { return []; }
+  }
+
+  function pathById(id) { return paths().filter((p) => p && p.id === id)[0] || null; }
+
+  function pathName(id) {
+    const p = pathById(id);
+    return p ? bi(p.title) : id;
+  }
+
+  function prereqMap() {
+    const all = new Set(paths().map((p) => p.id));
+    const out = {};
+    Object.keys(PREREQS).forEach((id) => {
+      if (!all.has(id)) return;
+      out[id] = (PREREQS[id] || []).filter((pre) => all.has(pre) && pre !== id);
+    });
+    return out;
+  }
+
+  function results() {
+    try {
+      const store = (typeof window.readStore === "function") ? window.readStore() : null;
+      return (store && typeof store.results === "object" && store.results) ? store.results : {};
+    } catch (e) { return {}; }
+  }
+
+  function doneMap() {
+    try {
+      const s = window.PLATFORM_STORE;
+      const v = (s && typeof s.get === "function") ? s.get("paths", null) : null;
+      return (v && typeof v.done === "object" && v.done) ? v.done : {};
+    } catch (e) { return {}; }
+  }
+
+  function banks() {
+    try { return (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {}; }
+    catch (e) { return {}; }
+  }
+
+  function resourcesFor(p) {
+    return (Array.isArray(p.topics) ? p.topics.map((t) => t && t.res) : [])
+      .concat(Array.isArray(p.related) ? p.related : [])
+      .filter(Boolean);
+  }
+
+  function lessonsFor(p) {
+    return (Array.isArray(p.topics) ? p.topics : [])
+      .filter((t) => t && t.lsn && t.lsn.sub && t.lsn.key && t.t)
+      .map((t) => ({
+        title: bi(t.t),
+        href: "#lesson/" + encodeURIComponent(t.lsn.sub) + "/" + encodeURIComponent(t.lsn.key)
+      }));
+  }
+
+  function quizzesFor(p) {
+    const qb = banks();
+    const seen = new Set();
+    return resourcesFor(p)
+      .filter((r) => r.k === "quiz" && r.key && !seen.has(r.key) && (seen.add(r.key), true))
+      .map((r) => ({
+        key: r.key,
+        name: (qb[r.key] && qb[r.key].name) || r.key,
+        href: "#quiz"
+      }));
+  }
+
+  function labsFor(p) {
+    const seen = new Set();
+    return resourcesFor(p)
+      .filter((r) => r.k === "lab" && r.view && !seen.has(r.view) && (seen.add(r.view), true))
+      .map((r) => ({
+        view: r.view,
+        name: T("labs." + (r.view === "cryptolab" ? "crypto" : r.view)) || r.view,
+        href: "#" + encodeURIComponent(r.view)
+      }));
+  }
+
+  function progressFor(p) {
+    const topics = (Array.isArray(p.topics) ? p.topics : []).filter((t) => t && t.id);
+    const done = doneMap();
+    const saved = results();
+    let count = 0, next = null;
+    topics.forEach((t) => {
+      const auto = !!(t.res && t.res.k === "quiz" && saved[t.res.key]);
+      const manual = !!(done[p.id] && done[p.id][t.id] === true);
+      if (auto || manual) count++;
+      else if (!next) next = t;
+    });
+    return {
+      done: count,
+      total: topics.length,
+      pct: topics.length ? Math.round((count / topics.length) * 100) : 0,
+      next: next
+    };
+  }
+
+  function depthFor(id, seen) {
+    const guard = seen || new Set();
+    if (guard.has(id)) return 0;
+    guard.add(id);
+    const pres = (prereqMap()[id] || []);
+    return pres.reduce((max, pre) => Math.max(max, depthFor(pre, guard) + 1), 0);
+  }
+
+  function nextActionFor(p) {
+    if (p.status === "soon") {
+      return { label: T("skills.comingSoon"), href: "#paths", attrs: ' class="skill-next is-soon" aria-disabled="true"' };
+    }
+    const prog = progressFor(p);
+    if (prog.total && !prog.next) {
+      return { label: T("skills.reviewPath"), href: "#path/" + encodeURIComponent(p.id), attrs: "" };
+    }
+    const topic = prog.next;
+    const res = topic && topic.res;
+    if (res && res.k === "quiz" && res.key) {
+      return {
+        label: T("skills.startQuiz"),
+        href: "#quiz",
+        attrs: ' data-quiz-jump="' + esc(res.key) + '"'
+      };
+    }
+    if (res && res.k === "lab" && res.view) {
+      return { label: T("skills.openLab"), href: "#" + encodeURIComponent(res.view), attrs: "" };
+    }
+    if (res && res.k === "flash") {
+      return { label: T("skills.reviewFlashcards"), href: "#flash", attrs: "" };
+    }
+    if (res && res.k === "tool" && res.id) {
+      return {
+        label: T("skills.openPath"),
+        href: "#tools",
+        attrs: ' data-tool-jump="' + esc(res.id) + '"'
+      };
+    }
+    return { label: T("skills.openPath"), href: "#path/" + encodeURIComponent(p.id), attrs: "" };
+  }
+
+  function build() {
+    return paths().map((p, index) => {
+      const pres = (prereqMap()[p.id] || []).map((id) => ({ id, name: pathName(id) }));
+      return {
+        path: p,
+        index: index,
+        depth: depthFor(p.id),
+        prerequisites: pres,
+        progress: progressFor(p),
+        lessons: lessonsFor(p),
+        quizzes: quizzesFor(p),
+        labs: labsFor(p),
+        next: nextActionFor(p)
+      };
+    }).sort((a, b) => a.depth - b.depth || a.index - b.index);
+  }
+
+  function cardHtml(node, i) {
+    const p = node.path;
+    const id = "skillTitle-" + encodeURIComponent(p.id);
+    const isSoon = p.status === "soon";
+    const pres = node.prerequisites.length
+      ? node.prerequisites.map((pre) => (
+        '<a class="skill-chip" href="#path/' + encodeURIComponent(pre.id) + '">' + esc(pre.name) + "</a>"
+      )).join("")
+      : '<span class="skill-empty">' + esc(T("skills.prerequisitesNone")) + "</span>";
+    const lessons = node.lessons.length
+      ? node.lessons.map((l) => '<a href="' + esc(l.href) + '">' + esc(l.title) + "</a>").join("")
+      : '<span class="skill-empty">' + esc(T("skills.noLessons")) + "</span>";
+    const quizzes = node.quizzes.length
+      ? node.quizzes.map((q) => (
+        '<a href="' + esc(q.href) + '" data-quiz-jump="' + esc(q.key) + '">' + esc(q.name) + "</a>"
+      )).join("")
+      : '<span class="skill-empty">' + esc(T("skills.noQuizzes")) + "</span>";
+    const labs = node.labs.length
+      ? node.labs.map((l) => '<a href="' + esc(l.href) + '">' + esc(l.name) + "</a>").join("")
+      : '<span class="skill-empty">' + esc(T("skills.noLabs")) + "</span>";
+    const nextTopic = (node.progress.next && node.progress.next.t)
+      ? esc(T("skills.nextTopic", { topic: bi(node.progress.next.t) }))
+      : "";
+
+    return (
+      '<article class="skill-card' + (isSoon ? " is-soon" : "") + (p.recommended ? " is-recommended" : "") +
+        '" role="listitem" tabindex="-1" data-skill-id="' + esc(p.id) + '" aria-labelledby="' + esc(id) + '">' +
+        '<div class="skill-card-top">' +
+          '<span class="skill-ico" aria-hidden="true">' + esc(p.ico || "🛡️") + "</span>" +
+          '<h3 class="skill-title" id="' + esc(id) + '">' + esc(bi(p.title)) + "</h3>" +
+          (p.recommended ? '<span class="skill-badge is-recommended">' + esc(T("skills.recommended")) + "</span>" : "") +
+          (isSoon ? '<span class="skill-badge is-soon">' + esc(T("skills.soon")) + "</span>" : "") +
+        "</div>" +
+        '<p class="skill-desc">' + esc(bi(p.desc)) + "</p>" +
+        '<div class="skill-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + node.progress.pct +
+          '" aria-label="' + esc(T("skills.completion") + " — " + bi(p.title)) + '">' +
+          '<i style="width:' + node.progress.pct + '%"></i>' +
+        "</div>" +
+        '<p class="skill-pct"><b>' + node.progress.pct + "%</b> · " + esc(T("skills.completion")) + "</p>" +
+        '<dl class="skill-details">' +
+          "<dt>" + esc(T("skills.prerequisites")) + "</dt><dd>" + pres + "</dd>" +
+          "<dt>" + esc(T("skills.relatedLessons")) + "</dt><dd>" + lessons + "</dd>" +
+          "<dt>" + esc(T("skills.relatedQuizzes")) + "</dt><dd>" + quizzes + "</dd>" +
+          "<dt>" + esc(T("skills.relatedLabs")) + "</dt><dd>" + labs + "</dd>" +
+        "</dl>" +
+        '<div class="skill-next-row">' +
+          "<span><b>" + esc(T("skills.nextAction")) + "</b>" + (nextTopic ? " · " + nextTopic : "") + "</span>" +
+          '<a class="btn btn-sm btn-primary skill-next"' + node.next.attrs + ' href="' + esc(node.next.href) + '">' +
+            esc(node.next.label) + "</a>" +
+        "</div>" +
+      "</article>"
+    );
+  }
+
+  function listItemHtml(node) {
+    const p = node.path;
+    const pres = node.prerequisites.length
+      ? node.prerequisites.map((pre) => pre.name).join(", ")
+      : T("skills.prerequisitesNone");
+    const lessons = node.lessons.length
+      ? node.lessons.map((l) => l.title).join(", ")
+      : T("skills.noLessons");
+    const quizzes = node.quizzes.length
+      ? node.quizzes.map((q) => q.name).join(", ")
+      : T("skills.noQuizzes");
+    const labs = node.labs.length
+      ? node.labs.map((l) => l.name).join(", ")
+      : T("skills.noLabs");
+
+    return (
+      '<li role="listitem">' +
+        "<article>" +
+          "<h3>" + esc(bi(p.title)) + "</h3>" +
+          "<p><b>" + esc(T("skills.completion")) + ":</b> " + node.progress.pct + "%</p>" +
+          "<p><b>" + esc(T("skills.prerequisites")) + ":</b> " + esc(pres) + "</p>" +
+          "<p><b>" + esc(T("skills.relatedLessons")) + ":</b> " + esc(lessons) + "</p>" +
+          "<p><b>" + esc(T("skills.relatedQuizzes")) + ":</b> " + esc(quizzes) + "</p>" +
+          "<p><b>" + esc(T("skills.relatedLabs")) + ":</b> " + esc(labs) + "</p>" +
+          "<p><b>" + esc(T("skills.nextAction")) + ":</b> " + esc(node.next.label) + "</p>" +
+        "</article>" +
+      "</li>"
+    );
+  }
+
+  function render() {
+    const nodes = build();
+    treeEl.innerHTML = nodes.map(cardHtml).join("");
+    listEl.innerHTML = nodes.map(listItemHtml).join("");
+    if (!nodes.length) {
+      treeEl.innerHTML = '<p class="skill-empty-state">' + esc(T("skills.comingSoon")) + "</p>";
+    }
+  }
+
+  treeEl.addEventListener("keydown", (ev) => {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(ev.key)) return;
+    const cards = Array.prototype.slice.call(treeEl.querySelectorAll(".skill-card"));
+    if (!cards.length) return;
+    const active = ev.target && ev.target.closest ? ev.target.closest(".skill-card") : null;
+    const index = active ? cards.indexOf(active) : -1;
+    let target = null;
+    if (ev.key === "ArrowDown") target = cards[Math.min(index + 1, cards.length - 1)];
+    else if (ev.key === "ArrowUp") target = cards[Math.max(index - 1, 0)];
+    else if (ev.key === "Home") target = cards[0];
+    else target = cards[cards.length - 1];
+    if (target && target !== active) { ev.preventDefault(); target.focus(); }
+  });
+
+  document.addEventListener("nova:view-changed", (ev) => {
+    if (ev.detail && ev.detail.viewId === "skills") render();
+  });
+  document.addEventListener("nova:progress-changed", render);
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) { /* optional */ }
+
+  render();
+
+  window.PlatformSkillTree = { build: build, render: render, PREREQS: PREREQS };
+})();
+/* @@SKILL_TREE_END@@ */
+
+/* @@REVISION_START@@ */
+/* ============================================================
+   MODULE 52 · Revision — transparent local review queue
+   ------------------------------------------------------------
+   Builds a review queue ONLY from the learner's own local data:
+     · missed quiz questions      → "motmi-portal:missed"
+     · unfinished lessons         → "motmi-portal:lessons" (last/undone)
+     · bookmarked topics          → "motmi-portal:bookmarks"
+     · stale review dates         → "motmi-portal:revision"
+   Every item shows WHY it is queued and when it was last reviewed.
+   Two modes: mistakes review (untimed) and five-minute practice.
+   All state lives on the device; nothing is sent anywhere.
+   ============================================================ */
+(function initRevision() {
+  "use strict";
+
+  const mount = document.getElementById("revisionApp");
+  if (!mount) return;
+
+  const DAY_MS = 86400000;
+  const STALE_AFTER = 7 * DAY_MS;
+  const FIVE_MIN_MS = 5 * 60000;
+  const QUEUE_CAP = 24;
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]
+    ));
+  }
+
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+
+  function T(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+
+  function store() {
+    try { return (window.PLATFORM_STORE && typeof window.PLATFORM_STORE.get === "function") ? window.PLATFORM_STORE : null; }
+    catch (e) { return null; }
+  }
+  function sget(key, fallback) {
+    const s = store();
+    if (!s) return fallback;
+    try { return s.get(key, fallback); } catch (e) { return fallback; }
+  }
+  function sset(key, value) {
+    const s = store();
+    if (!s) return;
+    try { s.set(key, value); } catch (e) { /* best effort */ }
+  }
+
+  function banks() {
+    try { return (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {}; }
+    catch (e) { return {}; }
+  }
+  function lessons() {
+    try { return (window.PLATFORM_LESSONS && typeof window.PLATFORM_LESSONS === "object") ? window.PLATFORM_LESSONS : {}; }
+    catch (e) { return {}; }
+  }
+
+  function notify() {
+    try {
+      if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed"));
+    } catch (e) { /* optional */ }
+  }
+
+  /** Missed-question map, same shape as MODULE 13a MissedBank ("sub:index" → ts). */
+  function missedMap() {
+    const v = sget("missed", null);
+    return (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+  }
+  function missedRemove(sub, idx) {
+    const m = missedMap();
+    const id = sub + ":" + idx;
+    if (id in m) { delete m[id]; sset("missed", m); notify(); }
+  }
+
+  function reviewedMap() {
+    const v = sget("revision", null);
+    return (v && typeof v === "object" && v.last && typeof v.last === "object") ? v.last : {};
+  }
+  function saveReview(id) {
+    const v = sget("revision", null);
+    const st = (v && typeof v === "object" && v.last && typeof v.last === "object") ? v : { v: 1, last: {} };
+    st.last[id] = Date.now();
+    sset("revision", st);
+  }
+
+  function lessonTitle(sub, topic) {
+    const L = lessons();
+    const l = L[sub] && L[sub][topic];
+    if (l && l.title) {
+      const cur = (L10N && L10N.current) || "ar";
+      return l.title[cur] || l.title.ar || l.title.en || topic;
+    }
+    return topic;
+  }
+
+
+  /**
+   * Build the transparent review queue from local data only.
+   * Reason priority: missed → unfinished → bookmark → stale (deduped by id).
+   * @returns {Array<{id:string,kind:string,subject:string,title:string,qIndex:number,lastReviewed:number}>}
+   */
+  function buildQueue() {
+    const out = [];
+    const seen = new Set();
+    const last = reviewedMap();
+    const now = Date.now();
+
+    /* 1 · Missed questions (only ones still valid against live banks). */
+    const m = missedMap();
+    Object.keys(m).forEach((id) => {
+      const ps = id.split(":");
+      const idx = parseInt(ps[ps.length - 1], 10);
+      const sub = ps.slice(0, -1).join(":");
+      const bank = banks()[sub];
+      if (!bank || !Array.isArray(bank.questions) || !Number.isInteger(idx) || idx < 0 || idx >= bank.questions.length) return;
+      const rid = "missed:" + sub + ":" + idx;
+      if (seen.has(rid)) return;
+      seen.add(rid);
+      out.push({ id: rid, kind: "missed", subject: sub, qIndex: idx, title: bank.name || sub, lastReviewed: last[rid] || 0 });
+    });
+
+    /* 2 · Unfinished lessons: explicitly un-completed, or the last-opened
+       lesson that is not marked complete. */
+    const ls = sget("lessons", null);
+    if (ls && typeof ls === "object") {
+      const done = (ls.done && typeof ls.done === "object") ? ls.done : {};
+      const undone = (ls.undone && typeof ls.undone === "object") ? ls.undone : {};
+      const keys = Object.keys(undone);
+      if (ls.last && ls.last.key && !done[ls.last.key]) keys.push(ls.last.key);
+      keys.forEach((k) => {
+        const rid = "unfinished:" + k;
+        if (seen.has(rid) || done[k]) return;
+        const ps = String(k).split("/");
+        seen.add(rid);
+        out.push({ id: rid, kind: "unfinished", subject: ps[0] || "", topic: ps.slice(1).join("/"), title: lessonTitle(ps[0], ps.slice(1).join("/")), qIndex: -1, lastReviewed: last[rid] || 0 });
+      });
+    }
+
+    /* 3 · Bookmarked topics. */
+    const bm = sget("bookmarks", null);
+    const items = (bm && typeof bm === "object" && bm.items && typeof bm.items === "object") ? bm.items : {};
+    Object.keys(items).forEach((k) => {
+      const rid = "bookmark:" + k;
+      if (seen.has(rid)) return;
+      const ps = String(k).split("/");
+      seen.add(rid);
+      out.push({ id: rid, kind: "bookmark", subject: ps[0] || "", topic: ps.slice(1).join("/"), title: lessonTitle(ps[0], ps.slice(1).join("/")), qIndex: -1, lastReviewed: last[rid] || 0 });
+    });
+
+    /* 4 · Stale reviews: reviewed before but not within the last 7 days,
+       and not already surfaced by a stronger reason. */
+    Object.keys(last).forEach((rid) => {
+      if (seen.has(rid)) return;
+      const ts = last[rid];
+      if (typeof ts !== "number" || (now - ts) < STALE_AFTER) return;
+      seen.add(rid);
+      out.push({ id: rid, kind: "stale", subject: rid.split(":")[1] || "", qIndex: -1, title: rid, lastReviewed: ts });
+    });
+
+    return out;
+  }
+
+  const REASON_KEY = {
+    missed: "review.reasonMissed",
+    unfinished: "review.reasonUnfinished",
+    bookmark: "review.reasonBookmark",
+    stale: "review.reasonStale"
+  };
+
+  function fmtDate(ts) {
+    try { return new Date(ts).toLocaleDateString(); } catch (e) { return ""; }
+  }
+
+
+  /* ---------- render: queue ---------- */
+
+  function itemHtml(it) {
+    const reason = T(REASON_KEY[it.kind]) || it.kind;
+    const reviewed = it.lastReviewed ? T("review.lastReview", { date: fmtDate(it.lastReviewed) }) : T("review.neverReviewed");
+    const openLesson = (it.kind === "unfinished" || it.kind === "bookmark") && it.subject && it.topic
+      ? '<a class="btn btn-sm btn-ghost" href="#lesson/' + esc(it.subject) + '/' + esc(it.topic) + '">' + esc(T("review.openLesson")) + "</a>"
+      : "";
+    return '<li class="rev-item" data-rev-id="' + esc(it.id) + '">' +
+      '<span class="rev-reason is-' + esc(it.kind) + '">' + esc(reason) + "</span>" +
+      '<span class="rev-title">' + esc(it.title) + "</span>" +
+      '<span class="rev-last">' + esc(reviewed) + "</span>" +
+      openLesson +
+      "</li>";
+  }
+
+  function render() {
+    const queue = buildQueue();
+    const shown = queue.slice(0, QUEUE_CAP);
+    const missedCount = queue.filter((q) => q.kind === "missed").length;
+
+    let html = '<div class="rev-shell">' +
+      '<div class="rev-head"><h3>' + esc(T("review.title")) + "</h3>" +
+      "<p>" + esc(T("review.sub")) + "</p></div>";
+
+    if (!queue.length) {
+      html += '<p class="rev-empty">' + esc(T("review.empty")) + "</p>";
+    } else {
+      html += '<p class="rev-showing">' + esc(T("review.showing", { shown: shown.length, total: queue.length })) + "</p>" +
+        '<ul class="rev-list" role="list">' + shown.map(itemHtml).join("") + "</ul>" +
+        '<div class="rev-actions">' +
+        (missedCount
+          ? '<button type="button" class="btn btn-sm btn-primary" data-rev-start="mistakes">' + esc(T("review.startMistakes")) + "</button>" +
+            '<button type="button" class="btn btn-sm btn-ghost" data-rev-start="five">' + esc(T("review.startFive")) + "</button>"
+          : '<p class="rev-empty">' + esc(T("review.noMistakes")) + "</p>") +
+        "</div>";
+    }
+    mount.innerHTML = html + "</div>";
+  }
+
+  /* ---------- render: review session (mistakes / five-minute) ---------- */
+
+  let session = null;   /* { mode, items, i, correct, answered, timerId, endAt } */
+  let pendingStart = null;
+
+  function missedItems() {
+    return buildQueue().filter((q) => q.kind === "missed");
+  }
+
+  function fmtTime(ms) {
+    const s = Math.max(0, Math.round(ms / 1000));
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+
+  function stopTimer() {
+    if (session && session.timerId) { try { clearInterval(session.timerId); } catch (e) { /* noop */ } }
+  }
+
+  function qField(q, key) {
+    const v = q ? q[key] : "";
+    if (v && typeof v === "object") { const cur = (L10N && L10N.current) || "ar"; return v[cur] || v.ar || v.en || ""; }
+    return typeof v === "string" ? v : "";
+  }
+
+  function questionHtml(it) {
+    const bank = banks()[it.subject];
+    const q = bank && bank.questions ? bank.questions[it.qIndex] : null;
+    if (!q) return "";
+    const opts = Array.isArray(q.opts) ? q.opts : (Array.isArray(q.options) ? q.options : []);
+    const correct = (typeof q.a === "number") ? q.a : ((typeof q.correct === "number") ? q.correct : 0);
+    const ex = qField(q, "ex") || qField(q, "why");
+    return '<div class="rev-card" data-rev-card="1">' +
+      '<p class="rev-q">' + esc(qField(q, "q")) + "</p>" +
+      '<div class="rev-opts">' + opts.map((o, oi) =>
+        '<button type="button" class="rev-opt" data-rev-opt="' + (oi === correct ? 1 : 0) + '">' + esc((o && typeof o === "object") ? qField({ v: o }, "v") : o) + "</button>").join("") + "</div>" +
+      '<p class="rev-ex is-hidden" data-rev-ex="1">' + esc(ex) + "</p>" +
+      '<div class="rev-card-actions">' +
+      '<button type="button" class="btn btn-sm btn-ghost" data-rev-reveal="1">' + esc(T("review.reveal")) + "</button>" +
+      '<button type="button" class="btn btn-sm btn-primary" data-rev-next="1" disabled>' + esc(T("review.next")) + "</button>" +
+      "</div></div>";
+  }
+
+
+  function sessionShell(inner) {
+    mount.innerHTML = '<div class="rev-shell is-session">' +
+      '<div class="rev-topbar">' +
+      '<strong>' + esc(session.mode === "five" ? T("review.startFive") : T("review.startMistakes")) + "</strong>" +
+      (session.mode === "five" ? '<span class="rev-timer" role="timer" data-rev-timer="1">' + esc(T("review.timeLeft", { time: fmtTime(session.endAt - Date.now()) })) + "</span>" : "") +
+      '<button type="button" class="btn btn-sm btn-ghost" data-rev-close="1">' + esc(T("review.close")) + "</button>" +
+      "</div>" + inner + "</div>";
+  }
+
+  function showCard() {
+    const it = session.items[session.i];
+    if (!it) { finishSession(false); return; }
+    sessionShell(questionHtml(it));
+  }
+
+  function startReview(mode) {
+    stopTimer();
+    const items = missedItems();
+    if (!items.length) { session = null; render(); return; }
+    session = { mode: mode, items: items, i: 0, correct: 0, answered: 0, timerId: 0, endAt: 0 };
+    if (mode === "five") {
+      session.endAt = Date.now() + FIVE_MIN_MS;
+      session.timerId = setInterval(() => {
+        if (!session) return;
+        const left = session.endAt - Date.now();
+        const el = mount.querySelector("[data-rev-timer]");
+        if (el) el.textContent = T("review.timeLeft", { time: fmtTime(left) });
+        if (left <= 0) finishSession(true);
+      }, 1000);
+    }
+    showCard();
+  }
+
+  function finishSession(timeUp) {
+    stopTimer();
+    const s = session;
+    if (!s) { render(); return; }
+    /* Notify OTHER modules first: our own progress-changed listener skips
+       re-rendering while a session is active, so the summary survives. */
+    notify();
+    session = null;
+    const remaining = missedItems().length;
+    mount.innerHTML = '<div class="rev-shell is-session">' +
+      '<div class="rev-summary" role="status">' +
+      (timeUp ? '<p class="rev-timeup">' + esc(T("review.timeUp")) + "</p>" : "") +
+      "<p>" + esc(T("review.summary", { correct: s.correct, answered: s.answered, remaining: remaining })) + "</p>" +
+      '<div class="rev-actions">' +
+      '<button type="button" class="btn btn-sm btn-ghost" data-rev-close="1">' + esc(T("review.close")) + "</button>" +
+      '<a href="#quiz" class="btn btn-sm btn-primary">' + esc(T("review.backToQuiz")) + "</a>" +
+      "</div></div></div>";
+  }
+
+  /* Delegated interactions on the revision mount (survive re-renders). */
+  mount.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+
+    const start = t.closest("[data-rev-start]");
+    if (start) { startReview(start.getAttribute("data-rev-start") === "five" ? "five" : "mistakes"); return; }
+
+    if (t.closest("[data-rev-close]")) { stopTimer(); session = null; render(); return; }
+    if (!session) return;
+
+    const opt = t.closest("[data-rev-opt]");
+    if (opt) {
+      const card = opt.closest("[data-rev-card]");
+      if (!card) return;
+      const ok = opt.getAttribute("data-rev-opt") === "1";
+      const it = session.items[session.i];
+      session.answered++;
+      if (ok) {
+        session.correct++;
+        /* Correct answer retires the mistake and stamps the review date. */
+        missedRemove(it.subject, it.qIndex);
+        saveReview(it.id);
+        opt.classList.add("is-correct");
+        card.classList.add("is-correct");
+      } else {
+        opt.classList.add("is-wrong");
+        card.classList.add("is-wrong");
+      }
+      card.querySelectorAll(".rev-opt").forEach((b) => { b.disabled = true; });
+      const ex = card.querySelector("[data-rev-ex]");
+      if (ex && ex.textContent) ex.classList.remove("is-hidden");
+      const next = card.querySelector("[data-rev-next]");
+      if (next) next.disabled = false;
+      return;
+    }
+
+    if (t.closest("[data-rev-reveal]")) {
+      const card = t.closest("[data-rev-card]");
+      const ex = card && card.querySelector("[data-rev-ex]");
+      if (ex) ex.classList.toggle("is-hidden");
+      return;
+    }
+
+    if (t.closest("[data-rev-next]")) {
+      session.i++;
+      showCard();
+      return;
+    }
+  });
+
+  /* "Review mistakes / five-minute practice" links from the lesson view:
+     they jump to #progress; the session starts once the view is shown. */
+  document.addEventListener("click", (e) => {
+    const a = e.target && e.target.closest && e.target.closest("[data-review-start]");
+    if (!a) return;
+    pendingStart = a.getAttribute("data-review-start") === "five" ? "five" : "mistakes";
+    setTimeout(() => {
+      if (!pendingStart) return;
+      const mode = pendingStart;
+      pendingStart = null;
+      startReview(mode);
+    }, 400);
+  });
+
+  document.addEventListener("nova:view-changed", (ev) => {
+    if (ev.detail && ev.detail.viewId === "progress") render();
+  });
+  document.addEventListener("nova:progress-changed", () => { if (!session) render(); });
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(() => { if (!session) render(); }); } catch (e) { /* optional */ }
+
+  render();
+
+  window.PlatformRevision = { buildQueue: buildQueue, render: render, startReview: startReview };
+})();
+/* @@REVISION_END@@ */
+
+
+/* ============================================================
+   MODULE 53 · ExamPrep — exam preparation mode @@EXAM_PREP_START@@
+   ------------------------------------------------------------
+   Optional exam date + countdown, daily study recommendations,
+   per-subject readiness percentages, weak-topic recommendations,
+   a calm practice-exam mode, and a final readiness summary.
+
+   Honesty rules (enforced by tests):
+     · Every percentage derives from REAL local data only:
+       readiness = 0.5·quizBest + 0.3·lessonCoverage + 0.2·mistakeFree
+       (subjects with no linked lessons → weight redistributed and
+       the UI says so). Nothing is invented.
+     · All state lives in the local store key "exam-prep":
+       { v:1, date:"YYYY-MM-DD"|null, runs:[{ts,total,correct,pct}] }
+     · Read-only access to quiz results / lessons / missed stores.
+     · No notifications, no network, no dependencies.
+   ============================================================ */
+(function initExamPrep() {
+  "use strict";
+
+  const mount = document.getElementById("examApp");
+  if (!mount) return;
+
+  const DAY_MS = 86400000;
+  const W_QUIZ = 0.5, W_LESSONS = 0.3, W_MISTAKES = 0.2;
+  const RUN_CAP = 10;
+  const EXAM_PER_SUBJECT = 4;
+  const REC_CAP = 4;
+  const STORE_KEY = "exam-prep";
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]
+    ));
+  }
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function T(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+  function store() {
+    try { return (window.PLATFORM_STORE && typeof window.PLATFORM_STORE.get === "function") ? window.PLATFORM_STORE : null; }
+    catch (e) { return null; }
+  }
+  function sget(key, fallback) {
+    const s = store();
+    if (!s) return fallback;
+    try { return s.get(key, fallback); } catch (e) { return fallback; }
+  }
+  function sset(key, value) {
+    const s = store();
+    if (!s) return;
+    try { s.set(key, value); } catch (e) { /* best effort */ }
+  }
+  function notify() {
+    try { if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed")); }
+    catch (e) { /* best effort */ }
+  }
+  function banks() {
+    try { return (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {}; }
+    catch (e) { return {}; }
+  }
+
+  /* ---------- own store ---------- */
+  function epGet() {
+    const v = sget(STORE_KEY, null);
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      return { v: 1, date: typeof v.date === "string" ? v.date : null, runs: Array.isArray(v.runs) ? v.runs : [] };
+    }
+    return { v: 1, date: null, runs: [] };
+  }
+  function epSet(v) { sset(STORE_KEY, v); }
+
+
+  /* ---------- real-data readers (read-only) ---------- */
+  function subjects() {
+    const reg = Array.isArray(window.PLATFORM_SUBJECTS) ? window.PLATFORM_SUBJECTS : [];
+    const b = banks();
+    const list = reg.filter((s) => s && b[s.quizKey || s.id]).map((s) => ({ key: s.quizKey || s.id }));
+    return list.length ? list : Object.keys(b).map((k) => ({ key: k }));
+  }
+  function subjectName(key) {
+    const b = banks();
+    return (b[key] && b[key].name) || key;
+  }
+  function resultsMap() {
+    try {
+      const d = (typeof window.readStore === "function") ? window.readStore() : null;
+      return (d && d.results && typeof d.results === "object" && !Array.isArray(d.results)) ? d.results : {};
+    } catch (e) { return {}; }
+  }
+  function lessonsState() {
+    const v = sget("lessons", null);
+    const o = (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+    return {
+      done: (o.done && typeof o.done === "object") ? o.done : {},
+      undone: (o.undone && typeof o.undone === "object") ? o.undone : {},
+      last: (o.last && typeof o.last === "object") ? o.last : null,
+    };
+  }
+  function missedMap() {
+    const m = sget("missed", {});
+    return (m && typeof m === "object" && !Array.isArray(m)) ? m : {};
+  }
+  /* Total real lessons per subject, from the learning-path topics' lsn.sub. */
+  function lessonTotals() {
+    const out = {};
+    try {
+      const paths = (typeof window.getLearningPaths === "function") ? (window.getLearningPaths() || []) : [];
+      paths.forEach((p) => (Array.isArray(p.topics) ? p.topics : []).forEach((t) => {
+        if (t && t.lsn && t.lsn.sub) out[t.lsn.sub] = (out[t.lsn.sub] || 0) + 1;
+      }));
+    } catch (e) { /* paths module optional */ }
+    return out;
+  }
+
+  /* ---------- honest readiness math ---------- */
+  function readinessFor(key, totals) {
+    const bank = banks()[key];
+    const size = bank && Array.isArray(bank.questions) ? bank.questions.length : 0;
+    const res = resultsMap()[key];
+    const tested = !!(res && (typeof res.pct === "number" || typeof res.score === "number"));
+    const quiz = tested
+      ? (typeof res.pct === "number" ? res.pct : Math.round(((res.score || 0) / Math.max(res.total || size, 1)) * 100))
+      : 0;
+    const ls = lessonsState();
+    const total = (totals && totals[key]) || 0;
+    let done = 0;
+    Object.keys(ls.done).forEach((k) => { if (k.indexOf(key + "/") === 0) done++; });
+    const coverage = total ? Math.round((done / total) * 100) : 0;
+    let missed = 0;
+    Object.keys(missedMap()).forEach((k) => { if (k.indexOf(key + ":") === 0) missed++; });
+    const mistakeFree = size ? Math.max(0, Math.round(100 * (1 - missed / size))) : 100;
+    let wq = W_QUIZ, wl = W_LESSONS, wm = W_MISTAKES;
+    if (!total) { const s = W_QUIZ + W_MISTAKES; wq = W_QUIZ / s; wl = 0; wm = W_MISTAKES / s; }
+    const pct = Math.max(0, Math.min(100, Math.round(wq * quiz + wl * coverage + wm * mistakeFree)));
+    return { key: key, pct: pct, quiz: quiz, coverage: coverage, mistakeFree: mistakeFree,
+             tested: tested, lessonsTotal: total, lessonsDone: done, missed: missed, bankSize: size };
+  }
+  function buildReadiness() {
+    const totals = lessonTotals();
+    return subjects().map((s) => readinessFor(s.key, totals));
+  }
+  function overallReadiness(list) {
+    return list.length ? Math.round(list.reduce((a, x) => a + x.pct, 0) / list.length) : 0;
+  }
+  function anyRealData() {
+    const ls = lessonsState();
+    return Object.keys(resultsMap()).length > 0 || Object.keys(ls.done).length > 0 || Object.keys(missedMap()).length > 0;
+  }
+
+
+  /* ---------- weak topics from the real missed store ---------- */
+  function weakTopics() {
+    const b = banks();
+    const counts = {};
+    Object.keys(missedMap()).forEach((id) => {
+      const i = id.lastIndexOf(":");
+      if (i < 0) return;
+      const sub = id.slice(0, i), idx = +id.slice(i + 1);
+      const q = b[sub] && Array.isArray(b[sub].questions) ? b[sub].questions[idx] : null;
+      if (!q) return; /* prune entries that no longer resolve */
+      const topic = (typeof q.topic === "string" && q.topic.trim()) ? q.topic.trim() : "—";
+      const k = sub + "|" + topic;
+      if (!counts[k]) counts[k] = { subject: sub, topic: topic, count: 0 };
+      counts[k].count++;
+    });
+    return Object.keys(counts).map((k) => counts[k]).sort((a, z) => z.count - a.count).slice(0, 5);
+  }
+
+  /* ---------- daily recommendations (real data, calm tone) ---------- */
+  function validMissedCount() {
+    const b = banks();
+    let n = 0;
+    Object.keys(missedMap()).forEach((id) => {
+      const i = id.lastIndexOf(":");
+      if (i < 0) return;
+      const sub = id.slice(0, i), idx = +id.slice(i + 1);
+      if (b[sub] && Array.isArray(b[sub].questions) && b[sub].questions[idx]) n++;
+    });
+    return n;
+  }
+  function recommendations(readiness, weak, daysLeft) {
+    const recs = [];
+    const missed = validMissedCount();
+    const urgent = (typeof daysLeft === "number") && daysLeft >= 0 && daysLeft <= 3;
+    /* Close to the exam → fixing known mistakes first. */
+    if (missed > 0) recs.push({ kind: "review", text: T("exam.recReview", { count: missed }), href: "#progress" });
+    weak.slice(0, urgent ? 1 : 2).forEach((w) => {
+      recs.push({ kind: "weak", text: T("exam.recWeak", { topic: w.topic, subject: subjectName(w.subject) }),
+                  href: "#lesson/" + w.subject + "/" + w.topic });
+    });
+    const ls = lessonsState();
+    const undoneKeys = Object.keys(ls.undone);
+    if (undoneKeys.length) {
+      const k = undoneKeys[0];
+      recs.push({ kind: "lesson", text: T("exam.recLesson", { lesson: k.split("/").pop() }), href: "#lesson/" + k });
+    }
+    if (!urgent) recs.push({ kind: "practice", text: T("exam.recPractice"), href: "#progress" });
+    readiness.slice().sort((a, z) => a.pct - z.pct).slice(0, 2).forEach((r) => {
+      recs.push({ kind: "subject", text: T("exam.recSubject", { subject: subjectName(r.key), pct: r.pct }), href: "#quiz" });
+    });
+    return recs.slice(0, REC_CAP);
+  }
+
+  /* ---------- exam date + countdown ---------- */
+  function parseDate(str) {
+    if (typeof str !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(str)) return null;
+    const d = new Date(str + "T00:00:00");
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function daysUntil(dateStr) {
+    const d = parseDate(dateStr);
+    if (!d) return null;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((d.getTime() - today.getTime()) / DAY_MS);
+  }
+
+  /* ---------- practice exam deck (real questions, no timer) ---------- */
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+  function buildDeck() {
+    const b = banks();
+    const deck = [];
+    subjects().forEach((s) => {
+      const qs = (b[s.key] && Array.isArray(b[s.key].questions) ? b[s.key].questions : [])
+        .map((q, i) => ({ q: q, idx: i }));
+      shuffle(qs).slice(0, EXAM_PER_SUBJECT).forEach((it) => {
+        deck.push({ subject: s.key, idx: it.idx, q: it.q });
+      });
+    });
+    return shuffle(deck);
+  }
+
+
+  /* ---------- rendering ---------- */
+  let session = null;      /* {deck, idx, correct, answered, picked} */
+  let summary = null;      /* {total, correct, pct} */
+  let statusMsg = "";      /* one-shot calm feedback line */
+  let showForm = false;    /* date form visible */
+  let promptDismissed = false;
+
+  function dateCardHtml(ep) {
+    const days = ep.date ? daysUntil(ep.date) : null;
+    if (ep.date && days !== null && !showForm) {
+      let line;
+      if (days > 1) line = T("exam.daysLeft", { days: days });
+      else if (days === 1) line = T("exam.dayLeft");
+      else if (days === 0) line = T("exam.today");
+      else line = T("exam.passed");
+      const cls = days < 0 ? "is-passed" : days <= 3 ? "is-soon" : "";
+      return (
+        '<div class="exam-date-card">' +
+        '<p class="exam-countdown ' + cls + '" role="status"><span class="exam-days" aria-hidden="true">' + esc(Math.max(days, 0)) + '</span> ' + esc(line) + '</p>' +
+        '<p class="exam-date-value">' + esc(ep.date) + '</p>' +
+        '<div class="exam-actions">' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-exam-edit="1">' + esc(T("exam.edit")) + '</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-exam-remove="1">' + esc(T("exam.remove")) + '</button>' +
+        '</div></div>'
+      );
+    }
+    return (
+      '<div class="exam-date-card">' +
+      '<p class="exam-muted">' + esc(T("exam.datePrompt")) + '</p>' +
+      '<div class="exam-date-form">' +
+      '<label class="sr-only" for="examDate">' + esc(T("exam.dateLabel")) + '</label>' +
+      '<input type="date" id="examDate" class="exam-date-input" value="' + esc(ep.date || "") + '">' +
+      '<button type="button" class="btn btn-primary btn-sm" data-exam-save="1">' + esc(T("exam.save")) + '</button>' +
+      (!ep.date && !showForm ? '<button type="button" class="btn btn-ghost btn-sm" data-exam-skip="1">' + esc(T("exam.skip")) + '</button>' : '') +
+      '</div></div>'
+    );
+  }
+
+  function dailyHtml(recs) {
+    const items = recs.length
+      ? recs.map((r) => '<li class="exam-rec is-' + esc(r.kind) + '"><a href="' + esc(r.href) + '">' + esc(r.text) + '</a></li>').join("")
+      : '<li class="exam-rec is-empty">' + esc(T("exam.dailyEmpty")) + '</li>';
+    return '<section class="exam-block"><h4>' + esc(T("exam.dailyTitle")) + '</h4><ul class="exam-recs">' + items + '</ul></section>';
+  }
+
+  function readinessHtml(list) {
+    const rows = list.map((r) => {
+      const cls = r.pct >= 75 ? "is-high" : r.pct >= 50 ? "is-mid" : "is-low";
+      const notes = [];
+      if (!r.tested) notes.push(T("exam.notTested"));
+      if (!r.lessonsTotal) notes.push(T("exam.noLessons"));
+      return (
+        '<li class="exam-subj">' +
+        '<div class="exam-subj-head"><span class="exam-subj-name">' + esc(subjectName(r.key)) + '</span>' +
+        '<span class="exam-pct ' + cls + '">' + esc(r.pct) + '%</span></div>' +
+        '<div class="exam-bar" aria-hidden="true"><i style="width:' + r.pct + '%"></i></div>' +
+        '<p class="exam-breakdown">' + esc(T("exam.breakdown", { quiz: r.quiz, lessons: r.coverage, mistakes: r.mistakeFree })) + '</p>' +
+        (notes.length ? '<p class="exam-muted">' + esc(notes.join(" · ")) + '</p>' : '') +
+        '</li>'
+      );
+    }).join("");
+    return '<section class="exam-block"><h4>' + esc(T("exam.readinessTitle")) + '</h4>' +
+      '<p class="exam-muted">' + esc(T("exam.readinessSub")) + '</p>' +
+      '<ul class="exam-subjects">' + rows + '</ul></section>';
+  }
+
+  function weakHtml(weak) {
+    const rows = weak.length
+      ? weak.map((w) =>
+          '<li class="exam-weak"><a href="#lesson/' + esc(w.subject) + '/' + esc(w.topic) + '">' + esc(w.topic) +
+          '</a> <span class="exam-muted">' + esc(subjectName(w.subject)) + ' · ' + esc(T("exam.missedCount", { count: w.count })) + '</span></li>').join("")
+      : '<li class="exam-weak is-empty">' + esc(T("exam.weakEmpty")) + '</li>';
+    return '<section class="exam-block"><h4>' + esc(T("exam.weakTitle")) + '</h4><ul class="exam-weaks">' + rows + '</ul></section>';
+  }
+
+
+  function practiceHtml(ep) {
+    const last = ep.runs.length ? ep.runs[ep.runs.length - 1] : null;
+    const lastLine = last
+      ? '<p class="exam-muted">' + esc(T("exam.lastRun", { pct: last.pct, date: new Date(last.ts).toLocaleDateString() })) + '</p>'
+      : "";
+    return (
+      '<section class="exam-block exam-practice">' +
+      '<h4>' + esc(T("exam.practiceTitle")) + '</h4>' +
+      '<p class="exam-muted">' + esc(T("exam.practiceSub")) + '</p>' + lastLine +
+      '<div class="exam-actions"><button type="button" class="btn btn-primary" data-exam-start="1">' + esc(T("exam.start")) + '</button></div>' +
+      '</section>'
+    );
+  }
+
+  function finalHtml(list) {
+    if (!anyRealData()) {
+      return (
+        '<section class="exam-block exam-final"><h4>' + esc(T("exam.finalTitle")) + '</h4>' +
+        '<p class="exam-muted">' + esc(T("exam.finalNoData")) + '</p>' +
+        '<div class="exam-actions">' +
+        '<a class="btn btn-primary btn-sm" href="#quiz">' + esc(T("exam.openQuiz")) + '</a>' +
+        '<a class="btn btn-ghost btn-sm" href="#lessons">' + esc(T("exam.openLessons")) + '</a>' +
+        '</div></section>'
+      );
+    }
+    const overall = overallReadiness(list);
+    const note = overall >= 75 ? T("exam.finalNoteHigh") : overall >= 50 ? T("exam.finalNoteMid") : T("exam.finalNoteLow");
+    const cls = overall >= 75 ? "is-high" : overall >= 50 ? "is-mid" : "is-low";
+    return (
+      '<section class="exam-block exam-final"><h4>' + esc(T("exam.finalTitle")) + '</h4>' +
+      '<div class="exam-overall ' + cls + '"><div class="exam-bar" aria-hidden="true"><i style="width:' + overall + '%"></i></div>' +
+      '<p>' + esc(T("exam.finalLine", { pct: overall, note: note })) + '</p></div></section>'
+    );
+  }
+
+  function renderMain() {
+    const ep = epGet();
+    const list = buildReadiness();
+    const weak = weakTopics();
+    const days = ep.date ? daysUntil(ep.date) : null;
+    const recs = recommendations(list, weak, days);
+    mount.innerHTML =
+      '<div class="exam-shell">' +
+      '<div class="exam-head"><h3>' + esc(T("exam.title")) + '</h3><p>' + esc(T("exam.sub")) + '</p></div>' +
+      (statusMsg ? '<p class="exam-status" role="status">' + esc(statusMsg) + '</p>' : '') +
+      (promptDismissed && !ep.date ? "" : dateCardHtml(ep)) +
+      dailyHtml(recs) +
+      readinessHtml(list) +
+      weakHtml(weak) +
+      practiceHtml(ep) +
+      finalHtml(list) +
+      '</div>';
+    statusMsg = "";
+  }
+
+  function renderSession() {
+    const item = session.deck[session.idx];
+    const q = item.q;
+    const opts = q.opts || q.options || [];
+    const correct = typeof q.a === "number" ? q.a : q.correct;
+    const last = session.idx === session.deck.length - 1;
+    const optHtml = opts.map((o, i) => {
+      let cls = "exam-opt";
+      if (session.picked !== null) {
+        if (i === correct) cls += " is-correct";
+        else if (i === session.picked) cls += " is-wrong";
+      }
+      return '<button type="button" class="' + cls + '" data-exam-opt="' + i + '"' + (session.picked !== null ? " disabled" : "") + '>' + esc(o) + '</button>';
+    }).join("");
+    mount.innerHTML =
+      '<div class="exam-shell">' +
+      '<div class="exam-topbar"><span class="exam-progress-label">' + esc(T("exam.progress", { i: session.idx + 1, total: session.deck.length })) + '</span>' +
+      '<button type="button" class="btn btn-ghost btn-sm" data-exam-finish="1">' + esc(T("exam.finish")) + '</button></div>' +
+      '<div class="exam-card' + (session.picked !== null ? (session.picked === correct ? " is-correct" : " is-wrong") : "") + '">' +
+      '<p class="exam-from">' + esc(T("exam.from", { subject: subjectName(item.subject) })) + '</p>' +
+      '<p class="exam-q">' + esc(q.q) + '</p>' +
+      '<div class="exam-opts">' + optHtml + '</div>' +
+      (session.picked !== null
+        ? '<p class="exam-fb" role="status">' + esc(session.picked === correct ? T("exam.correct") : T("exam.wrong")) + '</p>' +
+          (q.ex ? '<p class="exam-ex">' + esc(q.ex) + '</p>' : "") +
+          '<div class="exam-actions"><button type="button" class="btn btn-primary btn-sm" data-exam-next="1">' + esc(last ? T("exam.finish") : T("exam.next")) + '</button></div>'
+        : "") +
+      '</div></div>';
+  }
+
+
+  function renderSummary() {
+    const enc = summary.pct >= 75 ? T("exam.encHigh") : summary.pct >= 50 ? T("exam.encMid") : T("exam.encLow");
+    const cls = summary.pct >= 75 ? "is-high" : summary.pct >= 50 ? "is-mid" : "is-low";
+    mount.innerHTML =
+      '<div class="exam-shell"><div class="exam-summary ' + cls + '">' +
+      '<h4>' + esc(T("exam.summaryTitle")) + '</h4>' +
+      '<p class="exam-score">' + esc(T("exam.summaryLine", { correct: summary.correct, total: summary.total, pct: summary.pct })) + '</p>' +
+      '<p class="exam-muted">' + esc(enc) + '</p>' +
+      '<div class="exam-actions"><button type="button" class="btn btn-primary btn-sm" data-exam-close="1">' + esc(T("exam.finalTitle")) + '</button></div>' +
+      '</div></div>';
+  }
+
+  function finishSession() {
+    const total = session.deck.length;
+    const pct = total ? Math.round((session.correct / total) * 100) : 0;
+    const run = { ts: Date.now(), total: total, correct: session.correct, pct: pct };
+    const ep = epGet();
+    ep.runs = (ep.runs.concat([run])).slice(-RUN_CAP);
+    epSet(ep);
+    notify(); /* notify BEFORE clearing so the listener below re-renders the main view */
+    summary = { total: total, correct: session.correct, pct: pct };
+    session = null;
+    renderSummary();
+  }
+
+  function render() {
+    if (session) { renderSession(); return; }
+    if (summary) { renderSummary(); return; }
+    renderMain();
+  }
+
+  /* ---------- one delegated listener (survives innerHTML re-renders) ---------- */
+  if (!window.__examDelegated) {
+    window.__examDelegated = true;
+    mount.addEventListener("click", (e) => {
+      const t = e.target.closest ? e.target.closest("[data-exam-save],[data-exam-edit],[data-exam-remove],[data-exam-skip],[data-exam-start],[data-exam-opt],[data-exam-next],[data-exam-finish],[data-exam-close]") : null;
+      if (!t) return;
+
+      if (t.hasAttribute("data-exam-save")) {
+        const input = mount.querySelector("#examDate");
+        const val = input && input.value ? String(input.value) : "";
+        if (!parseDate(val)) { statusMsg = T("exam.invalidDate"); renderMain(); return; }
+        const ep = epGet();
+        ep.date = val;
+        epSet(ep);
+        statusMsg = T("exam.dateSaved");
+        showForm = false;
+        promptDismissed = false;
+        notify(); renderMain(); return;
+      }
+      if (t.hasAttribute("data-exam-edit")) { showForm = true; renderMain(); return; }
+      if (t.hasAttribute("data-exam-remove")) {
+        const ep = epGet();
+        ep.date = null;
+        epSet(ep);
+        statusMsg = T("exam.dateRemoved");
+        showForm = false;
+        notify(); renderMain(); return;
+      }
+      if (t.hasAttribute("data-exam-skip")) { promptDismissed = true; renderMain(); return; }
+
+      if (t.hasAttribute("data-exam-start")) {
+        const deck = buildDeck();
+        if (!deck.length) return;
+        summary = null;
+        session = { deck: deck, idx: 0, correct: 0, answered: 0, picked: null };
+        renderSession(); return;
+      }
+      if (t.hasAttribute("data-exam-opt") && session && session.picked === null) {
+        const item = session.deck[session.idx];
+        const q = item.q;
+        const correct = typeof q.a === "number" ? q.a : q.correct;
+        session.picked = +t.getAttribute("data-exam-opt");
+        session.answered++;
+        if (session.picked === correct) session.correct++;
+        renderSession(); return;
+      }
+      if (t.hasAttribute("data-exam-next") && session) {
+        if (session.idx >= session.deck.length - 1) { finishSession(); return; }
+        session.idx++;
+        session.picked = null;
+        renderSession(); return;
+      }
+      if (t.hasAttribute("data-exam-finish") && session) { finishSession(); return; }
+      if (t.hasAttribute("data-exam-close")) { summary = null; renderMain(); return; }
+    });
+  }
+
+  /* Live refresh: language switch + progress changes (unless mid-session). */
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(() => { if (!session && !summary) renderMain(); }); } catch (e) { /* optional */ }
+  document.addEventListener("nova:progress-changed", () => { if (!session && !summary) renderMain(); });
+
+  /* Diagnostics / tests */
+  window.PlatformExamPrep = {
+    buildReadiness: buildReadiness,
+    readinessFor: readinessFor,
+    weakTopics: weakTopics,
+    recommendations: recommendations,
+    daysUntil: daysUntil,
+    parseDate: parseDate,
+    buildDeck: buildDeck,
+    overallReadiness: overallReadiness,
+  };
+
+  renderMain();
+})();
+/* @@EXAM_PREP_END@@ */
 

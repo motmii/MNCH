@@ -81,7 +81,10 @@ const ids = [
   "semesterGrid", "semesterMeta",
   "hero", "semester", "paths", "path", "subjects", "tools", "labs", "flash", "quiz",
   "progress", "games", "redteam", "ir", "cryptolab", "about", "contact", "lesson",
-  "heroStartHere", "heroDash", "heroDashPct", "heroDashBar", "heroDashLesson", "heroDashQuiz", "heroDashContinue",
+  "heroStartHere", "heroDash", "heroDashTitle", "heroDashWelcome", "heroDashPct", "heroDashBar", "heroDashOverallMeter",
+  "heroDashPath", "heroDashPathMeta", "heroDashPathBar", "heroDashPathMeter", "heroDashPathLink",
+  "heroDashLesson", "heroDashLessonMeta", "heroDashTasks", "heroDashTasksMeta", "heroDashLast",
+  "heroDashQuiz", "heroDashContinue", "heroDashEmpty", "heroDashEmptyLink",
   "searchOpenBtn", "searchOverlay", "searchDialog", "searchInput", "searchResults", "searchClose",
   "onboardingOverlay", "onboardingBack", "onboardingSkip", "onboardingNext", "onboardingStart",
   "salawatBanner", "salawatBannerClose", "assistantRoot", "assistantPanel", "assistantFab",
@@ -228,10 +231,24 @@ check("window.NovaOnboarding.open exposed by MODULE 38",
   const bankKeys = Object.keys(banks);
   check("dashboard sees the real question banks", bankKeys.length === 5);
   const firstKey = bankKeys[0];
+  const realPaths = sandbox.getLearningPaths();
+  const recommendedPath = realPaths.filter((p) => p.recommended)[0];
+  const realLabs = [...new Set(realPaths.flatMap((p) => (p.topics || []).map((t) => t.res).filter((r) => r && r.k === "lab").map((r) => r.view)))];
   check("overall % painted (no saved results yet)", byId.heroDashPct.textContent === "0");
   check("progress bar width matches the %", byId.heroDashBar.style.width === "0%");
-  check("honest no-lesson state (nothing invented)",
-    byId.heroDashLesson.textContent === arValue("dash.noLesson"));
+  check("new-student welcome + useful empty state are shown",
+    byId.heroDashTitle.textContent === arValue("dash.welcomeNew") && byId.heroDashEmpty.hidden === false);
+  check("current path uses the real recommended path",
+    byId.heroDashPath.textContent === recommendedPath.title.ar &&
+    byId.heroDashPathLink.getAttribute("href") === "#path/" + recommendedPath.id);
+  check("next lesson is a real path topic with an honest coming-soon note",
+    byId.heroDashLesson.textContent === recommendedPath.topics[0].t.ar &&
+    byId.heroDashLessonMeta.textContent === arValue("dash.lessonSoon"));
+  check("unfinished quiz/lab counts come from real data",
+    byId.heroDashTasks.textContent === arValue("dash.readyCounts")
+      .replace("{quizzes}", String(bankKeys.length)).replace("{labs}", String(realLabs.length)));
+  check("last-lesson context stays honest for a new student",
+    byId.heroDashLast.textContent === arValue("dash.noLesson"));
   check("next-quiz cell shows the REAL subject name",
     byId.heroDashQuiz.textContent === "الخوارزميات" && banks[firstKey].name === "الخوارزميات");
   check("Continue CTA deep-starts that bank (data-quiz)",
@@ -319,14 +336,22 @@ check("window.NovaOnboarding.open exposed by MODULE 38",
    */
   function runDash(state) {
     const els = {};
-    ["heroDashPct", "heroDashBar", "heroDashLesson", "heroDashQuiz", "heroDashContinue"]
-      .forEach((id) => { els[id] = makeEl(id); });
+    [
+      "heroDashPct", "heroDashBar", "heroDashOverallMeter", "heroDashTitle", "heroDashWelcome",
+      "heroDashPath", "heroDashPathMeta", "heroDashPathBar", "heroDashPathMeter", "heroDashPathLink",
+      "heroDashLesson", "heroDashLessonMeta", "heroDashTasks", "heroDashTasksMeta", "heroDashLast",
+      "heroDashQuiz", "heroDashContinue", "heroDashEmpty"
+    ].forEach((id) => { els[id] = makeEl(id); });
     const calls = { activate: [], start: [] };
-    const dict = {
-      "dash.noLesson": arValue("dash.noLesson"), "dash.continue": arValue("dash.continue"),
-      "dash.continueFresh": arValue("dash.continueFresh"), "dash.resumeQuiz": arValue("dash.resumeQuiz"),
-      "dash.newQuiz": arValue("dash.newQuiz"), "dash.allDone": arValue("dash.allDone"),
-    };
+    const dict = {};
+    [
+      "dash.noLesson", "dash.continue", "dash.continueFresh", "dash.resumeQuiz", "dash.newQuiz",
+      "dash.allDone", "dash.welcomeNew", "dash.welcomeBack", "dash.welcomeEmpty", "dash.welcomeActive",
+      "dash.overall", "dash.overallAria", "dash.noPath", "dash.noPathBody", "dash.pathProgress",
+      "dash.pathNext", "dash.pathComplete", "dash.pathAria", "dash.lessonSoon", "dash.lessonReady",
+      "dash.pendingCounts", "dash.readyCounts", "dash.pendingQuiz", "dash.pendingLab",
+      "dash.allCaughtUp", "dash.lastOpened", "labs.redteam", "labs.ir", "labs.crypto", "labs.games"
+    ].forEach((key) => { dict[key] = arValue(key); });
     const win = {
       Lang: {
         current: "ar",
@@ -359,8 +384,12 @@ check("window.NovaOnboarding.open exposed by MODULE 38",
   const banks2 = { b1: { name: "بنك ألفا", questions: [1, 2, 3] }, b2: { name: "بنك بيتا", questions: [1, 2, 3] } };
 
   const r1 = runDash({ banks: banks2 });
-  check("empty store → 0% + honest no-lesson label",
-    r1.els.heroDashPct.textContent === "0" && r1.els.heroDashLesson.textContent === arValue("dash.noLesson"));
+  check("empty store → 0% + new-student welcome and no-path state",
+    r1.els.heroDashPct.textContent === "0" &&
+    r1.els.heroDashTitle.textContent === arValue("dash.welcomeNew") &&
+    r1.els.heroDashPath.textContent === arValue("dash.noPath") &&
+    r1.els.heroDashLesson.textContent === arValue("dash.noPath") &&
+    r1.els.heroDashEmpty.hidden === false);
 
   const r2 = runDash({ banks: banks2, results: { b1: { score: 2, total: 3, pct: 67 } } });
   check("saved result → mean % painted on the bar",
@@ -386,16 +415,37 @@ check("window.NovaOnboarding.open exposed by MODULE 38",
 
   const r5 = runDash({
     banks: banks2,
-    paths: [{ id: "fundamentals", topics: [{ id: "x", t: { ar: "مقدمة في الأمن", en: "Intro" }, lsn: { sub: "s1", key: "t1" } }] }],
+    paths: [{ id: "fundamentals", title: { ar: "الأساسيات", en: "Fundamentals" }, topics: [{ id: "x", t: { ar: "مقدمة في الأمن", en: "Intro" }, lsn: { sub: "s1", key: "t1" } }] }],
     subMap: { s1: "fundamentals" },
     store: { lessons: { last: { sub: "s1", topic: "t1" } } },
   });
-  check("last opened lesson resolved from the real learning-path data",
-    r5.els.heroDashLesson.textContent === "مقدمة في الأمن");
+  check("next learning step resolves from the real learning-path data",
+    r5.els.heroDashLesson.textContent === "مقدمة في الأمن" &&
+    r5.els.heroDashLessonMeta.textContent === arValue("dash.lessonSoon"));
+  check("last opened lesson remains visible in the continue panel",
+    r5.els.heroDashLast.textContent === arValue("dash.lastOpened").replace("{title}", "مقدمة في الأمن"));
 
   const r6 = runDash({ banks: banks2, paths: [], subMap: {}, store: { lessons: { last: { sub: "s1", topic: "t1" } } } });
   check("unresolvable last lesson → honest label (never a fake title)",
-    r6.els.heroDashLesson.textContent === arValue("dash.noLesson"));
+    r6.els.heroDashLast.textContent === arValue("dash.noLesson") &&
+    r6.els.heroDashLesson.textContent === arValue("dash.noPath"));
+
+  const r7 = runDash({
+    banks: banks2,
+    paths: [{
+      id: "fundamentals", title: { ar: "الأساسيات", en: "Fundamentals" },
+      topics: [
+        { id: "done", t: { ar: "موضوع مكتمل", en: "Done topic" } },
+        { id: "lab", t: { ar: "تدريب عملي", en: "Practice" }, res: { k: "lab", view: "redteam" } },
+      ],
+    }],
+    store: { paths: { done: { fundamentals: { done: true } } }, labs: { done: {} } },
+  });
+  check("manual path progress + unfinished lab render from existing stores",
+    r7.els.heroDashPathBar.style.width === "50%" &&
+    r7.els.heroDashTasks.textContent === arValue("dash.pendingCounts").replace("{quizzes}", "2").replace("{labs}", "1") &&
+    r7.els.heroDashTasksMeta.textContent.indexOf(arValue("dash.pendingLab").replace("{name}", arValue("labs.redteam"))) >= 0 &&
+    r7.els.heroDashEmpty.hidden === true);
 
   /* ---------- shared safety net ---------- */
   check("no delegated listener threw during the interactions", dispatchErrors.length === 0);
