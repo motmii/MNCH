@@ -70,6 +70,7 @@ function makeCard(id) {
 }
 const sandbox = {
   console,
+  __motivationCalls: [],
   $id: function (id) { return mounts[id] || elReg[id] || null; },
   document: {
     getElementById: function (id) { return mounts[id] || elReg[id] || null; },
@@ -82,6 +83,9 @@ const sandbox = {
   navigator: { clipboard: { writeText: function (t) { sandbox.__copied = t; return { then: function (f) { f(); } }; } } },
   Event: function (type, opts) { this.type = type; },
   CustomEvent: function (type, opts) { this.type = type; this.detail = opts && opts.detail; },
+  /* The real helper is hoisted outside MODULE 42; this isolated slice only
+     needs a safe bridge so lab completion keeps executing unchanged. */
+  awardMotivation: function (kind, id) { sandbox.__motivationCalls.push([kind, id]); },
   Store: {
     __data: {},
     get(k, f) { return (k in this.__data) ? this.__data[k] : f; },

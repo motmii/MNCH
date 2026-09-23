@@ -91,6 +91,7 @@
         <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
         <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
         <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
+        <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
         <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
         <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
         <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
@@ -123,6 +124,7 @@
       <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
       <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
       <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
+      <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
       <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
       <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
       <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
@@ -238,27 +240,109 @@
           </div>
         </div>
 
-        <!-- Compact dashboard (MODULE 47). Always visible on the homepage:
-             overall progress %, last viewed lesson, next recommended quiz,
-             and a Continue-Learning shortcut. JS fills it in. -->
-        <div class="hero-dash reveal" id="heroDash" aria-label="ملخص تقدمك في التعلم">
-          <div class="hero-dash-cell">
-            <span class="hero-dash-label" data-i18n="dash.progressLabel">تقدمك</span>
-            <strong class="hero-dash-value"><span id="heroDashPct">0</span>%</strong>
-            <div class="hero-dash-bar" role="progressbar" aria-hidden="true"><i id="heroDashBar" style="width:0%"></i></div>
+        <!-- Student command center (MODULE 47). Always visible on the homepage:
+             welcome, overall progress, current path, next learning step,
+             unfinished work, and a Continue-Learning shortcut. JS fills it in
+             from the platform's real local progress data only. -->
+        <section class="hero-dash hero-command reveal" id="heroDash" aria-labelledby="heroDashTitle">
+          <div class="hero-dash-head">
+            <div class="hero-dash-intro">
+              <p class="hero-dash-kicker" data-i18n="dash.kicker">لوحة الطالب</p>
+              <h2 class="hero-dash-title" id="heroDashTitle">مرحبًا بك في لوحة تعلّمك</h2>
+              <p class="hero-dash-welcome" id="heroDashWelcome" aria-live="polite">ابدأ مسارًا أو اختبارًا وسيظهر تقدمك هنا — محفوظًا على جهازك فقط.</p>
+            </div>
+            <div class="hero-dash-overall">
+              <span class="hero-dash-label" data-i18n="dash.overall">التقدم العام في الاختبارات</span>
+              <strong class="hero-dash-value"><span id="heroDashPct">0</span>%</strong>
+              <div class="hero-dash-bar" id="heroDashOverallMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="التقدم العام في الاختبارات"><i id="heroDashBar" style="width:0%"></i></div>
+            </div>
           </div>
-          <div class="hero-dash-cell">
-            <span class="hero-dash-label" data-i18n="dash.lastLesson">آخر درس</span>
-            <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
+
+          <div class="hero-dash-grid">
+            <article class="hero-dash-cell hero-dash-panel">
+              <span class="hero-dash-label" data-i18n="dash.currentPath">المسار الحالي</span>
+              <strong class="hero-dash-value is-text" id="heroDashPath">—</strong>
+              <p class="hero-dash-meta" id="heroDashPathMeta">—</p>
+              <div class="hero-dash-bar is-path" id="heroDashPathMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المسار"><i id="heroDashPathBar" style="width:0%"></i></div>
+              <a href="#paths" class="hero-dash-link" id="heroDashPathLink" data-i18n="dash.openPath">افتح المسار</a>
+            </article>
+
+            <article class="hero-dash-cell hero-dash-panel">
+              <span class="hero-dash-label" data-i18n="dash.nextLesson">الدرس التالي</span>
+              <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
+              <p class="hero-dash-meta" id="heroDashLessonMeta">—</p>
+            </article>
+
+            <article class="hero-dash-cell hero-dash-panel">
+              <span class="hero-dash-label" data-i18n="dash.pending">عمل غير مكتمل</span>
+              <strong class="hero-dash-value is-text" id="heroDashTasks">—</strong>
+              <p class="hero-dash-meta" id="heroDashTasksMeta">—</p>
+            </article>
+
+            <article class="hero-dash-cell hero-dash-panel is-continue">
+              <span class="hero-dash-label" data-i18n="dash.continueLabel">متابعة التعلم</span>
+              <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
+              <p class="hero-dash-meta" id="heroDashLast">—</p>
+              <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
+            </article>
           </div>
-          <div class="hero-dash-cell">
-            <span class="hero-dash-label" data-i18n="dash.nextQuiz">الاختبار التالي</span>
-            <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
+
+          <div class="hero-dash-empty" id="heroDashEmpty" hidden>
+            <span aria-hidden="true">🧭</span>
+            <p data-i18n="dash.emptyBody">لا يوجد تقدم محفوظ بعد. ابدأ بالمسار المقترح أو أول اختبار — ستظهر خطوتك التالية هنا تلقائيًا.</p>
+            <a href="#paths" class="btn btn-ghost btn-sm" id="heroDashEmptyLink" data-i18n="dash.emptyCta">استكشف مسارات التعلم</a>
           </div>
-          <div class="hero-dash-cell hero-dash-cta">
-            <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
-          </div>
-        </div>
+
+          <!-- Local motivation system (MODULE 50). Purely local XP, levels,
+               goals, streak and achievements; no leaderboards or competition. -->
+          <section class="hero-dash-motivation" id="heroDashMotivation" aria-labelledby="motivationTitle">
+            <div class="motivation-top">
+              <div class="motivation-level">
+                <p class="motivation-kicker" data-i18n="motivation.kicker">نظام التحفيز المحلي</p>
+                <h3 class="motivation-title" id="motivationTitle">
+                  <span data-i18n="motivation.level">المستوى</span>
+                  <span id="heroDashLevel">1</span>
+                  <span aria-hidden="true">·</span>
+                  <span id="heroDashLevelTitle">مستكشف</span>
+                </h3>
+                <p class="hero-dash-meta" id="heroDashXp">0 XP</p>
+                <div class="hero-dash-bar is-xp" id="heroDashXpMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المستوى"><i id="heroDashXpBar" style="width:0%"></i></div>
+                <p class="hero-dash-meta" id="heroDashXpNext">—</p>
+              </div>
+
+              <div class="motivation-goals">
+                <div class="motivation-goal">
+                  <span class="hero-dash-label" data-i18n="motivation.dailyGoal">هدف الدراسة اليومي</span>
+                  <strong class="motivation-goal-value" id="heroDashDaily">0 / 40 XP</strong>
+                  <div class="hero-dash-bar" id="heroDashDailyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="40" aria-valuenow="0" aria-label="هدف الدراسة اليومي"><i id="heroDashDailyBar" style="width:0%"></i></div>
+                </div>
+                <div class="motivation-goal">
+                  <span class="hero-dash-label" data-i18n="motivation.weeklyGoal">هدف الدراسة الأسبوعي</span>
+                  <strong class="motivation-goal-value" id="heroDashWeekly">0 / 200 XP</strong>
+                  <div class="hero-dash-bar" id="heroDashWeeklyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="200" aria-valuenow="0" aria-label="هدف الدراسة الأسبوعي"><i id="heroDashWeeklyBar" style="width:0%"></i></div>
+                </div>
+                <div class="motivation-goal is-streak">
+                  <span class="hero-dash-label" data-i18n="motivation.streak">سلسلة الدراسة</span>
+                  <strong class="motivation-goal-value" id="heroDashStreak">0</strong>
+                  <p class="hero-dash-meta" data-i18n="motivation.streakHint">أيام متتالية من النشاط الحقيقي</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="motivation-achievements">
+              <div class="motivation-achievements-head">
+                <h4 data-i18n="motivation.achievements">الإنجازات</h4>
+                <span id="heroDashBadgeCount">0 / 9</span>
+              </div>
+              <div class="motivation-badges" id="heroDashBadges" role="list"></div>
+            </div>
+
+            <div class="motivation-reset-row">
+              <p class="hero-dash-meta" data-i18n="motivation.resetNote">تُحفظ بيانات التحفيز على جهازك فقط، وإعادة الضبط لا تحذف نتائج الاختبارات أو تقدم المسارات.</p>
+              <button type="button" class="btn btn-ghost btn-sm" id="heroDashReset" data-i18n="motivation.reset">إعادة ضبط التحفيز</button>
+            </div>
+          </section>
+        </section>
 
         <!-- Continue-learning card (MODULE 37b). Hidden until the quiz store
              holds a resumable session or saved results; JS fills it in. -->
@@ -321,6 +405,29 @@
           <a href="#subjects" class="btn btn-ghost magnetic" data-i18n="beginner.cta">ابدأ الخطوة الأولى</a>
         </div>
       </div>
+    </section>
+
+    <!-- SKILL TREE — one visual node per existing learning path. MODULE 51
+         derives titles, completion, resources and next actions from the
+         existing LEARNING_PATHS data; the semantic list below is the
+         accessible alternative to the visual tree. -->
+    <section class="section skills" id="skills" aria-labelledby="skillsTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="skills.eyebrow">شجرة المهارات</p>
+        <h2 class="section-title" id="skillsTitle" data-i18n-html="skills.title">خريطة <em class="grad">المهارات</em></h2>
+        <p class="section-sub" data-i18n="skills.sub">مساراتك الحالية معروضة كشجرة مهارات: النسبة، المتطلبات، الدروس والاختبارات والمعامل، والخطوة التالية — بدون تكرار بيانات المسارات.</p>
+      </div>
+
+      <div class="skill-tree" id="skillsTree" role="list" aria-labelledby="skillsTitle" tabindex="0"></div>
+
+      <details class="skill-list-alt reveal" id="skillsListAlt">
+        <summary class="collapsible-summary">
+          <span data-i18n="skills.listAlt">قائمة المهارات (بديل قابل للوصول)</span>
+          <span class="collapsible-chev" aria-hidden="true">▾</span>
+        </summary>
+        <ul class="skill-list" id="skillsList" role="list" aria-label="قائمة مهارات أمن المعلومات"></ul>
+        <p class="skill-list-intro" data-i18n="skills.listIntro">كل عنصر يمثل مسارًا حقيقيًا من مسارات التعلم.</p>
+      </details>
     </section>
 
     <!-- LEARNING PATH DETAIL — one shared view filled by MODULE 39 from
@@ -636,6 +743,10 @@
         <p class="section-sub" data-i18n="progress.sub">نتائج اختباراتك وأفضل درجاتك محفوظة على جهازك فقط — تابع من حيث توقفت متى شئت.</p>
       </div>
       <div id="progressApp" class="progress-grid reveal" aria-live="polite"></div>
+      <!-- Phase 4 · transparent local revision queue (MODULE 52): mistakes,
+           unfinished lessons, bookmarks and stale reviews from local data. -->
+      <div id="revisionApp" class="revision-app reveal" aria-live="polite"></div>
+      <div id="examApp" class="exam-app reveal" aria-live="polite"></div>
     </section>
 
     <!-- GAMES -->

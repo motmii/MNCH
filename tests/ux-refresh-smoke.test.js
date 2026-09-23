@@ -30,7 +30,14 @@ check("Start Here links to Fundamentals path", html.includes('href="#path/fundam
 check("onboarding reopen trigger present", html.includes("data-onboarding-reopen"));
 
 console.log("— index.html: compact dashboard —");
-["heroDash", "heroDashPct", "heroDashBar", "heroDashLesson", "heroDashQuiz", "heroDashContinue"].forEach((id) => {
+["heroDash", "heroDashTitle", "heroDashWelcome", "heroDashPct", "heroDashBar", "heroDashOverallMeter",
+ "heroDashPath", "heroDashPathMeta", "heroDashPathBar", "heroDashPathMeter", "heroDashPathLink",
+ "heroDashLesson", "heroDashLessonMeta", "heroDashTasks", "heroDashTasksMeta", "heroDashLast",
+ "heroDashQuiz", "heroDashContinue", "heroDashEmpty", "heroDashEmptyLink",
+ "heroDashMotivation", "motivationTitle", "heroDashLevel", "heroDashLevelTitle", "heroDashXp",
+ "heroDashXpBar", "heroDashXpMeter", "heroDashXpNext", "heroDashDaily", "heroDashDailyBar",
+ "heroDashDailyMeter", "heroDashWeekly", "heroDashWeeklyBar", "heroDashWeeklyMeter",
+ "heroDashStreak", "heroDashBadges", "heroDashBadgeCount", "heroDashReset"].forEach((id) => {
   check("mounts #" + id, html.includes('id="' + id + '"'));
 });
 check("progress bar role=progressbar", html.includes('role="progressbar"'));
@@ -77,6 +84,27 @@ const NEW_KEYS = [
   "starthere.title", "starthere.desc", "starthere.cta", "starthere.wizard",
   "dash.progressLabel", "dash.lastLesson", "dash.nextQuiz", "dash.continue",
   "dash.continueFresh", "dash.noLesson", "dash.resumeQuiz", "dash.newQuiz", "dash.allDone",
+  "dash.kicker", "dash.welcomeNew", "dash.welcomeBack", "dash.welcomeEmpty", "dash.welcomeActive",
+  "dash.overall", "dash.overallAria", "dash.currentPath", "dash.pathAria", "dash.pathProgress",
+  "dash.pathNext", "dash.pathComplete", "dash.noPath", "dash.noPathBody", "dash.nextLesson",
+  "dash.lessonSoon", "dash.lessonReady", "dash.pending", "dash.pendingCounts", "dash.readyCounts",
+  "dash.pendingQuiz", "dash.pendingLab", "dash.allCaughtUp", "dash.emptyBody", "dash.emptyCta",
+  "dash.openPath", "dash.lastOpened", "dash.continueLabel",
+  "motivation.kicker", "motivation.level", "motivation.levelTitle.1", "motivation.levelTitle.6",
+  "motivation.xp", "motivation.xpNext", "motivation.levelAria", "motivation.dailyGoal",
+  "motivation.weeklyGoal", "motivation.goalValue", "motivation.dailyAria", "motivation.weeklyAria",
+  "motivation.streak", "motivation.streakHint", "motivation.streakDays", "motivation.achievements",
+  "motivation.achievementsCount", "motivation.locked", "motivation.unlocked", "motivation.reset",
+  "motivation.resetNote", "motivation.resetConfirm",
+  "motivation.badge.firstLesson", "motivation.badge.firstLessonDesc",
+  "motivation.badge.firstQuiz", "motivation.badge.firstQuizDesc",
+  "motivation.badge.quizMaster", "motivation.badge.quizMasterDesc",
+  "motivation.badge.labExplorer", "motivation.badge.labExplorerDesc",
+  "motivation.badge.cryptoApprentice", "motivation.badge.cryptoApprenticeDesc",
+  "motivation.badge.networkNavigator", "motivation.badge.networkNavigatorDesc",
+  "motivation.badge.incidentResponder", "motivation.badge.incidentResponderDesc",
+  "motivation.badge.streak7", "motivation.badge.streak7Desc",
+  "motivation.badge.semesterFinisher", "motivation.badge.semesterFinisherDesc",
   "collapsible.showQuizzes", "collapsible.showCards",
   "search.title", "search.placeholder", "search.hint", "search.empty", "search.start",
   "search.group.lesson", "search.group.path", "search.group.tool", "search.group.quiz",
@@ -91,9 +119,12 @@ const NEW_KEYS = [
 });
 
 console.log("— style.css: new component styles —");
-[".hero-brand", ".hero-start", ".hero-dash", ".search-toggle", ".search-dialog",
+[".hero-brand", ".hero-start", ".hero-dash", ".hero-command", ".hero-dash-head", ".hero-dash-panel",
+ ".hero-dash-empty", ".hero-dash-link", ".search-toggle", ".search-dialog",
  ".search-panel", ".search-option", ".collapsible", ".skip-link", ".sr-only",
- ".btn-lg", ".search-flash"].forEach((sel) => {
+ ".btn-lg", ".search-flash", ".hero-dash-motivation", ".motivation-top", ".motivation-level",
+ ".motivation-goals", ".motivation-goal", ".motivation-badges", ".motivation-badge",
+ ".motivation-reset-row", ".hero-dash-bar.is-xp"].forEach((sel) => {
   check("style for " + sel, css.includes(sel));
 });
 check("mobile assistant panel rule", css.includes("max-height: 72dvh"));

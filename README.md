@@ -40,6 +40,12 @@ A responsive, dark-themed cybersecurity education platform for Information Secur
 - **SEO** — bilingual `<title>` + meta description, Open Graph / Twitter cards, canonical URL, JSON-LD structured data, and a preloaded hero image.
 - **Honest "Coming Soon" states preserved** — empty lessons/paths still show the Arabic «قريبًا» placeholders; no fake content.
 
+### Study & motivation features
+- **Motivation (MODULE 50)** — local-only XP, levels, daily goals, streaks and badges derived from real activity; nothing leaves the device.
+- **Skill tree (MODULE 51)** — a cybersecurity skill map whose progress meters are computed from real quiz and lesson data.
+- **Revision queue (MODULE 52)** — a transparent review queue built from the questions you actually missed; no timers, no notifications, quiz engine untouched.
+- **Exam preparation (MODULE 53)** — optional exam date with a day-granular countdown, daily study recommendations, honest per-subject readiness (0.5·quiz + 0.3·lesson coverage + 0.2·mistake-free, with disclosed weight redistribution for subjects without lessons), an untimed practice-exam deck sampled from the real question banks, and weak-topic review links. All data stays in local storage.
+
 ### Cyber Tools Suite (6 cybersecurity tools)
 | Tool | Description |
 |------|-------------|

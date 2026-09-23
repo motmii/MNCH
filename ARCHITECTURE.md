@@ -128,12 +128,35 @@ Main IIFE ("use strict")
 │                         objective/skills/hints/explanation + responsible-use
 │                         warning + honest manual completion tracking. Original
 │                         HTML untouched — all context added dynamically.
-└── M38  Labs & IR        #redteam (Bash+SQL virtual FS + NetLab packet builder),
-                          #cryptolab (Vigenère · Enigma · RSA · DES · frequency ·
-                          hash-collision), #ir (SIEM table + charts & query syntax,
-                          kill-chain timeline, live incident sim + virtual team,
-                          RCA challenges). IIFE blocks, guarded by element-existence
-                          checks — they no-op on missing markup.
+├── M38  Labs & IR        #redteam (Bash+SQL virtual FS + NetLab packet builder),
+│                         #cryptolab (Vigenère · Enigma · RSA · DES · frequency ·
+│                         hash-collision), #ir (SIEM table + charts & query syntax,
+│                         kill-chain timeline, live incident sim + virtual team,
+│                         RCA challenges). IIFE blocks, guarded by element-existence
+│                         checks — they no-op on missing markup.
+├── M43  SemesterDashboard #semester — official curriculum view rendered from
+│                         window.PLATFORM_CURRENT_SEMESTER (current-semester.js is
+│                         the single source of truth; nothing duplicated).
+├── M47  HeroDash         Compact homepage dashboard: overall %, last lesson,
+│                         next recommended quiz, Continue-Learning link. Read-only.
+├── M48  GlobalSearch     Command palette (/ or Ctrl+K) over lessons, paths, tools,
+│                         quizzes, flashcards, glossary. ARIA combobox + listbox.
+├── M49  ReopenOnboarding Replay the intro tour on demand from the hero strip.
+├── M50  Motivation       Local-only XP, levels, goals, streaks, badges
+│                         ("motmi-portal:motivation"). Read-only over quiz store.
+├── M51  SkillTree        Cybersecurity skill map (MODULE 51) with progress meters
+│                         derived from real quiz/lesson data. Store "motmi-portal:skills".
+├── M52  Revision         Transparent local review queue built from real missed
+│                         questions (store "motmi-portal:revision"). No timers,
+│                         no notifications; quiz engine untouched.
+└── M53  ExamPrep         Exam-preparation mode in #progress: optional exam date,
+                          day-granular countdown, daily recommendations, honest
+                          per-subject readiness (0.5·quiz + 0.3·coverage +
+                          0.2·mistake-free, weight redistribution when a subject
+                          has no linked lessons), untimed practice-exam deck
+                          sampled from the real question banks, weak-topic review
+                          deep-links. Store "motmi-portal:exam-prep" (runs capped
+                          at 10); all other stores are read-only here.
 ```
 
 `M33 · AI.Assistant` lives in its own file, `assistant.js` (loaded after
