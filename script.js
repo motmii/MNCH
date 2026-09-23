@@ -29,6 +29,197 @@ const $id = (id) => document.getElementById(id);
  */
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
+/** Selector for controls participating in normal keyboard tab order. */
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "summary",
+  "[contenteditable='true']",
+  "[tabindex]:not([tabindex='-1'])"
+].join(",");
+
+/* Ref-counted inert records let modal controllers cooperate without wiping an
+   inert/aria-hidden value that was already present in the document. */
+const inertRecords = new WeakMap();
+
+/**
+ * Toggle keyboard/screen-reader access for background elements.
+ * @param {HTMLElement[]} elements Background elements.
+ * @param {boolean} active True to inert, false to restore.
+ * @returns {void}
+ */
+function setElementsInert(elements, active) {
+  elements.forEach((el) => {
+    if (!el || typeof el.setAttribute !== "function") return;
+    let rec = inertRecords.get(el);
+    if (active) {
+      if (!rec) {
+        rec = {
+          refs: 0,
+          hadInert: typeof el.hasAttribute === "function" ? el.hasAttribute("inert") : !!el.inert,
+          ariaHidden: typeof el.getAttribute === "function" ? el.getAttribute("aria-hidden") : null
+        };
+        inertRecords.set(el, rec);
+      }
+      rec.refs += 1;
+      if (!rec.hadInert) {
+        try { el.inert = true; } catch { /* property is progressive */ }
+        el.setAttribute("inert", "");
+      }
+      el.setAttribute("aria-hidden", "true");
+      return;
+    }
+    if (!rec) return;
+    rec.refs = Math.max(0, rec.refs - 1);
+    if (rec.refs > 0) return;
+    if (!rec.hadInert) {
+      try { el.inert = false; } catch { /* property is progressive */ }
+      if (typeof el.removeAttribute === "function") el.removeAttribute("inert");
+    }
+    if (rec.ariaHidden === null) {
+      if (typeof el.removeAttribute === "function") el.removeAttribute("aria-hidden");
+    } else {
+      el.setAttribute("aria-hidden", rec.ariaHidden);
+    }
+    inertRecords.delete(el);
+  });
+}
+
+/**
+ * Create a small modal focus controller. Escape behavior stays local to each
+ * existing modal; this helper owns Tab wrapping, background inerting, and
+ * returning focus to the control that opened the overlay.
+ * @param {HTMLElement|HTMLElement[]} roots Modal and any persistent trigger.
+ * @param {{background?: function(): HTMLElement[]}=} options Options.
+ * @returns {{activate:function(),deactivate:function(Object=),focusFirst:function(string=):HTMLElement|null,isActive:function():boolean}}
+ */
+function createFocusTrap(roots, options = {}) {
+  const focusRoots = (Array.isArray(roots) ? roots : [roots]).filter(Boolean);
+  const rootSet = new Set(focusRoots);
+  const getBackground = options.background || (() => {
+    const children = document.body && document.body.children ? [...document.body.children] : [];
+    return children.filter((el) => !rootSet.has(el) && !/^(?:SCRIPT|STYLE|TEMPLATE)$/.test(el.tagName || ""));
+  });
+  let active = false;
+  let opener = null;
+  let inerted = [];
+
+  /** @returns {HTMLElement[]} Tabbable elements in trap order. */
+  function focusables() {
+    const out = [];
+    focusRoots.forEach((root) => {
+      if (!root) return;
+      if (typeof root.matches === "function" && root.matches(FOCUSABLE_SELECTOR)) out.push(root);
+      if (typeof root.querySelectorAll === "function") $$(FOCUSABLE_SELECTOR, root).forEach((el) => out.push(el));
+    });
+    return [...new Set(out)].filter((el) =>
+      el && el.getAttribute && el.getAttribute("aria-hidden") !== "true" &&
+      el.getAttribute("tabindex") !== "-1"
+    );
+  }
+
+  /** @param {HTMLElement|null} target Candidate focus target. @returns {boolean} */
+  function containsFocus(target) {
+    return !!target && focusRoots.some((root) =>
+      root === target || (typeof root.contains === "function" && root.contains(target))
+    );
+  }
+
+  /**
+   * Focus the first matching control, falling back to the first tabbable item.
+   * @param {string=} selector Preferred selector inside the trap.
+   * @returns {HTMLElement|null} Focused element.
+   */
+  function focusFirst(selector) {
+    let target = null;
+    if (selector) {
+      for (const root of focusRoots) {
+        target = root && typeof root.querySelector === "function" ? root.querySelector(selector) : null;
+        if (target) break;
+      }
+    }
+    target = target || focusables()[0] || focusRoots[0] || null;
+    if (target && typeof target.focus === "function") {
+      try { target.focus({ preventScroll: true }); }
+      catch { target.focus(); }
+    }
+    return target;
+  }
+
+  /** @param {KeyboardEvent} e Key event. @returns {void} */
+  function onKeydown(e) {
+    if (!active || e.key !== "Tab") return;
+    const items = focusables();
+    if (!items.length) {
+      e.preventDefault();
+      focusFirst();
+      return;
+    }
+    const current = document.activeElement;
+    const index = items.indexOf(current);
+    if (e.shiftKey && index <= 0) {
+      e.preventDefault();
+      items[items.length - 1].focus({ preventScroll: true });
+    } else if (!e.shiftKey && (index === -1 || index === items.length - 1)) {
+      e.preventDefault();
+      items[0].focus({ preventScroll: true });
+    }
+  }
+
+  /** Keep programmatic focus from escaping while the modal is active. */
+  function onFocusIn(e) {
+    if (!active || containsFocus(e.target)) return;
+    e.stopPropagation();
+    focusFirst();
+  }
+
+  return {
+    /** Activate inerting and keyboard containment. @returns {void} */
+    activate() {
+      if (active) return;
+      active = true;
+      opener = document.activeElement || null;
+      inerted = getBackground();
+      setElementsInert(inerted, true);
+      document.addEventListener("keydown", onKeydown, true);
+      document.addEventListener("focusin", onFocusIn, true);
+    },
+    /**
+     * Restore the page and optionally focus the opener.
+     * @param {{restoreFocus?: boolean}=} opts Close options.
+     * @returns {void}
+     */
+    deactivate(opts = {}) {
+      if (!active) return;
+      active = false;
+      document.removeEventListener("keydown", onKeydown, true);
+      document.removeEventListener("focusin", onFocusIn, true);
+      setElementsInert(inerted, false);
+      inerted = [];
+      const target = opener;
+      opener = null;
+      if (opts.restoreFocus === false || !target || typeof target.focus !== "function") return;
+      if (document.contains && !document.contains(target)) return;
+      if (typeof target.closest === "function" && target.closest("[inert]")) return;
+      try { target.focus({ preventScroll: true }); }
+      catch { target.focus(); }
+    },
+    focusFirst,
+    /** @returns {boolean} Active state. */
+    isActive() { return active; }
+  };
+}
+
+/** True when another application modal is open. @param {HTMLElement=} except @returns {boolean} */
+function anotherOverlayOpen(except) {
+  return $$(".mobile-menu.is-open, .onboarding-overlay[aria-hidden='false'], .search-dialog.is-open")
+    .some((el) => el !== except);
+}
+
+
 /**
  * Escape HTML-significant characters.
  * @param {string} s Raw text.
@@ -182,6 +373,524 @@ const Store = {
    labs / flash) through this reference instead of re-implementing storage. */
 window.PLATFORM_STORE = Store;
 
+/* A11y bridge — top-level modules OUTSIDE this IIFE that own a modal
+   (MODULE 48 · GlobalSearch) reuse the same focus containment and the same
+   "another modal is open" guard instead of re-implementing them. */ 
+window.PLATFORM_A11Y = {
+  createFocusTrap: createFocusTrap,
+  anotherOverlayOpen: anotherOverlayOpen,
+  setElementsInert: setElementsInert
+};
+
+/* ============================================================
+   MODULE 54 · OnboardingTour — الجولة التعريفية للمستخدم الجديد
+   ------------------------------------------------------------
+   Eight short steps (Arabic-first, RTL) that explain the platform
+   to a first-time student: purpose → dashboard / progress →
+   learning paths, subjects & lessons → quizzes (progress is saved)
+   → labs & security tools → study materials → the AI assistant →
+   navigation & search.
+
+   Design notes
+   · Declared BEFORE MODULE 38 on purpose: the preferences wizard
+     asks this module's bridge whether the guided tour owns the
+     first visit, so a new student never gets two modals at once.
+   · Shows once per browser. The state lives in localStorage through
+     the shared Store wrapper (MODULE 02) under "motmi-portal:tour";
+     Skip, Escape and the final step all persist { done: true }.
+     No other key is read, written or reset.
+   · Reuses the existing overlay shell (.onboarding-overlay /
+     .onboarding-panel, MODULE 38 CSS), the shared focus trap
+     (Tab wrap · background inerting · focus restore) and
+     MODULE 22's Lang dictionary — no new framework, no duplicate
+     modal system.
+   · Highlighting is best-effort: the described view is activated
+     through the public window.NovaViews bridge (MODULE 33) and the
+     related element receives the .is-tour-highlight ring, while
+     the panel always names the area in words (never colour-only).
+   · Fails gracefully: without markup, without storage, without
+     NovaViews or with prefers-reduced-motion the tour either stays
+     silent or degrades to a plain, scroll-free step list.
+   ============================================================ */
+/* @@TOUR_START@@ */
+(function initOnboardingTour() {
+  var overlay = $id("tourOverlay");
+  if (!overlay) return; /* markup absent → the tour simply does not exist */
+
+  var STORE_KEY = "tour";   /* → "motmi-portal:tour" through Store (MODULE 02) */
+  var AUTO_DELAY = 700;     /* let the preloader (MODULE 04) fade out first */
+
+  /* The eight first-visit steps — one per main area of the platform.
+     `view` is a ViewSwitcher (MODULE 33) view id, `target` the element to
+     highlight; both are best effort (a missing section never breaks a step).
+     `t` / `x` / `a` are MODULE 22 dictionary keys: title, explanation and the
+     spoken name of the highlighted area. */
+  var STEPS = [
+    { view: "hero",  target: ".hero-brand",   t: "tour.s1Title", x: "tour.s1Text", a: "tour.s1Area" },
+    { view: "hero",  target: "#heroDash",     t: "tour.s2Title", x: "tour.s2Text", a: "tour.s2Area" },
+    { view: "paths", target: "#paths",        t: "tour.s3Title", x: "tour.s3Text", a: "tour.s3Area" },
+    { view: "quiz",  target: "#quizApp",      t: "tour.s4Title", x: "tour.s4Text", a: "tour.s4Area" },
+    { view: "labs",  target: "#labs",         t: "tour.s5Title", x: "tour.s5Text", a: "tour.s5Area" },
+    { view: "flash", target: "#flash",        t: "tour.s6Title", x: "tour.s6Text", a: "tour.s6Area" },
+    { view: "hero",  target: "#assistantRoot", t: "tour.s7Title", x: "tour.s7Text", a: "tour.s7Area" },
+    { view: "hero",  target: "#nav",          t: "tour.s8Title", x: "tour.s8Text", a: "tour.s8Area" }
+  ];
+  var TOTAL = STEPS.length;
+
+  var titleEl = $id("tourTitle");
+  var textEl = $id("tourStepText");
+  var areaEl = $id("tourArea");
+  var countEl = $id("tourCounter");
+  var nextBtn = $id("tourNext");
+  var backBtn = $id("tourBack");
+  var trap = createFocusTrap(overlay);
+
+  var step = 0;            /* 0-based index of the visible step */
+  var open = false;        /* overlay visible? */
+  var marked = false;      /* in-memory "seen" — also covers blocked storage */
+  var langBound = false;   /* Lang.onSwitch registered once, lazily */
+  var pinnedEntry = false; /* deep link active → never navigate views */
+  var returnView = null;   /* view the visitor came from (restored on close) */
+  var highlighted = null;  /* element currently carrying the ring */
+  /* ---------- persisted state (never touches other keys) ---------- */
+
+  /**
+   * True once the tour was completed or skipped in this browser.
+   * @returns {boolean} Seen state.
+   */
+  function seen() {
+    if (marked) return true;
+    var saved = Store.get(STORE_KEY, null);
+    return !!(saved && saved.done);
+  }
+
+  /**
+   * Store "never show the tour again" (additive — every other key stays as it
+   * is). A blocked or unavailable localStorage is tolerated: the in-memory flag
+   * still keeps the tour closed for the rest of this page load.
+   * @param {string} reason "done" | "skip" | "escape"
+   * @returns {void}
+   */
+  function remember(reason) {
+    marked = true;
+    Store.set(STORE_KEY, { v: 1, done: true, reason: reason, at: Date.now() });
+  }
+
+  /* ---------- small helpers ---------- */
+
+  /** @returns {boolean} True when the visitor asked for reduced motion. */
+  function reducedMotion() {
+    try {
+      return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    } catch (e) { return false; }
+  }
+
+  /**
+   * Show the view that owns the described area — best effort, through the
+   * public MODULE 33 bridge, and skipped entirely for deep-link entries so a
+   * "#path/…" or "#lesson/…" destination is never rewritten.
+   * @param {string} viewId Target view id.
+   * @returns {void}
+   */
+  function showView(viewId) {
+    if (!viewId || pinnedEntry) return;
+    try {
+      var views = window.NovaViews;
+      if (!views || typeof views.activate !== "function") return;
+      var current = typeof views.current === "function" ? views.current() : null;
+      /* replace → the tour never pollutes the visitor's Back history. */
+      if (current !== viewId) views.activate(viewId, { replace: true });
+    } catch (e) { /* view switching is additive, never mandatory */ }
+  }
+
+  /** Put the visitor back on the view the tour started from. @returns {void} */
+  function restoreView() {
+    var target = returnView;
+    returnView = null;
+    showView(target);
+  }
+
+  /** Drop the ring from the previously highlighted element. @returns {void} */
+  function clearHighlight() {
+    if (highlighted && highlighted.classList) highlighted.classList.remove("is-tour-highlight");
+    highlighted = null;
+    resetAnchor();
+  }
+
+  /* ---------- anchored popover positioning ---------- */
+
+  var PANEL_GAP = 16;      /* breathing room between the target and the popover */
+  var VIEW_MARGIN = 12;    /* minimum distance from any viewport edge */
+  var pinQueued = false;   /* a re-pin is already scheduled on the next frame */
+  var pinTimer = 0;        /* fallback timer when rAF is unavailable */
+
+  /**
+   * Viewport size (guarded — the vm sandbox has no window.innerWidth).
+   * @returns {{w:number,h:number}} Viewport dimensions.
+   */
+  function viewport() {
+    var w = 0;
+    var h = 0;
+    try {
+      if (typeof window !== "undefined" && window) {
+        if (typeof window.innerWidth === "number") w = window.innerWidth;
+        if (typeof window.innerHeight === "number") h = window.innerHeight;
+      }
+    } catch (e) { /* keep the fallbacks below */ }
+    return { w: w || 1024, h: h || 700 };
+  }
+
+  /**
+   * Measured panel box (guarded — offsetWidth is 0 in the vm sandbox).
+   * @returns {{w:number,h:number}} Panel dimensions.
+   */
+  function panelBox() {
+    var panel = tourPanel();
+    var w = 0;
+    var h = 0;
+    try {
+      if (panel && typeof panel.getBoundingClientRect === "function") {
+        var r = panel.getBoundingClientRect();
+        if (r) { w = r.width || 0; h = r.height || 0; }
+      }
+    } catch (e) { /* keep the fallbacks below */ }
+    if (!w && panel) { try { w = panel.offsetWidth || 0; } catch (e2) { w = 0; } }
+    if (!h && panel) { try { h = panel.offsetHeight || 0; } catch (e3) { h = 0; } }
+    return { w: w || 360, h: h || 300 };
+  }
+
+  /** @returns {Object|null} The floating popover panel. */
+  function tourPanel() {
+    try {
+      if (overlay.querySelector) {
+        var p = overlay.querySelector(".tour-panel");
+        if (p) return p;
+      }
+    } catch (e) { /* fall through to the overlay */ }
+    return overlay;
+  }
+
+  /** Clear any inline anchor so a missing target degrades to the CSS fallback. @returns {void} */
+  function resetAnchor() {
+    try {
+      if (overlay && overlay.style && typeof overlay.style.removeProperty === "function") {
+        overlay.style.removeProperty("--tour-top");
+        overlay.style.removeProperty("--tour-left");
+        overlay.style.removeProperty("--tour-shift");
+        overlay.style.removeProperty("--tour-arrow");
+      }
+    } catch (e) { /* inline anchoring is additive */ }
+    try {
+      var panel0 = tourPanel();
+      if (panel0 && panel0.removeAttribute && panel0 !== overlay) panel0.removeAttribute("data-tour-place");
+    } catch (e2) { /* the arrow placement is additive */ }
+  }
+
+  /**
+   * Pin the popover next to the highlighted target: below it when room
+   * allows, above it otherwise, horizontally aligned to the target and
+   * clamped inside the viewport. Without a measurable target the CSS
+   * fallback (centered popover) stays in place.
+   * @returns {void}
+   */
+  function positionTour() {
+    if (!open) return;
+    var el = highlighted;
+    var panel = tourPanel();
+    if (!el || typeof el.getBoundingClientRect !== "function") return;
+    var rect = null;
+    try { rect = el.getBoundingClientRect(); } catch (e) { rect = null; }
+    if (!rect) return;
+    if (!rect.width && !rect.height && !rect.top && !rect.bottom && !rect.left && !rect.right) return;
+    var vp = viewport();
+    var box = panelBox();
+    var pw = Math.min(box.w, vp.w - VIEW_MARGIN * 2);
+    var ph = Math.min(box.h, vp.h - VIEW_MARGIN * 2);
+    var rtl = false;
+    try { rtl = !!(document && document.documentElement && document.documentElement.dir === "rtl"); }
+    catch (e2) { rtl = false; }
+    var left = rtl ? (rect.right - pw) : rect.left;
+    if (typeof left !== "number" || isNaN(left)) left = (vp.w - pw) / 2;
+    left = Math.max(VIEW_MARGIN, Math.min(left, Math.max(VIEW_MARGIN, vp.w - pw - VIEW_MARGIN)));
+    var cx = (typeof rect.left === "number" ? rect.left : left) + (rect.width || 0) / 2;
+    var arrow = Math.max(20, Math.min(Math.max(20, pw - 20), cx - left));
+    var place = "below";
+    var top = (typeof rect.bottom === "number" ? rect.bottom : 0) + PANEL_GAP;
+    if (top + ph > vp.h - VIEW_MARGIN) {
+      var above = (typeof rect.top === "number" ? rect.top : vp.h) - PANEL_GAP - ph;
+      if (above >= VIEW_MARGIN) { place = "above"; top = above; }
+      else {
+        place = (above > (vp.h - VIEW_MARGIN - top)) ? "above" : "below";
+        top = place === "above" ? above : top;
+      }
+    }
+    top = Math.max(VIEW_MARGIN, Math.min(top, Math.max(VIEW_MARGIN, vp.h - ph - VIEW_MARGIN)));
+    try {
+      if (overlay && overlay.style && typeof overlay.style.setProperty === "function") {
+        overlay.style.setProperty("--tour-top", Math.round(top) + "px");
+        overlay.style.setProperty("--tour-left", Math.round(left) + "px");
+        overlay.style.setProperty("--tour-shift", "none");
+        overlay.style.setProperty("--tour-arrow", Math.round(arrow) + "px");
+      }
+      if (panel && panel.setAttribute && panel !== overlay) panel.setAttribute("data-tour-place", place);
+    } catch (e3) { /* anchoring is additive — the fallback stays readable */ }
+  }
+
+  /** Schedule a re-pin on the next frame (scroll/resize safe). @returns {void} */
+  function queuePin() {
+    if (!open || pinQueued) return;
+    pinQueued = true;
+    var run = function () { pinQueued = false; positionTour(); };
+    try {
+      if (typeof window !== "undefined" && window && typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(run);
+        return;
+      }
+    } catch (e) { /* fall through to the timer */ }
+    try { pinTimer = setTimeout(run, 16); } catch (e2) { pinQueued = false; }
+  }
+
+  /**
+   * Scroll the target into view first (smooth unless reduced motion), then
+   * anchor the popover once the scroll settles. Missing markup is fine.
+   * @param {Object} sStep Step definition.
+   * @returns {void}
+   */
+  function scrollTarget(sStep) {
+    var el = null;
+    try { el = sStep.target ? document.querySelector(sStep.target) : null; } catch (e) { el = null; }
+    if (!el || !el.classList) { resetAnchor(); positionTour(); return; }
+    if (highlighted !== el) {
+      clearHighlight();
+      try { el.classList.add("is-tour-highlight"); } catch (e0) { /* ring is additive */ }
+      highlighted = el;
+    }
+    var smooth = !reducedMotion();
+    if (typeof el.scrollIntoView !== "function") { positionTour(); return; }
+    try {
+      el.scrollIntoView(smooth ? { block: "center", behavior: "smooth" } : { block: "center" });
+    } catch (e2) {
+      try { el.scrollIntoView(); } catch (e3) { /* nothing to scroll */ }
+    }
+    /* Anchor after the smooth scroll settles: two frames when available,
+       one guarded timer otherwise. */
+    var settle = function () { positionTour(); };
+    try {
+      if (smooth && typeof window !== "undefined" && window && typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(function () { window.requestAnimationFrame(settle); });
+        return;
+      }
+    } catch (e4) { /* fall through to the timer */ }
+    try { setTimeout(settle, smooth ? 350 : 0); } catch (e5) { positionTour(); }
+  }
+
+  /**
+   * Highlight the element a step talks about: a dashed ring (the panel also
+   * names the area in words, so colour is never the only cue), scrolled into
+   * view first, with the popover anchored next to it. Missing markup is fine.
+   * @param {Object} sStep Step definition.
+   * @returns {void}
+   */
+  function highlight(sStep) {
+    scrollTarget(sStep);
+  }
+
+  /**
+   * Subscribe to MODULE 22 language switches once, so the panel re-renders in
+   * the new locale. Deferred to the first open because Lang is declared later
+   * in this IIFE than the module body.
+   * @returns {void}
+   */
+  function bindLang() {
+    if (langBound) return;
+    langBound = true;
+    try {
+      if (typeof Lang !== "undefined" && Lang && typeof Lang.onSwitch === "function") {
+        Lang.onSwitch(function () { if (open) render(step); });
+      }
+    } catch (e) { /* the locale hook is optional */ }
+  }
+  /* ---------- rendering ---------- */
+
+  /**
+   * Paint step `n` (0-based): localized text, counter, highlight and focus.
+   * @param {number} n Step index.
+   * @returns {void}
+   */
+  function render(n) {
+    step = Math.max(0, Math.min(n, TOTAL - 1));
+    var current = STEPS[step];
+    var last = step === TOTAL - 1;
+    showView(current.view);
+    if (titleEl) titleEl.textContent = Lang.t(current.t);
+    if (textEl) textEl.textContent = Lang.t(current.x);
+    if (areaEl) areaEl.textContent = Lang.t("tour.areaLabel") + " " + Lang.t(current.a);
+    if (countEl) countEl.textContent = Lang.t("tour.counter", { i: step + 1, n: TOTAL });
+    if (nextBtn) nextBtn.textContent = Lang.t(last ? "tour.finish" : "tour.next");
+    /* Back is disabled — not hidden — on the first step, so the panel never
+       creates an invisible focus stop (display rules beat [hidden] on .btn). */
+    if (backBtn) backBtn.disabled = step === 0;
+    highlight(current);
+    /* Scroll/resize re-pins the popover next to the target (throttled). */
+    bindRepin();
+    queuePin();
+    /* Focus the step heading: a screen reader announces the new step while the
+       shared trap keeps the tab order inside the dialog. */
+    if (titleEl && typeof titleEl.focus === "function") {
+      try { titleEl.focus({ preventScroll: true }); }
+      catch (e) { try { titleEl.focus(); } catch (e2) { /* not focusable */ } }
+    }
+  }
+
+  /* ---------- open / close ---------- */
+
+  /**
+   * Open the tour on step 1 — used by the first-visit timer and by the manual
+   * replay control ([data-tour-reopen]). Never stacks on another modal.
+   * @returns {void}
+   */
+  function openTour() {
+    if (open || anotherOverlayOpen(overlay)) return;
+    bindLang();
+    returnView = null;
+    pinnedEntry = false;
+    try {
+      var views = window.NovaViews;
+      if (views && typeof views.current === "function") returnView = views.current();
+    } catch (e) { returnView = null; }
+    /* A deep link (#path/… · #lesson/…) must survive the tour untouched. */
+    try { pinnedEntry = /^#(?:path|lesson)\//.test(location.hash || ""); } catch (e2) { pinnedEntry = false; }
+    open = true;
+    overlay.setAttribute("aria-hidden", "false");
+    trap.activate();
+    render(0);
+  }
+
+  /**
+   * Close the tour for good (Skip · Escape · final step).
+   * @param {string} reason "done" | "skip" | "escape"
+   * @returns {void}
+   */
+  function closeTour(reason) {
+    if (!open) return;
+    open = false;
+    clearHighlight();
+    /* Restore the original view while the overlay still counts as open, so the
+       ViewSwitcher's own focus handling stays out of the way; the shared trap
+       then returns focus to the element that opened the tour. */
+    restoreView();
+    overlay.setAttribute("aria-hidden", "true");
+    trap.deactivate();
+    remember(reason);
+    dispatchDone(reason);
+  }
+
+  /**
+   * Tell the rest of the page that the first visit is over (additive).
+   * @param {string} reason End reason.
+   * @returns {void}
+   */
+  function dispatchDone(reason) {
+    try {
+      if (typeof CustomEvent !== "function" || !document.dispatchEvent) return;
+      document.dispatchEvent(new CustomEvent("nova:tour-done", { detail: { reason: reason } }));
+    } catch (e) { /* notifying other modules is optional */ }
+  }
+
+  /** Advance, or finish on the last step. @returns {void} */
+  function nextStep() {
+    if (step >= TOTAL - 1) { closeTour("done"); return; }
+    render(step + 1);
+  }
+
+  /* ---------- wiring ---------- */
+
+  /* Delegated clicks inside the panel (Next · Back · Skip) — the MODULE 38
+     pattern. Enter/Space keep working because these are real buttons. */
+  overlay.addEventListener("click", function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    if (t.closest("#tourNext")) nextStep();
+    else if (t.closest("#tourBack")) render(step - 1);
+    else if (t.closest("#tourSkip")) closeTour("skip");
+  });
+
+  /* The dimmed backdrop never dismisses the tour — leaving is an explicit
+     choice (Skip, Escape or the final step). */
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) e.stopPropagation();
+  });
+
+  /* Escape = skip for good. */
+  document.addEventListener("keydown", function (e) {
+    if (!open) return;
+    if (e.key === "Escape" || e.key === "Esc") {
+      e.preventDefault();
+      closeTour("escape");
+    }
+  });
+
+  /* Manual replay — the same delegated-trigger pattern as MODULE 49. */
+  document.addEventListener("click", function (e) {
+    var trigger = (e.target && e.target.closest) ? e.target.closest("[data-tour-reopen]") : null;
+    if (!trigger) return;
+    e.preventDefault();
+    openTour();
+  });
+
+  /* Keep the popover glued to its target while it is open. Listeners are
+     attached once (capture for scroll so nested scrollers count too) and
+     every callback is throttled through queuePin. */
+  var repinBound = false;
+  function bindRepin() {
+    if (repinBound) return;
+    repinBound = true;
+    try {
+      if (window && typeof window.addEventListener === "function") {
+        window.addEventListener("resize", queuePin);
+        window.addEventListener("scroll", queuePin, true);
+      }
+    } catch (e) { /* re-pinning is additive */ }
+    try {
+      if (document && typeof document.addEventListener === "function") {
+        document.addEventListener("scroll", queuePin, true);
+      }
+    } catch (e2) { /* re-pinning is additive */ }
+  }
+
+  /* ---------- first visit ---------- */
+
+  /** Auto-open once per browser, never on top of another modal. @returns {void} */
+  function autoOpen() {
+    if (open || seen() || anotherOverlayOpen(overlay)) return;
+    openTour();
+  }
+
+  if (!seen()) {
+    /* script.js is deferred: "load" is the moment the preloader (MODULE 04)
+       starts fading — exactly when a welcome tour belongs on screen. */
+    if (document.readyState === "complete") setTimeout(autoOpen, AUTO_DELAY);
+    else window.addEventListener("load", function () { setTimeout(autoOpen, AUTO_DELAY); });
+  }
+
+  /* Public bridge: the Start-Here control replays the tour, and MODULE 38 asks
+     `ownsFirstVisit` before it auto-opens its preferences wizard. */
+  window.NovaTour = {
+    ownsFirstVisit: true,
+    /** Replay from step 1. @returns {void} */
+    open: openTour,
+    /** Close exactly like the "Skip tour" button. @returns {void} */
+    close: function () { closeTour("skip"); },
+    /** @returns {boolean} True while the panel is visible. */
+    isOpen: function () { return open; },
+    /** @returns {boolean} True once the tour was completed or skipped. */
+    seen: seen,
+    /** @returns {number} Number of steps in the tour. */
+    stepCount: function () { return TOTAL; }
+  };
+})();
+/* @@TOUR_END@@ */
+
 /* ============================================================
    MODULE 38 · Onboarding — optional first-time learning-path
    wizard. Shows a 3-step modal asking for the student's level,
@@ -204,9 +913,9 @@ window.PLATFORM_STORE = Store;
      show is suppressed (see the guard at the end of this module). */
   window.NovaOnboarding = {
     open: function () {
+      if (anotherOverlayOpen(overlay)) return;
       state = { level: null, subjects: [], styles: [] };
-      var act = document.querySelectorAll(".btn-level.is-active, .btn-subject.is-active, .btn-style.is-active");
-      for (var a = 0; a < act.length; a++) act[a].classList.remove("is-active");
+      clearSelections(".btn-level, .btn-subject, .btn-style");
       showStep(1);
     },
     isOpen: function () { return overlay.getAttribute("aria-hidden") === "false"; }
@@ -225,6 +934,7 @@ window.PLATFORM_STORE = Store;
   var skipBtn = $id("onboardingSkip");
   var nextBtn = $id("onboardingNext");
   var startLink = $id("onboardingStart");
+  var trap = createFocusTrap(overlay);
 
   /** Toggle a value in an array state field. @param {string} key @param {string} val @returns {void} */
   function toggleArr(key, val) {
@@ -232,6 +942,20 @@ window.PLATFORM_STORE = Store;
     var idx = arr.indexOf(val);
     if (idx >= 0) arr.splice(idx, 1);
     else arr.push(val);
+  }
+
+  /** Keep the visual and ARIA pressed states in lockstep. */
+  function setPressed(btn, on) {
+    if (btn && btn.setAttribute) btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  /** Clear a selection group before replaying/skipping the wizard. */
+  function clearSelections(selector) {
+    var nodes = document.querySelectorAll(selector);
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].classList.remove("is-active");
+      setPressed(nodes[i], false);
+    }
   }
 
   /**
@@ -270,12 +994,14 @@ window.PLATFORM_STORE = Store;
   /** Close the overlay and mark onboarding as done. @returns {void} */
   function finishOnboarding() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify({ done: true })); } catch { /* storage blocked — overlay must still close */ }
+    trap.deactivate();
     overlay.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   }
 
   /** Show step N (1-based). @param {number} n @returns {void} */
   function showStep(n) {
+    var opening = overlay.getAttribute("aria-hidden") !== "false";
     Object.keys(stepEls).forEach(function (k) {
       var el = stepEls[k];
       if (el) el.hidden = String(+k) !== String(n);
@@ -285,6 +1011,11 @@ window.PLATFORM_STORE = Store;
     if (nextBtn) nextBtn.style.display = n >= OS_STEPS ? "none" : "";
     if (startLink) startLink.style.display = n >= OS_STEPS ? "" : "none";
     if (overlay) overlay.setAttribute("aria-hidden", "false");
+    if (opening) {
+      trap.activate();
+      document.body.style.overflow = "hidden";
+    }
+    trap.focusFirst(".onboarding-step:not([hidden]) button, .onboarding-step:not([hidden]) a");
   }
 
   function handleNext() {
@@ -298,7 +1029,12 @@ window.PLATFORM_STORE = Store;
   }
 
   function handleSkip() {
-    if (step === 2) { state.subjects = []; showStep(step + 1); return; }
+    if (step === 2) {
+      state.subjects = [];
+      clearSelections(".btn-subject");
+      showStep(step + 1);
+      return;
+    }
     finishOnboarding();
   }
 
@@ -307,7 +1043,11 @@ window.PLATFORM_STORE = Store;
     if (!btn) return;
     state.level = btn.dataset.osLevel;
     var btns = document.querySelectorAll(".btn-level");
-    btns.forEach(function (b) { b.classList.toggle("is-active", b === btn); });
+    btns.forEach(function (b) {
+      var active = b === btn;
+      b.classList.toggle("is-active", active);
+      setPressed(b, active);
+    });
     showStep(step + 1);
   }
 
@@ -315,14 +1055,14 @@ window.PLATFORM_STORE = Store;
     var btn = e.target.closest(".btn-subject");
     if (!btn) return;
     toggleArr("subjects", btn.dataset.osSubj);
-    btn.classList.toggle("is-active");
+    setPressed(btn, btn.classList.toggle("is-active"));
   }
 
   function handleStyle(e) {
     var btn = e.target.closest(".btn-style");
     if (!btn) return;
     toggleArr("styles", btn.dataset.osStyle);
-    btn.classList.toggle("is-active");
+    setPressed(btn, btn.classList.toggle("is-active"));
   }
 
   function handleStart(e) {
@@ -364,8 +1104,15 @@ window.PLATFORM_STORE = Store;
 
   /* Auto-show only for first-time visitors. A finished/dismissed wizard stays
      hidden until [data-onboarding-reopen] (MODULE 49) replays it — the module
-     itself keeps running above, so every control still works after a reopen. */
-  if (done) { overlay.setAttribute("aria-hidden", "true"); return; }
+     itself keeps running above, so every control still works after a reopen.
+     While the guided first-visit TOUR (MODULE 54) is mounted it owns that very
+     first visit, so this preferences wizard never opens by itself; its stored
+     answers are never touched and its Start-Here control still replays it. */
+  var firstVisitTour = window.NovaTour;
+  if (done || (firstVisitTour && firstVisitTour.ownsFirstVisit)) {
+    overlay.setAttribute("aria-hidden", "true");
+    return;
+  }
 
   /* Render localized step 1 on load, keep the panel closed until mounted. */
   showStep(1);
@@ -868,6 +1615,9 @@ if (pointerFine && !prefersReducedMotion) {
 (function initMobileMenu() {
   const burger = $id("navBurger");
   const menu = $id("mobileMenu");
+  const trap = burger && menu ? createFocusTrap([burger, menu], {
+    background: () => $$(".skip-link, .preloader, .cursor-dot, .cursor-ring, .nav-inner > *:not(#navBurger), main, .footer, #toTop, #assistantRoot, #salawatBanner, #onboardingOverlay, #searchOverlay, #searchDialog")
+  }) : null;
 
   /**
    * Open/close the drawer and lock body scrolling.
@@ -876,15 +1626,22 @@ if (pointerFine && !prefersReducedMotion) {
    */
   function setMenu(open) {
     if (!menu || !burger) return;
+    if (open && anotherOverlayOpen(menu)) return;
     menu.classList.toggle("is-open", open);
     burger.classList.toggle("is-open", open);
     burger.setAttribute("aria-expanded", String(open));
     burger.setAttribute("aria-label", open ? "إغلاق القائمة" : "فتح القائمة");
+    menu.setAttribute("aria-hidden", String(!open));
+    try { menu.inert = !open; } catch { /* inert is progressive */ }
+    if (open) menu.removeAttribute("inert");
+    else menu.setAttribute("inert", "");
     document.body.style.overflow = open ? "hidden" : "";
     if (open) {
+      trap.activate();
       /* Move focus into the drawer so keyboard users are not stranded. */
-      const first = menu.querySelector("a, button");
-      if (first) first.focus({ preventScroll: true });
+      trap.focusFirst("a, button");
+    } else {
+      trap.deactivate();
     }
   }
 
@@ -1002,14 +1759,17 @@ if (pointerFine && !prefersReducedMotion) {
     const honeypot = form.querySelector('[name="_gotcha"]');
     if (honeypot && honeypot.value.trim()) return;
 
+    let firstInvalid = null;
     fields.forEach((f) => {
       const g = f.closest(".form-field");
       const bad = !f.checkValidity();
+      if (bad && !firstInvalid) firstInvalid = f;
       if (g) g.classList.toggle("has-error", bad);
       f.setAttribute("aria-invalid", bad ? "true" : "false");
     });
     if (!form.checkValidity()) {
       showStatus(Lang.t("contact.invalid"), true);
+      if (firstInvalid && typeof firstInvalid.focus === "function") firstInvalid.focus();
       return;
     }
 
@@ -1348,8 +2108,8 @@ function renderPicks() {
     ? ""
     : '<div class="q-mode-row">' +
       '<div class="q-mode-selector" role="group" aria-label="' + esc(Lang.qt("modePractice")) + '">' +
-      `<button type="button" class="q-mode-btn${timedMode ? "" : " is-active"}" data-mode="practice">${esc(Lang.qt("modePractice"))}</button>` +
-      `<button type="button" class="q-mode-btn${timedMode ? " is-active" : ""}" data-mode="exam">${esc(Lang.qt("modeExam"))}</button>` +
+      `<button type="button" class="q-mode-btn${timedMode ? "" : " is-active"}" data-mode="practice" aria-pressed="${timedMode ? "false" : "true"}">${esc(Lang.qt("modePractice"))}</button>` +
+      `<button type="button" class="q-mode-btn${timedMode ? " is-active" : ""}" data-mode="exam" aria-pressed="${timedMode ? "true" : "false"}">${esc(Lang.qt("modeExam"))}</button>` +
       "</div>" +
       (hasData
         ? `<button type="button" class="btn btn-ghost btn-sm q-clear" id="qClear">${esc(Lang.qt("clear"))}</button>`
@@ -1453,10 +2213,15 @@ function showQuestion(resumeNote) {
     timerBar +
     `<div class="q-progress"><div class="q-progress-fill" style="width:${pct}%"></div></div>` +
     (resumeNote ? `<p class="q-note">${esc(resumeNote)}</p>` : "") +
-    `<div class="q-question" id="qQ">${esc(q.q)}</div>` +
+    `<h3 class="q-question" id="qQ" tabindex="-1">${esc(q.q)}</h3>` +
     `<div class="q-options" role="group" aria-labelledby="qQ">${optsHtml}</div>` +
     '<p class="q-feedback" id="qFeedback" role="status"></p>' +
     `<div class="q-actions"><button type="button" class="btn btn-ghost" id="qRestart">${esc(Lang.qt("restartSubject"))}</button></div>`;
+
+  /* Move focus to the new question so keyboard and screen-reader users do not
+     have to rediscover where the replaced content begins. */
+  const questionHeading = app.querySelector("#qQ");
+  if (questionHeading) questionHeading.focus({ preventScroll: true });
 
   /* Option + restart clicks are handled by the delegated listeners. */
   startTimer();
@@ -1559,6 +2324,7 @@ function finishQuestion(correct, chosenIdx) {
   nextBtn.textContent = isLast ? Lang.qt("showResult") : Lang.qt("next");
   /* Advance/result handled by the delegated #qNext listener. */
   app.querySelector(".q-actions").appendChild(nextBtn);
+  nextBtn.focus({ preventScroll: true });
 }
 
 /**
@@ -2568,6 +3334,7 @@ const Lang = (() => {
       "starthere.desc": "مسار «الأساسيات» مصمم للمبتدئين — خمس خطوات قصيرة تنقلك من الصفر إلى أول اختبار.",
       "starthere.cta": "ابدأ مسار الأساسيات",
       "starthere.wizard": "جولة التعريف",
+      "starthere.tour": "جولة الأقسام",
       "dash.progressLabel": "تقدمك",
       "dash.lastLesson": "آخر درس",
       "dash.nextQuiz": "الاختبار التالي",
@@ -2920,6 +3687,38 @@ const Lang = (() => {
       "onboarding.summaryLevel": "المستوى: {level}",
       "onboarding.summarySubjects": "المواد: {subjects}",
       "onboarding.summaryStyle": "الأسلوب: {style}",
+      /* ---------- MODULE 54 · OnboardingTour — الجولة التعريفية (8 خطوات) ---------- */
+      "tour.next": "التالي",
+      "tour.finish": "إنهاء الجولة",
+      "tour.back": "رجوع",
+      "tour.skip": "تخطي الجولة",
+      "tour.counter": "الخطوة {i} من {n}",
+      "tour.areaLabel": "القسم المميّز:",
+      "tour.hint": "استخدم Tab للتنقل بين الأزرار · Esc لتخطي الجولة.",
+      "tour.s1Title": "أهلًا بك في منصة أمن المعلومات 👋",
+      "tour.s1Text": "منصة عربية لتعلّم أمن المعلومات: تعلّم الأساسيات، اختبر نفسك، وتدرّب عمليًا — كل ذلك داخل متصفحك.",
+      "tour.s1Area": "الواجهة الرئيسية للمنصة",
+      "tour.s2Title": "لوحة الطالب — تقدّمك",
+      "tour.s2Text": "هنا يظهر ملخّص تقدّمك: النسبة العامة، آخر درس، والخطوة التالية. كل الأرقام محفوظة على جهازك فقط.",
+      "tour.s2Area": "لوحة الطالب",
+      "tour.s3Title": "المسارات والمواد والدروس",
+      "tour.s3Text": "مسارات مرتّبة من الأساسيات إلى المستوى المتقدم. اختر مسارًا ثم تابع دروسه خطوة بخطوة.",
+      "tour.s3Area": "مسارات التعلم والدروس",
+      "tour.s4Title": "الاختبارات وحفظ التقدّم",
+      "tour.s4Text": "اختبر نفسك في كل مادة، وتُحفظ إجاباتك ونتيجتك تلقائيًا — ويمكنك الاستئناف من حيث توقفت.",
+      "tour.s4Area": "الاختبارات",
+      "tour.s5Title": "المعامل والأدوات الأمنية",
+      "tour.s5Text": "طبّق ما تعلّمته: معامل محاكاة وأدوات أمنية آمنة تعمل داخل المتصفح وبدون إنترنت.",
+      "tour.s5Area": "المعامل العملية والأدوات",
+      "tour.s6Title": "المواد الدراسية والمصادر",
+      "tour.s6Text": "راجع المصطلحات بالبطاقات، وافتح ملفات المواد والملخصات وبنوك الأسئلة من قسم المواد.",
+      "tour.s6Area": "البطاقات والمواد الدراسية",
+      "tour.s7Title": "مساعد المنصة الذكي",
+      "tour.s7Text": "اسأله عن أي موضوع في المنصة: يشرح ويقترح دروسًا واختبارات، ويعمل محليًا داخل متصفحك.",
+      "tour.s7Area": "مساعد المنصة",
+      "tour.s8Title": "التنقّل والبحث",
+      "tour.s8Text": "من الشريط العلوي تنتقل بين الأقسام، ويفتح البحث السريع بالضغط على / أو Ctrl+K.",
+      "tour.s8Area": "الشريط العلوي والبحث",
       "progress.lessons": "الدروس المكتملة",
       "progress.labs": "المعامل المكتملة",
       "progress.flashcards": "البطاقات المراجعة",
@@ -3011,6 +3810,7 @@ const Lang = (() => {
       "starthere.desc": "The «Fundamentals» path is built for beginners — five short steps from zero to your first quiz.",
       "starthere.cta": "Start the Fundamentals path",
       "starthere.wizard": "Intro tour",
+      "starthere.tour": "Sections tour",
       "dash.progressLabel": "Your progress",
       "dash.lastLesson": "Last lesson",
       "dash.nextQuiz": "Next quiz",
@@ -3360,6 +4160,38 @@ const Lang = (() => {
       "onboarding.summaryLevel": "Level: {level}",
       "onboarding.summarySubjects": "Subjects: {subjects}",
       "onboarding.summaryStyle": "Style: {style}",
+      /* ---------- MODULE 54 · OnboardingTour — first-visit walkthrough (8 steps) ---------- */
+      "tour.next": "Next",
+      "tour.finish": "Finish tour",
+      "tour.back": "Back",
+      "tour.skip": "Skip tour",
+      "tour.counter": "Step {i} of {n}",
+      "tour.areaLabel": "Highlighted area:",
+      "tour.hint": "Use Tab to move between the buttons · Esc to skip the tour.",
+      "tour.s1Title": "Welcome to the Information Security platform 👋",
+      "tour.s1Text": "An Arabic-first platform for learning information security: study the basics, test yourself and practise hands-on — all inside your browser.",
+      "tour.s1Area": "the platform home screen",
+      "tour.s2Title": "Your dashboard — progress",
+      "tour.s2Text": "This is your progress summary: overall percentage, last lesson and the next step. Everything is saved on your device only.",
+      "tour.s2Area": "the student dashboard",
+      "tour.s3Title": "Paths, subjects and lessons",
+      "tour.s3Text": "Structured paths that take you from the fundamentals to an advanced level. Pick a path and follow its lessons one by one.",
+      "tour.s3Area": "learning paths and lessons",
+      "tour.s4Title": "Quizzes and saved progress",
+      "tour.s4Text": "Test yourself in every subject — your answers and score are saved automatically, and you can resume where you stopped.",
+      "tour.s4Area": "quizzes",
+      "tour.s5Title": "Labs and security tools",
+      "tour.s5Text": "Practise what you learned: simulation labs and safe security tools that run inside the browser and offline.",
+      "tour.s5Area": "practical labs and tools",
+      "tour.s6Title": "Study materials and resources",
+      "tour.s6Text": "Review terminology with flashcards, and open each subject's files, summaries and question banks from the Subjects section.",
+      "tour.s6Area": "flashcards and study materials",
+      "tour.s7Title": "The platform AI assistant",
+      "tour.s7Text": "Ask it about any topic on the platform: it explains and recommends lessons and quizzes, and works locally inside your browser.",
+      "tour.s7Area": "the platform assistant",
+      "tour.s8Title": "Navigation and search",
+      "tour.s8Text": "Use the top bar to move between sections, and open quick search with / or Ctrl+K.",
+      "tour.s8Area": "the top navigation bar and search",
       "progress.lessons": "Lessons completed",
       "progress.labs": "Labs completed",
       "progress.flashcards": "Flashcards reviewed",
@@ -4793,6 +5625,23 @@ window.Lang = Lang;
     return VIEW_IDS.has(id) ? id : "hero";
   }
 
+  /** Move focus to the heading of the newly activated view. @returns {void} */
+  function focusActiveView() {
+    const view = activeView ? $id(activeView) : null;
+    if (!view || anotherOverlayOpen()) return;
+    const target = view.querySelector("h1, h2, [data-view-heading]") || view;
+    const hasTabindex = typeof target.hasAttribute === "function"
+      ? target.hasAttribute("tabindex")
+      : target.getAttribute("tabindex") !== null;
+    if (!hasTabindex) target.setAttribute("tabindex", "-1");
+    const schedule = typeof requestAnimationFrame === "function" ? requestAnimationFrame : (fn) => setTimeout(fn, 0);
+    schedule(() => {
+      if (!activeView || activeView !== view.id || anotherOverlayOpen()) return;
+      try { target.focus({ preventScroll: true }); }
+      catch { target.focus(); }
+    });
+  }
+
   /**
    * Activate exactly one view: add .is-active to target, remove
    * from the rest. Updates nav aria-current, navbar frosted state,
@@ -4812,6 +5661,7 @@ window.Lang = Lang;
         !/^(?:path|lesson)\//.test(requestedId)) {
       notifyUnknownRoute(requestedId);
     }
+    const previousView = activeView;
     if (activeView === viewId && !opts.force) return false;
 
     /* Show target, hide the rest */
@@ -4868,6 +5718,10 @@ window.Lang = Lang;
     /* Notify other modules (e.g. ProgressHub) so they can refresh
        when their view is activated. Additive — no behavior change. */
     document.dispatchEvent(new CustomEvent("nova:view-changed", { detail: { viewId } }));
+
+    /* Programmatic focus lands on the new view only after a real switch; the
+       initial boot keeps native hash/first-visit behavior unchanged. */
+    if (previousView !== null) focusActiveView();
 
     return true;
   }
@@ -9389,12 +10243,25 @@ const LABS_META = {
 
   /* ---------- open / close ---------- */
   let isOpen = false;
+  /* Focus containment + the modal guard come from the shared helpers through
+     the A11Y bridge, because this module lives outside the main IIFE. The
+     inert fallback keeps the dialog usable if that bridge is ever absent. */
+  const A11Y = (typeof window !== "undefined" && window.PLATFORM_A11Y) || {};
+  const trap = (typeof A11Y.createFocusTrap === "function")
+    ? A11Y.createFocusTrap(dialog)
+    : { activate() {}, deactivate() {}, focusFirst() { return null; }, isActive() { return false; } };
+  /** @param {HTMLElement=} except Overlay to ignore. @returns {boolean} */
+  const overlayOpen = (except) => (typeof A11Y.anotherOverlayOpen === "function")
+    ? !!A11Y.anotherOverlayOpen(except) : false;
 
   /** Open the dialog, rebuild the index and show the start hint. @returns {void} */
   function open() {
     if (isOpen) { if (input.focus) input.focus(); return; }
+    if (overlayOpen(dialog)) return;
     isOpen = true;
     try { entries = buildIndex(); } catch (e) { entries = []; }
+    try { dialog.inert = false; } catch (e1) { /* inert is progressive */ }
+    if (dialog.removeAttribute) dialog.removeAttribute("inert");
     if (dialog.classList) dialog.classList.add("is-open");
     dialog.setAttribute("aria-hidden", "false");
     if (overlay) overlay.hidden = false;
@@ -9402,6 +10269,7 @@ const LABS_META = {
     if (input.setAttribute) input.setAttribute("aria-expanded", "true");
     try { if ("value" in input) input.value = ""; } catch (e3) { /* read-only input in tests */ }
     renderResults("");
+    trap.activate();
     if (input.focus) input.focus();
   }
 
@@ -9409,8 +10277,11 @@ const LABS_META = {
   function close() {
     if (!isOpen) return;
     isOpen = false;
+    trap.deactivate({ restoreFocus: false });
     if (dialog.classList) dialog.classList.remove("is-open");
     dialog.setAttribute("aria-hidden", "true");
+    try { dialog.inert = true; } catch (e0) { /* inert is progressive */ }
+    dialog.setAttribute("inert", "");
     if (overlay) overlay.hidden = true;
     try { if (document.body && document.body.classList) document.body.classList.remove("search-open"); } catch (e) { /* no-op */ }
     if (input.setAttribute) {

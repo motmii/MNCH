@@ -78,6 +78,9 @@ const sandbox5 = {
     addEventListener() {},
   },
   window: { NovaViews: { activate() {} } },
+  /* MODULE 38 contains its modal with the shared focus trap; the sandbox only
+     needs a no-op double for it. */
+  createFocusTrap() { return { activate() {}, deactivate() {}, focusFirst() { return null; }, isActive() { return false; } }; },
   CustomEvent() {},
 };
 vm.createContext(sandbox5);

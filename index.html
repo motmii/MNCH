@@ -119,7 +119,7 @@
     </div>
   </nav>
 
-  <div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="القائمة" aria-hidden="true" inert>
     <ul>
       <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
       <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
@@ -152,9 +152,9 @@
         <h3 data-i18n="onboarding.step1Title">Level?</h3>
         <p class="onboarding-step-sub" data-i18n="onboarding.step1Desc"></p>
         <div class="onboarding-levels">
-          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="beginner" data-i18n="onboarding.level.beginner">Beginner</button>
-          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="intermediate" data-i18n="onboarding.level.intermediate">Intermediate</button>
-          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="advanced" data-i18n="onboarding.level.advanced">Advanced</button>
+          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="beginner" aria-pressed="false" data-i18n="onboarding.level.beginner">Beginner</button>
+          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="intermediate" aria-pressed="false" data-i18n="onboarding.level.intermediate">Intermediate</button>
+          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="advanced" aria-pressed="false" data-i18n="onboarding.level.advanced">Advanced</button>
         </div>
       </section>
 
@@ -163,11 +163,11 @@
         <h3 data-i18n="onboarding.step2Title">Interested in?</h3>
         <p class="onboarding-step-sub" data-i18n="onboarding.step2Desc"></p>
         <div class="onboarding-subjects">
-          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030702" data-i18n="onboarding.subj.algorithms">الخوارزميات</button>
-          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030802" data-i18n="onboarding.subj.osconcepts">مفاهيم نظم التشغيل</button>
-          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030902" data-i18n="onboarding.subj.policy">السياسات والتشريعات والأخلاقيات</button>
-          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210031002" data-i18n="onboarding.subj.components">مكونات أنظمة تقنية المعلومات</button>
-          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210031102" data-i18n="onboarding.subj.design">مبادئ التصميم في الأمن السيبراني</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030702" aria-pressed="false" data-i18n="onboarding.subj.algorithms">الخوارزميات</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030802" aria-pressed="false" data-i18n="onboarding.subj.osconcepts">مفاهيم نظم التشغيل</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030902" aria-pressed="false" data-i18n="onboarding.subj.policy">السياسات والتشريعات والأخلاقيات</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210031002" aria-pressed="false" data-i18n="onboarding.subj.components">مكونات أنظمة تقنية المعلومات</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210031102" aria-pressed="false" data-i18n="onboarding.subj.design">مبادئ التصميم في الأمن السيبراني</button>
         </div>
         <p class="onboarding-skip-sub"><button type="button" class="btn btn-ghost btn-sm" data-os-skip-subjects data-i18n="onboarding.skip">Skip</button></p>
       </section>
@@ -177,9 +177,9 @@
         <h3 data-i18n="onboarding.step3Title">Learning style?</h3>
         <p class="onboarding-step-sub" data-i18n="onboarding.step3Desc"></p>
         <div class="onboarding-styles">
-          <button type="button" class="btn btn-ghost btn-style" data-os-style="theory" data-i18n="onboarding.style.theory">Theory</button>
-          <button type="button" class="btn btn-ghost btn-style" data-os-style="quizzes" data-i18n="onboarding.style.quizzes">Quizzes</button>
-          <button type="button" class="btn btn-ghost btn-style" data-os-style="practical" data-i18n="onboarding.style.practical">Practical</button>
+          <button type="button" class="btn btn-ghost btn-style" data-os-style="theory" aria-pressed="false" data-i18n="onboarding.style.theory">Theory</button>
+          <button type="button" class="btn btn-ghost btn-style" data-os-style="quizzes" aria-pressed="false" data-i18n="onboarding.style.quizzes">Quizzes</button>
+          <button type="button" class="btn btn-ghost btn-style" data-os-style="practical" aria-pressed="false" data-i18n="onboarding.style.practical">Practical</button>
         </div>
       </section>
 
@@ -200,6 +200,31 @@
         <button type="button" id="onboardingSkip" class="btn btn-ghost btn-sm" data-i18n="onboarding.skip">Skip</button>
         <button type="button" id="onboardingNext" class="btn btn-primary btn-sm" data-i18n="onboarding.next">Next</button>
       </footer>
+    </div>
+  </div>
+
+  <!-- ONBOARDING TOUR — MODULE 54 · first-time guided walkthrough (8 steps).
+       Shown ONCE per browser (state: "motmi-portal:tour" via MODULE 02 Store);
+       Skip, Escape and the final step all close it for good. It reuses the
+       MODULE 38 overlay shell and the shared focus trap, names every area in
+       words (never colour-only) and highlights the related element while the
+       step is visible. Arabic-first / RTL, keyboard-accessible.
+       The step texts are written by the module (MODULE 22 Lang.t), so the
+       slots below intentionally carry no data-i18n. -->
+  <div id="tourOverlay" class="onboarding-overlay tour-overlay" role="dialog"
+       aria-modal="true" aria-labelledby="tourTitle"
+       aria-describedby="tourCounter tourStepText tourArea" aria-hidden="true">
+    <div class="onboarding-panel tour-panel" role="document">
+      <p class="tour-count" id="tourCounter">الخطوة 1 من 8</p>
+      <h2 class="tour-title" id="tourTitle" tabindex="-1">جولة تعريفية في المنصة</h2>
+      <p class="tour-text" id="tourStepText"></p>
+      <p class="tour-area" id="tourArea"></p>
+      <div class="onboarding-foot tour-foot">
+        <button type="button" id="tourBack" class="btn btn-ghost btn-sm" data-i18n="tour.back">رجوع</button>
+        <button type="button" id="tourSkip" class="btn btn-ghost btn-sm" data-i18n="tour.skip">تخطي الجولة</button>
+        <button type="button" id="tourNext" class="btn btn-primary btn-sm">التالي</button>
+      </div>
+      <p class="tour-hint" data-i18n="tour.hint">استخدم Tab للتنقل بين الأزرار · Esc لتخطي الجولة.</p>
     </div>
   </div>
 
@@ -236,6 +261,7 @@
           </div>
           <div class="hero-start-actions">
             <a href="#path/fundamentals" class="btn btn-primary btn-sm" data-i18n="starthere.cta">ابدأ مسار الأساسيات</a>
+            <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
             <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
           </div>
         </div>
@@ -1027,30 +1053,30 @@
           <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp-guard" aria-hidden="true" />
           <div class="form-field">
             <label for="cfName" data-i18n="contact.name">اسمك</label>
-            <input id="cfName" name="name" required minlength="2" placeholder="الاسم الكامل" autocomplete="name" />
-            <small class="error-msg">فضلاً أدخل اسمك (حرفان على الأقل).</small>
+            <input id="cfName" name="name" required minlength="2" placeholder="الاسم الكامل" autocomplete="name" aria-invalid="false" aria-describedby="cfNameError" />
+            <small class="error-msg" id="cfNameError">فضلاً أدخل اسمك (حرفان على الأقل).</small>
           </div>
           <div class="form-row">
             <div class="form-field">
               <label for="cfEmail" data-i18n="contact.email">بريدك الإلكتروني</label>
-              <input id="cfEmail" type="email" name="email" required placeholder="you@example.com" dir="ltr" autocomplete="email" />
-              <small class="error-msg">فضلاً أدخل بريدًا إلكترونيًا صحيحًا.</small>
+              <input id="cfEmail" type="email" name="email" required placeholder="you@example.com" dir="ltr" autocomplete="email" aria-invalid="false" aria-describedby="cfEmailError" />
+              <small class="error-msg" id="cfEmailError">فضلاً أدخل بريدًا إلكترونيًا صحيحًا.</small>
             </div>
             <div class="form-field">
               <label for="cfService" data-i18n="contact.type">نوع الرسالة</label>
-              <select id="cfService" name="service">
+              <select id="cfService" name="service" aria-invalid="false" aria-describedby="cfServiceError">
                 <option value="اقتراح عام">اقتراح عام</option>
                 <option value="تلخيص مادة">تلخيص مادة</option>
                 <option value="بنك أسئلة">بنك أسئلة</option>
                 <option value="تصحيح خطأ">تصحيح خطأ</option>
               </select>
-              <small class="error-msg">اختر نوع الرسالة.</small>
+              <small class="error-msg" id="cfServiceError">اختر نوع الرسالة.</small>
             </div>
           </div>
           <div class="form-field">
             <label for="cfMessage" data-i18n="contact.message">رسالتك</label>
-            <textarea id="cfMessage" name="message" rows="5" required minlength="10" placeholder="اكتب رسالتك هنا…"></textarea>
-            <small class="error-msg">فضلاً اكتب رسالة من 10 أحرف على الأقل.</small>
+            <textarea id="cfMessage" name="message" rows="5" required minlength="10" placeholder="اكتب رسالتك هنا…" aria-invalid="false" aria-describedby="cfMessageError"></textarea>
+            <small class="error-msg" id="cfMessageError">فضلاً اكتب رسالة من 10 أحرف على الأقل.</small>
           </div>
           <button class="btn btn-primary form-submit" type="submit"><span class="submit-text" data-i18n="contact.submit">إرسال المساهمة ✦</span></button>
           <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
@@ -1145,7 +1171,7 @@
        navigable: / or Ctrl+K opens, Esc closes, ↑↓ + Enter pick.
        ============================================================ -->
   <div id="searchOverlay" class="search-overlay" hidden></div>
-  <div id="searchDialog" class="search-dialog" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="searchDialogTitle">
+  <div id="searchDialog" class="search-dialog" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="searchDialogTitle" inert>
     <div class="search-panel" role="document">
       <h2 id="searchDialogTitle" class="sr-only" data-i18n="search.title">بحث في المنصة</h2>
       <div class="search-bar">

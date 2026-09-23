@@ -3811,6 +3811,179 @@ p, li { text-wrap: pretty; }
 }
 
 /* ============================================================
+   MODULE 54 · OnboardingTour — first-visit guided walkthrough
+   ------------------------------------------------------------
+   Reuses the MODULE 38 overlay shell (.onboarding-overlay /
+   .onboarding-panel) but repositions the panel as a floating popover
+   anchored to the highlighted target: the module measures the target
+   (getBoundingClientRect) after scrolling it into view and pins the
+   panel near it (below when room allows, above otherwise, flipped for
+   RTL via logical inset-inline), clamped inside the viewport with a
+   pointer arrow. RTL-first, mobile → desktop, reduced-motion aware.
+   Nothing here changes layout of the page itself: the highlight is an
+   outline only.
+   ============================================================ */
+.tour-overlay {
+  z-index: 1500;                 /* above the fixed navbar (1000) and the assistant (1100) */
+  align-items: flex-start;       /* popover is anchored per-step by JS, never a fixed bottom sheet */
+  justify-content: center;
+  padding: 0;
+  background: transparent;       /* the ::before veil dims the page; keeps panel/highlight above it */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;         /* blur would smear the highlighted area */
+  overflow: hidden;              /* anchored popover positions itself; no overlay scrollbars */
+  pointer-events: none;          /* veil + panel decide their own hit-testing below */
+}
+
+/* Dimming veil — sits above page content but below the highlight + popover. */
+.tour-overlay::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: rgba(6, 9, 18, 0.52);
+  pointer-events: auto;
+}
+
+.tour-panel {
+  /* Floating popover: JS pins it with physical top/left next to the target
+     (clamped inside the viewport). Static fallbacks keep no-JS / degraded
+     renders centered and readable. */
+  position: fixed;
+  z-index: 1502;
+  top: var(--tour-top, 12vh);
+  left: var(--tour-left, 50%);
+  transform: var(--tour-shift, translateX(-50%));
+  width: min(380px, calc(100vw - 2rem));
+  max-height: min(80vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  gap: 0.55rem;
+  align-content: start;
+  pointer-events: auto;
+  padding: 1.25rem 1.25rem 1.1rem;
+  border-top: 2px dashed var(--accent-2);   /* same visual language as the highlight ring */
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.55);
+  scroll-margin-block-end: 1rem;
+}
+
+/* Pointer arrow — JS flips [data-tour-place] top/bottom and sets
+   --tour-arrow so the arrow keeps pointing at the target. */
+.tour-panel::after {
+  content: "";
+  position: absolute;
+  left: var(--tour-arrow, 1.5rem);
+  inline-size: 0.9rem;
+  block-size: 0.9rem;
+  background: var(--surface);
+  border-inline-start: 1px solid var(--line);
+  border-block-start: 1px solid var(--line);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.tour-panel[data-tour-place="below"]::after { top: -0.48rem; }
+.tour-panel[data-tour-place="above"]::after {
+  top: auto;
+  bottom: -0.48rem;
+  transform: rotate(225deg);
+}
+.tour-panel[data-tour-place="center"]::after { display: none; }
+
+.tour-count {
+  justify-self: start;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--accent-2);
+  background: var(--wash-accent2);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  max-width: 100%;
+}
+
+.tour-title {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.tour-text {
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.9;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.tour-area {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.8;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+/* Shape (◆) + the panel wording carry the meaning — never colour alone. */
+.tour-area::before { content: "◆ "; color: var(--accent-3); }
+
+.tour-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+.tour-foot .btn { flex: 0 1 auto; min-width: 0; }
+.tour-foot #tourNext { margin-inline-start: auto; }
+.tour-foot .btn:disabled { opacity: 0.5; cursor: default; }
+
+.tour-hint {
+  color: var(--dim);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  text-align: center;
+  margin: 0.15rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* Visible focus indicator for keyboard users inside the tour. */
+.tour-panel :focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+
+/* Highlight ring — dashed outline (pattern + thickness, not colour alone),
+   and a scroll margin that keeps the element below the fixed navbar.
+   Positioned targets are lifted above the veil; static sections simply
+   ignore z-index. */
+.is-tour-highlight {
+  position: relative;
+  z-index: 1501;
+  outline: 3px dashed var(--accent-2);
+  outline-offset: 6px;
+  border-radius: 12px;
+  scroll-margin-block-start: calc(var(--nav-h) + 16px);
+  scroll-margin-block-end: 40vh;
+}
+
+@media (max-width: 640px) {
+  .tour-overlay { overflow: hidden; }
+  .tour-panel {
+    width: min(380px, calc(100vw - 1.2rem));
+    max-height: min(82vh, 560px);
+    padding: 1.05rem;
+  }
+  .tour-foot { gap: 0.5rem; }
+  .tour-foot .btn { flex: 1 1 auto; justify-content: center; }
+  .tour-foot #tourNext { margin-inline-start: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-overlay,
+  .tour-panel,
+  .is-tour-highlight { transition: none; animation: none; }
+}
+
+/* ============================================================
    MODULE 43 · SemesterDashboard — لوحة الترم الحالي (#semester)
    Uses the existing design tokens only; both themes supported.
    RTL-safe (logical properties) · responsive · no overflow.
