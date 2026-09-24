@@ -1219,6 +1219,18 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
      Stats.Live overwrites them from the live question bank. */
   const COUNT_SEED = { "260210030702": 20, "260210030802": 20, "260210030902": 20, "260210031002": 20, "260210031102": 20 };
 
+  function materialsHtml(s) {
+    const data = (typeof window !== "undefined" && window.PLATFORM_CURRENT_SEMESTER) || {};
+    const subject = (data.subjects || []).find((item) => item.code === s.code);
+    const materials = subject && Array.isArray(subject.materials) ? subject.materials : [];
+    if (!materials.length) return `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">تحميل التجميعات ⬇</span>`;
+    const items = materials.map((material, index) => {
+      const label = material.title && (material.title.ar || material.title.en) || `الفصل ${index + 1}`;
+      return `<a class="chapter-download" href="${escS(material.path || "")}" target="_blank" rel="noopener"><span>${escS(label)}</span><b aria-hidden="true">⬇</b></a>`;
+    }).join("");
+    return `<details class="card-materials"><summary class="card-link card-materials-trigger">تحميل التجميعات <span aria-hidden="true">⬇</span></summary><div class="chapter-menu">${items}</div></details>`;
+  }
+
   function linksHtml(s) {
     let html = "";
     if (s.contentStatus === "available" && s.quizKey) {
@@ -1227,7 +1239,7 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
     } else {
       html += `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">بنك الأسئلة</span>`;
     }
-    html += `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">تحميل التجميعات ⬇</span>`;
+    html += materialsHtml(s);
     html += `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">الملخصات</span>`;
     return html;
   }
@@ -1472,6 +1484,15 @@ function hidePreloader() {
 }
 window.addEventListener("load", () => setTimeout(hidePreloader, 600));
 setTimeout(hidePreloader, 4000); // hard safety net
+
+/* ---------- Navigation click sound — quiet, intentional feedback ---------- */
+document.addEventListener("click", (event) => {
+  const link = event.target && event.target.closest
+    ? event.target.closest(".nav-links a[href]")
+    : null;
+  if (!link) return;
+  Sfx.play("flip");
+});
 
 /* ============================================================
    MODULE 05 · PointerFX — shared pointer + idle-aware rAF loop
@@ -2081,47 +2102,80 @@ function renderPicks() {
   const progress = data.progress || {};
   const keys = Object.keys(QUIZZES);
   const hasData = Object.keys(results).length > 0 || Object.keys(progress).length > 0;
-  const noBank = keys.length === 0; /* quiz data not loaded (yet) */
+  const noBank = keys.length === 0;
+  const curLang = Lang.current || "ar";
+  const completedCount = keys.filter((k) => results[k]).length;
+  const inProgressCount = keys.filter((k) => progress[k] && progress[k].idx > 0 && progress[k].idx < progress[k].total).length;
+  const reviewCount = keys.filter((k) => MissedBank.countForSubject(k) > 0).length;
+  const overallPct = keys.length ? Math.round(keys.reduce((sum, k) => sum + (results[k] && typeof results[k].pct === "number" ? results[k].pct : 0), 0) / keys.length) : 0;
+  const orderedKeys = keys.slice().sort((a, b) => {
+    const rank = (k) => {
+      const saved = progress[k];
+      if (saved && saved.idx > 0 && saved.idx < saved.total) return 0;
+      if (!results[k]) return 1;
+      if (MissedBank.countForSubject(k) > 0) return 2;
+      return 3;
+    };
+    return rank(a) - rank(b);
+  });
+  const recommended = orderedKeys[0];
+  const recommendedBank = recommended ? QUIZZES[recommended] : null;
 
-  const chips = keys.map((k) => {
+  const cards = orderedKeys.map((k, index) => {
+    const bank = QUIZZES[k] || {};
     const best = results[k];
-    const res = progress[k] && progress[k].idx > 0 && progress[k].idx < progress[k].total;
+    const saved = progress[k];
+    const resumable = saved && saved.idx > 0 && saved.idx < saved.total;
     const missedCount = MissedBank.countForSubject(k);
-    return (
-      `<button type="button" class="q-pick" data-sub="${esc(k)}"${res ? ' data-resume="1"' : ""}>` +
-      `${esc(QUIZZES[k].name)}` +
-      (best ? `<span class="q-best">${esc(Lang.qt("best", { pct: best.pct }))}</span>` : "") +
-      (res ? `<span class="q-resume">${esc(Lang.qt("resume"))}</span>` : "") +
-      (missedCount ? `<span class="q-missed">${missedCount} خطأ</span>` : "") +
-      "</button>"
-    );
+    const total = Array.isArray(bank.questions) ? bank.questions.length : 0;
+    const status = resumable
+      ? { ar: "قيد التفاعل", en: "In progress", cls: "is-progress" }
+      : best
+        ? { ar: "آخر نتيجة", en: "Last result", cls: "is-complete" }
+        : { ar: "لم تبدأ", en: "Not started", cls: "is-new" };
+    const statusText = curLang === "en" ? status.en : status.ar;
+    const bestText = best ? (curLang === "en" ? "Best" : "أفضل نتيجة") + " " + best.pct + "%" : (curLang === "en" ? "No result yet" : "لم تبدأ بعد");
+    const action = resumable
+      ? (curLang === "en" ? "Resume quiz" : "استكمال الاختبار")
+      : best
+        ? (curLang === "en" ? "Retake quiz" : "إعادة الاختبار")
+        : (curLang === "en" ? "Start quiz" : "ابدأ الاختبار");
+    const questionsText = curLang === "en" ? total + " questions" : total + " أسئلة";
+    const missedText = curLang === "en" ? missedCount + " to review" : missedCount + " للمراجعة";
+    return `<button type="button" class="q-pick q-subject-card ${status.cls}" data-sub="${esc(k)}"${resumable ? ' data-resume="1"' : ""}>
+      <span class="q-subject-card-top"><span class="q-subject-number">${String(index + 1).padStart(2, "0")}</span><span class="q-subject-status">${esc(statusText)}</span></span>
+      <span class="q-subject-card-title">${esc(bank.name || k)}</span>
+      <span class="q-subject-card-meta"><span>${esc(questionsText)}</span><span class="q-card-dot">•</span><span>${esc(bestText)}</span></span>
+      ${missedCount ? `<span class="q-subject-missed">${esc(missedText)}</span>` : ""}
+      <span class="q-subject-action">${esc(action)} <b aria-hidden="true">←</b></span>
+    </button>`;
   }).join("");
-
-  const picksHtml = noBank
-    ? '<div class="q-data-error" role="alert">' +
-      `<p>${esc(Lang.qt("dataError"))}</p>` +
-      `<button type="button" class="btn btn-sm btn-primary" id="qRetry">${esc(Lang.qt("retry"))}</button>` +
-      "</div>"
-    : '<div class="q-subject-picks">' + chips + "</div>";
 
   const modeRow = noBank
     ? ""
-    : '<div class="q-mode-row">' +
-      '<div class="q-mode-selector" role="group" aria-label="' + esc(Lang.qt("modePractice")) + '">' +
-      `<button type="button" class="q-mode-btn${timedMode ? "" : " is-active"}" data-mode="practice" aria-pressed="${timedMode ? "false" : "true"}">${esc(Lang.qt("modePractice"))}</button>` +
-      `<button type="button" class="q-mode-btn${timedMode ? " is-active" : ""}" data-mode="exam" aria-pressed="${timedMode ? "true" : "false"}">${esc(Lang.qt("modeExam"))}</button>` +
-      "</div>" +
-      (hasData
-        ? `<button type="button" class="btn btn-ghost btn-sm q-clear" id="qClear">${esc(Lang.qt("clear"))}</button>`
-        : "") +
-      "</div>" +
-      `<p class="q-feedback" role="status">${esc(Lang.qt("pickPrompt"))}</p>`;
+    : `<div class="q-dashboard-mode">
+      <div class="q-dashboard-mode-head"><div><span class="q-kicker">${curLang === "en" ? "Choose your mode" : "اختر طريقة الاختبار"}</span><strong>${curLang === "en" ? "How do you want to test yourself?" : "كيف تريد أن تختبر نفسك؟"}</strong></div><span class="q-mode-orbit" aria-hidden="true">✦</span></div>
+      <div class="q-mode-selector" role="group" aria-label="${esc(Lang.qt("modePractice"))}">
+        <button type="button" class="q-mode-btn${timedMode ? "" : " is-active"}" data-mode="practice" aria-pressed="${timedMode ? "false" : "true"}"><b>${esc(Lang.qt("modePractice"))}</b><small>${curLang === "en" ? "Learn with instant explanations" : "تعلّم مع شرح فوري لكل إجابة"}</small></button>
+        <button type="button" class="q-mode-btn${timedMode ? " is-active" : ""}" data-mode="exam" aria-pressed="${timedMode ? "true" : "false"}"><b>${esc(Lang.qt("modeExam"))}</b><small>${curLang === "en" ? "Timed challenge, exam-style" : "تحدٍ زمني بأسلوب الامتحان"}</small></button>
+      </div>
+      ${hasData ? `<button type="button" class="btn btn-ghost btn-sm q-clear" id="qClear">${esc(Lang.qt("clear"))}</button>` : ""}
+    </div>`;
 
-  app.innerHTML = picksHtml + modeRow;
+  const insight = noBank ? "" : `<div class="q-insight-grid">
+    <section class="q-progress-card" aria-label="${curLang === "en" ? "Your overall progress" : "تقدمك العام"}">
+      <div class="q-progress-copy"><span class="q-kicker">${curLang === "en" ? "Your learning pulse" : "نبض تعلمك"}</span><strong>${curLang === "en" ? "Keep your momentum" : "حافظ على تقدمك"}</strong><small>${curLang === "en" ? "One focused quiz today makes you stronger." : "اختبار واحد مركّز اليوم يجعلك أقوى."}</small></div>
+      <div class="q-progress-ring" style="--pct:${overallPct * 3.6}deg"><b>${overallPct}%</b><small>${curLang === "en" ? "overall" : "المتوسط"}</small></div>
+    </section>
+    <section class="q-stats-card"><div><b>${completedCount}</b><small>${curLang === "en" ? "completed" : "مكتملة"}</small></div><div><b>${inProgressCount}</b><small>${curLang === "en" ? "in progress" : "جارية"}</small></div><div><b>${reviewCount}</b><small>${curLang === "en" ? "to review" : "للمراجعة"}</small></div></section>
+    ${recommendedBank ? `<section class="q-recommended-card"><span class="q-kicker">${curLang === "en" ? "Recommended next" : "الاختبار المقترح"}</span><strong>${esc(recommendedBank.name)}</strong><small>${curLang === "en" ? "Start here and make this subject your next win." : "ابدأ من هنا وحوّل المادة إلى إنجازك التالي."}</small><button type="button" class="btn btn-primary btn-sm" data-sub="${esc(recommended)}"${progress[recommended] && progress[recommended].idx > 0 && progress[recommended].idx < progress[recommended].total ? ' data-resume="1"' : ""}>${curLang === "en" ? "Start recommended" : "ابدأ الاختبار المقترح"} <span aria-hidden="true">←</span></button></section>` : ""}
+  </div>`;
 
-  /* Interactions are handled by the delegated listeners bound once in
-     bindQuizDelegation() — no per-render binding, so buttons can never
-     end up dead after a re-render. */
+  const picksHtml = noBank
+    ? `<div class="q-data-error" role="alert"><p>${esc(Lang.qt("dataError"))}</p><button type="button" class="btn btn-sm btn-primary" id="qRetry">${esc(Lang.qt("retry"))}</button></div>`
+    : `<div class="q-dashboard"><div class="q-dashboard-head"><div><span class="q-kicker">${curLang === "en" ? "Your test library" : "مكتبة اختباراتك"}</span><h3>${curLang === "en" ? "Choose a subject" : "اختر المادة التي تريد اختبارها"}</h3></div><span class="q-library-count">${keys.length} ${curLang === "en" ? "subjects" : "مواد"}</span></div>${insight}<div class="q-subject-grid">${cards}</div></div>`;
+
+  app.innerHTML = modeRow + picksHtml;
 }
 
 /**
@@ -2191,7 +2245,7 @@ function showQuestion(resumeNote) {
   stopTimer();
   const pct = Math.round((curIndex / total) * 100);
   const optsHtml = q.opts
-    .map((opt, i) => `<button type="button" class="q-option" data-i="${i}">${esc(opt)}</button>`)
+    .map((opt, i) => `<button type="button" class="q-option" data-i="${i}"><span class="q-option-key" aria-hidden="true">${i + 1}</span><span class="q-option-text">${esc(opt)}</span></button>`)
     .join("");
   const timerBar = timedMode
     ? '<div class="q-timer" role="timer" aria-label="الوقت المتبقي لهذا السؤال"><div class="q-timer-fill" style="width:100%"></div></div>'
@@ -2239,10 +2293,11 @@ function handleAnswer(i) {
   const q = current();
   const correct = q.a === i;
   if (correct) score++;
-  Sfx.play(correct ? "good" : "bad");
+  /* Answer selection is silent by design; visual feedback is the primary cue. */
 
   const opts = $$(".q-option", app);
   opts.forEach((b) => b.setAttribute("disabled", ""));
+  if (opts[i]) opts[i].classList.add("is-selected");
   /* Exam mode suppresses correct/incorrect highlighting. */
   if (!timedMode) {
     opts[q.a].classList.add("is-correct");
@@ -3747,6 +3802,8 @@ const Lang = (() => {
       "semester.tools": "أدوات ذات صلة",
       "semester.labs": "معامل ذات صلة",
       "semester.missingData": "بيانات الترم الحالي غير متوفرة حاليًا.",
+       "semester.materials": "المواد التعليمية",
+
       /* ---------- MODULE 48 · GlobalSearch (Phase 6) ---------- */
       "search.title": "بحث في المنصة",
       "search.placeholder": "ابحث: درس، مسار، أداة، اختبار، مصطلح…",
@@ -3783,6 +3840,8 @@ const Lang = (() => {
       "semester.lessonsSoon": "Lessons will be added soon.",
       "semester.quizChip": "Question bank",
       "semester.tools": "Related tools",
+       "semester.materials": "Learning materials",
+
       "semester.labs": "Related labs",
       "semester.missingData": "Current-semester data is not available right now.",
       "nav.home": "Home", "nav.semester": "Current Semester",
@@ -9359,7 +9418,23 @@ const LABS_META = {
     );
   }
 
-  /** Prerequisites — empty state is explicit, never hidden silently. @param {object} s @returns {string} */
+  /** Course-material links — PDF files are user-supplied static assets, not lessons. */
+  function materialsHtml(s) {
+    const materials = Array.isArray(s.materials) ? s.materials : [];
+    if (!materials.length) return "";
+    const label = T10("semester.materials") || "Materials";
+    const links = materials.map((m) => {
+      const path = m && m.path;
+      if (!path) return "";
+      return '<li class="sem-material-item"><a href="' + esc(path) +
+        '" target="_blank" rel="noopener"><span>' + esc(TT(m)) + '</span>' +
+        '<span aria-hidden="true">↗</span></a></li>';
+    }).join("");
+    return '<details class="sem-details sem-materials"><summary>' + escHtmlL(label) +
+      ' <span class="sem-count">' + materials.length + "</span></summary>" +
+      '<ul class="sem-material-list">' + links + "</ul></details>";
+  }
+
   function prereqHtml(s) {
     const items = (Array.isArray(s.prerequisites) ? s.prerequisites : [])
       .map((p) => esc(TT(p) || String(p))).filter(Boolean);
@@ -9437,7 +9512,7 @@ const LABS_META = {
       (schedule ? '<li class="sem-chip is-sched">🗓 ' + schedule + "</li>" : "") +
       "</ul>" +
       '<p class="sem-desc">' + esc(T(s.shortDescription)) + "</p>" +
-      '<div class="sem-blocks">' + prereqHtml(s) +
+      '<div class="sem-blocks">' + prereqHtml(s) + materialsHtml(s) +
       (Array.isArray(s.learningOutcomes) && s.learningOutcomes.length
         ? detailsList("semester.outcomes", s.learningOutcomes.map((o) => esc(T(o))))
         : "") +
