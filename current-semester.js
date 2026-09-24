@@ -98,6 +98,28 @@ const CURRENT_SEMESTER = {
       ],
 
       lessons: [],
+      materials: [
+        {
+          title: { ar: "الفصل 1: مدخل إلى الخوارزميات", en: "Chapter 1: Introduction to Algorithms" },
+          type: "lecture",
+          path: "materials/algorithms/chapter-01-introduction.pdf"
+        },
+        {
+          title: { ar: "الفصل 2: تمثيل الخوارزميات", en: "Chapter 2: Algorithm Representation" },
+          type: "lecture",
+          path: "materials/algorithms/chapter-02-algorithm-representation.pdf"
+        },
+        {
+          title: { ar: "الفصل 4: خوارزميات البحث", en: "Chapter 4: Searching Algorithms" },
+          type: "lecture",
+          path: "materials/algorithms/chapter-04-searching-algorithms.pdf"
+        },
+        {
+          title: { ar: "الفصل 7: خوارزميات التعامل مع السلاسل النصية", en: "Chapter 7: String Algorithms" },
+          type: "lecture",
+          path: "materials/algorithms/chapter-07-string-algorithms.pdf"
+        }
+      ],
       quizzes: ["260210030702"],
       relatedTools: [],
       relatedLabs: [],
@@ -167,6 +189,43 @@ const CURRENT_SEMESTER = {
       ],
 
       lessons: [],
+      materials: [
+        {
+          title: { ar: "الفصل 1: مقدمة في نظم التشغيل", en: "Chapter 1: Introduction to Operating Systems" },
+          type: "lecture",
+          path: "materials/operating-systems/chapter-01-introduction-to-operating-systems.pdf"
+        },
+        {
+          title: { ar: "الفصل 3: إدارة العمليات", en: "Chapter 3: Process Management" },
+          type: "lecture",
+          path: "materials/operating-systems/chapter-03-process-management.pdf"
+        },
+        {
+          title: { ar: "الفصل 4: إدارة الذاكرة", en: "Chapter 4: Memory Management" },
+          type: "lecture",
+          path: "materials/operating-systems/chapter-04-memory-management.pdf"
+        },
+        {
+          title: { ar: "الفصل 6: إدارة الإدخال والإخراج", en: "Chapter 6: Input/Output Management" },
+          type: "lecture",
+          path: "materials/operating-systems/chapter-06-input-output-management.pdf"
+        },
+        {
+          title: { ar: "الفصل 7: الأمان في نظم التشغيل", en: "Chapter 7: Operating System Security" },
+          type: "lecture",
+          path: "materials/operating-systems/chapter-07-operating-system-security.pdf"
+        },
+        {
+          title: { ar: "الفصل 8: نظم تشغيل شائعة ومقارنة بينها", en: "Chapter 8: Common Operating Systems and Comparison" },
+          type: "lecture",
+          path: "materials/operating-systems/chapter-08-common-operating-systems-comparison.pdf"
+        },
+        {
+          title: { ar: "الفصل 9: تطبيقات عملية في نظم التشغيل", en: "Chapter 9: Practical Applications of Operating Systems" },
+          type: "lecture",
+          path: "materials/operating-systems/chapter-09-practical-operating-system-applications.pdf"
+        }
+      ],
       quizzes: ["260210030802"],
       relatedTools: [],
       relatedLabs: ["redteam"],
@@ -236,6 +295,33 @@ const CURRENT_SEMESTER = {
       ],
 
       lessons: [],
+      materials: [
+        {
+          title: { ar: "الفصل 1: مقدمة في السياسات الأمنية", en: "Chapter 1: Introduction to Security Policies" },
+          type: "lecture",
+          path: "materials/policies-ethics/chapter-01-introduction-to-security-policies.pdf"
+        },
+        {
+          title: { ar: "الفصل 2: التشريعات والقوانين المرتبطة بأمن المعلومات", en: "Chapter 2: Information Security Legislation" },
+          type: "lecture",
+          path: "materials/policies-ethics/chapter-02-information-security-legislation.pdf"
+        },
+        {
+          title: { ar: "الفصل 3: الأخلاقيات المهنية في أمن المعلومات", en: "Chapter 3: Professional Ethics in Information Security" },
+          type: "lecture",
+          path: "materials/policies-ethics/chapter-03-professional-ethics.pdf"
+        },
+        {
+          title: { ar: "الفصل 5: تقييم المخاطر القانونية والأخلاقية", en: "Chapter 5: Legal and Ethical Risk Assessment" },
+          type: "lecture",
+          path: "materials/policies-ethics/chapter-05-legal-and-ethical-risk-assessment.pdf"
+        },
+        {
+          title: { ar: "الفصل 6: الثقافة التنظيمية والتوعية الأمنية", en: "Chapter 6: Organizational Culture and Security Awareness" },
+          type: "lecture",
+          path: "materials/policies-ethics/chapter-06-organizational-culture-and-security-awareness.pdf"
+        }
+      ],
       quizzes: ["260210030902"],
       relatedTools: ["tool-vuln", "tool-portscan"],
       relatedLabs: [],
@@ -305,6 +391,28 @@ const CURRENT_SEMESTER = {
       ],
 
       lessons: [],
+      materials: [
+        {
+          title: { ar: "الفصل 1: مقدمة إلى أنظمة تقنية المعلومات", en: "Chapter 1: Introduction to IT Systems" },
+          type: "lecture",
+          path: "materials/it-components/chapter-01-introduction-to-it-systems.pdf"
+        },
+        {
+          title: { ar: "الفصل 2: مكونات الحاسب الآلي الأساسية", en: "Chapter 2: Basic Computer Components" },
+          type: "lecture",
+          path: "materials/it-components/chapter-02-basic-computer-components.pdf"
+        },
+        {
+          title: { ar: "الفصل 3: البنية التحتية لتقنية المعلومات", en: "Chapter 3: IT Infrastructure" },
+          type: "lecture",
+          path: "materials/it-components/chapter-03-it-infrastructure.pdf"
+        },
+        {
+          title: { ar: "الفصل 4: الشبكات في أنظمة تقنية المعلومات", en: "Chapter 4: Networks in IT Systems" },
+          type: "lecture",
+          path: "materials/it-components/chapter-04-networks-in-it-systems.pdf"
+        }
+      ],
       quizzes: ["260210031002"],
       relatedTools: ["tool-cidr", "tool-sniffer"],
       relatedLabs: [],
@@ -374,6 +482,43 @@ const CURRENT_SEMESTER = {
       ],
 
       lessons: [],
+      materials: [
+        {
+          title: { ar: "الفصل 1: مقدمة في مبادئ التصميم الأمني", en: "Chapter 1: Introduction to Security Design Principles" },
+          type: "lecture",
+          path: "materials/security-design/chapter-01-introduction-to-security-design.pdf"
+        },
+        {
+          title: { ar: "الفصل 2: مكونات التصميم الأمني", en: "Chapter 2: Security Design Components" },
+          type: "lecture",
+          path: "materials/security-design/chapter-02-security-design-components.pdf"
+        },
+        {
+          title: { ar: "الفصل 3: نماذج التهديد وتحليل المخاطر", en: "Chapter 3: Threat Modeling and Risk Analysis" },
+          type: "lecture",
+          path: "materials/security-design/chapter-03-threat-modeling-and-risk-analysis.pdf"
+        },
+        {
+          title: { ar: "الفصل 4: تصميم الأنظمة المقاومة للهجمات", en: "Chapter 4: Designing Attack-Resistant Systems" },
+          type: "lecture",
+          path: "materials/security-design/chapter-04-attack-resistant-system-design.pdf"
+        },
+        {
+          title: { ar: "الفصل 5: أمان البرمجيات والتطبيقات", en: "Chapter 5: Software and Application Security" },
+          type: "lecture",
+          path: "materials/security-design/chapter-05-software-and-application-security.pdf"
+        },
+        {
+          title: { ar: "الفصل 6: تقييم واختبار أمان الأنظمة", en: "Chapter 6: Security Assessment and Testing" },
+          type: "lecture",
+          path: "materials/security-design/chapter-06-security-assessment-and-testing.pdf"
+        },
+        {
+          title: { ar: "الفصل 7: الاتجاهات الحديثة في التصميم الأمني", en: "Chapter 7: Modern Security Design Trends" },
+          type: "lecture",
+          path: "materials/security-design/chapter-07-modern-security-design-trends.pdf"
+        }
+      ],
       quizzes: ["260210031102"],
       relatedTools: ["tool-hash", "tool-caesar", "tool-playground"],
       relatedLabs: ["cryptolab"],
