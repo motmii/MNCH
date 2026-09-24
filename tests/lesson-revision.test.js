@@ -118,7 +118,12 @@ check("RTL-safe logical properties used", css.includes("margin-inline-start") &&
 check("responsive collapse present", /@media \(max-width: 720px\)[\s\S]*\.rev-item \{ flex-direction: column/.test(css));
 check("focus-visible styles present", css.includes(".rev-opt:focus-visible") && css.includes(".lesson-check-opt:focus-visible"));
 check("reduced-motion support present", /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.rev-opt/.test(css));
-check("service worker cache bumped", /CACHE_VERSION = "v1\.(22\.[6-9]|2[3-9]\.\d+)"/.test(sw));
+check("service worker cache bumped to at least v1.22.6", (function () {
+  const m = /CACHE_VERSION = "v(\d+)\.(\d+)\.(\d+)"/.exec(sw);
+  if (!m) return false;
+  const v = [Number(m[1]), Number(m[2]), Number(m[3])];
+  return v[0] > 1 || (v[0] === 1 && (v[1] > 22 || (v[1] === 22 && v[2] >= 6)));
+})());
 
 console.log("\n— bilingual dict coverage —");
 check("all lesson keys exist in Arabic", lessonKeys.every((k) => hasKey(arSrc, k)));

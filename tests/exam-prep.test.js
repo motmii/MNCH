@@ -72,7 +72,12 @@ check("RTL-safe logical properties used", /margin-inline-start/.test(css) && /bo
 check("focus-visible styles present", css.includes(".exam-opt:focus-visible") && css.includes(".exam-date-input:focus-visible"));
 check("mobile collapse present", /@media \(max-width: 720px\)[\s\S]*\.exam-date-form \{ flex-direction: column/.test(css));
 check("reduced-motion support present", /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.exam-bar/.test(css));
-check("service worker cache bumped to v1.22.7", /CACHE_VERSION = "v1\.22\.7"/.test(sw));
+check("service worker cache bumped to at least v1.22.7", (function () {
+  const m = /CACHE_VERSION = "v(\d+)\.(\d+)\.(\d+)"/.exec(sw);
+  if (!m) return false;
+  const v = [Number(m[1]), Number(m[2]), Number(m[3])];
+  return v[0] > 1 || (v[0] === 1 && (v[1] > 22 || (v[1] === 22 && v[2] >= 7)));
+})());
 check("all exam keys exist in Arabic", examKeys.every((k) => hasKey(arSrc, k)));
 check("all exam keys exist in English", examKeys.every((k) => hasKey(enSrc, k)));
 

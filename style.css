@@ -2,6 +2,101 @@
    منصة أمن المعلومات — الترم الحالي | stylesheet
    ============================================================ */
 
+/* ============================================================
+   SEMESTER DASHBOARD · calm overview redesign
+   Keeps the existing rendered markup, while giving students a clear
+   hierarchy: overview → course → quick actions → optional details.
+   ============================================================ */
+.semester-dashboard { --sem-card-radius: 20px; }
+.semester-dashboard .section-head { max-width: 780px; }
+.semester-dashboard .section-sub { max-width: 70ch; }
+
+.semester-summary { margin-bottom: 2rem; }
+.sem-sum {
+  position: relative;
+  overflow: hidden;
+  gap: 1.5rem 2.5rem;
+  padding: 1.35rem 1.5rem;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 34%),
+    var(--surface);
+  box-shadow: 0 18px 45px -32px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.sem-sum::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 4px;
+  background: var(--accent-2);
+}
+.sem-sum-main { min-width: 0; }
+.sem-sum-title { margin: 0; font-size: clamp(1.25rem, 2.5vw, 1.7rem); }
+.sem-sum-program { margin: .35rem 0 .55rem; font-size: .9rem; }
+.sem-sum-desc { max-width: 58ch; line-height: 1.7; }
+.sem-sum-stats { display: grid; grid-template-columns: repeat(2, minmax(6.8rem, 1fr)); gap: .65rem; }
+.sem-stat { min-width: 0; padding: .8rem .9rem; border-radius: 15px; background: var(--surface-2); }
+.sem-stat dt { font-size: .76rem; }
+.sem-stat dd { font-size: 1.65rem; }
+
+.semester-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+.sem-card {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--sem-card-radius);
+  background: var(--surface);
+  box-shadow: 0 14px 34px -28px color-mix(in srgb, var(--accent) 70%, transparent);
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.sem-card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 4px;
+  border-start-end-radius: 4px;
+  border-start-start-radius: 4px;
+  background: hsl(var(--hue) 75% 62%);
+}
+.sem-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, hsl(var(--hue) 75% 62%) 55%, var(--line)); box-shadow: 0 22px 42px -28px color-mix(in srgb, var(--accent) 75%, transparent); }
+.sem-card .work-card-inner { gap: 1rem; height: 100%; padding: 1.25rem; }
+.sem-card .work-thumb { width: 58px; height: 58px; border-radius: 15px; border: 1px solid var(--line); background: var(--surface-2); }
+.sem-card .work-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sem-body { gap: .8rem; }
+.sem-head { display: flex; flex-direction: column; gap: .35rem; }
+.sem-head h3 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.35rem); line-height: 1.45; }
+.sem-code { font-size: .72rem; opacity: .8; }
+.sem-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; }
+.sem-chip { display: flex; align-items: center; min-height: 2.2rem; padding: .35rem .65rem; font-size: .78rem; white-space: normal; }
+.sem-chip.is-sched { grid-column: 1 / -1; color: var(--muted); }
+.sem-desc { margin: 0; min-height: 3.3em; line-height: 1.7; }
+.sem-blocks { gap: .5rem; margin-top: auto; }
+.sem-details { border-radius: 12px; }
+.sem-details > summary { min-height: 42px; padding: .55rem .8rem; }
+.sem-material-list { padding: .4rem .6rem .65rem; }
+.sem-material-item a { min-height: 42px; }
+.sem-links { gap: .45rem; padding-top: .85rem; }
+.sem-links .path-chip { min-height: 38px; padding: .45rem .7rem; }
+
+@media (max-width: 760px) {
+  .semester-grid { grid-template-columns: 1fr; }
+  .sem-sum { align-items: stretch; padding: 1.15rem 1.1rem; }
+  .sem-sum-stats { grid-template-columns: repeat(2, 1fr); }
+  .sem-card .work-card-inner { padding: 1.05rem; }
+  .sem-desc { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sem-card { transition: none; }
+  .sem-card:hover { transform: none; }
+}
+
+/* ============================================================ */
+
 :root {
   /* MODULE 36 · dark educational palette (default) — WCAG AA (text ≥ 4.5:1 on cards)
      Deep soft slate canvas #0b0f19 · cards #111827 / #1e293b · text #f1f5f9 / #94a3b8.
