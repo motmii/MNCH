@@ -13,7 +13,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.22.11";
+const CACHE_VERSION = "v1.22.13";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
