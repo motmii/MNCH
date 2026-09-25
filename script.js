@@ -1677,6 +1677,54 @@ if (pointerFine && !prefersReducedMotion) {
     });
   }
 })();
+
+/* ============================================================
+   MODULE 10b · Nav "More" dropdown
+   Renders nothing: it only adds accessible open/close behaviour for
+   the compact top navigation (<details id="navMoreDetails">).
+   Closes on outside click, Escape, or choosing any link.
+   ============================================================ */
+(function initNavMore() {
+  const details = $id("navMoreDetails");
+  if (!details) return;
+  const summary = details.querySelector("summary");
+  if (!summary) return;
+
+  /** Reflect native open state for assistive tech. */
+  function sync() {
+    summary.setAttribute("aria-expanded", details.open ? "true" : "false");
+  }
+  sync();
+
+  details.addEventListener("toggle", sync);
+
+  /* Close on link click */
+  details.querySelectorAll("a").forEach((a) => {
+    a.addEventListener("click", () => {
+      details.open = false;
+      sync();
+    });
+  });
+
+  /* Close on click outside */
+  document.addEventListener("click", (e) => {
+    if (!details.open) return;
+    if (!details.contains(e.target)) {
+      details.open = false;
+      sync();
+    }
+  });
+
+  /* Close on Escape key */
+  details.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && details.open) {
+      details.open = false;
+      sync();
+      summary.focus({ preventScroll: true });
+    }
+  });
+})();
+
  
 /* ============================================================
    MODULES 11-12 · Tilt / Magnetic effects + Contact form
@@ -3364,6 +3412,7 @@ const Lang = (() => {
       "meta.title": "منصة أمن المعلومات — الترم الحالي",
       "meta.description": "منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال.",
       "a11y.skip": "تخطي إلى المحتوى الرئيسي",
+      "nav.more": "المزيد",
       "nav.home": "الرئيسية", "nav.semester": "الترم الحالي",
       "nav.paths": "مسارات التعلم", "nav.subjects": "المواد",
       "nav.skills": "شجرة المهارات",
@@ -3428,6 +3477,32 @@ const Lang = (() => {
       "dash.openPath": "افتح المسار",
       "dash.lastOpened": "آخر درس: {title}",
       "dash.continueLabel": "متابعة التعلم",
+      "dash.tabsAria": "أقسام لوحة الطالب",
+      "dash.tabToday": "اليوم",
+      "dash.tabPath": "مساري",
+      "dash.tabMotivation": "التحفيز",
+      "now.loading": "جارٍ تحديد موعد حصتك القادمة…",
+      "now.greetMorning": "صباح الخير 👋",
+      "now.greetEvening": "مساء الخير 👋",
+      "now.greetNight": "أهلاً بك 👋",
+      "now.nextClass": "حصتك القادمة: {name}",
+      "now.startsAt": "{day} الساعة {time}",
+      "now.chipNow": "الآن مباشر",
+      "now.chipToday": "اليوم",
+      "now.chipTomorrow": "غدًا",
+      "now.chipInDays": "بعد {n} أيام",
+      "now.noSchedule": "لا يوجد جدول دراسي متاح الآن.",
+      "next.title": "خطوتك التالية",
+      "next.dismiss": "إخفاء",
+      "next.resumeMeta": "أكملت {i} من {total} أسئلة في {sub}",
+      "next.resumeCta": "استئناف الاختبار",
+      "next.missedMeta": "لديك {n} أسئلة بحاجة إلى مراجعة",
+      "next.missedCta": "راجع الأخطاء",
+      "next.lessonMeta": "تابِع القراءة من: {title}",
+      "next.lessonCta": "متابعة الدرس",
+      "next.pathMeta": "أنجزت {pct}% من مسار {title}",
+      "next.pathCta": "متابعة المسار",
+      "next.lessonGeneric": "استأنف تعلمك وحقق أهدافك اليومية",
       /* Phase 2 · local motivation system */
       "motivation.kicker": "نظام التحفيز المحلي",
       "motivation.level": "المستوى",
@@ -3815,7 +3890,16 @@ const Lang = (() => {
       "search.group.tool": "الأدوات",
       "search.group.quiz": "الاختبارات",
       "search.group.flash": "البطاقات",
-      "search.group.term": "المصطلحات والشرح"
+      "search.group.term": "المصطلحات والشرح",
+      /* ---------- MODULE 58 · WhatsNew (زر التعجب 👍 + لوحة آخر التحديثات) ---------- */
+      "updates.title": "آخر التحديثات",
+      "updates.sub": "أحدث ما أُضيف إلى المنصة — من الأحدث إلى الأقدم",
+      "updates.empty": "لا توجد تحديثات لعرضها بعد.",
+      "updates.foot": "تُحدَّث هذه القائمة عند إضافة مزايا جديدة.",
+      "updates.tag.new": "جديد",
+      "updates.tag.improve": "تحسين",
+      "updates.tag.release": "إطلاق",
+      "updates.tag.fix": "إصلاح"
     },
     en: {
       "meta.title": "Information Security Platform — Current Semester",
@@ -3844,6 +3928,7 @@ const Lang = (() => {
 
       "semester.labs": "Related labs",
       "semester.missingData": "Current-semester data is not available right now.",
+      "nav.more": "More",
       "nav.home": "Home", "nav.semester": "Current Semester",
       "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
       "nav.skills": "Skill Tree",
@@ -3908,6 +3993,32 @@ const Lang = (() => {
       "dash.openPath": "Open path",
       "dash.lastOpened": "Last lesson: {title}",
       "dash.continueLabel": "Continue learning",
+      "dash.tabsAria": "Student dashboard sections",
+      "dash.tabToday": "Today",
+      "dash.tabPath": "My Path",
+      "dash.tabMotivation": "Motivation",
+      "now.loading": "Finding your next scheduled class…",
+      "now.greetMorning": "Good morning 👋",
+      "now.greetEvening": "Good evening 👋",
+      "now.greetNight": "Welcome 👋",
+      "now.nextClass": "Next class: {name}",
+      "now.startsAt": "{day} at {time}",
+      "now.chipNow": "LIVE NOW",
+      "now.chipToday": "Today",
+      "now.chipTomorrow": "Tomorrow",
+      "now.chipInDays": "In {n} days",
+      "now.noSchedule": "No scheduled classes at this moment.",
+      "next.title": "Your Next Step",
+      "next.dismiss": "Dismiss",
+      "next.resumeMeta": "Completed {i} of {total} questions in {sub}",
+      "next.resumeCta": "Resume Quiz",
+      "next.missedMeta": "You have {n} questions queued for review",
+      "next.missedCta": "Review Mistakes",
+      "next.lessonMeta": "Continue reading: {title}",
+      "next.lessonCta": "Continue Lesson",
+      "next.pathMeta": "Completed {pct}% of path {title}",
+      "next.pathCta": "Continue Path",
+      "next.lessonGeneric": "Pick up where you left off and hit your daily goals",
       /* Phase 2 · local motivation system */
       "motivation.kicker": "Local motivation",
       "motivation.level": "Level",
@@ -4269,7 +4380,16 @@ const Lang = (() => {
       "search.group.tool": "Tools",
       "search.group.quiz": "Quizzes",
       "search.group.flash": "Flashcards",
-      "search.group.term": "Glossary terms"
+      "search.group.term": "Glossary terms",
+      /* ---------- MODULE 58 · WhatsNew (navbar 👍 + latest updates) ---------- */
+      "updates.title": "Latest updates",
+      "updates.sub": "The newest additions to the platform, newest first",
+      "updates.empty": "No updates to show yet.",
+      "updates.foot": "This list refreshes whenever new features ship.",
+      "updates.tag.new": "New",
+      "updates.tag.improve": "Improved",
+      "updates.tag.release": "Release",
+      "updates.tag.fix": "Fix"
     },
   };
 
@@ -12245,3 +12365,686 @@ const LABS_META = {
 })();
 /* @@EXAM_PREP_END@@ */
 
+
+
+/* ============================================================
+   MODULE 55 · HeroNow — "الآن" في المنصة (شريط الترحيب والجدول)
+   ------------------------------------------------------------
+   Computes the next official class for the current semester
+   strictly from the schedule already published in
+   `current-semester.js` (subject.schedule).
+   - Zero network requests, zero personal data saved.
+   ============================================================ */
+(function initHeroNow() {
+  "use strict";
+
+  const strip = document.getElementById("heroNow");
+  const textEl = document.getElementById("heroNowText");
+  const chipEl = document.getElementById("heroNowChip");
+  if (!strip || !textEl) return;
+
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) {}
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) {}
+    return null;
+  }
+  const L10N = resolveLang();
+
+  function T(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+
+  function curLocale() { return (L10N && L10N.current) || "ar"; }
+
+  const DAY_MAP = {
+    "الأحد": 0, "Sunday": 0,
+    "الاثنين": 1, "الإثنين": 1, "Monday": 1,
+    "الثلاثاء": 2, "Tuesday": 2,
+    "الأربعاء": 3, "الاربعاء": 3, "Wednesday": 3,
+    "الخميس": 4, "Thursday": 4,
+    "الجمعة": 5, "Friday": 5,
+    "السبت": 6, "Saturday": 6
+  };
+
+  function parseTimeMinutes(str) {
+    if (!str || typeof str !== "string") return null;
+    const m = str.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (!m) return null;
+    let h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    const ampm = m[3] ? m[3].toUpperCase() : null;
+    if (ampm === "PM" && h < 12) h += 12;
+    if (ampm === "AM" && h === 12) h = 0;
+    return h * 60 + min;
+  }
+
+  function getScheduleList() {
+    const data = (typeof window !== "undefined" && window.PLATFORM_CURRENT_SEMESTER) || {};
+    const subjects = Array.isArray(data.subjects) ? data.subjects : [];
+    const list = [];
+    subjects.forEach((s) => {
+      const sch = (s && s.meta && s.meta.schedule) || (s && s.schedule) || null;
+      if (!sch) return;
+      const dayRaw = (sch.day && (sch.day.ar || sch.day.en)) || sch.day;
+      const dayIdx = DAY_MAP[dayRaw];
+      if (typeof dayIdx !== "number") return;
+      const startMin = parseTimeMinutes(sch.startTime);
+      const endMin = parseTimeMinutes(sch.endTime) || (startMin !== null ? startMin + 180 : null);
+      if (startMin === null) return;
+      list.push({
+        subject: s,
+        dayIdx: dayIdx,
+        startMin: startMin,
+        endMin: endMin,
+        dayLabel: (sch.day && (sch.day[curLocale()] || sch.day.ar || sch.day.en)) || dayRaw,
+        startTime: sch.startTime,
+        endTime: sch.endTime
+      });
+    });
+    return list;
+  }
+
+  function findNextClass(now) {
+    const list = getScheduleList();
+    if (!list.length) return null;
+    const curDay = now.getDay();
+    const curMin = now.getHours() * 60 + now.getMinutes();
+
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      if (item.dayIdx === curDay && curMin >= item.startMin && curMin < item.endMin) {
+        return { item: item, status: "ongoing", daysAway: 0 };
+      }
+    }
+
+    let candidates = [];
+    list.forEach((item) => {
+      let daysAway = (item.dayIdx - curDay + 7) % 7;
+      if (daysAway === 0 && item.startMin <= curMin) daysAway = 7;
+      const totalMinutesAway = daysAway * 1440 + (item.startMin - curMin);
+      candidates.push({ item: item, daysAway: daysAway, totalMin: totalMinutesAway });
+    });
+
+    candidates.sort((a, b) => a.totalMin - b.totalMin);
+    return candidates.length ? { item: candidates[0].item, status: "upcoming", daysAway: candidates[0].daysAway } : null;
+  }
+
+  function render() {
+    const now = new Date();
+    const h = now.getHours();
+    let greeting = T("now.greetEvening");
+    if (h >= 5 && h < 12) greeting = T("now.greetMorning");
+    else if (h >= 12 && h < 17) greeting = T("now.greetEvening");
+    else if (h >= 17 || h < 5) greeting = T("now.greetNight");
+
+    const found = findNextClass(now);
+    if (!found) {
+      textEl.textContent = greeting + " · " + (T("now.noSchedule") || "مرحبًا بك في منصة أمن المعلومات");
+      if (chipEl) chipEl.hidden = true;
+      return;
+    }
+
+    const s = found.item.subject;
+    const sName = (s.name && (s.name[curLocale()] || s.name.ar || s.name.en)) || s.id;
+    const startsAt = T("now.startsAt", { day: found.item.dayLabel, time: found.item.startTime });
+
+    textEl.textContent = greeting + " · " + T("now.nextClass", { name: sName }) + " (" + startsAt + ")";
+
+    if (chipEl) {
+      if (found.status === "ongoing") {
+        chipEl.textContent = T("now.chipNow");
+        chipEl.className = "hero-now-chip is-live";
+        chipEl.hidden = false;
+      } else if (found.daysAway === 0) {
+        chipEl.textContent = T("now.chipToday");
+        chipEl.className = "hero-now-chip is-today";
+        chipEl.hidden = false;
+      } else if (found.daysAway === 1) {
+        chipEl.textContent = T("now.chipTomorrow");
+        chipEl.className = "hero-now-chip";
+        chipEl.hidden = false;
+      } else {
+        chipEl.textContent = T("now.chipInDays", { n: found.daysAway });
+        chipEl.className = "hero-now-chip";
+        chipEl.hidden = false;
+      }
+    }
+  }
+
+  render();
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) {}
+  setInterval(render, 60000);
+
+  window.PlatformHeroNow = { findNextClass: findNextClass, parseTimeMinutes: parseTimeMinutes };
+})();
+
+
+/* ============================================================
+   MODULE 56 · HeroTabs — تبويبات لوحة الطالب (اليوم · مساري · التحفيز)
+   ------------------------------------------------------------
+   Keyboard accessible tablist: Left/Right (RTL aware), Home/End.
+   ============================================================ */
+(function initHeroTabs() {
+  "use strict";
+
+  const tabs = (typeof document.querySelectorAll === "function")
+    ? Array.from(document.querySelectorAll("#heroDashTabs [role='tab']"))
+    : [];
+  if (!tabs.length) return;
+
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) {}
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) {}
+    return null;
+  }
+  const L10N = resolveLang();
+
+  /* The i18n engine only translates text nodes, so the tablist's accessible
+     name (dash.tabsAria) is localized here — on boot and on every switch. */
+  const listEl = document.getElementById("heroDashTabs");
+  function syncLabel() {
+    if (!listEl || !L10N || typeof L10N.t !== "function") return;
+    let s = "";
+    try { s = L10N.t("dash.tabsAria"); } catch (e) { s = ""; }
+    if (s && s !== "dash.tabsAria") listEl.setAttribute("aria-label", s);
+  }
+  syncLabel();
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(syncLabel); } catch (e) {}
+
+  function activateTab(tab, focusTab) {
+    if (!tab) return;
+    tabs.forEach((t) => {
+      const isTarget = t === tab;
+      t.setAttribute("aria-selected", String(isTarget));
+      t.setAttribute("tabindex", isTarget ? "0" : "-1");
+      t.classList.toggle("is-active", isTarget);
+
+      const panelId = t.getAttribute("aria-controls");
+      const panel = panelId ? document.getElementById(panelId) : null;
+      if (panel) panel.hidden = !isTarget;
+    });
+    if (focusTab && typeof tab.focus === "function") tab.focus();
+  }
+
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener("click", () => activateTab(tab, false));
+    tab.addEventListener("keydown", (ev) => {
+      const isRtl = document.documentElement.dir !== "ltr";
+      let nextIdx = null;
+
+      if (ev.key === "ArrowRight") {
+        nextIdx = isRtl ? (idx - 1 + tabs.length) % tabs.length : (idx + 1) % tabs.length;
+      } else if (ev.key === "ArrowLeft") {
+        nextIdx = isRtl ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+      } else if (ev.key === "Home") {
+        nextIdx = 0;
+      } else if (ev.key === "End") {
+        nextIdx = tabs.length - 1;
+      }
+
+      if (nextIdx !== null) {
+        ev.preventDefault();
+        activateTab(tabs[nextIdx], true);
+      }
+    });
+  });
+
+  window.PlatformHeroTabs = { activateTab: activateTab };
+})();
+
+
+/* ============================================================
+   MODULE 57 · HeroAdaptiveNext — شريط الخطوة التالية التكيفي
+   ------------------------------------------------------------
+   Replaces the beginner "جديد هنا؟" strip for returning learners
+   who already have activity. Evaluates real local data in order:
+     1. Unfinished quiz session (resume)
+     2. Missed quiz questions (revision queue)
+     3. Last opened lesson
+     4. Current in-progress learning path
+   ============================================================ */
+(function initHeroAdaptiveNext() {
+  "use strict";
+
+  const nextBox = document.getElementById("heroNextAction");
+  const startBox = document.getElementById("heroStartHere");
+  const metaEl = document.getElementById("heroNextMeta");
+  const btnEl = document.getElementById("heroNextBtn");
+  const dismissBtn = document.getElementById("heroNextDismiss");
+  if (!nextBox || !startBox) return;
+
+  let dismissed = false;
+
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) {}
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) {}
+    return null;
+  }
+  const L10N = resolveLang();
+
+  function T(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+
+  function storeGet(key) {
+    try {
+      const S = window.PLATFORM_STORE;
+      if (S && typeof S.get === "function") return S.get(key, null);
+    } catch (e) {}
+    try { const raw = localStorage.getItem("motmi-portal:" + key); return raw ? JSON.parse(raw) : null; } catch (e2) { return null; }
+  }
+
+  function banks() {
+    try { return (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {}; } catch (e) { return {}; }
+  }
+
+  function bankName(key) {
+    try {
+      const reg = window.PLATFORM_SUBJECTS;
+      if (Array.isArray(reg)) {
+        const s = reg.find((x) => x && (x.quizKey === key || x.id === key));
+        if (s) {
+          const en = (s.nameEn && L10N && L10N.current === "en") ? s.nameEn : "";
+          return en || s.nameAr || key;
+        }
+      }
+    } catch (e) {}
+    const b = banks()[key];
+    return (b && b.name) || key;
+  }
+
+
+  function determineNextAction() {
+    const qb = banks();
+    const quizStore = (function () {
+      try { return (typeof window.readStore === "function") ? (window.readStore() || {}) : {}; } catch (e) { return {}; }
+    })();
+    const progress = quizStore.progress || {};
+    const results = quizStore.results || {};
+
+    const resumeKeys = Object.keys(progress).filter((k) => {
+      const p = progress[k];
+      return qb[k] && p && typeof p.idx === "number" && p.idx > 0 && p.idx < (qb[k].questions || []).length;
+    });
+    if (resumeKeys.length) {
+      const k = resumeKeys[0];
+      const p = progress[k];
+      const total = (qb[k].questions || []).length;
+      return {
+        type: "resume",
+        sub: k,
+        meta: T("next.resumeMeta", { i: (p.idx || 0) + 1, total: total, sub: bankName(k) }),
+        cta: T("next.resumeCta"),
+        href: "#quiz"
+      };
+    }
+
+    const missed = storeGet("missed");
+    const missedKeys = missed && typeof missed === "object" ? Object.keys(missed) : [];
+    if (missedKeys.length > 0) {
+      return {
+        type: "missed",
+        meta: T("next.missedMeta", { n: missedKeys.length }),
+        cta: T("next.missedCta"),
+        href: "#progress"
+      };
+    }
+
+    const lessonsStore = storeGet("lessons");
+    const last = lessonsStore && lessonsStore.last ? lessonsStore.last : null;
+    if (last && last.sub && last.topic) {
+      return {
+        type: "lesson",
+        meta: T("next.lessonMeta", { title: last.topic }),
+        cta: T("next.lessonCta"),
+        href: "#lesson/" + last.sub + "/" + last.topic
+      };
+    }
+
+    const paths = (typeof window.getLearningPaths === "function") ? (window.getLearningPaths() || []) : [];
+    let inProgressPath = null;
+    for (let i = 0; i < paths.length; i++) {
+      const p = paths[i];
+      if (!p || p.status === "soon") continue;
+      const count = Array.isArray(p.topics) ? p.topics.length : 0;
+      if (!count) continue;
+      let done = 0;
+      p.topics.forEach((t) => {
+        if (!t) return;
+        if (t.quiz && results[t.quiz]) done++;
+      });
+      if (done > 0 && done < count) {
+        const pct = Math.round((done / count) * 100);
+        inProgressPath = { path: p, pct: pct };
+        break;
+      }
+    }
+    if (inProgressPath) {
+      const pTitle = (inProgressPath.path.title && (inProgressPath.path.title[L10N ? L10N.current : "ar"] || inProgressPath.path.title.ar)) || inProgressPath.path.id;
+      return {
+        type: "path",
+        meta: T("next.pathMeta", { pct: inProgressPath.pct, title: pTitle }),
+        cta: T("next.pathCta"),
+        href: "#path/" + inProgressPath.path.id
+      };
+    }
+
+    const hasAnyActivity = Object.keys(results).some((k) => qb[k]) ||
+      (lessonsStore && lessonsStore.done && Object.keys(lessonsStore.done).length > 0);
+    if (hasAnyActivity) {
+      return {
+        type: "general",
+        meta: T("next.lessonGeneric"),
+        cta: T("dash.continue"),
+        href: "#paths"
+      };
+    }
+
+    return null;
+  }
+
+
+
+  function render() {
+    if (dismissed) {
+      nextBox.hidden = true;
+      return;
+    }
+    const next = determineNextAction();
+    if (!next) {
+      nextBox.hidden = true;
+      startBox.hidden = false;
+      return;
+    }
+
+    startBox.hidden = true;
+    nextBox.hidden = false;
+    if (metaEl) metaEl.textContent = next.meta;
+    if (btnEl) {
+      btnEl.textContent = next.cta;
+      btnEl.setAttribute("href", next.href);
+      btnEl.dataset.nextType = next.type;
+      if (next.sub) btnEl.dataset.nextSub = next.sub;
+    }
+  }
+
+  if (btnEl) {
+    btnEl.addEventListener("click", (ev) => {
+      const t = btnEl.dataset.nextType;
+      if (t === "resume") {
+        ev.preventDefault();
+        const sub = btnEl.dataset.nextSub;
+        if (window.NovaViews && typeof window.NovaViews.activate === "function") window.NovaViews.activate("quiz");
+        const start = (typeof window.startQuiz === "function") ? window.startQuiz : null;
+        if (typeof start === "function" && sub) start(sub, true);
+      }
+    });
+  }
+
+  if (dismissBtn) {
+    dismissBtn.addEventListener("click", () => {
+      dismissed = true;
+      nextBox.hidden = true;
+      startBox.hidden = false;
+    });
+  }
+
+  document.addEventListener("nova:progress-changed", render);
+  document.addEventListener("nova:view-changed", render);
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) {}
+
+  render();
+
+  window.PlatformAdaptiveNext = { determineNextAction: determineNextAction };
+})();
+
+/* ============================================================
+   MODULE 58 · WhatsNew — زر التعجب (👍) + لوحة «آخر التحديثات»
+   ------------------------------------------------------------
+   Navbar trigger (the slot right after the links, in the red
+   box) that opens a dated changelog popover.
+   - UPDATES is the single source of truth: every entry is
+     bilingual (ar + en) with a real ISO date, and the list is
+     sorted NEWEST FIRST at render time.
+   - Fully local: no network, no accounts, no tracking. The
+     unread dot reads and writes the shared Store key
+     "whatsnew-seen".
+   - A11y: aria-expanded and aria-controls on the trigger,
+     dialog semantics on the panel, Escape and outside clicks
+     close it and focus returns to the trigger.
+   - Re-renders on Lang.onSwitch so the list follows AR/EN.
+   ============================================================ */
+(function initWhatsNew() {
+  "use strict";
+
+  var wrap = document.getElementById("navUpdates");
+  var btn = document.getElementById("updatesBtn");
+  var panel = document.getElementById("updatesPanel");
+  var list = document.getElementById("updatesList");
+  var closeBtn = document.getElementById("updatesClose");
+  var dot = document.getElementById("updatesDot");
+  var emptyEl = document.getElementById("updatesEmpty");
+
+  /* Defensive boot: test VMs run this file with partial DOM stubs,
+     so a missing node or method must never break the page. */
+  if (!wrap || !btn || !panel || !list) return;
+  if (typeof document.createElement !== "function") return;
+  if (typeof btn.addEventListener !== "function") return;
+  /* ---------- changelog data: single source of truth ---------- */
+  var UPDATES = [
+    {
+      date: "2026-09-24",
+      tag: "new",
+      title: { ar: "بنوك أسئلة الترم الحالي كاملة", en: "Full current-semester question banks" },
+      desc: {
+        ar: "200 سؤال تدريبي موزّعة بالتساوي على مواد الترم الخمس (40 لكل مادة) مع شرح لكل إجابة، ووضع تدريب وامتحان موقوت.",
+        en: "200 practice questions split evenly across the five current subjects (40 each), an explanation for every answer, plus practice and timed-exam modes."
+      }
+    },
+    {
+      date: "2026-09-24",
+      tag: "new",
+      title: { ar: "ملفات المواد الدراسية (PDF)", en: "Course material files (PDF)" },
+      desc: {
+        ar: "27 ملفًا موزّعة على مواد الترم الخمس: فصول تجميعية وملخّصات قابلة للتحميل من صفحة كل مادة.",
+        en: "27 files across the five subjects: compiled chapters and summaries, downloadable from each subject page."
+      }
+    },    {
+      date: "2026-09-21",
+      tag: "release",
+      title: { ar: "المنصة مفتوحة المصدر", en: "The platform is open source" },
+      desc: {
+        ar: "أُعيد نشر المنصة برخصة MIT مع دليل مساهمة واضح للمحتوى ثنائي اللغة.",
+        en: "The platform was re-released under the MIT licence with a clear bilingual content contribution guide."
+      }
+    },
+    {
+      date: "2026-09-16",
+      tag: "new",
+      title: { ar: "لوحة الترم الحالي", en: "Current-semester dashboard" },
+      desc: {
+        ar: "خطة الترم كاملة: رمز المقرر، الساعات المعتمدة، الجدول الأسبوعي، مخرجات التعلم، ووصول مباشر للاختبارات والأدوات والمعامل.",
+        en: "The full semester plan: course codes, credit hours, weekly schedule, learning outcomes, and direct links to quizzes, tools and labs."
+      }
+    },    {
+      date: "2026-09-16",
+      tag: "improve",
+      title: { ar: "عمل أكثر استقرارًا دون إنترنت", en: "More stable offline mode" },
+      desc: {
+        ar: "إصلاح مسارات التخزين المؤقت وتحديث نسخة ملف الخدمة لضمان عمل المنصة كاملة دون اتصال.",
+        en: "Cache-path fixes and a service-worker version bump so the whole platform keeps working without a connection."
+      }
+    },
+    {
+      date: "2026-08-31",
+      tag: "release",
+      title: { ar: "إطلاق المنصة", en: "Platform launch" },
+      desc: {
+        ar: "12 أداة أمنية، 4 معامل محاكاة، 10 مسارات تعلم، 18 بطاقة مصطلحات، اختبارات تفاعلية ومساعد ذكي — كلها داخل المتصفح.",
+        en: "12 security tools, 4 simulation labs, 10 learning paths, 18 flashcards, interactive quizzes and an AI assistant, all inside your browser."
+      }
+    }
+  ];
+
+  /** Newest first — ISO dates compare lexicographically. */
+  function byDateDesc(a, b) {
+    var da = (a && a.date) ? a.date : "";
+    var db = (b && b.date) ? b.date : "";
+    if (da === db) return 0;
+    return da < db ? 1 : -1;
+  }
+
+  var LATEST = (function () {
+    var sorted = UPDATES.slice().sort(byDateDesc);
+    return sorted.length ? sorted[0].date : "";
+  })();
+  /* ---------- locale helpers (Lang lives above in this file) ---------- */
+  function locale() {
+    try { if (typeof Lang !== "undefined" && Lang && Lang.current) return Lang.current; } catch (e) {}
+    return "ar";
+  }
+  function tr(key) {
+    try { if (typeof Lang !== "undefined" && Lang && typeof Lang.t === "function") return Lang.t(key); } catch (e) {}
+    return key;
+  }
+  function fmtDate(iso) {
+    var raw = String(iso || "");
+    try {
+      var d = new Date(raw + "T00:00:00");
+      if (isNaN(d.getTime())) return raw;
+      var loc = locale() === "en" ? "en-GB" : "ar-EG";
+      return new Intl.DateTimeFormat(loc, { year: "numeric", month: "long", day: "numeric" }).format(d);
+    } catch (e) { return raw; }
+  }
+  function pick(bilingual) {
+    if (!bilingual) return "";
+    return bilingual[locale()] || bilingual.ar || bilingual.en || "";
+  }
+
+  /* ---------- local store bridge (same contract as MODULE 57) ---------- */
+  function storeGet(key) {
+    try {
+      var S = window.PLATFORM_STORE;
+      if (S && typeof S.get === "function") return S.get(key, null);
+    } catch (e) {}
+    try { var raw = localStorage.getItem("motmi-portal:" + key); return raw ? JSON.parse(raw) : null; } catch (e2) { return null; }
+  }
+  function storeSet(key, value) {
+    try {
+      var S = window.PLATFORM_STORE;
+      if (S && typeof S.set === "function") { S.set(key, value); return; }
+    } catch (e) {}
+    try { localStorage.setItem("motmi-portal:" + key, JSON.stringify(value)); } catch (e2) {}
+  }
+  function refreshDot() {
+    if (!dot) return;
+    dot.hidden = !(LATEST && storeGet("whatsnew-seen") !== LATEST);
+  }
+  function markSeen() {
+    if (!LATEST) return;
+    storeSet("whatsnew-seen", LATEST);
+    if (dot) dot.hidden = true;
+  }
+  /* ---------- render (newest first) ---------- */
+  function render() {
+    try {
+      while (list.firstChild) list.removeChild(list.firstChild);
+      var items = UPDATES.slice().sort(byDateDesc);
+      if (!items.length) { if (emptyEl) emptyEl.hidden = false; return; }
+      if (emptyEl) emptyEl.hidden = true;
+      items.forEach(function (u) {
+        if (!u) return;
+        var li = document.createElement("li");
+        li.className = "updates-item";
+        li.setAttribute("data-tag", u.tag || "update");
+
+        var top = document.createElement("div");
+        top.className = "updates-item-top";
+
+        var tagEl = document.createElement("span");
+        tagEl.className = "updates-tag";
+        var tagKey = "updates.tag." + (u.tag || "new");
+        var tagLabel = tr(tagKey);
+        tagEl.textContent = (tagLabel === tagKey) ? (u.tag || "new") : tagLabel;
+
+        var timeEl = document.createElement("time");
+        timeEl.className = "updates-date";
+        timeEl.setAttribute("datetime", u.date || "");
+        timeEl.textContent = fmtDate(u.date);
+
+        top.appendChild(tagEl);
+        top.appendChild(timeEl);
+
+        var heading = document.createElement("h4");
+        heading.className = "updates-item-title";
+        heading.textContent = pick(u.title);
+
+        var body = document.createElement("p");
+        body.className = "updates-item-desc";
+        body.textContent = pick(u.desc);
+
+        li.appendChild(top);
+        li.appendChild(heading);
+        li.appendChild(body);
+        list.appendChild(li);
+      });
+    } catch (e) { /* rendering must never break the page */ }
+  }
+  /* ---------- open / close ---------- */
+  function setOpen(open) {
+    panel.hidden = !open;
+    if (typeof btn.setAttribute === "function") btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      markSeen();
+      try { if (closeBtn) closeBtn.focus({ preventScroll: true }); }
+      catch (e) { try { if (closeBtn && closeBtn.focus) closeBtn.focus(); } catch (e2) {} }
+    }
+  }
+
+  btn.addEventListener("click", function () { setOpen(panel.hidden === true); });
+
+  if (closeBtn && typeof closeBtn.addEventListener === "function") {
+    closeBtn.addEventListener("click", function () {
+      setOpen(false);
+      try { btn.focus({ preventScroll: true }); } catch (e) { try { btn.focus(); } catch (e2) {} }
+    });
+  }
+
+  document.addEventListener("click", function (ev) {
+    if (panel.hidden !== false) return;
+    var target = ev && ev.target;
+    if (!target) return;
+    try { if (wrap.contains && !wrap.contains(target)) setOpen(false); } catch (e) {}
+  });
+
+  document.addEventListener("keydown", function (ev) {
+    if (panel.hidden !== false) return;
+    if (ev && ev.key === "Escape") {
+      setOpen(false);
+      try { btn.focus({ preventScroll: true }); } catch (e) { try { btn.focus(); } catch (e2) {} }
+    }
+  });
+
+  document.addEventListener("nova:view-changed", function () { if (panel.hidden === false) setOpen(false); });
+  try {
+    if (typeof Lang !== "undefined" && Lang && typeof Lang.onSwitch === "function") {
+      Lang.onSwitch(function () { render(); });
+    }
+  } catch (e) {}
+
+  render();
+  refreshDot();
+
+  if (typeof window !== "undefined") {
+    window.PlatformWhatsNew = {
+      updates: UPDATES,
+      newestFirst: function () { return UPDATES.slice().sort(byDateDesc); },
+      open: function () { setOpen(true); },
+      close: function () { setOpen(false); }
+    };
+  }
+})();

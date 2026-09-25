@@ -46,6 +46,9 @@ A responsive, dark-themed cybersecurity education platform for Information Secur
 - **Revision queue (MODULE 52)** — a transparent review queue built from the questions you actually missed; no timers, no notifications, quiz engine untouched.
 - **Exam preparation (MODULE 53)** — optional exam date with a day-granular countdown, daily study recommendations, honest per-subject readiness (0.5·quiz + 0.3·lesson coverage + 0.2·mistake-free, with disclosed weight redistribution for subjects without lessons), an untimed practice-exam deck sampled from the real question banks, and weak-topic review links. All data stays in local storage.
 
+### What's New (MODULE 58)
+- **Navbar 👍 button** — sits next to «المزيد» and opens a dated **«آخر التحديثات»** popover: the platform changelog sorted newest-first, bilingual (AR/EN), with a locally-stored unread dot. No network, no accounts — everything stays on the device.
+
 ### Cyber Tools Suite (6 cybersecurity tools)
 | Tool | Description |
 |------|-------------|
