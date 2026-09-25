@@ -4412,6 +4412,72 @@ html[dir="ltr"] .sem-details[open] > summary::before { transform: rotate(-90deg)
 }
 .hero-meta--compact .hero-stat strong { font-size: 1.35rem; }
 .hero-meta--compact .hero-stat span { font-size: 0.8rem; }
+/* ---------- Hero "Now" live strip (MODULE 55) ---------- */
+.hero-now {
+  width: min(100%, 820px);
+  margin: 0 auto 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.4);
+  font-size: 0.88rem;
+}
+.hero-now-ico { font-size: 1.1rem; flex: 0 0 auto; }
+.hero-now-text { flex: 1 1 auto; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hero-now-chip {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 99px;
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+.hero-now-chip.is-live {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.35);
+  animation: pulse-dot 1.8s infinite;
+}
+.hero-now-chip.is-today {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ---------- Hero adaptive next step (MODULE 57) ---------- */
+.hero-next {
+  background: var(--wash-accent2);
+  border-color: rgba(139, 92, 246, 0.35);
+}
+.hero-next #heroNextMeta { color: var(--muted); font-size: 0.85rem; line-height: 1.55; }
+.hero-next #heroNextBtn { font-weight: 800; }
+
+/* Mobile: keep the Now strip readable (single ellipsized line + chip) */
+@media (max-width: 560px) {
+  .hero-now { font-size: 0.8rem; padding: 0.5rem 0.75rem; gap: 0.5rem; }
+  .hero-now-text { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .hero-tabs { flex-wrap: wrap; }
+  .hero-start { flex-wrap: wrap; }
+  .hero-start-actions { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-now-chip.is-live { animation: none; }
+  .hero-dash-bar > i,
+  .hero-dash-bar.is-path > i,
+  .hero-dash-bar.is-xp > i { transition: none; }
+}
+
+
 /* ---------- Hero "Start Here" strip (new users) ---------- */
 .hero-start {
   width: min(100%, 760px);
@@ -4493,11 +4559,67 @@ html[dir="ltr"] .sem-details[open] > summary::before { transform: rotate(-90deg)
   border: 1px solid var(--line);
   border-radius: var(--radius);
 }
+.hero-dash-tabs,
+.hero-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.4rem;
+}
+.hero-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.hero-tab:hover {
+  color: var(--text);
+  background: var(--wash-neutral);
+}
+.hero-tab.is-active,
+.hero-tab[aria-selected="true"] {
+  color: var(--text);
+  background: var(--surface-2);
+  border-color: var(--line);
+  box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.4);
+}
+.hero-tab-ico { font-size: 1rem; }
+.hero-panel { outline: none; }
+.hero-panel[hidden] { display: none; }
+
 .hero-dash-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
   margin-top: 0.9rem;
+}
+.hero-dash-grid.is-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.hero-dash-grid.is-1 {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 860px) {
+  .hero-dash-grid,
+  .hero-dash-grid.is-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .hero-dash-grid,
+  .hero-dash-grid.is-3 {
+    grid-template-columns: 1fr;
+  }
 }
 .hero-dash-cell {
   display: grid;
@@ -5602,3 +5724,291 @@ body.search-open { overflow: hidden; }
 .q-actions .btn-primary { margin-inline-start: auto; }
 @media (max-width: 560px) { .q-option { min-height: 3.9rem; padding: .75rem; } .q-option-key { width: 1.9rem; height: 1.9rem; } }
 
+
+/* ============================================================
+   Compact top navigation · "More" dropdown
+   Keeps the primary 6 destinations visible and moves secondary
+   sections (semester, skills, labs, flashcards, about, contact)
+   behind one accessible summary — same design tokens, RTL-safe.
+   ============================================================ */
+.nav-links .nav-more { position: relative; }
+.nav-more-details > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+.nav-more-details > summary::-webkit-details-marker { display: none; }
+.nav-more-details > summary::after {
+  content: "▾";
+  font-size: 0.68rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+.nav-more-details[open] > summary::after { transform: rotate(180deg); }
+.nav-more-details > summary:hover,
+.nav-more-details[open] > summary { color: var(--text); }
+
+.nav-more-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + 1.1rem);
+  min-width: 12.5rem;
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.45rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 24px 48px -28px rgba(7, 7, 13, 0.7);
+  z-index: 1200;
+}
+.nav-more-menu a {
+  display: block;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.nav-more-menu a:hover,
+.nav-more-menu a:focus-visible {
+  color: var(--text);
+  background: var(--wash-neutral);
+}
+.nav-more-menu a::after { content: none; }
+
+/* Match the transparent / scrolled navbar states used elsewhere. */
+.nav:not(.is-scrolled) .nav-more-details > summary { color: #f5f6fa; }
+.nav.is-scrolled .nav-more-details > summary { color: var(--text); }
+
+@media (max-width: 1320px) {
+  .nav-more-details > summary { font-size: 0.86rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-more-details > summary,
+  .nav-more-details > summary::after { transition: none; }
+}
+
+
+/* ============================================================
+   Navbar balance pass · grouped logo + links vs. grouped actions
+   Earlier the 5 direct children of .nav-inner were spread apart by
+   space-between, which made the menu look scattered. Grouping fixes
+   the rhythm without changing any link or behaviour.
+   ============================================================ */
+.nav-inner { gap: 1rem; }
+.nav-main {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.1rem, 2vw, 2.2rem);
+  min-width: 0;
+}
+.nav-links { gap: 1.35rem; }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-inline-start: auto;
+  padding-inline-start: 0.55rem;
+  border-inline-start: 1px solid var(--line);
+}
+.nav:not(.is-scrolled) .nav-actions { border-inline-start-color: rgba(255, 255, 255, 0.22); }
+
+/* Precise CSS chevron instead of the small “▾” text glyph. */
+.nav-more-details > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.2s ease;
+}
+.nav-more-details[open] > summary::after { transform: rotate(-135deg); }
+
+@media (max-width: 1320px) {
+  .nav-main { gap: 1rem; }
+  .nav-links { gap: 0.85rem; }
+  .nav-actions { gap: 0.4rem; }
+}
+@media (max-width: 1180px) {
+  .nav-actions { border-inline-start: 0; padding-inline-start: 0; }
+}
+
+
+/* ============================================================
+   MODULE 58 · WhatsNew — زر التعجب (👍) في الشريط العلوي
+   The trigger sits in the navbar slot after the links (the red
+   box). The panel opens under it: RTL-safe logical properties,
+   design tokens, reduced-motion guard, mobile sheet.
+   ============================================================ */
+.nav-updates { position: relative; display: flex; align-items: center; }
+.updates-toggle {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.updates-toggle:hover {
+  background: var(--wash-neutral);
+  border-color: var(--line);
+  color: var(--accent-3);
+}
+.updates-toggle:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+.updates-toggle[aria-expanded="true"] {
+  color: var(--accent-3);
+  background: rgba(244, 114, 182, 0.1);
+  border-color: rgba(244, 114, 182, 0.45);
+}
+.updates-ico { display: block; }
+.updates-dot {
+  position: absolute;
+  top: 7px;
+  inset-inline-end: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-3);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.updates-dot[hidden] { display: none; }
+/* ---------- «آخر التحديثات» popover ---------- */
+.updates-panel {
+  position: absolute;
+  top: calc(100% + 0.9rem);
+  inset-inline-start: 0;
+  width: min(23rem, calc(100vw - 2rem));
+  max-height: min(70vh, 32rem);
+  overflow-y: auto;
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.95rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 28px 60px -30px rgba(7, 7, 13, 0.85);
+  z-index: 1300;
+}
+.updates-panel[hidden] { display: none; }
+.updates-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.updates-head-text { min-width: 0; }
+.updates-head h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  color: var(--text);
+}
+.updates-sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.updates-close {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.updates-close:hover { background: var(--wash-neutral); color: var(--text); border-color: var(--line); }
+.updates-close:focus-visible { outline: 2px solid var(--accent-3); outline-offset: 2px; }
+.updates-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.updates-item {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.updates-item[data-tag="new"] {
+  border-inline-start-color: var(--accent-3);
+  background: rgba(244, 114, 182, 0.06);
+}
+.updates-item[data-tag="improve"] {
+  border-inline-start-color: var(--accent-2);
+  background: rgba(34, 211, 238, 0.05);
+}
+.updates-item[data-tag="release"] { border-inline-start-color: var(--accent); }
+.updates-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+.updates-tag {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.08rem 0.5rem;
+  border-radius: 999px;
+  color: var(--accent-3);
+  background: rgba(244, 114, 182, 0.14);
+}
+.updates-item[data-tag="improve"] .updates-tag { color: var(--accent-2); background: rgba(34, 211, 238, 0.12); }
+.updates-item[data-tag="release"] .updates-tag { color: var(--accent); background: rgba(139, 92, 246, 0.16); }
+.updates-date { font-size: 0.7rem; color: var(--dim); white-space: nowrap; }
+.updates-item-title {
+  margin: 0 0 0.15rem;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.updates-item-desc { margin: 0; font-size: 0.8rem; line-height: 1.7; color: var(--muted); }
+.updates-empty,
+.updates-foot {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--dim);
+  text-align: center;
+}
+.updates-empty[hidden] { display: none; }
+/* Mobile: the popover becomes a top sheet under the navbar. */
+@media (max-width: 700px) {
+  .updates-panel {
+    position: fixed;
+    top: 74px;
+    inset-inline: 4%;
+    width: auto;
+    max-height: 70vh;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .updates-toggle,
+  .updates-close { transition: none; }
+}
+/* END MODULE 58 · WhatsNew */

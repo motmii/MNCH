@@ -36,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.22.13" />
+  <link rel="stylesheet" href="style.css?v=1.22.16" />
   <link rel="manifest" href="manifest.json" />
   <script>
     /* MODULE 36 · pre-paint theme restore — runs before first paint (no FOUC).
@@ -86,51 +86,87 @@
 
   <nav class="nav" id="nav">
     <div class="nav-inner">
-      <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">منصة<span class="logo-dot">.</span></a>
-      <ul class="nav-links">
-        <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
-        <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
-        <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
-        <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
-        <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
-        <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
-        <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
-        <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
-        <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
-        <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
-        <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
-        <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
-      </ul>
-      <button type="button" id="searchOpenBtn" class="search-toggle" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="بحث في المنصة / Search the platform" title="بحث — / أو Ctrl+K">
-        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-      </button>
-      <button id="langToggle" class="lang-toggle" type="button" aria-pressed="true" aria-label="تغيير اللغة / Switch language" title="English">
-        <span class="lang-current" aria-hidden="true">EN</span>
-      </button>
-      <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="الوضع الفاتح / Light mode" title="الوضع الفاتح / Light mode">
-        <span class="theme-ico" aria-hidden="true">
-          <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6"/></svg>
-          <svg class="ico-moon" viewBox="0 0 24 24"><path d="M20.8 13.2A8.5 8.5 0 1 1 10.8 3.2a6.8 6.8 0 0 0 10 10z"/></svg>
-        </span>
-      </button>
-      <button type="button" class="nav-burger" id="navBurger" aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobileMenu">
-        <span></span><span></span>
-      </button>
+      <div class="nav-main">
+        <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">منصة<span class="logo-dot">.</span></a>
+        <ul class="nav-links">
+          <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
+          <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
+          <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+          <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
+          <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+          <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
+          <li class="nav-more">
+            <details class="nav-more-details" id="navMoreDetails">
+              <summary data-i18n="nav.more">المزيد</summary>
+              <ul class="nav-more-menu">
+                <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
+                <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
+                <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
+                <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
+                <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
+                <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
+              </ul>
+            </details>
+          </li>
+        </ul>
+
+        <!-- MODULE 58 · WhatsNew — زر التعجب (👍) داخل المربع الأحمر بجانب «المزيد» -->
+        <!-- يفتح لوحة «آخر التحديثات»: قائمة مرتّبة من الأحدث إلى الأقدم (AR + EN). -->
+        <div class="nav-updates" id="navUpdates">
+          <button type="button" id="updatesBtn" class="updates-toggle" aria-haspopup="dialog" aria-expanded="false" aria-controls="updatesPanel" aria-label="آخر التحديثات / Latest updates" title="آخر التحديثات / Latest updates">
+            <svg class="updates-ico" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            <span class="updates-dot" id="updatesDot" aria-hidden="true" hidden></span>
+          </button>
+
+          <div class="updates-panel" id="updatesPanel" role="dialog" aria-labelledby="updatesTitle" aria-describedby="updatesSub" hidden>
+            <div class="updates-head">
+              <div class="updates-head-text">
+                <h3 id="updatesTitle" data-i18n="updates.title">آخر التحديثات</h3>
+                <p class="updates-sub" id="updatesSub" data-i18n="updates.sub">أحدث ما أُضيف إلى المنصة — من الأحدث إلى الأقدم</p>
+              </div>
+              <button type="button" class="updates-close" id="updatesClose" aria-label="إغلاق / Close" title="إغلاق / Close">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <ol class="updates-list" id="updatesList"></ol>
+            <p class="updates-empty" id="updatesEmpty" data-i18n="updates.empty" hidden>لا توجد تحديثات لعرضها بعد.</p>
+            <p class="updates-foot" data-i18n="updates.foot">تُحدَّث هذه القائمة عند إضافة مزايا جديدة.</p>
+          </div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <button type="button" id="searchOpenBtn" class="search-toggle" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="بحث في المنصة / Search the platform" title="بحث — / أو Ctrl+K">
+          <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button id="langToggle" class="lang-toggle" type="button" aria-pressed="true" aria-label="تغيير اللغة / Switch language" title="English">
+          <span class="lang-current" aria-hidden="true">EN</span>
+        </button>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="الوضع الفاتح / Light mode" title="الوضع الفاتح / Light mode">
+          <span class="theme-ico" aria-hidden="true">
+            <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6"/></svg>
+            <svg class="ico-moon" viewBox="0 0 24 24"><path d="M20.8 13.2A8.5 8.5 0 1 1 10.8 3.2a6.8 6.8 0 0 0 10 10z"/></svg>
+          </span>
+        </button>
+        <button type="button" class="nav-burger" id="navBurger" aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobileMenu">
+          <span></span><span></span>
+        </button>
+      </div>
     </div>
   </nav>
 
   <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="القائمة" aria-hidden="true" inert>
     <ul>
       <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
-      <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
-      <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
-      <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
       <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
       <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+      <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
       <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+      <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
+      <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
+      <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
       <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
       <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
-      <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
       <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
       <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
     </ul>
@@ -234,6 +270,17 @@
       <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
 
       <div class="hero-content">
+        <!-- "Now" strip (MODULE 55). A slim, honest line: a time-of-day
+             greeting plus the NEXT real class, computed locally from the
+             official timetable already published in current-semester.js
+             (subject.schedule). No network, no stored personal data, and
+             when no timetable exists the strip says so instead of guessing. -->
+        <div class="hero-now reveal" id="heroNow" role="status">
+          <span class="hero-now-ico" aria-hidden="true">🗓</span>
+          <span class="hero-now-text" id="heroNowText" data-i18n="now.loading">جارٍ تحديد موعد حصتك القادمة…</span>
+          <span class="hero-now-chip" id="heroNowChip" hidden></span>
+        </div>
+
         <!-- Platform identity — clear name in Arabic & English + short description -->
         <div class="hero-brand reveal" aria-label="اسم المنصة بالعربية والإنجليزية">
           <strong class="hero-brand-ar">منصة أمن المعلومات</strong>
@@ -266,6 +313,27 @@
           </div>
         </div>
 
+        <!-- Adaptive next step (MODULE 57). For students who already have
+             real saved progress this strip replaces the "new here?" strip
+             and offers the SINGLE most useful next action, derived only
+             from local state: an unfinished quiz session → missed
+             questions → the last opened lesson → a path in progress.
+             Both strip buttons are document-delegated, so the replay
+             controls keep working from here. -->
+        <div class="hero-start hero-next reveal" id="heroNextAction" hidden>
+          <span class="hero-start-ico" aria-hidden="true">⚡</span>
+          <div class="hero-start-text">
+            <strong id="heroNextTitle" data-i18n="next.title">خطوتك التالية</strong>
+            <span id="heroNextMeta" aria-live="polite">—</span>
+          </div>
+          <div class="hero-start-actions">
+            <a href="#quiz" class="btn btn-primary btn-sm" id="heroNextBtn">ابدأ</a>
+            <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="heroNextDismiss" data-i18n="next.dismiss">إخفاء</button>
+          </div>
+        </div>
+
         <!-- Student command center (MODULE 47). Always visible on the homepage:
              welcome, overall progress, current path, next learning step,
              unfinished work, and a Continue-Learning shortcut. JS fills it in
@@ -284,40 +352,68 @@
             </div>
           </div>
 
-          <div class="hero-dash-grid">
-            <article class="hero-dash-cell hero-dash-panel">
-              <span class="hero-dash-label" data-i18n="dash.currentPath">المسار الحالي</span>
-              <strong class="hero-dash-value is-text" id="heroDashPath">—</strong>
-              <p class="hero-dash-meta" id="heroDashPathMeta">—</p>
-              <div class="hero-dash-bar is-path" id="heroDashPathMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المسار"><i id="heroDashPathBar" style="width:0%"></i></div>
-              <a href="#paths" class="hero-dash-link" id="heroDashPathLink" data-i18n="dash.openPath">افتح المسار</a>
-            </article>
-
-            <article class="hero-dash-cell hero-dash-panel">
-              <span class="hero-dash-label" data-i18n="dash.nextLesson">الدرس التالي</span>
-              <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
-              <p class="hero-dash-meta" id="heroDashLessonMeta">—</p>
-            </article>
-
-            <article class="hero-dash-cell hero-dash-panel">
-              <span class="hero-dash-label" data-i18n="dash.pending">عمل غير مكتمل</span>
-              <strong class="hero-dash-value is-text" id="heroDashTasks">—</strong>
-              <p class="hero-dash-meta" id="heroDashTasksMeta">—</p>
-            </article>
-
-            <article class="hero-dash-cell hero-dash-panel is-continue">
-              <span class="hero-dash-label" data-i18n="dash.continueLabel">متابعة التعلم</span>
-              <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
-              <p class="hero-dash-meta" id="heroDashLast">—</p>
-              <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
-            </article>
+          <!-- Section tabs (MODULE 56). The dashboard's blocks are grouped
+               behind three tabs instead of being stacked, so the hero stays
+               compact while every value keeps its own mount id. Arrow keys
+               move between tabs (RTL-aware), only the active panel is in the
+               tab order, and the inactive panels are `hidden`. -->
+          <div class="hero-tabs" id="heroDashTabs" role="tablist" aria-label="أقسام لوحة الطالب">
+            <button type="button" class="hero-tab is-active" id="heroTabToday" role="tab" aria-selected="true" aria-controls="heroPanelToday" tabindex="0">
+              <span class="hero-tab-ico" aria-hidden="true">📌</span><span data-i18n="dash.tabToday">اليوم</span>
+            </button>
+            <button type="button" class="hero-tab" id="heroTabPath" role="tab" aria-selected="false" aria-controls="heroPanelPath" tabindex="-1">
+              <span class="hero-tab-ico" aria-hidden="true">🧭</span><span data-i18n="dash.tabPath">مساري</span>
+            </button>
+            <button type="button" class="hero-tab" id="heroTabMotivation" role="tab" aria-selected="false" aria-controls="heroPanelMotivation" tabindex="-1">
+              <span class="hero-tab-ico" aria-hidden="true">🏅</span><span data-i18n="dash.tabMotivation">التحفيز</span>
+            </button>
           </div>
 
-          <div class="hero-dash-empty" id="heroDashEmpty" hidden>
-            <span aria-hidden="true">🧭</span>
-            <p data-i18n="dash.emptyBody">لا يوجد تقدم محفوظ بعد. ابدأ بالمسار المقترح أو أول اختبار — ستظهر خطوتك التالية هنا تلقائيًا.</p>
-            <a href="#paths" class="btn btn-ghost btn-sm" id="heroDashEmptyLink" data-i18n="dash.emptyCta">استكشف مسارات التعلم</a>
+          <!-- Panel 1 · Today — the three actionable cells. -->
+          <div class="hero-panel" id="heroPanelToday" role="tabpanel" aria-labelledby="heroTabToday" tabindex="0">
+            <div class="hero-dash-grid is-3">
+              <article class="hero-dash-cell hero-dash-panel">
+                <span class="hero-dash-label" data-i18n="dash.nextLesson">الدرس التالي</span>
+                <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
+                <p class="hero-dash-meta" id="heroDashLessonMeta">—</p>
+              </article>
+
+              <article class="hero-dash-cell hero-dash-panel">
+                <span class="hero-dash-label" data-i18n="dash.pending">عمل غير مكتمل</span>
+                <strong class="hero-dash-value is-text" id="heroDashTasks">—</strong>
+                <p class="hero-dash-meta" id="heroDashTasksMeta">—</p>
+              </article>
+
+              <article class="hero-dash-cell hero-dash-panel is-continue">
+                <span class="hero-dash-label" data-i18n="dash.continueLabel">متابعة التعلم</span>
+                <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
+                <p class="hero-dash-meta" id="heroDashLast">—</p>
+                <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
+              </article>
+            </div>
+
+            <div class="hero-dash-empty" id="heroDashEmpty" hidden>
+              <span aria-hidden="true">🧭</span>
+              <p data-i18n="dash.emptyBody">لا يوجد تقدم محفوظ بعد. ابدأ بالمسار المقترح أو أول اختبار — ستظهر خطوتك التالية هنا تلقائيًا.</p>
+              <a href="#paths" class="btn btn-ghost btn-sm" id="heroDashEmptyLink" data-i18n="dash.emptyCta">استكشف مسارات التعلم</a>
+            </div>
           </div>
+
+          <!-- Panel 2 · My path — the current learning path in full width. -->
+          <div class="hero-panel" id="heroPanelPath" role="tabpanel" aria-labelledby="heroTabPath" tabindex="0" hidden>
+            <div class="hero-dash-grid is-1">
+              <article class="hero-dash-cell hero-dash-panel">
+                <span class="hero-dash-label" data-i18n="dash.currentPath">المسار الحالي</span>
+                <strong class="hero-dash-value is-text" id="heroDashPath">—</strong>
+                <p class="hero-dash-meta" id="heroDashPathMeta">—</p>
+                <div class="hero-dash-bar is-path" id="heroDashPathMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المسار"><i id="heroDashPathBar" style="width:0%"></i></div>
+                <a href="#paths" class="hero-dash-link" id="heroDashPathLink" data-i18n="dash.openPath">افتح المسار</a>
+              </article>
+            </div>
+          </div>
+
+          <!-- Panel 3 · Motivation (MODULE 50) — unchanged content and ids. -->
+          <div class="hero-panel" id="heroPanelMotivation" role="tabpanel" aria-labelledby="heroTabMotivation" tabindex="0" hidden>
 
           <!-- Local motivation system (MODULE 50). Purely local XP, levels,
                goals, streak and achievements; no leaderboards or competition. -->
@@ -368,6 +464,7 @@
               <button type="button" class="btn btn-ghost btn-sm" id="heroDashReset" data-i18n="motivation.reset">إعادة ضبط التحفيز</button>
             </div>
           </section>
+          </div>
         </section>
 
         <!-- Continue-learning card (MODULE 37b). Hidden until the quiz store
