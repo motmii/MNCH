@@ -9,8 +9,9 @@
  *      (muted/loop/playsinline/preload=none/poster, and NO autoplay),
  *   2. styles: the heroDrift keyframes, the layer order inside .hero, the
  *      playing state, the phone rule and the reduced-motion guard,
- *   3. the service worker: cache version, the precached loop, and the
- *      range-request rule (a 206 response is never cached),
+ *   3. the service worker: cache version, the precached loop's own contract
+ *      (a short, silent cycle under 3 MB) and the range-request rule (a 206
+ *      response is never cached),
  *   4. runtime: MODULE 59 executed in a vm with a stubbed DOM, proving every
  *      veto (reduced motion, Save-Data, slow link, narrow screen, low
  *      battery) and every pause rule (hidden tab, hero off-screen, view
@@ -36,6 +37,35 @@ const modStart = js.indexOf("(function initHeroMedia()");
 const mod = modStart > -1 ? js.slice(modStart) : "";
 const videoTag = (html.match(/<video[\s\S]*?<\/video>/) || [""])[0];
 const loopPath = path.join(root, "images", "hero-bg.mp4");
+
+/* The loop is a binary asset, so its half of the contract is read straight
+   out of the MP4 boxes — no ffprobe, no dependency:
+   · `mvhd` carries the movie header (timescale + duration),
+   · every track declares its handler type in an `hdlr` box, so a stray
+     audio track would show up as `soun`.
+   (The old file was a 5-minute 1080p video with an audio track that only
+   the size check happened to catch — these two close that gap.) */
+function mp4DurationSeconds(file) {
+  if (!fs.existsSync(file)) return null;
+  const buf = fs.readFileSync(file);
+  const at = buf.indexOf("mvhd", 0, "ascii");
+  if (at < 0) return null;
+  const version = buf[at + 4];
+  const timescale = version === 1 ? buf.readUInt32BE(at + 24) : buf.readUInt32BE(at + 16);
+  const duration = version === 1
+    ? Number(buf.readBigUInt64BE(at + 28))
+    : buf.readUInt32BE(at + 20);
+  return timescale > 0 ? duration / timescale : null;
+}
+function mp4HasAudioTrack(file) {
+  if (!fs.existsSync(file)) return false;
+  const buf = fs.readFileSync(file);
+  for (let at = buf.indexOf("hdlr", 0, "ascii"); at >= 0; at = buf.indexOf("hdlr", at + 1, "ascii")) {
+    /* hdlr = [size][hdlr][version+flags 4B][pre_defined 4B][handler 4B] */
+    if (buf.toString("ascii", at + 12, at + 16) === "soun") return true;
+  }
+  return false;
+}
 
 /* ---------- static: index.html ---------- */
 console.log("— index.html: hero background layers —");
@@ -96,6 +126,12 @@ check("range path answers from the cached FULL copy", (() => {
 })());
 check("loop file exists on disk (CI precache guard)", fs.existsSync(loopPath));
 check("loop stays small (< 3 MB)", fs.existsSync(loopPath) && fs.statSync(loopPath).size < 3 * 1024 * 1024);
+check("loop is a short cycle, not a whole film (5-12s)", (() => {
+  const secs = mp4DurationSeconds(loopPath);
+  return secs !== null && secs > 5 && secs <= 12;
+})());
+check("loop carries no audio track (background, never a player)",
+  fs.existsSync(loopPath) && !mp4HasAudioTrack(loopPath));
 check("every precached asset exists on disk (CI guard mirrored)", (() => {
   const m = /PRECACHE_ASSETS\s*=\s*\[([\s\S]*?)\]/.exec(sw);
   if (!m) return false;

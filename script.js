@@ -12773,8 +12773,8 @@ const LABS_META = {
       tag: "new",
       title: { ar: "خلفية متحركة للصفحة الرئيسية", en: "Animated homepage background" },
       desc: {
-        ar: "خلفية الصفحة الرئيسية تتحرك الآن: انزياح بطيء للصورة، وحلقة فيديو قصيرة محلية (10 ثوانٍ، 1600×900، صامتة، ‎0.6MB‎) تظهر فقط إذا سمح الجهاز — تُلغى عند تقليل الحركة أو توفير البيانات أو الشاشات الصغيرة أو انخفاض البطارية، وتتوقف عند إخفاء التبويب أو مغادرة القسم للشاشة.",
-        en: "The homepage hero now moves: the photo drifts slowly and a short local video loop (10s, 1600×900, silent, 0.6 MB) fades in only when the device allows it — vetoed for reduced motion, Save-Data, narrow screens and low battery, and paused whenever the tab is hidden or the hero leaves the viewport."
+        ar: "خلفية الصفحة الرئيسية تتحرك الآن: انزياح بطيء للصورة، وحلقة فيديو قصيرة محلية (10 ثوانٍ، 1280×720، صامتة، ‎0.37MB‎) تظهر فقط إذا سمح الجهاز — تُلغى عند تقليل الحركة أو توفير البيانات أو الشاشات الصغيرة أو انخفاض البطارية، وتتوقف عند إخفاء التبويب أو مغادرة القسم للشاشة.",
+        en: "The homepage hero now moves: the photo drifts slowly and a short local video loop (10s, 1280×720, silent, 0.37 MB) fades in only when the device allows it — vetoed for reduced motion, Save-Data, narrow screens and low battery, and paused whenever the tab is hidden or the hero leaves the viewport."
       }
     },
     {
@@ -12997,7 +12997,7 @@ const LABS_META = {
    The hero background is a still photo by default, animated by
    the CSS layer `.hero-bg` (see MODULE 59 in style.css). This
    module adds the optional video loop on top of it
-   (images/hero-bg.mp4 — 10s, 1600×900, silent, ~0.6 MB, shipped
+   (images/hero-bg.mp4 — 10s, 1280×720, silent, ~0.37 MB, shipped
    with the site and precached by the service worker, so the
    animated hero also works offline).
 

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="شعار المنصة (maskable)">
+  <rect width="512" height="512" fill="#07070d"/>
+  <defs>
+    <linearGradient id="mshield" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <path d="M256 96 L400 148 V276 C400 362 336 424 256 452 C176 424 112 362 112 276 V148 Z"
+        fill="url(#mshield)" opacity="0.9"/>
+  <circle cx="256" cy="268" r="64" fill="#07070d"/>
+  <text x="256" y="296" text-anchor="middle" font-family="Tahoma, Arial, sans-serif"
+        font-size="104" font-weight="700" fill="#ffffff">م</text>
+</svg>

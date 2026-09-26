@@ -5931,8 +5931,10 @@ body.search-open { overflow: hidden; }
                      with a slow, seamless zoom/pan. One compositor
                      transform per frame: no layout, and the hero
                      content is never repainted.
-     · .hero-media — a 10s / 1600×900 / ~0.6 MB silent loop derived
-                     from the same photo, faded in only when
+     · .hero-media — a 10s / 1280×720 / ~0.37 MB silent loop derived
+                     from the same photo (a zoom + pan mirroring the
+                     heroDrift keyframes on a cosine, which makes the
+                     loop mathematically seamless), faded in only when
                      script.js MODULE 59 allows it (reduced motion,
                      Save-Data, narrow screens and low battery all
                      veto playback). Nothing autoplays from the
@@ -5994,3 +5996,137 @@ body.search-open { overflow: hidden; }
   .hero-media { display: none; transition: none; }
 }
 /* END MODULE 59 · HeroMedia */
+
+/* ============================================================
+   MODULE 60 · BrandLockup — navbar mark + gradient wordmark + CTA
+   Adds the two things the top bar was missing: the platform's own
+   shield mark beside the wordmark, and one clearly primary action.
+   Additive only — .logo / .logo-dot / .nav-main / .nav-actions keep
+   working untouched. Every colour comes from the theme tokens, so
+   dark and light are both covered, and all directional properties
+   stay logical (RTL-safe).
+   ============================================================ */
+/* ---------- the bar's spacing rhythm + one transition speed ----------
+   The top bar used to carry three different gap scales (left over from
+   earlier passes) and three different transition speeds. Both now come
+   from tokens declared on .nav, so every space inside the bar is a step
+   on the same 8 · 12 · 20 · 32 scale and every bar-chrome transition
+   runs at the same 300ms with one expo-out curve.
+   Menu items inside the «المزيد» dropdown keep their snappier default:
+   300ms is right for bar chrome, too slow for a list hover. */
+.nav {
+  --nav-rhythm-xs: 0.5rem;   /*  8px — inside one group (lockup, icon row) */
+  --nav-rhythm-sm: 0.75rem;  /* 12px — link gap on narrower desktops      */
+  --nav-rhythm-md: 1.25rem;  /* 20px — link gap on wide desktops          */
+  --nav-rhythm-lg: clamp(1.25rem, 2vw, 2rem); /* 20→32px — between groups */
+  --nav-dur: 0.3s;
+  --nav-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-main { gap: var(--nav-rhythm-lg); }
+.nav-links { gap: var(--nav-rhythm-md); }
+.nav-actions { gap: var(--nav-rhythm-xs); padding-inline-start: var(--nav-rhythm-xs); }
+/* One duration, one curve, for every interactive element in the bar. */
+.nav-links a,
+.nav-cta,
+.nav-actions > button,
+.nav-updates .updates-toggle,
+.nav-more-details > summary {
+  transition-duration: var(--nav-dur);
+  transition-timing-function: var(--nav-ease);
+}
+
+/* ---------- logo lockup: mark + wordmark on one row ---------- */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nav-rhythm-xs);
+}
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  display: block;
+}
+.logo-mark svg { display: block; width: 100%; height: 100%; }
+/* The shield gradient is painted from CSS so each theme picks its own
+   stops (images/icon.svg keeps its fixed ones for the favicon/PWA). */
+.logo-mark .logo-stop-a { stop-color: #a78bfa; }
+.logo-mark .logo-stop-b { stop-color: #22d3ee; }
+[data-theme="light"] .logo-mark .logo-stop-a { stop-color: #6d28d9; }
+[data-theme="light"] .logo-mark .logo-stop-b { stop-color: #0e7490; }
+.logo-mark .logo-shield { fill: url(#navLogoGrad); }
+.logo-mark .logo-disc { fill: var(--bg); }      /* punches the inner disc out */
+.logo-mark .logo-glyph { fill: var(--text); }   /* 15.5:1 dark · ≈12:1 light */
+.logo-word {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1;
+  /* Arabic is a joined script: any letter-spacing would break the
+     letter joins, so the wordmark stays at exactly 0. */
+  letter-spacing: 0;
+  background: var(--grad-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+/* The word and the accent dot must stay ONE line box: inside a flex
+   container each child would be blockified (and re-centred), which
+   would drop the dot off the wordmark's baseline. */
+.logo-text { display: block; line-height: 1; white-space: nowrap; }
+/* ---------- navbar primary CTA ---------- */
+.nav-cta { flex: 0 0 auto; }
+/* No lift inside a fixed bar — the colour change is the feedback. */
+.nav-cta, .nav-cta:hover { transform: none; }
+/* The bar is transparent until it frosts: over the hero photo an
+   outlined pill keeps its contrast, then it fills once scrolled. */
+.nav:not(.is-scrolled) .nav-cta {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.42);
+  color: #f5f6fa;
+  box-shadow: none;
+}
+.nav:not(.is-scrolled) .nav-cta:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.72);
+  color: #ffffff;
+}
+.nav.is-scrolled .nav-cta {
+  box-shadow: 0 10px 26px -14px color-mix(in srgb, var(--accent-2) 70%, transparent);
+}
+/* Token-based halo instead of a hard-coded cyan: the light theme picks up
+   its own softer teal through --glow, and the ring reads as one piece with
+   the elevation shadow above it. */
+.nav.is-scrolled .nav-cta:hover {
+  box-shadow:
+    0 12px 30px -14px color-mix(in srgb, var(--accent-2) 72%, transparent),
+    0 0 0 3px var(--glow);
+}
+/* Density step: the same rhythm, one notch tighter. The links only lose
+   air — their smaller type size is set by the earlier responsive layer. */
+@media (max-width: 1320px) {
+  .nav {
+    --nav-rhythm-lg: 1rem;
+    --nav-rhythm-md: var(--nav-rhythm-sm);
+  }
+}
+@media (max-width: 1180px) {
+  /* This layer loads after the earlier ≤1180px rule, so the divider reset
+     has to be repeated here — otherwise the padding would come back. */
+  .nav-actions { padding-inline-start: 0; }
+  /* Below the desktop bar the burger menu already carries the same CTA. */
+  .nav-cta { display: none; }
+}
+@media (max-width: 760px) {
+  .logo-mark { width: 28px; height: 28px; }
+  .logo, .logo-word { font-size: 1.3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-cta,
+  .nav-links a,
+  .nav-actions > button,
+  .nav-updates .updates-toggle,
+  .nav-more-details > summary { transition: none; }
+}
+/* END MODULE 60 · BrandLockup */
