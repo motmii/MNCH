@@ -145,9 +145,14 @@ console.log("- live behavior -");
 check("panel starts collapsed", nodes.updatesPanel.hidden === true);
 check("unread dot visible before first open", nodes.updatesDot.hidden === false);
 const cards = nodes.updatesList.children;
-check("renders 6 update cards", cards.length === 6);const topOf = (c) => c && c.children[0];
+/* Expected cards are derived from the module's own changelog array, so
+   adding a new dated entry never breaks this suite. */
+const updateDates = (js.slice(js.indexOf("var UPDATES = [")).match(/date: "(\d{4}-\d{2}-\d{2})"/g) || [])
+  .map((s) => s.slice(7, 17));
+check("renders one card per dated entry", cards.length === updateDates.length && updateDates.length >= 5);const topOf = (c) => c && c.children[0];
 const dateOf = (c) => topOf(c) && topOf(c).children[1];
-check("newest card is first (2026-09-24)", !!dateOf(cards[0]) && dateOf(cards[0]).attrs.datetime === "2026-09-24");
+check("newest card is first", !!dateOf(cards[0]) &&
+  dateOf(cards[0]).attrs.datetime === updateDates.slice().sort().reverse()[0]);
 check("oldest card is last (2026-08-31)", !!dateOf(cards[cards.length - 1]) && dateOf(cards[cards.length - 1]).attrs.datetime === "2026-08-31");
 check("dates never go out of order", cards.every((c, i) => {
   if (!i) return true;
@@ -180,6 +185,6 @@ check("close button closes it too", (function () {
 })());
 check("outside-click and view-change listeners registered",
   (docL.click || []).length >= 1 && (docL["nova:view-changed"] || []).length >= 1);
-check("panel never renders before opening", cards.length === 6 && nodes.updatesPanel.hidden === true);
+check("panel never renders before opening", cards.length === updateDates.length && nodes.updatesPanel.hidden === true);
 console.log("\n" + (failures ? "\u2717 " + failures + " check(s) FAILED" : "\u2713 all checks passed"));
 process.exit(failures ? 1 : 0);

@@ -439,11 +439,10 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
 .hero {
   position: relative;
   min-height: 100vh;             /* spans the full viewport height */
-  background-image: url('images/backweb.jpg');
-  background-size: cover;        /* cover the hero box, no distortion */
-  background-position: center center;
-  background-repeat: no-repeat;
+  /* The photo itself now lives on the .hero-bg layer (MODULE 59) so it can
+     drift/zoom; only the flat colour stays here as the ultimate fallback. */
   background-color: var(--bg);   /* fallback while backweb.jpg loads */
+  isolation: isolate;            /* keep the hero layer stack self-contained */
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -460,11 +459,15 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 0;
+  /* MODULE 59 layer order (lowest → highest):
+     .hero-bg / .hero-media (0) → this contrast overlay (1) → the glows (2)
+     → .hero-content (3). */
+  z-index: 1;
   pointer-events: none;
 }
 .hero-glow {
   position: absolute;
+  z-index: 2;                    /* above the contrast overlay (unchanged look) */
   border-radius: 50%;
   pointer-events: none;
 }
@@ -495,7 +498,7 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
 
 .hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   text-align: center;
   max-width: 900px;
   margin: 0 auto;
@@ -1965,99 +1968,6 @@ details.q-explain {
 @media (prefers-reduced-motion: reduce) {
   .console-led { animation: none; }
   .games-sc { transition: none; }
-}
-
-/* ============================================================
-   MODULE 28 · Salawat top banner
-   A slim, elegant strip pinned to the top of the viewport that
-   reminds visitors to send blessings upon the Prophet ﷺ. It is
-   `position: fixed` so it never alters layout or scroll (no CLS),
-   starts off-screen + inert, and slides in via JS after a delay.
-   No audio, no focus stealing, polite aria-live, drow close btn.
-   ============================================================ */
-.salawat-banner {
-  --sw-bg-a: #0c5c52;   /* emerald base */
-  --sw-bg-b: #06402f;   /* deep green */
-  --sw-gold: #c9a24a;
-  --sw-ink: #f2fbf7;
-
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1001;                 /* just above the fixed nav (1000) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 9px 16px;
-  background: linear-gradient(90deg, var(--sw-bg-a), var(--sw-bg-b) 55%, var(--sw-bg-a));
-  border-bottom: 1px solid rgba(201, 162, 74, 0.4);
-  color: var(--sw-ink);
-  font-family: var(--font-body, "Tajawal", system-ui, sans-serif);
-  text-align: center;
-
-  transform: translateY(-101%);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: transform 0.6s ease, opacity 0.6s ease, visibility 0.6s;
-}
-.salawat-banner.is-visible {
-  transform: translateY(0);
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-.salawat-banner-text {
-  margin: 0;
-  font-weight: 600;
-  font-size: clamp(0.95rem, 1rem + 0.3vw, 1.15rem);
-  line-height: 1.7;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-}
-.salawat-banner-close {
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--sw-ink);
-  cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
-}
-.salawat-banner-close:hover {
-  background: var(--sw-gold);
-  color: #0a2433;
-  transform: scale(1.08);
-}
-.salawat-banner-close:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-.salawat-banner-close svg { width: 13px; height: 13px; display: block; }
-
-/* While the banner is shown, ride the fixed nav down by its height so the
-   two never overlap and navigation stays fully tappable. var is set by JS. */
-.nav { top: var(--salawat-offset, 0); }
-.nav {
-  transition: background 0.4s, border-color 0.4s, backdrop-filter 0.4s, top 0.6s ease;
-}
-
-@media (max-width: 520px) {
-  .salawat-banner { padding: 8px 12px; gap: 8px; }
-  .salawat-banner-text { font-size: 0.96rem; line-height: 1.6; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .salawat-banner { transition: none; }
-  .nav { transition: none; }
 }
 
 /* ============================================================
@@ -6012,3 +5922,75 @@ body.search-open { overflow: hidden; }
   .updates-close { transition: none; }
 }
 /* END MODULE 58 · WhatsNew */
+
+/* ============================================================
+   MODULE 59 · HeroMedia — خلفية الـhero المتحركة
+   The hero background is built from two stacked, pointer-inert
+   layers (markup in index.html):
+     · .hero-bg    — the still photo (images/backweb.jpg) drifting
+                     with a slow, seamless zoom/pan. One compositor
+                     transform per frame: no layout, and the hero
+                     content is never repainted.
+     · .hero-media — a 10s / 1600×900 / ~0.6 MB silent loop derived
+                     from the same photo, faded in only when
+                     script.js MODULE 59 allows it (reduced motion,
+                     Save-Data, narrow screens and low battery all
+                     veto playback). Nothing autoplays from the
+                     markup, so a vetoed device downloads 0 bytes.
+   Layer order (see .hero / .hero::before / .hero-glow / .hero-content):
+     .hero-bg + .hero-media (0) → contrast overlay (1) → glows (2)
+     → .hero-content (3), with `isolation: isolate` on .hero.
+   ============================================================ */
+.hero-bg {
+  position: absolute;
+  /* Bleed past the hero edges so the drift never exposes a seam. */
+  inset: -6%;
+  z-index: 0;
+  background-image: url("images/backweb.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transform: scale(1.06);
+  transform-origin: center center;
+  animation: heroDrift 36s ease-in-out infinite alternate;
+  will-change: transform;
+  pointer-events: none;
+}
+@keyframes heroDrift {
+  0%   { transform: scale(1.06) translate3d(-1.4%, -1.1%, 0); }
+  50%  { transform: scale(1.12) translate3d(1.2%, 1.4%, 0); }
+  100% { transform: scale(1.07) translate3d(2%, -1.2%, 0); }
+}
+.hero-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+.hero-media[hidden] { display: none; }
+/* Set by MODULE 59 once a frame has really rendered (never before). */
+.hero-media.is-playing { opacity: 1; }
+/* While the loop plays, the drifting photo stops moving underneath it. */
+.hero.is-media-playing .hero-bg { animation-play-state: paused; }
+/* A touch more contrast under the loop so hero text keeps its AA ratio. */
+.hero.is-media-playing::before { background: rgba(0, 0, 0, 0.46); }
+/* Light theme: the photo/loop is dark, so deepen the scrim slightly. */
+[data-theme="light"] .hero.is-media-playing::before { background: rgba(0, 0, 0, 0.52); }
+
+/* Small screens: shorter travel + a slower cycle keeps the drift calm
+   and the compositor cheap on phones. */
+@media (max-width: 700px) {
+  .hero-bg { inset: -4%; animation-duration: 48s; }
+}
+
+/* Reduced motion: still background, and no video at all. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg { animation: none; transform: none; inset: 0; will-change: auto; }
+  .hero-media { display: none; transition: none; }
+}
+/* END MODULE 59 · HeroMedia */

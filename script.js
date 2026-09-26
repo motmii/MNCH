@@ -1637,7 +1637,7 @@ if (pointerFine && !prefersReducedMotion) {
   const burger = $id("navBurger");
   const menu = $id("mobileMenu");
   const trap = burger && menu ? createFocusTrap([burger, menu], {
-    background: () => $$(".skip-link, .preloader, .cursor-dot, .cursor-ring, .nav-inner > *:not(#navBurger), main, .footer, #toTop, #assistantRoot, #salawatBanner, #onboardingOverlay, #searchOverlay, #searchDialog")
+    background: () => $$(".skip-link, .preloader, .cursor-dot, .cursor-ring, .nav-inner > *:not(#navBurger), main, .footer, #toTop, #assistantRoot, #onboardingOverlay, #searchOverlay, #searchDialog")
   }) : null;
 
   /**
@@ -5446,74 +5446,6 @@ window.Lang = Lang;
   }
   init();
 
-})();
-
-/* ============================================================
-   MODULE 28 · Salawat top banner
-   Slim reminder strip pinned to the top of the viewport. Slides in
-   after a short delay once the page is open, auto-hides on its own,
-   and optionally repeats at a generous interval (4h) for visitors who
-   keep the page open. Dismissing persists a 24h suppression stamp in
-   localStorage. Non-intrusive: no autoplay audio, no focus stealing,
-   no forced interaction; honors prefers-reduced-motion via CSS.
-   ============================================================ */
-(function initSalawatBanner() {
-  "use strict";
-  const el = document.getElementById("salawatBanner");
-  const btn = document.getElementById("salawatBannerClose");
-  if (!el || !btn) return;
-
-  const KEY = "salawat_banner_dismissed";
-  const SUPPRESS_MS = 24 * 60 * 60 * 1000;
-  const FIRST_DELAY_MS = 2200;
-  const AUTO_HIDE_MS = 20000;
-  const REPEAT_MS = 4 * 60 * 60 * 1000;
-
-  let shown = false;
-
-  function recentlyDismissed() {
-    try {
-      const at = parseInt(localStorage.getItem(KEY), 10);
-      if (!isFinite(at) || at <= 0) return false;
-      return (Date.now() - at) < SUPPRESS_MS;
-    } catch (err) { return false; }
-  }
-
-  function setNavOffset(px) {
-    document.documentElement.style.setProperty("--salawat-offset", px + "px");
-  }
-
-  function show() {
-    if (shown || recentlyDismissed()) return;
-    shown = true;
-    setNavOffset(el.offsetHeight || 44);
-    requestAnimationFrame(() => el.classList.add("is-visible"));
-    clearTimeout(show._hide);
-    show._hide = setTimeout(hide, AUTO_HIDE_MS);
-  }
-
-  function hide() {
-    shown = false;
-    el.classList.remove("is-visible");
-    setNavOffset(0);
-  }
-
-  function dismiss() {
-    try { localStorage.setItem(KEY, String(Date.now())); } catch (err) {}
-    hide();
-  }
-
-  btn.addEventListener("click", dismiss);
-  document.addEventListener("keydown", (ev) => {
-    if (ev.key === "Escape" || ev.key === "Esc") hide();
-  });
-
-  function start() {
-    if (document.readyState === "complete") setTimeout(show, FIRST_DELAY_MS);
-    else window.addEventListener("load", () => setTimeout(show, FIRST_DELAY_MS));
-    setInterval(() => { if (!recentlyDismissed()) show(); }, REPEAT_MS);
-  }
-  start();
 })();
 
 /* ============================================================
@@ -12837,6 +12769,15 @@ const LABS_META = {
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
     {
+      date: "2026-09-26",
+      tag: "new",
+      title: { ar: "خلفية متحركة للصفحة الرئيسية", en: "Animated homepage background" },
+      desc: {
+        ar: "خلفية الصفحة الرئيسية تتحرك الآن: انزياح بطيء للصورة، وحلقة فيديو قصيرة محلية (10 ثوانٍ، 1600×900، صامتة، ‎0.6MB‎) تظهر فقط إذا سمح الجهاز — تُلغى عند تقليل الحركة أو توفير البيانات أو الشاشات الصغيرة أو انخفاض البطارية، وتتوقف عند إخفاء التبويب أو مغادرة القسم للشاشة.",
+        en: "The homepage hero now moves: the photo drifts slowly and a short local video loop (10s, 1600×900, silent, 0.6 MB) fades in only when the device allows it — vetoed for reduced motion, Save-Data, narrow screens and low battery, and paused whenever the tab is hidden or the hero leaves the viewport."
+      }
+    },
+    {
       date: "2026-09-24",
       tag: "new",
       title: { ar: "بنوك أسئلة الترم الحالي كاملة", en: "Full current-semester question banks" },
@@ -13047,4 +12988,178 @@ const LABS_META = {
       close: function () { setOpen(false); }
     };
   }
+})();
+
+
+/* ============================================================
+   MODULE 59 · HeroMedia — خلفية متحركة مشروطة (فيديو محلي)
+   ------------------------------------------------------------
+   The hero background is a still photo by default, animated by
+   the CSS layer `.hero-bg` (see MODULE 59 in style.css). This
+   module adds the optional video loop on top of it
+   (images/hero-bg.mp4 — 10s, 1600×900, silent, ~0.6 MB, shipped
+   with the site and precached by the service worker, so the
+   animated hero also works offline).
+
+   Playback is opt-in per device, checked in this order:
+     1. prefers-reduced-motion: reduce    → never load or play
+     2. Save-Data or a 2g-class link      → never load or play
+     3. viewport narrower than 700px      → never load or play
+     4. battery below 20% while unplugged → never load or play
+   Once allowed, the loop pauses whenever the tab is hidden or the
+   hero leaves the viewport (view switch / scroll), so an idle page
+   costs nothing. The markup carries no autoplay attribute and
+   preload="none", so a vetoed device downloads zero bytes.
+
+   No network calls, no storage, no personal data; the file is
+   same-origin and served from the SW cache when offline.
+   Exposes window.PlatformHeroMedia for manual control/tests.
+   ============================================================ */
+(function initHeroMedia() {
+  "use strict";
+
+  var hero = document.getElementById("hero");
+  var video = document.getElementById("heroMedia");
+  if (!hero || !video) return;
+  if (typeof video.play !== "function") return;
+  if (typeof video.addEventListener !== "function") return;
+
+  var PLAYING_CLASS = "is-playing";
+  var HERO_CLASS = "is-media-playing";
+
+  /* ---------- gates ---------- */
+  var reduced = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  var narrow = window.matchMedia ? window.matchMedia("(max-width: 700px)") : null;
+
+  /** @returns {boolean} True when the visitor asked for no motion. */
+  function prefersReducedMotion() {
+    return Boolean(reduced && reduced.matches);
+  }
+
+  /** @returns {boolean} True on Save-Data or a 2g-class connection. */
+  function dataSaver() {
+    try {
+      var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!c) return false;
+      if (c.saveData === true) return true;
+      return /(^|-)2g$/.test(String(c.effectiveType || ""));
+    } catch (e) { return false; }
+  }
+
+  /** @returns {boolean} True on phone-width viewports. */
+  function smallScreen() {
+    if (narrow) return narrow.matches;
+    try { return window.innerWidth > 0 && window.innerWidth < 700; } catch (e) { return true; }
+  }
+
+  var batteryBlocked = false;
+  /** Watch the battery once (Chromium-only API) — low + unplugged vetoes. */
+  function watchBattery() {
+    try {
+      if (typeof navigator.getBattery !== "function") return;
+      navigator.getBattery().then(function (b) {
+        if (!b) return;
+        var apply = function () {
+          batteryBlocked = b.level < 0.2 && b.charging === false;
+          evaluate();
+        };
+        apply();
+        if (typeof b.addEventListener === "function") {
+          b.addEventListener("levelchange", apply);
+          b.addEventListener("chargingchange", apply);
+        }
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  /** @returns {boolean} True when every gate lets the loop run. */
+  function allowed() {
+    if (prefersReducedMotion()) return false;
+    if (dataSaver()) return false;
+    if (smallScreen()) return false;
+    if (batteryBlocked) return false;
+    return true;
+  }
+
+  /* ---------- playback ---------- */
+  var inView = true;
+  var started = false;
+
+  function tabVisible() {
+    try { return document.visibilityState !== "hidden"; } catch (e) { return true; }
+  }
+
+  function pause() {
+    try { if (video.paused !== true) video.pause(); } catch (e) {}
+  }
+
+  function play() {
+    if (!allowed() || !inView || !tabVisible()) return;
+    var attempt;
+    try { attempt = video.play(); } catch (e) { return; }
+    if (attempt && typeof attempt.catch === "function") attempt.catch(function () {});
+  }
+
+  /** Single decision point: allowed + on-screen + visible tab → play. */
+  function evaluate() {
+    if (!allowed() || !inView || !tabVisible()) { pause(); return; }
+    play();
+  }
+
+  /* Fade the loop in only after a real frame rendered (no black flash). */
+  video.addEventListener("playing", function () {
+    video.classList.add(PLAYING_CLASS);
+    hero.classList.add(HERO_CLASS);
+  });
+  video.addEventListener("pause", function () { video.classList.remove(PLAYING_CLASS); });
+  video.addEventListener("error", function () {
+    /* The drifting photo stays: a broken or unsupported file must never
+       leave the hero without a background. */
+    video.classList.remove(PLAYING_CLASS);
+    hero.classList.remove(HERO_CLASS);
+    video.hidden = true;
+  });
+
+  /* ---------- pause when the tab is hidden or the hero scrolls away ---------- */
+  document.addEventListener("visibilitychange", function () {
+    if (tabVisible()) evaluate(); else pause();
+  });
+
+  if (typeof IntersectionObserver === "function") {
+    try {
+      new IntersectionObserver(function (entries) {
+        var last = entries[entries.length - 1];
+        if (!last) return;
+        inView = last.isIntersecting;
+        evaluate();
+      }, { threshold: 0.15 }).observe(hero);
+    } catch (e) {}
+  }
+
+  /* ViewSwitcher hides the hero on every other view; re-check at once. */
+  document.addEventListener("nova:view-changed", evaluate);
+
+  /* Re-evaluate when the visitor flips a relevant preference mid-session. */
+  [reduced, narrow].forEach(function (mq) {
+    if (!mq || typeof mq.addEventListener !== "function") return;
+    mq.addEventListener("change", evaluate);
+  });
+
+  watchBattery();
+
+  /* Start after load: the loop must never compete with the first paint. */
+  function boot() { started = true; evaluate(); }
+  if (document.readyState === "complete") boot();
+  else window.addEventListener("load", boot);
+
+  window.PlatformHeroMedia = {
+    video: video,
+    allowed: allowed,
+    play: play,
+    pause: pause,
+    /** @returns {boolean} True while a video frame is on screen. */
+    isPlaying: function () { return video.classList.contains(PLAYING_CLASS); },
+    /** @returns {boolean} True once the post-load evaluation ran. */
+    started: function () { return started; }
+  };
 })();

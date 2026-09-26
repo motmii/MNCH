@@ -109,7 +109,15 @@ check("#heroStartHere still present (DOM contract)", html.includes('id="heroStar
 check("legacy dashboard mounts survive inside panels",
   ["heroDashLesson", "heroDashTasks", "heroDashQuiz", "heroDashContinue",
    "heroDashPath", "heroDashDaily", "heroDashWeekly"].every((id) => html.includes('id="' + id + '"')));
-check("asset version bumped", html.includes("style.css?v=1.22.16"));
+/* Cache-busting scheme for the stylesheet: assert the scheme and a
+   version at least as new as the Wave-1 release, so later bumps (the
+   MODULE 59 hero background among them) don't need to touch this suite. */
+check("asset version bumped (style.css?v=1.22.16+)", (() => {
+  const m = /style\.css\?v=(\d+)\.(\d+)\.(\d+)/.exec(html);
+  if (!m) return false;
+  const [maj, min, pat] = [+m[1], +m[2], +m[3]];
+  return maj > 1 || (maj === 1 && (min > 22 || (min === 22 && pat >= 16)));
+})());
 
 /* ---------- static: style.css ---------- */
 console.log("\n— style.css: Wave-1 styles —");
