@@ -55,6 +55,24 @@ check("quiz hub collapsible", html.includes('data-i18n="collapsible.showQuizzes"
 check("flashcards hub collapsible", html.includes('data-i18n="collapsible.showCards"'));
 check("skip link present", html.includes('class="skip-link"') && html.includes('data-i18n="a11y.skip"'));
 
+console.log("— index.html: navbar brand lockup + primary CTA (MODULE 60) —");
+check("logo lockup wraps a mark + a wordmark",
+  html.includes('class="logo-mark"') && html.includes('class="logo-word"'));
+check("wordmark + accent dot share one line box (baseline kept)",
+  /class="logo-text"><span class="logo-word">/.test(html));
+check("logo mark is decorative (aria-hidden inside the named link)",
+  /class="logo-mark" aria-hidden="true"/.test(html));
+check("logo mark reuses the same shield path as images/icon.svg",
+  html.includes("M50 12 L82 24 V52 C82 71 68 84 50 90 C32 84 18 71 18 52 V24 Z"));
+check("logo mark colours come from theme tokens (no hardcoded dark rect)",
+  html.includes('class="logo-disc"') && html.includes('class="logo-glyph"'));
+check("navbar CTA present, reusing the existing nav.cta key",
+  html.includes('class="btn btn-primary btn-sm nav-cta"') && html.includes('data-i18n="nav.cta"'));
+check("navbar CTA sits after the updates trigger and before nav-actions", (() => {
+  const cta = html.indexOf("nav-cta");
+  return cta > html.indexOf("navUpdates") && cta < html.indexOf('class="nav-actions"');
+})());
+
 console.log("— index.html: SEO —");
 check("Open Graph metadata", html.includes('property="og:title"') && html.includes('property="og:description"') && html.includes('property="og:image"'));
 check("canonical link", html.includes('rel="canonical"'));
@@ -127,6 +145,50 @@ console.log("— style.css: new component styles —");
  ".motivation-reset-row", ".hero-dash-bar.is-xp"].forEach((sel) => {
   check("style for " + sel, css.includes(sel));
 });
+console.log("— style.css: MODULE 60 navbar brand layer —");
+[".logo-mark", ".logo-word", ".logo-text", ".logo-shield", ".logo-disc", ".logo-glyph",
+ ".logo-stop-a", ".logo-stop-b", ".nav-cta"].forEach((sel) => {
+  check("style for " + sel, css.includes(sel));
+});
+check("module markers present",
+  css.includes("MODULE 60 · BrandLockup") && css.includes("END MODULE 60 · BrandLockup"));
+check("wordmark keeps Arabic letter-spacing at 0",
+  /\.logo-word\s*\{[\s\S]{0,320}letter-spacing: 0;/.test(css));
+check("wordmark clips the shared text gradient",
+  /\.logo-word\s*\{[\s\S]{0,520}background: var\(--grad-text\);/.test(css));
+check("light theme re-paints both logo gradient stops",
+  css.includes('[data-theme="light"] .logo-mark .logo-stop-a') &&
+  css.includes('[data-theme="light"] .logo-mark .logo-stop-b'));
+check("CTA outlined while the bar is transparent (contrast over the photo)",
+  /\.nav:not\(\.is-scrolled\) \.nav-cta\s*\{[\s\S]{0,220}border-color: rgba\(255, 255, 255, 0\.42\);/.test(css));
+
+console.log("— style.css: navbar rhythm & motion tokens —");
+check("one spacing rhythm declared on .nav (8 · 12 · 20 · 32)",
+  /\.nav\s*\{[\s\S]{0,700}--nav-rhythm-xs: 0\.5rem;[\s\S]{0,200}--nav-rhythm-sm: 0\.75rem;[\s\S]{0,200}--nav-rhythm-md: 1\.25rem;[\s\S]{0,200}--nav-rhythm-lg:/.test(css));
+check("the three bar groups consume the tokens, not hard-coded gaps",
+  /\.nav-main\s*\{\s*gap: var\(--nav-rhythm-lg\);\s*\}/.test(css) &&
+  /\.nav-links\s*\{\s*gap: var\(--nav-rhythm-md\);\s*\}/.test(css) &&
+  /\.nav-actions\s*\{\s*gap: var\(--nav-rhythm-xs\); padding-inline-start: var\(--nav-rhythm-xs\); \}/.test(css));
+check("lockup gap is the same 8px step as the icon row",
+  /\.logo\s*\{[\s\S]{0,200}gap: var\(--nav-rhythm-xs\);/.test(css));
+check("one transition duration for the whole bar (300ms + one curve)",
+  /--nav-dur: 0\.3s;/.test(css) && /--nav-ease: cubic-bezier\(0\.16, 1, 0\.3, 1\);/.test(css) &&
+  /\.nav-links a,[\s\S]{0,260}transition-duration: var\(--nav-dur\);[\s\S]{0,90}transition-timing-function: var\(--nav-ease\);/.test(css));
+check("CTA, toggles, updates trigger and «المزيد» are all covered",
+  /\.nav-actions > button,[\s\S]{0,80}\.nav-updates \.updates-toggle,[\s\S]{0,80}\.nav-more-details > summary \{/.test(css));
+check("density step ≤1320px re-points the same tokens",
+  /@media \(max-width: 1320px\) \{\s*\.nav \{\s*--nav-rhythm-lg: 1rem;\s*--nav-rhythm-md: var\(--nav-rhythm-sm\);/.test(css));
+check("≤1180px still resets the actions divider (layer-order guard)",
+  /@media \(max-width: 1180px\) \{\s*\/\*[\s\S]{0,320}\.nav-actions \{ padding-inline-start: 0; \}/.test(css));
+check("scrolled CTA hover halo is token-based (--glow)",
+  /\.nav\.is-scrolled \.nav-cta:hover \{\s*box-shadow:[\s\S]{0,220}0 0 0 3px var\(--glow\);/.test(css));
+check("reduced motion switches every bar transition off",
+  /prefers-reduced-motion[\s\S]{0,300}\.nav-cta,\s*\.nav-links a,[\s\S]{0,220}\{ transition: none; \}/.test(css));
+check("CTA hidden where the burger menu carries it",
+  /@media \(max-width: 1180px\)[\s\S]{0,200}\.nav-cta\s*\{\s*display: none;\s*\}/.test(css));
+check("reduced-motion guard for the CTA",
+  /prefers-reduced-motion[\s\S]{0,320}\.nav-cta,/.test(css));
+
 check("mobile assistant panel rule", css.includes("max-height: 72dvh"));
 check("mobile drawer scrollable", css.includes("overflow-y: auto"));
 

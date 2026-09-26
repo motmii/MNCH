@@ -51,7 +51,10 @@ A responsive, dark-themed cybersecurity education platform for Information Secur
 
 ### Animated hero background (MODULE 59)
 - **Two-layer hero** — the hero photo keeps drifting on its own with pure CSS (`@keyframes heroDrift`), so the homepage is never static even when video is unavailable.
-- **Optional local video loop** — `images/hero-bg.mp4` (10s, 1600×900, silent, ~0.6 MB, generated from the same photo) fades in over that photo only when the device allows it. Playback is vetoed for `prefers-reduced-motion`, Save-Data / 2g links, screens under 700px, and batteries under 20% while unplugged; it also pauses whenever the tab is hidden or the hero leaves the viewport. The markup has no `autoplay` and uses `preload="none"`, so a vetoed device downloads zero bytes.
+- **Optional local video loop** — `images/hero-bg.mp4` (10s, 1280×720, silent, ~0.37 MB — a zoom + pan of the same photo, driven by a cosine so the 300-frame loop is seamless) fades in over that photo only when the device allows it. Playback is vetoed for `prefers-reduced-motion`, Save-Data / 2g links, screens under 700px, and batteries under 20% while unplugged; it also pauses whenever the tab is hidden or the hero leaves the viewport. The markup has no `autoplay` and uses `preload="none"`, so a vetoed device downloads zero bytes. To rebuild the loop (ffmpeg is a build-time tool only — nothing at runtime needs it):
+  ```
+  ffmpeg -i images/backweb.jpg -vf "scale=1600:900,zoompan=z='1.09-0.03*cos(2*PI*on/300)':x='iw*(0.5-0.001-0.013*cos(2*PI*on/300))-iw/(2*zoom)':y='ih*(0.5+0.0015-0.0125*cos(2*PI*on/300))-ih/(2*zoom)':d=300:s=1280x720:fps=30" -frames:v 300 -an -c:v libx264 -profile:v high -crf 26 -movflags +faststart images/hero-bg.mp4
+  ```
 - **Offline-ready** — the loop is precached by the service worker, and byte-range requests are answered from that cached full copy (a `206` response is never stored).
 
 ### Cyber Tools Suite (6 cybersecurity tools)
@@ -138,7 +141,7 @@ nova-studio/
 │   ├── icon.svg        # Favicon
 │   ├── icon-maskable.svg # PWA icon
 │   ├── backweb.jpg     # Hero background (still photo + video poster)
-│   ├── hero-bg.mp4     # Animated hero loop (10s, silent, precached · MODULE 59)
+│   ├── hero-bg.mp4     # Animated hero loop (10s, 1280×720, silent, precached · MODULE 59)
 │   ├── algorithms.svg  # Current-semester subject thumbnails (×5)
 │   ├── os-concepts.svg
 │   ├── policies-ethics.svg
@@ -186,6 +189,15 @@ Released under the [MIT License](LICENSE) — free to use, study, modify and sha
 | `--font-body` | Tajawal / Inter | Body text |
 
 Dark cyber theme · Glassmorphism · RTL layout · Custom cursor · Particle canvas
+
+**Navbar & brand (MODULE 60)**: the top bar is one fixed, frosted surface with
+three groups — logo lockup · links (`المزيد` dropdown + updates trigger) ·
+actions (search · language · theme · burger). The logo is the **same shield
+mark the favicon & PWA icon use**, inlined and theme-tinted (no extra asset),
+beside a gradient wordmark; Arabic text keeps `letter-spacing: 0` because
+tracking would break the letter joins. One **primary CTA** (`nav.cta` → `#paths`)
+closes the bar: outlined over the hero photo, filled once the bar frosts, and
+hidden ≤1180px where the mobile menu already carries it.
 
 **Theme switcher**: a navbar toggle flips between a dark-by-default theme and a light educational theme. The choice is persisted, an explicit stored choice wins, and otherwise the OS `prefers-color-scheme` is followed (with a pre-paint script to prevent any flash of the wrong theme).
 

@@ -162,10 +162,16 @@ Main IIFE ("use strict")
 │                         changelog popover (see README for the full list).
 └── M59  HeroMedia        Animated hero background — two pointer-inert layers:
                           `.hero-bg` (the hero photo, drifting with a pure-CSS
-                          heroDrift zoom/pan) and `.hero-media` (a 10s, 1600×900,
+                          heroDrift zoom/pan) and `.hero-media` (a 10s, 1280×720,
                           silent local loop `images/hero-bg.mp4` derived from the
                           same photo — replace that one file to ship a different
                           animation, and keep backweb.jpg as poster/fallback).
+                          It is regenerated from that same JPEG with ffmpeg
+                          (`zoompan` driven by a cosine, 300 frames @30fps, no
+                          audio track), which keeps it ~0.37 MB and makes the
+                          loop seamless; tests/hero-bg.test.js holds it under 3 MB
+                          and also reads the MP4 boxes to prove the loop stays a
+                          short, silent cycle. Recipe: README.md.
                           Playback is opt-in per device and vetoed for
                           prefers-reduced-motion, Save-Data/slow links, screens
                           narrower than 700px, and batteries below 20% while
@@ -296,6 +302,27 @@ CSS rules are scoped under `html[data-cursor-active="true"]`.
   shared `#path` view and `activate()` preserves the full hash; unknown ids and
   bare `#path` render honest empty states).
 
+### Navbar & Brand Layer (MODULE 60 · `index.html` + `style.css`)
+The top bar is one fixed, frosted surface (`.nav` → `.nav.is-scrolled`) grouped
+into `.nav-main` (logo lockup · links · “المزيد” · updates trigger · primary CTA)
+and `.nav-actions` (search · language · theme · burger), separated by a logical
+inline-start divider.
+
+- **Logo lockup** — `.logo` holds a decorative `.logo-mark` (the same shield
+  path `images/icon.svg` is built from, inlined so it needs no extra asset and
+  no precache entry) plus a `.logo-word` gradient wordmark. The mark's colours
+  are theme tokens (`.logo-disc` = `var(--bg)`, `.logo-glyph` = `var(--text)`)
+  and its gradient stops are re-painted for the light theme, so the PWA icon
+  keeps its fixed palette while the navbar mark follows the theme.
+- **Arabic rule** — a wordmark (or any Arabic text) must keep
+  `letter-spacing: 0`; tracking breaks the joins between letters.
+- **Primary CTA** — `.nav-cta` reuses the existing `nav.cta` i18n key and the
+  `#paths` target. It renders outlined while the bar is transparent (contrast
+  over the hero photo) and becomes the filled gradient primary once the bar
+  frosts; it is hidden ≤1180px, where the mobile menu already carries it.
+- The layer is **additive**: no pre-existing selector (`.logo`, `.logo-dot`,
+  `.nav-main`, `.nav-actions`) is overridden beyond the intended additions.
+
 ### Preloader Fallback
 `.preloader` has a CSS keyframe (`preloaderFallback 5s forwards`) that force-hides the overlay after 5 seconds even if JavaScript fails entirely.
 
@@ -318,4 +345,4 @@ Notes: `OFFLINE_API_PATTERNS` / `API_CACHE_NAME` are declared hooks for future
 network-first API caching but are currently unused — the fetch handler routes
 every non-navigation GET through stale-while-revalidate.
 
-Cache versioning: bump `CACHE_VERSION` in `sw.js` to invalidate (currently `v1.22.18`).
+Cache versioning: bump `CACHE_VERSION` in `sw.js` to invalidate (currently `v1.22.19`).

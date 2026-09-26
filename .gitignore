@@ -14,6 +14,10 @@ node_modules/
 __*.js
 out.txt
 
+# Local-only heavy media: the raw hero-loop source stays on the machine it
+# was trimmed on — the repo ships the compressed images/hero-bg.mp4 only.
+images/*.source.mp4
+
 # Logs & OS junk
 *.log
 .DS_Store

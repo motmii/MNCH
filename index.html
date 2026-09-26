@@ -13,13 +13,13 @@
   <meta property="og:title" content="منصة أمن المعلومات | Information Security Platform" />
   <meta property="og:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال. An Arabic-first infosec learning platform: paths, quizzes, tools and labs — offline-ready." />
   <meta property="og:url" content="https://motmii.github.io/MNCH/" />
-  <meta property="og:image" content="https://motmii.github.io/MNCH/images/icon.svg" />
+  <meta property="og:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
   <meta property="og:locale" content="ar_SA" />
   <meta property="og:locale:alternate" content="en_US" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="منصة أمن المعلومات | Information Security Platform" />
   <meta name="twitter:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال." />
-  <meta name="twitter:image" content="https://motmii.github.io/MNCH/images/icon.svg" />
+  <meta name="twitter:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
   <!-- Structured data (JSON-LD) — language switchable via Lang hook in script.js -->
   <script type="application/ld+json">
   {
@@ -36,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.22.18" />
+  <link rel="stylesheet" href="style.css?v=1.22.20" />
   <link rel="manifest" href="manifest.json" />
   <script>
     /* MODULE 36 · pre-paint theme restore — runs before first paint (no FOUC).
@@ -77,7 +77,28 @@
   <nav class="nav" id="nav">
     <div class="nav-inner">
       <div class="nav-main">
-        <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">منصة<span class="logo-dot">.</span></a>
+        <!-- MODULE 60 · brand lockup — the same shield mark the favicon/PWA
+             icon is built from (images/icon.jpg), inlined here so its colours
+             come from the theme tokens (the inner disc is var(--bg), the «م»
+             is var(--text)) instead of shipping a second dark-only raster.
+             The mark is decorative: the link already carries an Arabic name. -->
+        <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 100 100" focusable="false">
+              <defs>
+                <linearGradient id="navLogoGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop class="logo-stop-a" offset="0" />
+                  <stop class="logo-stop-b" offset="1" />
+                </linearGradient>
+              </defs>
+              <path class="logo-shield" d="M50 12 L82 24 V52 C82 71 68 84 50 90 C32 84 18 71 18 52 V24 Z" />
+              <circle class="logo-disc" cx="50" cy="52" r="17" />
+              <text class="logo-glyph" x="50" y="63" text-anchor="middle"
+                    font-family="Tahoma, Arial, sans-serif" font-size="26" font-weight="700">م</text>
+            </svg>
+          </span>
+          <span class="logo-text"><span class="logo-word">منصة</span><span class="logo-dot">.</span></span>
+        </a>
         <ul class="nav-links">
           <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
           <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
@@ -125,6 +146,12 @@
           </div>
         </div>
       </div>
+      <!-- MODULE 60 · navbar primary action. The top bar had no desktop CTA
+           at all (the same action only existed inside the mobile menu), so
+           the page never offered one obvious next step while scrolling. It
+           points at the same #paths view as the hero CTA and is hidden
+           ≤1180px, where the burger menu already carries it. -->
+      <a href="#paths" class="btn btn-primary btn-sm nav-cta" data-i18n="nav.cta">ابدأ التعلم</a>
       <div class="nav-actions">
         <button type="button" id="searchOpenBtn" class="search-toggle" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="بحث في المنصة / Search the platform" title="بحث — / أو Ctrl+K">
           <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
@@ -260,8 +287,9 @@
            1. .hero-bg — the still hero photo, gently drifting via CSS
               (@keyframes heroDrift). Always present, so the hero keeps a
               real animated background even if nothing else is allowed to run.
-           2. .hero-media — a short, silent, locally generated loop
-              (images/hero-bg.mp4, derived from the same photo) that fades in
+           2. .hero-media — a 10s / 1280×720 / silent, locally generated
+              loop (images/hero-bg.mp4, derived from the same photo) that
+              fades in
               over the photo only when the device and the visitor's
               preferences allow it (script.js MODULE 59 gates: reduced motion,
               Save-Data / slow connection, narrow screens, low battery).
