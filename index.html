@@ -36,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.22.16" />
+  <link rel="stylesheet" href="style.css?v=1.22.18" />
   <link rel="manifest" href="manifest.json" />
   <script>
     /* MODULE 36 · pre-paint theme restore — runs before first paint (no FOUC).
@@ -64,16 +64,6 @@
 
   <!-- Keyboard accessibility: first tabbable element jumps to the main view. -->
   <a href="#hero" class="skip-link" data-i18n="a11y.skip">تخطي إلى المحتوى الرئيسي</a>
-
-  <!-- Salawat banner (MODULE 28) — slim, elegant, RTL-safe strip pinned to the top.
-       position:fixed → never affects layout/scroll (CLS-safe). Starts off-screen and
-       inert via CSS; JS slides it in. Non-intrusive: no autoplay audio, no focus steal. -->
-  <div id="salawatBanner" class="salawat-banner" role="region" aria-live="polite" aria-label="تذكير بالصلاة على النبي ﷺ">
-    <p class="salawat-banner-text">اللهم صلِّ وسلم وبارك على نبينا محمد ﷺ</p>
-    <button type="button" id="salawatBannerClose" class="salawat-banner-close" aria-label="إغلاق التذكير" title="إغلاق" aria-controls="salawatBanner">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    </button>
-  </div>
 
   <div class="cursor-dot" aria-hidden="true"></div>
   <div class="cursor-ring" aria-hidden="true"></div>
@@ -266,6 +256,22 @@
 
   <main>
   <header class="hero is-active" id="hero">
+      <!-- Animated hero background (MODULE 59). Two layers, cheapest first:
+           1. .hero-bg — the still hero photo, gently drifting via CSS
+              (@keyframes heroDrift). Always present, so the hero keeps a
+              real animated background even if nothing else is allowed to run.
+           2. .hero-media — a short, silent, locally generated loop
+              (images/hero-bg.mp4, derived from the same photo) that fades in
+              over the photo only when the device and the visitor's
+              preferences allow it (script.js MODULE 59 gates: reduced motion,
+              Save-Data / slow connection, narrow screens, low battery).
+           There is deliberately no autoplay attribute: with preload="none"
+           the file is not downloaded at all until those gates pass. -->
+      <div class="hero-bg" aria-hidden="true"></div>
+      <video class="hero-media" id="heroMedia" muted loop playsinline preload="none"
+             poster="images/backweb.jpg" aria-hidden="true" tabindex="-1">
+        <source src="images/hero-bg.mp4" type="video/mp4" />
+      </video>
       <div class="hero-glow hero-glow-a" aria-hidden="true"></div>
       <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
 

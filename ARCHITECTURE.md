@@ -65,7 +65,6 @@ Main IIFE ("use strict")
 ├── M23  PWA Registration navigator.serviceWorker.register("./sw.js")
 ├── M24  CyberGames       Incident Response Simulator & CTF (console)
 ├── M25  TerminalFX       Typewriter console driver (help/scan/block-ip → Flag)
-├── M28  SalawatBanner    Slim auto-hiding top banner (nav offset aware)
 ├── M29  Tools.Flash      18 bilingual flashcards (study feature — separate
 │                         from the 6-tool suite; terms embedded, no JSON)
 ├── M30  Stats.Live       Hero counters from real data + quiz jump links
@@ -149,7 +148,7 @@ Main IIFE ("use strict")
 ├── M52  Revision         Transparent local review queue built from real missed
 │                         questions (store "motmi-portal:revision"). No timers,
 │                         no notifications; quiz engine untouched.
-└── M53  ExamPrep         Exam-preparation mode in #progress: optional exam date,
+├── M53  ExamPrep         Exam-preparation mode in #progress: optional exam date,
                           day-granular countdown, daily recommendations, honest
                           per-subject readiness (0.5·quiz + 0.3·coverage +
                           0.2·mistake-free, weight redistribution when a subject
@@ -157,6 +156,24 @@ Main IIFE ("use strict")
                           sampled from the real question banks, weak-topic review
                           deep-links. Store "motmi-portal:exam-prep" (runs capped
                           at 10); all other stores are read-only here.
+├── M55–M58 Hero Wave 1   HeroNow ribbon (time-of-day greeting + the next real
+│                         class from the official timetable), HeroTabs tablist,
+│                         HeroAdaptiveNext strip, and the navbar WhatsNew
+│                         changelog popover (see README for the full list).
+└── M59  HeroMedia        Animated hero background — two pointer-inert layers:
+                          `.hero-bg` (the hero photo, drifting with a pure-CSS
+                          heroDrift zoom/pan) and `.hero-media` (a 10s, 1600×900,
+                          silent local loop `images/hero-bg.mp4` derived from the
+                          same photo — replace that one file to ship a different
+                          animation, and keep backweb.jpg as poster/fallback).
+                          Playback is opt-in per device and vetoed for
+                          prefers-reduced-motion, Save-Data/slow links, screens
+                          narrower than 700px, and batteries below 20% while
+                          unplugged; it pauses on hidden tabs and whenever the
+                          hero leaves the viewport. No autoplay attribute plus
+                          preload="none" means a vetoed device downloads 0 bytes.
+                          Publishes window.PlatformHeroMedia; covered by
+                          tests/hero-bg.test.js.
 ```
 
 `M33 · AI.Assistant` lives in its own file, `assistant.js` (loaded after
@@ -294,10 +311,11 @@ All directional properties use CSS logical equivalents:
 |---|---|
 | Navigations | Network-first → cached `index.html` shell fallback |
 | Statics + API/JSON (HTML/CSS/JS/images/fonts/fetched data) | Stale-while-revalidate into the versioned runtime cache |
-| Precache (app shell + subject images + flashcards + `backweb.jpg`) | Versioned cache refreshed on each `CACHE_VERSION` bump |
+| Precache (app shell + subject images + flashcards + `backweb.jpg` + the animated `hero-bg.mp4`) | Versioned cache refreshed on each `CACHE_VERSION` bump |
+| Media byte-range requests (the animated hero loop) | Cached full copy when one exists, otherwise streamed straight from the network — a `206` response is never stored |
 
 Notes: `OFFLINE_API_PATTERNS` / `API_CACHE_NAME` are declared hooks for future
 network-first API caching but are currently unused — the fetch handler routes
 every non-navigation GET through stale-while-revalidate.
 
-Cache versioning: bump `CACHE_VERSION` in `sw.js` to invalidate (currently `v1.13.0`).
+Cache versioning: bump `CACHE_VERSION` in `sw.js` to invalidate (currently `v1.22.18`).

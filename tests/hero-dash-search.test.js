@@ -87,7 +87,7 @@ const ids = [
   "heroDashQuiz", "heroDashContinue", "heroDashEmpty", "heroDashEmptyLink",
   "searchOpenBtn", "searchOverlay", "searchDialog", "searchInput", "searchResults", "searchClose",
   "onboardingOverlay", "onboardingBack", "onboardingSkip", "onboardingNext", "onboardingStart",
-  "salawatBanner", "salawatBannerClose", "assistantRoot", "assistantPanel", "assistantFab",
+  "assistantRoot", "assistantPanel", "assistantFab",
 ];
 const byId = {};
 ids.forEach((id) => { byId[id] = makeEl(id); });

@@ -4,6 +4,10 @@
    - Precache the app shell on install (versioned cache).
    - Navigations: network-first with cached-shell fallback.
    - Static assets + JSON: Stale-While-Revalidate.
+   - Media range requests (progressive video, e.g. the MODULE 59 hero
+     loop): answered from the precached full copy when one exists,
+     otherwise streamed straight from the network. A 206 response is
+     never stored — the Cache API rejects partial responses.
    - API study data (materials/tools/analytics/decks): network-
      first into a dedicated API cache with offline fallback.
    - Background Sync: failed progress/exam-result POSTs are
@@ -13,7 +17,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.22.17";
+const CACHE_VERSION = "v1.22.18";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
@@ -38,6 +42,7 @@ const PRECACHE_ASSETS = [
   "./images/it-components.svg",
   "./images/security-design.svg",
   "./images/backweb.jpg",
+  "./images/hero-bg.mp4",
   "./images/flashcards/firewall.svg",
   "./images/flashcards/vpn.svg",
   "./images/flashcards/hash.svg",
@@ -100,6 +105,26 @@ self.addEventListener("activate", (event) => {
  */
 function isCacheable(response) {
   return Boolean(response && (response.ok || response.type === "opaque"));
+}
+
+/**
+ * Range requests (progressive media such as the MODULE 59 hero loop):
+ * answer from the precached full copy when one exists — that is what
+ * keeps the animated hero working offline — otherwise let the network
+ * stream the file untouched, because a 206 response can never be
+ * stored and must not poison the cache.
+ * @param {Request} request Range request for a media file.
+ * @returns {Promise<Response>} Cached full copy, else the live stream.
+ */
+async function handleRangeRequest(request) {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    /* Match by URL: the cached entry is the FULL file, while this
+       request only asks for a byte slice. */
+    const cached = await cache.match(request.url);
+    if (cached) return cached;
+  } catch {}
+  return fetch(request);
 }
 
 /**
@@ -343,6 +368,13 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(handleNavigation(request));
+    return;
+  }
+
+  /* Progressive media (the MODULE 59 hero loop) asks for byte ranges:
+     serve the precached full copy when we have it, else stream live. */
+  if (request.headers.has("range")) {
+    event.respondWith(handleRangeRequest(request));
     return;
   }
 

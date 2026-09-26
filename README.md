@@ -49,6 +49,11 @@ A responsive, dark-themed cybersecurity education platform for Information Secur
 ### What's New (MODULE 58)
 - **Navbar 👍 button** — sits next to «المزيد» and opens a dated **«آخر التحديثات»** popover: the platform changelog sorted newest-first, bilingual (AR/EN), with a locally-stored unread dot. No network, no accounts — everything stays on the device.
 
+### Animated hero background (MODULE 59)
+- **Two-layer hero** — the hero photo keeps drifting on its own with pure CSS (`@keyframes heroDrift`), so the homepage is never static even when video is unavailable.
+- **Optional local video loop** — `images/hero-bg.mp4` (10s, 1600×900, silent, ~0.6 MB, generated from the same photo) fades in over that photo only when the device allows it. Playback is vetoed for `prefers-reduced-motion`, Save-Data / 2g links, screens under 700px, and batteries under 20% while unplugged; it also pauses whenever the tab is hidden or the hero leaves the viewport. The markup has no `autoplay` and uses `preload="none"`, so a vetoed device downloads zero bytes.
+- **Offline-ready** — the loop is precached by the service worker, and byte-range requests are answered from that cached full copy (a `206` response is never stored).
+
 ### Cyber Tools Suite (6 cybersecurity tools)
 | Tool | Description |
 |------|-------------|
@@ -132,7 +137,8 @@ nova-studio/
 ├── images/
 │   ├── icon.svg        # Favicon
 │   ├── icon-maskable.svg # PWA icon
-│   ├── backweb.jpg     # Hero background
+│   ├── backweb.jpg     # Hero background (still photo + video poster)
+│   ├── hero-bg.mp4     # Animated hero loop (10s, silent, precached · MODULE 59)
 │   ├── algorithms.svg  # Current-semester subject thumbnails (×5)
 │   ├── os-concepts.svg
 │   ├── policies-ethics.svg

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الدرع السيبراني | أمن المعلومات</title>
+    
+    <!-- تحميل مكتبة Tailwind CSS للتصميم -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- خطوط Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #050b14; /* لون خلفية داكن جداً */
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* تنسيق الـ Canvas ليكون في الخلفية بالكامل */
+        #network-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* إضافة تدرج لوني خفيف فوق الكانفاس لزيادة وضوح النص */
+            background: radial-gradient(circle at center, #0a192f 0%, #020c1b 100%);
+        }
+
+        /* تأثير الزجاج (Glassmorphism) للبطاقات */
+        .glass-panel {
+            background: rgba(16, 33, 62, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 255, 204, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* تأثير التوهج للأزرار */
+        .neon-glow:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.6), 0 0 30px rgba(0, 255, 204, 0.4);
+        }
+        
+        /* حركة بسيطة للعناصر عند التحميل */
+        .fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- عنصر الـ Canvas الذي سيتم رسم الحركة عليه -->
+    <canvas id="network-canvas"></canvas>
+
+    <!-- الشريط العلوي (Navbar) -->
+    <header class="w-full relative z-10 py-6 px-8 md:px-16 flex justify-between items-center glass-panel border-b-0">
+        <div class="flex items-center gap-3">
+            <!-- أيقونة الدرع (SVG) -->
+            <svg class="w-8 h-8 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            <h1 class="text-2xl font-bold text-white tracking-wider text-transparent bg-clip-text bg-gradient-to-l from-teal-300 to-blue-500">
+                سايبر شيلد
+            </h1>
+        </div>
+        <nav class="hidden md:flex gap-8 text-sm font-semibold text-gray-300">
+            <a href="#" class="hover:text-teal-400 transition duration-300">الرئيسية</a>
+            <a href="#" class="hover:text-teal-400 transition duration-300">الحلول</a>
+            <a href="#" class="hover:text-teal-400 transition duration-300">التهديدات</a>
+            <a href="#" class="hover:text-teal-400 transition duration-300">من نحن</a>
+        </nav>
+        <button class="hidden md:block px-6 py-2 border border-teal-500 text-teal-400 rounded-full hover:bg-teal-500 hover:text-white transition duration-300 font-semibold neon-glow">
+            تسجيل الدخول
+        </button>
+        <!-- زر القائمة للجوال -->
+        <button class="md:hidden text-teal-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </header>
+
+    <!-- القسم الرئيسي (Hero Section) -->
+    <main class="flex-grow flex items-center justify-center relative z-10 px-6 py-20 text-center">
+        <div class="max-w-4xl mx-auto glass-panel p-10 md:p-16 rounded-3xl fade-in-up relative overflow-hidden">
+            
+            <!-- تأثير إضاءة خلفي داخل المربع -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-teal-500 opacity-20 blur-[80px] rounded-full"></div>
+
+            <span class="inline-block py-1 px-3 rounded-full bg-teal-900/50 border border-teal-500/30 text-teal-300 text-sm font-semibold mb-6 shadow-[0_0_10px_rgba(0,255,204,0.2)]">
+                <span class="inline-block w-2 h-2 rounded-full bg-teal-400 animate-pulse ml-2"></span>
+                مراقبة مستمرة للتهديدات 24/7
+            </span>
+            
+            <h2 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight fade-in-up delay-100">
+                حماية الجيل القادم لـ <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-l from-teal-400 to-blue-600">
+                    أصولك الرقمية
+                </span>
+            </h2>
+            
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed fade-in-up delay-200">
+                منصة متكاملة تعتمد على الذكاء الاصطناعي لاكتشاف، تحليل، والتصدي للهجمات السيبرانية في الوقت الفعلي. أمن معلوماتك هو أولويتنا القصوى.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4 fade-in-up delay-300">
+                <button class="px-8 py-4 bg-teal-500 text-slate-900 rounded-full font-bold hover:bg-teal-400 transition duration-300 neon-glow flex items-center justify-center gap-2">
+                    ابدأ تجربتك المجانية
+                    <svg class="w-5 h-5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+                <button class="px-8 py-4 bg-transparent border border-gray-600 text-white rounded-full font-bold hover:border-teal-500 hover:text-teal-400 transition duration-300 flex items-center justify-center gap-2">
+                    اكتشف النظام
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </button>
+            </div>
+            
+            <!-- إحصائيات سريعة -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 pt-8 border-t border-gray-700/50">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold text-teal-400 mb-2">99.9%</h3>
+                    <p class="text-sm text-gray-400">دقة اكتشاف التهديدات</p>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold text-teal-400 mb-2">+10M</h3>
+                    <p class="text-sm text-gray-400">هجوم يتم صده يومياً</p>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold text-teal-400 mb-2">0.5s</h3>
+                    <p class="text-sm text-gray-400">سرعة الاستجابة اللحظية</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- سكربت حركة الخلفية (Network Animation) -->
+    <script>
+        window.onload = function () {
+            const canvas = document.getElementById('network-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let particlesArray = [];
+            
+            // ضبط حجم الكانفاس ليتناسب مع حجم الشاشة
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // تحديث الحجم عند تغيير حجم النافذة
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                init();
+            });
+
+            // كائن لتخزين موقع الماوس لعمل تفاعل خفيف
+            let mouse = {
+                x: null,
+                y: null,
+                radius: (canvas.height/80) * (canvas.width/80)
+            }
+
+            window.addEventListener('mousemove', function(event) {
+                mouse.x = event.x;
+                mouse.y = event.y;
+            });
+            window.addEventListener('mouseout', function() {
+                mouse.x = undefined;
+                mouse.y = undefined;
+            });
+
+            // كلاس الجزيئات (النقاط)
+            class Particle {
+                constructor(x, y, directionX, directionY, size, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.directionX = directionX;
+                    this.directionY = directionY;
+                    this.size = size;
+                    this.color = color;
+                }
+                
+                // رسم النقطة
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                    
+                    // إضافة توهج للنقاط
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = this.color;
+                }
+                
+                // تحديث موقع النقطة
+                update() {
+                    // ارتداد النقاط عند الوصول لحواف الشاشة
+                    if (this.x > canvas.width || this.x < 0) {
+                        this.directionX = -this.directionX;
+                    }
+                    if (this.y > canvas.height || this.y < 0) {
+                        this.directionY = -this.directionY;
+                    }
+                    
+                    // التفاعل مع الماوس (ابتعاد النقاط عن الماوس)
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (distance < mouse.radius + this.size){
+                        if (mouse.x < this.x && this.x < canvas.width - this.size * 10) {
+                            this.x += 10;
+                        }
+                        if (mouse.x > this.x && this.x > this.size * 10) {
+                            this.x -= 10;
+                        }
+                        if (mouse.y < this.y && this.y < canvas.height - this.size * 10) {
+                            this.y += 10;
+                        }
+                        if (mouse.y > this.y && this.y > this.size * 10) {
+                            this.y -= 10;
+                        }
+                    }
+
+                    // تحريك النقطة
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    
+                    // رسم النقطة في الموقع الجديد
+                    this.draw();
+                }
+            }
+
+            // تهيئة الجزيئات (تحديد العدد والمواقع الأولية)
+            function init() {
+                particlesArray = [];
+                // حساب عدد الجزيئات بناءً على مساحة الشاشة حتى لا تزدحم الشاشات الصغيرة
+                let numberOfParticles = (canvas.height * canvas.width) / 12000;
+                
+                // إذا كانت الشاشة كبيرة جداً نقوم بوضع حد أقصى
+                if(numberOfParticles > 150) numberOfParticles = 150;
+
+                for (let i = 0; i < numberOfParticles; i++) {
+                    let size = (Math.random() * 2) + 1; // حجم عشوائي
+                    let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                    let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                    let directionX = (Math.random() * 2) - 1; // سرعة واتجاه عشوائي
+                    let directionY = (Math.random() * 2) - 1;
+                    
+                    // لون النقاط (درجات السيان / الأخضر التقني)
+                    let color = '#00f3ff'; 
+
+                    particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                }
+            }
+
+            // رسم الخطوط بين النقاط القريبة (شبكة الاتصال)
+            function connect() {
+                let opacityValue = 1;
+                for (let a = 0; a < particlesArray.length; a++) {
+                    for (let b = a; b < particlesArray.length; b++) {
+                        let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                                     + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                        
+                        // إذا كانت المسافة قصيرة، نرسم خط بينهما
+                        if (distance < (canvas.width/7) * (canvas.height/7)) {
+                            opacityValue = 1 - (distance/20000);
+                            ctx.strokeStyle = 'rgba(0, 243, 255,' + opacityValue + ')';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            // حلقة الحركة (Animation Loop)
+            function animate() {
+                requestAnimationFrame(animate);
+                // مسح الإطار السابق
+                ctx.clearRect(0, 0, innerWidth, innerHeight);
+                
+                // تحديث جميع النقاط
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                }
+                
+                // رسم الخطوط المتصلة
+                connect();
+            }
+
+            // بدء التشغيل
+            init();
+            animate();
+        }
+    </script>
+</body>
+</html>
