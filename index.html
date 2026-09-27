@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة أمن المعلومات | Information Security Platform — الترم الحالي</title>
+  <meta name="description" content="منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال. An Arabic-first learning platform for Information Security diploma students: learning paths, quizzes, security tools and labs — offline-ready." />
+  <meta name="keywords" content="أمن المعلومات, منصة تعليمية, اختبارات, سيبراني, information security, cybersecurity, learning platform, quizzes" />
+  <link rel="canonical" href="https://motmii.github.io/MNCH/" />
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="منصة أمن المعلومات — Information Security Platform" />
+  <meta property="og:title" content="منصة أمن المعلومات | Information Security Platform" />
+  <meta property="og:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال. An Arabic-first infosec learning platform: paths, quizzes, tools and labs — offline-ready." />
+  <meta property="og:url" content="https://motmii.github.io/MNCH/" />
+  <meta property="og:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
+  <meta property="og:locale" content="ar_SA" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="منصة أمن المعلومات | Information Security Platform" />
+  <meta name="twitter:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال." />
+  <meta name="twitter:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
+  <!-- Structured data (JSON-LD) — language switchable via Lang hook in script.js -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "منصة أمن المعلومات — Information Security Platform",
+    "alternateName": "Information Security Platform — منصة أمن المعلومات",
+    "url": "https://motmii.github.io/MNCH/",
+    "inLanguage": ["ar", "en"],
+    "description": "منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال."
+  }
+  </script>
+  <link rel="preload" as="image" href="images/backweb.jpg" fetchpriority="high" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=1.22.24" />
+  <link rel="manifest" href="manifest.json" />
+  <script>
+    /* MODULE 36 · pre-paint theme + palette restore — runs before first paint
+       (no FOUC). Resolution mirrors script.js MODULE 36: explicit stored
+       choice wins; otherwise follow the OS (prefers-color-scheme); LIGHT
+       (Rose Blush) is the fallback. <html data-theme="dark"> is therefore an
+       explicit opt-in, while :root keeps the dark Rose Noir tokens (never a
+       light flash on a dark shell). Palette (rose/classic) restores the same
+       way via "motmi-portal:palette" (default: rose → no attribute). */
+    (function () {
+      var t = null;
+      try { t = JSON.parse(localStorage.getItem("motmi-portal:theme") || "null"); } catch (e) {}
+      var sysDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var dark = t === "dark" || (t !== "light" && sysDark);
+      document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      var p = null;
+      try { p = JSON.parse(localStorage.getItem("motmi-portal:palette") || "null"); } catch (e) {}
+      if (p === "classic") document.documentElement.setAttribute("data-palette", "classic");
+    })();
+  </script>
+  <meta name="theme-color" content="#d6c1c3" />
+  <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
+  <noscript>
+    <style>
+      /* Without JS: never trap the user behind the preloader, and show
+         all reveal-on-scroll content immediately. */
+      .preloader, .cursor-dot, .cursor-ring { display: none !important; }
+      .reveal { opacity: 1 !important; transform: none !important; }
+    </style>
+  </noscript>
+</head>
+<body>
+
+  <!-- Keyboard accessibility: first tabbable element jumps to the main view. -->
+  <a href="#hero" class="skip-link" data-i18n="a11y.skip">تخطي إلى المحتوى الرئيسي</a>
+
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+
+  <div class="preloader" id="preloader">
+    <div class="preloader-inner">
+      <span class="preloader-word">م</span><span class="preloader-word">ن</span><span class="preloader-word">ص</span><span class="preloader-word">ة</span>
+    </div>
+  </div>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <div class="nav-main">
+        <!-- MODULE 60 · brand lockup — the same shield mark the favicon/PWA
+             icon is built from (images/icon.jpg), inlined here so its colours
+             come from the theme tokens (the inner disc is var(--bg), the «م»
+             is var(--text)) instead of shipping a second dark-only raster.
+             The mark is decorative: the link already carries an Arabic name. -->
+        <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 100 100" focusable="false">
+              <defs>
+                <linearGradient id="navLogoGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop class="logo-stop-a" offset="0" />
+                  <stop class="logo-stop-b" offset="1" />
+                </linearGradient>
+              </defs>
+              <path class="logo-shield" d="M50 12 L82 24 V52 C82 71 68 84 50 90 C32 84 18 71 18 52 V24 Z" />
+              <circle class="logo-disc" cx="50" cy="52" r="17" />
+              <text class="logo-glyph" x="50" y="63" text-anchor="middle"
+                    font-family="Tahoma, Arial, sans-serif" font-size="26" font-weight="700">م</text>
+            </svg>
+          </span>
+          <span class="logo-text"><span class="logo-word">منصة</span><span class="logo-dot">.</span></span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
+          <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
+          <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+          <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
+          <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+          <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
+          <li class="nav-more">
+            <details class="nav-more-details" id="navMoreDetails">
+              <summary data-i18n="nav.more">المزيد</summary>
+              <ul class="nav-more-menu">
+                <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
+                <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
+                <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
+                <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
+                <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
+                <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
+                <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
+              </ul>
+            </details>
+          </li>
+        </ul>
+
+        <!-- MODULE 58 · WhatsNew — زر التعجب (👍) داخل المربع الأحمر بجانب «المزيد» -->
+        <!-- يفتح لوحة «آخر التحديثات»: قائمة مرتّبة من الأحدث إلى الأقدم (AR + EN). -->
+        <div class="nav-updates" id="navUpdates">
+          <button type="button" id="updatesBtn" class="updates-toggle" aria-haspopup="dialog" aria-expanded="false" aria-controls="updatesPanel" aria-label="آخر التحديثات / Latest updates" title="آخر التحديثات / Latest updates">
+            <svg class="updates-ico" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v11"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg>
+            <span class="updates-dot" id="updatesDot" aria-hidden="true" hidden></span>
+          </button>
+
+          <div class="updates-panel" id="updatesPanel" role="dialog" aria-labelledby="updatesTitle" aria-describedby="updatesSub" hidden>
+            <div class="updates-head">
+              <div class="updates-head-text">
+                <h3 id="updatesTitle" data-i18n="updates.title">آخر التحديثات</h3>
+                <p class="updates-sub" id="updatesSub" data-i18n="updates.sub">أحدث ما أُضيف إلى المنصة — من الأحدث إلى الأقدم</p>
+              </div>
+              <button type="button" class="updates-close" id="updatesClose" aria-label="إغلاق / Close" title="إغلاق / Close">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <ol class="updates-list" id="updatesList"></ol>
+            <p class="updates-empty" id="updatesEmpty" data-i18n="updates.empty" hidden>لا توجد تحديثات لعرضها بعد.</p>
+            <p class="updates-foot" data-i18n="updates.foot">تُحدَّث هذه القائمة عند إضافة مزايا جديدة.</p>
+          </div>
+        </div>
+      </div>
+      <!-- MODULE 60 · navbar primary action. The top bar had no desktop CTA
+           at all (the same action only existed inside the mobile menu), so
+           the page never offered one obvious next step while scrolling. It
+           points at the same #paths view as the hero CTA and is hidden
+           ≤1180px, where the burger menu already carries it. -->
+      <a href="#paths" class="btn btn-primary btn-sm nav-cta" data-i18n="nav.cta">ابدأ التعلم</a>
+      <div class="nav-actions">
+        <button type="button" id="searchOpenBtn" class="search-toggle" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="بحث في المنصة / Search the platform" title="بحث — / أو Ctrl+K">
+          <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        </button>
+        <button id="langToggle" class="lang-toggle" type="button" aria-pressed="true" aria-label="تغيير اللغة / Switch language" title="English">
+          <span class="lang-current" aria-hidden="true">EN</span>
+        </button>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="الوضع الفاتح / Light mode" title="الوضع الفاتح / Light mode">
+          <span class="theme-ico" aria-hidden="true">
+            <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M5.2 18.8l1.6-1.6M17.2 6.8l1.6-1.6"/></svg>
+            <svg class="ico-moon" viewBox="0 0 24 24"><path d="M20.8 13.2A8.5 8.5 0 1 1 10.8 3.2a6.8 6.8 0 0 0 10 10z"/></svg>
+          </span>
+        </button>
+        <button id="paletteToggle" class="palette-toggle" type="button" aria-pressed="false" aria-label="اللون الكلاسيكي / Classic palette" title="اللون الكلاسيكي / Classic palette">
+          <span class="palette-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="9.2" cy="9.6" r="1.3" fill="currentColor" stroke="none"/><circle cx="14.8" cy="9.6" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="14.9" r="1.3" fill="currentColor" stroke="none"/></svg></span>
+        </button>
+        <button type="button" class="nav-burger" id="navBurger" aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobileMenu">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="القائمة" aria-hidden="true" inert>
+    <ul>
+      <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
+      <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
+      <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+      <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
+      <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+      <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
+      <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
+      <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
+      <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
+      <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
+      <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
+      <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
+      <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
+    </ul>
+    <a href="#paths" class="btn btn-primary" data-i18n="nav.cta">ابدأ التعلم</a>
+  </div>
+
+    <!-- ONBOARDING — MODULE 38 · first-time modal (optional, skippable) -->
+  <div id="onboardingOverlay" class="onboarding-overlay" role="dialog"
+       aria-modal="true" aria-labelledby="onboardingTitle" aria-hidden="true"
+       data-onboarding>
+    <div class="onboarding-panel" role="document">
+      <header class="onboarding-head">
+        <h2 id="onboardingTitle" data-i18n="onboarding.title">Welcome</h2>
+        <p class="onboarding-sub" data-i18n="onboarding.subtitle"></p>
+      </header>
+
+      <!-- Step 1: Level -->
+      <section class="onboarding-step" data-os-step="1" hidden>
+        <h3 data-i18n="onboarding.step1Title">Level?</h3>
+        <p class="onboarding-step-sub" data-i18n="onboarding.step1Desc"></p>
+        <div class="onboarding-levels">
+          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="beginner" aria-pressed="false" data-i18n="onboarding.level.beginner">Beginner</button>
+          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="intermediate" aria-pressed="false" data-i18n="onboarding.level.intermediate">Intermediate</button>
+          <button type="button" class="btn btn-ghost btn-block btn-level" data-os-level="advanced" aria-pressed="false" data-i18n="onboarding.level.advanced">Advanced</button>
+        </div>
+      </section>
+
+      <!-- Step 2: Subjects -->
+      <section class="onboarding-step" data-os-step="2" hidden>
+        <h3 data-i18n="onboarding.step2Title">Interested in?</h3>
+        <p class="onboarding-step-sub" data-i18n="onboarding.step2Desc"></p>
+        <div class="onboarding-subjects">
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030702" aria-pressed="false" data-i18n="onboarding.subj.algorithms">الخوارزميات</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030802" aria-pressed="false" data-i18n="onboarding.subj.osconcepts">مفاهيم نظم التشغيل</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210030902" aria-pressed="false" data-i18n="onboarding.subj.policy">السياسات والتشريعات والأخلاقيات</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210031002" aria-pressed="false" data-i18n="onboarding.subj.components">مكونات أنظمة تقنية المعلومات</button>
+          <button type="button" class="btn btn-ghost btn-sm btn-subject" data-os-subj="260210031102" aria-pressed="false" data-i18n="onboarding.subj.design">مبادئ التصميم في الأمن السيبراني</button>
+        </div>
+        <p class="onboarding-skip-sub"><button type="button" class="btn btn-ghost btn-sm" data-os-skip-subjects data-i18n="onboarding.skip">Skip</button></p>
+      </section>
+
+      <!-- Step 3: Style -->
+      <section class="onboarding-step" data-os-step="3" hidden>
+        <h3 data-i18n="onboarding.step3Title">Learning style?</h3>
+        <p class="onboarding-step-sub" data-i18n="onboarding.step3Desc"></p>
+        <div class="onboarding-styles">
+          <button type="button" class="btn btn-ghost btn-style" data-os-style="theory" aria-pressed="false" data-i18n="onboarding.style.theory">Theory</button>
+          <button type="button" class="btn btn-ghost btn-style" data-os-style="quizzes" aria-pressed="false" data-i18n="onboarding.style.quizzes">Quizzes</button>
+          <button type="button" class="btn btn-ghost btn-style" data-os-style="practical" aria-pressed="false" data-i18n="onboarding.style.practical">Practical</button>
+        </div>
+      </section>
+
+            <!-- Summary / Recommendation -->
+      <section class="onboarding-step" data-os-step="4" hidden>
+        <h3 data-i18n="onboarding.recommendedTitle">Recommended</h3>
+        <p class="onboarding-step-sub" data-i18n="onboarding.recommendedDesc"></p>
+        <div class="onboarding-summary">
+          <p><b data-os-summary-level data-i18n="onboarding.summaryLevel">Level</b></p>
+          <p><b data-os-summary-subjects data-i18n="onboarding.summarySubjects">Subjects</b></p>
+          <p><b data-os-summary-style data-i18n="onboarding.summaryStyle">Style</b></p>
+        </div>
+        <a href="#path/fundamentals" class="btn btn-primary btn-block" id="onboardingStart" data-i18n="onboarding.finish">Start</a>
+      </section>
+
+      <footer class="onboarding-foot">
+        <button type="button" id="onboardingBack" class="btn btn-ghost btn-sm" data-i18n="onboarding.back">Back</button>
+        <button type="button" id="onboardingSkip" class="btn btn-ghost btn-sm" data-i18n="onboarding.skip">Skip</button>
+        <button type="button" id="onboardingNext" class="btn btn-primary btn-sm" data-i18n="onboarding.next">Next</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ONBOARDING TOUR — MODULE 54 · first-time guided walkthrough (8 steps).
+       Shown ONCE per browser (state: "motmi-portal:tour" via MODULE 02 Store);
+       Skip, Escape and the final step all close it for good. It reuses the
+       MODULE 38 overlay shell and the shared focus trap, names every area in
+       words (never colour-only) and highlights the related element while the
+       step is visible. Arabic-first / RTL, keyboard-accessible.
+       The step texts are written by the module (MODULE 22 Lang.t), so the
+       slots below intentionally carry no data-i18n. -->
+  <div id="tourOverlay" class="onboarding-overlay tour-overlay" role="dialog"
+       aria-modal="true" aria-labelledby="tourTitle"
+       aria-describedby="tourCounter tourStepText tourArea" aria-hidden="true">
+    <div class="onboarding-panel tour-panel" role="document">
+      <p class="tour-count" id="tourCounter">الخطوة 1 من 8</p>
+      <h2 class="tour-title" id="tourTitle" tabindex="-1">جولة تعريفية في المنصة</h2>
+      <p class="tour-text" id="tourStepText"></p>
+      <p class="tour-area" id="tourArea"></p>
+      <div class="onboarding-foot tour-foot">
+        <button type="button" id="tourBack" class="btn btn-ghost btn-sm" data-i18n="tour.back">رجوع</button>
+        <button type="button" id="tourSkip" class="btn btn-ghost btn-sm" data-i18n="tour.skip">تخطي الجولة</button>
+        <button type="button" id="tourNext" class="btn btn-primary btn-sm">التالي</button>
+      </div>
+      <p class="tour-hint" data-i18n="tour.hint">استخدم Tab للتنقل بين الأزرار · Esc لتخطي الجولة.</p>
+    </div>
+  </div>
+
+  <main>
+  <header class="hero is-active" id="hero">
+      <!-- Animated hero background (MODULE 59). Two layers, cheapest first:
+           1. .hero-bg — the still hero photo, gently drifting via CSS
+              (@keyframes heroDrift). Always present, so the hero keeps a
+              real animated background even if nothing else is allowed to run.
+           2. .hero-media — a 10s / 1280×720 / silent, locally generated
+              loop (images/hero-bg.mp4, derived from the same photo) that
+              fades in
+              over the photo only when the device and the visitor's
+              preferences allow it (script.js MODULE 59 gates: reduced motion,
+              Save-Data / slow connection, narrow screens, low battery).
+           There is deliberately no autoplay attribute: with preload="none"
+           the file is not downloaded at all until those gates pass. -->
+      <div class="hero-bg" aria-hidden="true"></div>
+      <video class="hero-media" id="heroMedia" muted loop playsinline preload="none"
+             poster="images/backweb.jpg" aria-hidden="true" tabindex="-1">
+        <source src="images/hero-bg.mp4" type="video/mp4" />
+      </video>
+      <div class="hero-glow hero-glow-a" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
+
+      <div class="hero-content">
+        <!-- "Now" strip (MODULE 55). A slim, honest line: a time-of-day
+             greeting plus the NEXT real class, computed locally from the
+             official timetable already published in current-semester.js
+             (subject.schedule). No network, no stored personal data, and
+             when no timetable exists the strip says so instead of guessing. -->
+        <div class="hero-now reveal" id="heroNow" role="status">
+          <span class="hero-now-ico" aria-hidden="true">🗓</span>
+          <span class="hero-now-text" id="heroNowText" data-i18n="now.loading">جارٍ تحديد موعد حصتك القادمة…</span>
+          <span class="hero-now-chip" id="heroNowChip" hidden></span>
+          <!-- MODULE 61 contextual entry point: shown by MODULE 55 only when a
+               class is live or starts today/tomorrow — one tap to the access guide. -->
+          <a class="hero-now-guide" id="heroNowGuide" href="#guide" data-i18n="guide.nowCta" hidden>كيف أصل للمحاضرة؟</a>
+        </div>
+
+        <!-- Platform identity — clear name in Arabic & English + short description -->
+        <div class="hero-brand reveal" aria-label="اسم المنصة بالعربية والإنجليزية">
+          <strong class="hero-brand-ar">منصة أمن المعلومات</strong>
+          <span class="hero-brand-sep" aria-hidden="true">·</span>
+          <span class="hero-brand-en" lang="en" dir="ltr">Information Security Platform</span>
+        </div>
+        <p class="hero-tagline reveal" data-i18n="hero.tagline">منصة عربية تعليمية لطلاب دبلوم أمن المعلومات — تعلّم، اختبر نفسك، وتدرّب عمليًا داخل متصفحك ودون اتصال.</p>
+        <h1 class="hero-title">
+          <span class="line"><span class="reveal-line" data-i18n="hero.title1">منصة تعليمية</span></span>
+          <span class="line"><span class="reveal-line" data-i18n="hero.title2">وتدريبية عملية </span><em class="grad" data-i18n="hero.titleAccent">لطلاب أمن المعلومات</em></span>
+        </h1>
+        <p class="hero-sub reveal" data-i18n="hero.sub">منصة عربية متكاملة لطلاب أمن المعلومات: تعلّم أساسيات كل مادة، راجِع المصطلحات بالبطاقات، اختبر نفسك بأسئلة عملية، وطبّق ما تعلّمته بأدوات أمنية ومعامل محاكاة حقيقية — كل ذلك يعمل داخل متصفحك وبدون إنترنت.</p>
+        <div class="hero-actions reveal">
+          <a href="#paths" class="btn btn-primary btn-lg magnetic" data-i18n="hero.ctaStart">ابدأ رحلة التعلم</a>
+          <a href="#semester" class="btn btn-ghost magnetic" data-i18n="hero.ctaSemester">استكشف الترم الحالي</a>
+        </div>
+
+        <!-- Start Here — new users: beginner-friendly entry point pointing at
+             the Fundamentals path + the existing onboarding wizard. -->
+        <div class="hero-start reveal" id="heroStartHere">
+          <span class="hero-start-ico" aria-hidden="true">🧭</span>
+          <div class="hero-start-text">
+            <strong data-i18n="starthere.title">جديد هنا؟ ابدأ من هنا</strong>
+            <span data-i18n="starthere.desc">مسار «الأساسيات» مصمم للمبتدئين — خمس خطوات قصيرة تنقلك من الصفر إلى أول اختبار.</span>
+          </div>
+          <div class="hero-start-actions">
+            <a href="#path/fundamentals" class="btn btn-primary btn-sm" data-i18n="starthere.cta">ابدأ مسار الأساسيات</a>
+            <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
+          </div>
+        </div>
+
+        <!-- Adaptive next step (MODULE 57). For students who already have
+             real saved progress this strip replaces the "new here?" strip
+             and offers the SINGLE most useful next action, derived only
+             from local state: an unfinished quiz session → missed
+             questions → the last opened lesson → a path in progress.
+             Both strip buttons are document-delegated, so the replay
+             controls keep working from here. -->
+        <div class="hero-start hero-next reveal" id="heroNextAction" hidden>
+          <span class="hero-start-ico" aria-hidden="true">⚡</span>
+          <div class="hero-start-text">
+            <strong id="heroNextTitle" data-i18n="next.title">خطوتك التالية</strong>
+            <span id="heroNextMeta" aria-live="polite">—</span>
+          </div>
+          <div class="hero-start-actions">
+            <a href="#quiz" class="btn btn-primary btn-sm" id="heroNextBtn">ابدأ</a>
+            <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="heroNextDismiss" data-i18n="next.dismiss">إخفاء</button>
+          </div>
+        </div>
+
+        <!-- Student command center (MODULE 47). Always visible on the homepage:
+             welcome, overall progress, current path, next learning step,
+             unfinished work, and a Continue-Learning shortcut. JS fills it in
+             from the platform's real local progress data only. -->
+        <section class="hero-dash hero-command reveal" id="heroDash" aria-labelledby="heroDashTitle">
+          <div class="hero-dash-head">
+            <div class="hero-dash-intro">
+              <p class="hero-dash-kicker" data-i18n="dash.kicker">لوحة الطالب</p>
+              <h2 class="hero-dash-title" id="heroDashTitle">مرحبًا بك في لوحة تعلّمك</h2>
+              <p class="hero-dash-welcome" id="heroDashWelcome" aria-live="polite">ابدأ مسارًا أو اختبارًا وسيظهر تقدمك هنا — محفوظًا على جهازك فقط.</p>
+            </div>
+            <div class="hero-dash-overall">
+              <span class="hero-dash-label" data-i18n="dash.overall">التقدم العام في الاختبارات</span>
+              <strong class="hero-dash-value"><span id="heroDashPct">0</span>%</strong>
+              <div class="hero-dash-bar" id="heroDashOverallMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="التقدم العام في الاختبارات"><i id="heroDashBar" style="width:0%"></i></div>
+            </div>
+          </div>
+
+          <!-- Section tabs (MODULE 56). The dashboard's blocks are grouped
+               behind three tabs instead of being stacked, so the hero stays
+               compact while every value keeps its own mount id. Arrow keys
+               move between tabs (RTL-aware), only the active panel is in the
+               tab order, and the inactive panels are `hidden`. -->
+          <div class="hero-tabs" id="heroDashTabs" role="tablist" aria-label="أقسام لوحة الطالب">
+            <button type="button" class="hero-tab is-active" id="heroTabToday" role="tab" aria-selected="true" aria-controls="heroPanelToday" tabindex="0">
+              <span class="hero-tab-ico" aria-hidden="true">📌</span><span data-i18n="dash.tabToday">اليوم</span>
+            </button>
+            <button type="button" class="hero-tab" id="heroTabPath" role="tab" aria-selected="false" aria-controls="heroPanelPath" tabindex="-1">
+              <span class="hero-tab-ico" aria-hidden="true">🧭</span><span data-i18n="dash.tabPath">مساري</span>
+            </button>
+            <button type="button" class="hero-tab" id="heroTabMotivation" role="tab" aria-selected="false" aria-controls="heroPanelMotivation" tabindex="-1">
+              <span class="hero-tab-ico" aria-hidden="true">🏅</span><span data-i18n="dash.tabMotivation">التحفيز</span>
+            </button>
+          </div>
+
+          <!-- Panel 1 · Today — the three actionable cells. -->
+          <div class="hero-panel" id="heroPanelToday" role="tabpanel" aria-labelledby="heroTabToday" tabindex="0">
+            <div class="hero-dash-grid is-3">
+              <article class="hero-dash-cell hero-dash-panel">
+                <span class="hero-dash-label" data-i18n="dash.nextLesson">الدرس التالي</span>
+                <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
+                <p class="hero-dash-meta" id="heroDashLessonMeta">—</p>
+              </article>
+
+              <article class="hero-dash-cell hero-dash-panel">
+                <span class="hero-dash-label" data-i18n="dash.pending">عمل غير مكتمل</span>
+                <strong class="hero-dash-value is-text" id="heroDashTasks">—</strong>
+                <p class="hero-dash-meta" id="heroDashTasksMeta">—</p>
+              </article>
+
+              <article class="hero-dash-cell hero-dash-panel is-continue">
+                <span class="hero-dash-label" data-i18n="dash.continueLabel">متابعة التعلم</span>
+                <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
+                <p class="hero-dash-meta" id="heroDashLast">—</p>
+                <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
+              </article>
+            </div>
+
+            <div class="hero-dash-empty" id="heroDashEmpty" hidden>
+              <span aria-hidden="true">🧭</span>
+              <p data-i18n="dash.emptyBody">لا يوجد تقدم محفوظ بعد. ابدأ بالمسار المقترح أو أول اختبار — ستظهر خطوتك التالية هنا تلقائيًا.</p>
+              <a href="#paths" class="btn btn-ghost btn-sm" id="heroDashEmptyLink" data-i18n="dash.emptyCta">استكشف مسارات التعلم</a>
+            </div>
+          </div>
+
+          <!-- Panel 2 · My path — the current learning path in full width. -->
+          <div class="hero-panel" id="heroPanelPath" role="tabpanel" aria-labelledby="heroTabPath" tabindex="0" hidden>
+            <div class="hero-dash-grid is-1">
+              <article class="hero-dash-cell hero-dash-panel">
+                <span class="hero-dash-label" data-i18n="dash.currentPath">المسار الحالي</span>
+                <strong class="hero-dash-value is-text" id="heroDashPath">—</strong>
+                <p class="hero-dash-meta" id="heroDashPathMeta">—</p>
+                <div class="hero-dash-bar is-path" id="heroDashPathMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المسار"><i id="heroDashPathBar" style="width:0%"></i></div>
+                <a href="#paths" class="hero-dash-link" id="heroDashPathLink" data-i18n="dash.openPath">افتح المسار</a>
+              </article>
+            </div>
+          </div>
+
+          <!-- Panel 3 · Motivation (MODULE 50) — unchanged content and ids. -->
+          <div class="hero-panel" id="heroPanelMotivation" role="tabpanel" aria-labelledby="heroTabMotivation" tabindex="0" hidden>
+
+          <!-- Local motivation system (MODULE 50). Purely local XP, levels,
+               goals, streak and achievements; no leaderboards or competition. -->
+          <section class="hero-dash-motivation" id="heroDashMotivation" aria-labelledby="motivationTitle">
+            <div class="motivation-top">
+              <div class="motivation-level">
+                <p class="motivation-kicker" data-i18n="motivation.kicker">نظام التحفيز المحلي</p>
+                <h3 class="motivation-title" id="motivationTitle">
+                  <span data-i18n="motivation.level">المستوى</span>
+                  <span id="heroDashLevel">1</span>
+                  <span aria-hidden="true">·</span>
+                  <span id="heroDashLevelTitle">مستكشف</span>
+                </h3>
+                <p class="hero-dash-meta" id="heroDashXp">0 XP</p>
+                <div class="hero-dash-bar is-xp" id="heroDashXpMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المستوى"><i id="heroDashXpBar" style="width:0%"></i></div>
+                <p class="hero-dash-meta" id="heroDashXpNext">—</p>
+              </div>
+
+              <div class="motivation-goals">
+                <div class="motivation-goal">
+                  <span class="hero-dash-label" data-i18n="motivation.dailyGoal">هدف الدراسة اليومي</span>
+                  <strong class="motivation-goal-value" id="heroDashDaily">0 / 40 XP</strong>
+                  <div class="hero-dash-bar" id="heroDashDailyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="40" aria-valuenow="0" aria-label="هدف الدراسة اليومي"><i id="heroDashDailyBar" style="width:0%"></i></div>
+                </div>
+                <div class="motivation-goal">
+                  <span class="hero-dash-label" data-i18n="motivation.weeklyGoal">هدف الدراسة الأسبوعي</span>
+                  <strong class="motivation-goal-value" id="heroDashWeekly">0 / 200 XP</strong>
+                  <div class="hero-dash-bar" id="heroDashWeeklyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="200" aria-valuenow="0" aria-label="هدف الدراسة الأسبوعي"><i id="heroDashWeeklyBar" style="width:0%"></i></div>
+                </div>
+                <div class="motivation-goal is-streak">
+                  <span class="hero-dash-label" data-i18n="motivation.streak">سلسلة الدراسة</span>
+                  <strong class="motivation-goal-value" id="heroDashStreak">0</strong>
+                  <p class="hero-dash-meta" data-i18n="motivation.streakHint">أيام متتالية من النشاط الحقيقي</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="motivation-achievements">
+              <div class="motivation-achievements-head">
+                <h4 data-i18n="motivation.achievements">الإنجازات</h4>
+                <span id="heroDashBadgeCount">0 / 9</span>
+              </div>
+              <div class="motivation-badges" id="heroDashBadges" role="list"></div>
+            </div>
+
+            <div class="motivation-reset-row">
+              <p class="hero-dash-meta" data-i18n="motivation.resetNote">تُحفظ بيانات التحفيز على جهازك فقط، وإعادة الضبط لا تحذف نتائج الاختبارات أو تقدم المسارات.</p>
+              <button type="button" class="btn btn-ghost btn-sm" id="heroDashReset" data-i18n="motivation.reset">إعادة ضبط التحفيز</button>
+            </div>
+          </section>
+          </div>
+        </section>
+
+        <!-- Continue-learning card (MODULE 37b). Hidden until the quiz store
+             holds a resumable session or saved results; JS fills it in. -->
+        <div class="hero-continue" id="heroContinue" hidden>
+          <div class="hero-continue-inner">
+            <span class="hero-continue-ico" aria-hidden="true">▶</span>
+            <div class="hero-continue-text">
+              <strong data-i18n="hero.continueLabel">متابعة التعلم</strong>
+              <span id="heroContinueMeta" class="hero-continue-meta" aria-live="polite"></span>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="heroContinueBtn">تابع من حيث توقفت</button>
+          </div>
+        </div>
+
+        <p class="hero-credit reveal" data-i18n-html="hero.credit">صُمّم وطُوّر بواسطة <em class="grad">أحمد مطمي</em></p>
+        <div class="hero-meta hero-meta--compact reveal">
+          <div class="hero-stat"><strong data-count="questions">0</strong><span data-i18n="hero.statq">سؤال تدريبي</span></div>
+          <div class="hero-stat"><strong data-count="subjects">0</strong><span data-i18n="hero.stats">مواد دراسية</span></div>
+          <div class="hero-stat"><strong data-count="tools">0</strong><span data-i18n="hero.statTools">أدوات تفاعلية</span></div>
+        </div>
+      </div>
+
+      <div class="scroll-hint" aria-hidden="true"><span></span></div>
+    </header>
+
+    <!-- MARQUEE -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>أمن المعلومات&nbsp;✦</span><span>الخوارزميات&nbsp;✦</span><span>نظم التشغيل&nbsp;✦</span><span>السياسات والتشريعات&nbsp;✦</span><span>مكونات تقنية المعلومات&nbsp;✦</span><span>التصميم في الأمن السيبراني&nbsp;✦</span>
+        <span>أمن المعلومات&nbsp;✦</span><span>الخوارزميات&nbsp;✦</span><span>نظم التشغيل&nbsp;✦</span><span>السياسات والتشريعات&nbsp;✦</span><span>مكونات تقنية المعلومات&nbsp;✦</span><span>التصميم في الأمن السيبراني&nbsp;✦</span>
+      </div>
+    </div>
+
+    <!-- LEARNING PATHS -->
+    <section class="section paths" id="paths" aria-labelledby="pathsTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="paths.eyebrow">مسارات التعلم</p>
+        <h2 class="section-title" id="pathsTitle" data-i18n-html="paths.title">من أين تبدأ؟ إليك <em class="grad">مساراتك</em></h2>
+        <p class="section-sub" data-i18n="paths.sub">عشرة مسارات منظمة تغطي رحلتك كاملة في أمن المعلومات — من الأساسيات إلى الاختراق الأخلاقي والاستجابة للحوادث: لكل مسار مواضيع مرتبة واختبارات وأدوات عملية.</p>
+      </div>
+
+      <!-- Structured path cards (MODULE 39 · LearningPaths). Rendered from
+           the embedded LEARNING_PATHS data — 10 paths with AR/EN titles,
+           levels, ordered topics, progress and coming-soon states. -->
+      <div class="paths-grid" id="pathsGrid"></div>
+
+      <div class="beginner-box reveal">
+        <div class="beginner-head">
+          <span class="beginner-ico" aria-hidden="true">🚀</span>
+          <h3 data-i18n="beginner.title">مبتدئ؟ ابدأ من هنا — خطواتك الأربع</h3>
+        </div>
+        <ol class="beginner-steps">
+          <li><b aria-hidden="true">1</b><span data-i18n="beginner.s1">اختر مادة من «المواد» واقرأ وصفها.</span></li>
+          <li><b aria-hidden="true">2</b><span data-i18n="beginner.s2">احفظ المصطلحات ببطاقات الفلاش السريعة.</span></li>
+          <li><b aria-hidden="true">3</b><span data-i18n="beginner.s3">اختبر نفسك في المادة واقرأ شرح كل إجابة.</span></li>
+          <li><b aria-hidden="true">4</b><span data-i18n="beginner.s4">طبّق بأداة تفاعلية واحدة ثم جرّب معمل المحاكاة.</span></li>
+        </ol>
+        <div class="beginner-cta-row">
+          <a href="#path/fundamentals" class="btn btn-primary magnetic" data-i18n="beginner.pathCta">ابدأ المسار الموصى به</a>
+          <a href="#subjects" class="btn btn-ghost magnetic" data-i18n="beginner.cta">ابدأ الخطوة الأولى</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SKILL TREE — one visual node per existing learning path. MODULE 51
+         derives titles, completion, resources and next actions from the
+         existing LEARNING_PATHS data; the semantic list below is the
+         accessible alternative to the visual tree. -->
+    <section class="section skills" id="skills" aria-labelledby="skillsTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="skills.eyebrow">شجرة المهارات</p>
+        <h2 class="section-title" id="skillsTitle" data-i18n-html="skills.title">خريطة <em class="grad">المهارات</em></h2>
+        <p class="section-sub" data-i18n="skills.sub">مساراتك الحالية معروضة كشجرة مهارات: النسبة، المتطلبات، الدروس والاختبارات والمعامل، والخطوة التالية — بدون تكرار بيانات المسارات.</p>
+      </div>
+
+      <div class="skill-tree" id="skillsTree" role="list" aria-labelledby="skillsTitle" tabindex="0"></div>
+
+      <details class="skill-list-alt reveal" id="skillsListAlt">
+        <summary class="collapsible-summary">
+          <span data-i18n="skills.listAlt">قائمة المهارات (بديل قابل للوصول)</span>
+          <span class="collapsible-chev" aria-hidden="true">▾</span>
+        </summary>
+        <ul class="skill-list" id="skillsList" role="list" aria-label="قائمة مهارات أمن المعلومات"></ul>
+        <p class="skill-list-intro" data-i18n="skills.listIntro">كل عنصر يمثل مسارًا حقيقيًا من مسارات التعلم.</p>
+      </details>
+    </section>
+
+    <!-- LEARNING PATH DETAIL — one shared view filled by MODULE 39 from
+         the #path/<id> deep link. Reuses the ViewSwitcher view system. -->
+    <section class="section path-detail-sec" id="path" aria-label="تفاصيل مسار التعلم">
+      <a href="#paths" class="btn btn-ghost btn-sm path-back" data-i18n="paths.back">رجوع إلى المسارات</a>
+      <div id="pathDetailBody" class="path-detail-body"></div>
+    </section>
+
+    <!-- LESSON VIEW — one shared view filled by MODULE 40 from the
+         #lesson/<subject>/<topic> deep link. Shows bilingual lesson
+         content (explanation, concepts, example, mistakes, terminology)
+         with links to related quizzes and next lesson. -->
+    <section class="section lesson-sec" id="lesson" aria-label="الدرس">
+      <a href="#paths" class="btn btn-ghost btn-sm path-back" data-i18n="lesson.back">رجوع إلى المسارات</a>
+      <div id="lessonBody" class="lesson-body"></div>
+    </section>
+
+    <!-- CURRENT SEMESTER DASHBOARD — the real #semester view. Rendered
+         by MODULE 43 from window.PLATFORM_CURRENT_SEMESTER
+         (current-semester.js — single source of curriculum truth). -->
+    <section class="section semester-dashboard" id="semester" aria-labelledby="semesterTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="semester.eyebrow">دليل الترم الحالي</p>
+        <h2 class="section-title" id="semesterTitle" data-i18n-html="semester.title">لوحة <em class="grad">الترم الحالي</em></h2>
+        <p class="section-sub" data-i18n="semester.sub">خطة الترم الحالي كاملة في مكان واحد: المواد الرسمية، الجدول الأسبوعي، الساعات المعتمدة، وحلقات الوصول إلى الاختبارات والأدوات والمعامل.</p>
+      </div>
+
+      <div class="semester-summary reveal" id="semesterMeta"></div>
+
+      <!-- MODULE 61 · LectureGuide inline block (rendered from
+           current-semester.js → lectureGuide). Deliberately OUTSIDE
+           #semesterGrid so the subject-card grid stays untouched. -->
+      <div class="sem-guide-mount reveal" id="semesterGuide"></div>
+
+      <div class="semester-grid" id="semesterGrid"></div>
+    </section>
+
+    <!-- ============================================================
+         LECTURE ACCESS GUIDE (MODULE 61) — the official step-by-step
+         guide to joining a live class, plus the weekly timetable
+         derived from the approved plan and a troubleshooting list.
+         Shareable through its own #guide route and every block is
+         rendered from current-semester.js (single source of truth).
+         ============================================================ -->
+    <section class="section lecture-guide" id="guide" aria-labelledby="guideTitle">
+      <a href="#semester" class="btn btn-ghost btn-sm path-back" data-i18n="guide.back">رجوع إلى لوحة الترم الحالي</a>
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="guide.eyebrow">الوصول إلى المحاضرات</p>
+        <h2 class="section-title" id="guideTitle" data-i18n-html="guide.title">دليل <em class="grad">الدخول إلى المحاضرات</em></h2>
+        <p class="section-sub" data-i18n="guide.sub">كل ما تحتاجه لدخول محاضرتك الحالية: جدول الأسبوع، الخطوات بالترتيب، الروابط الرسمية، وحلول أكثر المشاكل تكرارًا.</p>
+      </div>
+      <div class="guide-body" id="guideBody"></div>
+    </section>
+
+    <!-- SUBJECTS & RESOURCES -->
+    <section class="section subjects" id="subjects">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="subjects.eyebrow">المواد الدراسية والتجميعات</p>
+        <h2 class="section-title" data-i18n-html="subjects.title">مواد <em class="grad">الترم الحالي</em> وملفاتها</h2>
+        <p class="section-sub" data-i18n="subjects.sub">مواد الفصل الدراسي الحالي وفق الخطة الرسمية: رمز المقرر والساعات والجدول، ولكل مادة بنك أسئلة تدريبي كامل مع شرح لكل إجابة.</p>
+      </div>
+
+      <div class="work-toolbar reveal">
+        <div class="work-search">
+          <input id="subjectSearch" type="search" placeholder="ابحث عن مادة أو موضوع…" aria-label="بحث في المواد الدراسية" />
+        </div>
+        <div class="tag-row" role="group" aria-label="تصفية المواد حسب التصنيف">
+          <button type="button" class="tag-chip" data-tag="all" aria-pressed="true">الكل</button>
+          <button type="button" class="tag-chip" data-tag="algorithms" aria-pressed="false">الخوارزميات</button>
+          <button type="button" class="tag-chip" data-tag="osconcepts" aria-pressed="false">نظم التشغيل</button>
+          <button type="button" class="tag-chip" data-tag="policy" aria-pressed="false">السياسات والأخلاقيات</button>
+          <button type="button" class="tag-chip" data-tag="components" aria-pressed="false">مكونات تقنية المعلومات</button>
+          <button type="button" class="tag-chip" data-tag="design" aria-pressed="false">التصميم الأمني</button>
+        </div>
+        <p class="results-count" id="resultsCount" aria-live="polite"></p>
+      </div>
+
+      <div class="work-grid" id="subjectsGrid">
+        <!-- Subject cards are rendered from SUBJECTS (script.js MODULE 00b) — single source of truth. -->
+      </div>
+
+      <p class="empty-state" id="emptyState" hidden>لا توجد مواد مطابقة — جرّب كلمة بحث أخرى أو تصنيفًا مختلفًا.</p>
+    </section>
+<!-- TOOLS -->
+    <section class="section tools" id="tools">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="tools.eyebrow">أدوات الأمن السيبراني</p>
+        <h2 class="section-title" data-i18n-html="tools.title">جرّب <em class="grad">الأدوات</em> مباشرة</h2>
+        <p class="section-sub" data-i18n="tools.sub">اثنتا عشرة أداة تفاعلية تعمل بالكامل في متصفحك — من تشفير Caesar إلى تحليل JWT وحساب الشبكات.</p>
+      </div>
+
+      <div class="tools-grid">
+        <article class="tool-card reveal" id="tool-hash">
+          <h3 class="tool-title">مولّد بصمة SHA-256</h3>
+          <p class="tool-desc">احسب بصمة التشفير لأي نص فورًا، مع شبكة بصرية ملوّنة للبصمة.</p>
+          <textarea id="hashInput" class="tool-input" rows="3" placeholder="اكتب النص هنا…" aria-label="نص إدخال البصمة"></textarea>
+          <code id="hashOut" class="tool-out hash-hex" dir="ltr">—</code>
+          <div id="hashFp" class="hash-fp" aria-hidden="true"></div>
+          <button type="button" id="hashCopy" class="btn btn-sm btn-ghost copy-btn">نسخ البصمة</button>
+        </article>
+
+        <article class="tool-card reveal" id="tool-caesar">
+          <h3 class="tool-title">تشفير Caesar</h3>
+          <p class="tool-desc">شفرة الإزاحة الكلاسيكية تدعم العربية واللاتينية.</p>
+          <input id="cipherIn" class="tool-input" type="text" placeholder="مرحباً…" aria-label="نص التشفير" />
+          <div class="cipher-controls">
+            <input id="shiftRange" class="shift-range" type="range" min="-13" max="13" value="3" aria-label="مقدار الإزاحة" />
+            <span id="shiftVal" class="shift-val" aria-live="polite">3</span>
+          </div>
+          <p id="cipherOut" class="tool-out" dir="auto">—</p>
+          <button type="button" id="cipherCopy" class="btn btn-sm btn-ghost copy-btn">نسخ النتيجة</button>
+        </article>
+
+        <article class="tool-card reveal" id="tool-jwt">
+          <h3 class="tool-title">محلّل JWT</h3>
+          <p class="tool-desc">فكّ رموز JWT وافحص الترويسة والحمولة وتاريخ الانتهاء.</p>
+          <textarea id="jwtIn" class="tool-input" rows="4" dir="ltr" placeholder="eyJhbGciOiJIUzI1NiIs…"></textarea>
+          <p id="jwtWarn" class="jwt-warn" role="status"></p>
+          <div id="jwtParts" hidden>
+            <div class="jwt-seg"><span class="jwt-tag jwt-h">Header</span><pre id="jwtHeader" class="tool-out"></pre></div>
+            <div class="jwt-seg"><span class="jwt-tag jwt-p">Payload</span><pre id="jwtPayload" class="tool-out"></pre></div>
+            <div class="jwt-seg"><span class="jwt-tag jwt-s">Signature</span><pre id="jwtSig" class="tool-out"></pre></div>
+          </div>
+        </article>
+
+        <article class="tool-card reveal" id="tool-cidr">
+          <h3 class="tool-title">حاسبة الشبكات CIDR</h3>
+          <p class="tool-desc">قناع، نطاق، بث، وعدد المضيفين لأي عنوان IPv4.</p>
+          <div class="cidr-row">
+            <div><label class="tool-label" for="cidrIp">العنوان</label><input id="cidrIp" class="tool-input" type="text" inputmode="decimal" value="192.168.10.7" /></div>
+            <div><label class="tool-label" for="cidrPrefix">البادئة</label><input id="cidrPrefix" class="tool-input" type="number" min="0" max="32" value="24" /></div>
+          </div>
+          <p id="cidrError" class="tool-desc" hidden role="alert"></p>
+          <table class="cidr-table"><tbody id="cidrTableBody"></tbody></table>
+        </article>
+
+        <article class="tool-card reveal" id="tool-password">
+          <h3 class="tool-title">تحليل قوة كلمة المرور</h3>
+          <p class="tool-desc">إنتروبيا، قواعد أمان، وزمن كسر تقديري — دون إرسال أي شيء للخارج.</p>
+          <div class="pw-row">
+            <input id="pwInput" class="tool-input" type="password" dir="ltr" aria-label="كلمة المرور" />
+            <button type="button" id="pwEye" class="btn btn-sm btn-ghost" aria-pressed="false" aria-label="إظهار كلمة المرور">👁</button>
+          </div>
+          <div class="pw-meter" aria-hidden="true"><span id="pwFill" class="pw-meter-fill"></span></div>
+          <p id="pwVerdict" class="pw-verdict" role="status">ابدأ بالكتابة لتحليل القوة…</p>
+          <ul id="pwList" class="pw-checklist">
+            <li data-rule="len12">12 حرفًا على الأقل</li>
+            <li data-rule="case">أحرف كبيرة وصغيرة</li>
+            <li data-rule="digit">رقم واحد على الأقل</li>
+            <li data-rule="symbol">رمز خاص</li>
+            <li data-rule="common">ليست كلمة شائعة</li>
+            <li data-rule="keyboardPattern">بدون أنماط لوحة مفاتيح</li>
+            <li data-rule="sequentialPattern">بدون متتاليات مألوفة</li>
+            <li data-rule="repeatedChars">بدون تكرار حرفي مفرط</li>
+          </ul>
+        </article>
+
+        <article class="tool-card reveal" id="tool-encoders">
+          <h3 class="tool-title">مشفّرات Base64 / Hex / URL</h3>
+          <p class="tool-desc">حوّل النصوص بين الصيغ الشائعة ثنائي الاتجاه.</p>
+          <div class="enc-tabs" role="group" aria-label="صيغة التحويل">
+            <button type="button" class="btn btn-sm btn-ghost enc-tab active" data-enc="b64" aria-pressed="true">Base64</button>
+            <button type="button" class="btn btn-sm btn-ghost enc-tab" data-enc="hex" aria-pressed="false">Hex</button>
+            <button type="button" class="btn btn-sm btn-ghost enc-tab" data-enc="url" aria-pressed="false">URL</button>
+          </div>
+          <textarea id="encIn" class="tool-input" rows="3" dir="ltr" aria-label="نص الترميز"></textarea>
+          <p id="encErr" class="tool-desc" hidden role="alert"></p>
+          <p id="encOut" class="tool-out" dir="ltr">—</p>
+          <div class="enc-actions">
+            <button type="button" id="encEncode" class="btn btn-sm btn-primary">ترميز ←</button>
+            <button type="button" id="encDecode" class="btn btn-sm btn-ghost">→ فك الترميز</button>
+            <button type="button" id="encCopy" class="btn btn-sm btn-ghost copy-btn">نسخ</button>
+          </div>
+        </article>
+
+      <article class="tool-card reveal" id="tool-regex">
+          <h3 class="tool-title">محلل Regex + مرئي</h3>
+          <p class="tool-desc">اعرض بنية النمط كرسم بياني واختبره ضد نص مع عدّاد خطوات المطابقة.</p>
+          <input id="regexPatt" class="tool-input" dir="ltr" placeholder="(ab|cd)+[0-9]?" aria-label="النمط Regex" />
+          <input id="regexText" class="tool-input" dir="ltr" placeholder="abab cd7..." aria-label="نص الاختبار" />
+          <div class="regex-actions"><button type="button" id="regexRun" class="btn btn-sm btn-primary">حلل وطابق</button></div>
+          <p id="regexRes" class="tool-out" dir="ltr" role="status">—</p>
+          <svg id="regexSvg" class="regex-svg" viewBox="0 0 520 220" role="img" aria-label="مخطط بنية النمط"></svg>
+        </article>
+
+        <article class="tool-card reveal" id="tool-fw">
+          <h3 class="tool-title">محاكي قواعد الجدار الناري</h3>
+          <p class="tool-desc">أضف قواعد allow/deny ثم اختبر مرور حزمة مسارًا بمسار حتى القاعدة المطابقة.</p>
+          <div class="fw-edit">
+            <select id="fwAct" class="tool-input"><option value="deny">deny</option><option value="allow">allow</option></select>
+            <select id="fwProto" class="tool-input"><option value="*">*</option><option value="tcp">tcp</option><option value="udp">udp</option></select>
+            <input id="fwDst" class="tool-input" placeholder="وجهة أو *" dir="ltr" />
+            <input id="fwPort" class="tool-input" type="number" placeholder="منفذ أو *" dir="ltr" />
+            <button type="button" id="fwAdd" class="btn btn-sm btn-primary">+ قاعدة</button>
+          </div>
+          <table class="cidr-table"><thead><tr><th>#</th><th>إجراء</th><th>بروتوكول</th><th>وجهة</th><th>منفذ</th><th></th></tr></thead><tbody id="fwBody"></tbody></table>
+          <div class="fw-probe">
+            <input id="fwProbeIp" class="tool-input" value="203.0.113.9" dir="ltr" />
+            <input id="fwProbePort" class="tool-input" type="number" value="443" dir="ltr" />
+            <select id="fwProbeProto" class="tool-input"><option value="tcp">tcp</option><option value="udp">udp</option></select>
+            <button type="button" id="fwTest" class="btn btn-sm btn-primary">اختبر حزمة</button>
+          </div>
+          <pre id="fwTrace" class="tool-out" dir="ltr"></pre>
+          <p id="fwCount" class="tool-desc" role="status"></p>
+        </article>
+
+        <article class="tool-card reveal" id="tool-vuln">
+          <h3 class="tool-title">ماسح ثغرات (محاكاة)</h3>
+          <p class="tool-desc">افحص هدفًا معرّفًا محليًا واكتشف الثغرات بخطوراتها وحلولها المقترحة.</p>
+          <select id="vulnTarget" class="tool-input"></select>
+          <button type="button" id="vulnRun" class="btn btn-sm btn-primary">ابدأ الفحص</button>
+          <div class="pw-meter"><span id="vulnFill" class="pw-meter-fill"></span></div>
+          <div id="vulnFindings" class="tool-out" role="status">اختر هدفًا وابدأ الفحص.</div>
+        </article>
+
+        <article class="tool-card reveal" id="tool-sniffer">
+          <h3 class="tool-title">مستنشق حزم (فك ترميز)</h3>
+          <p class="tool-desc">فك إطار Ethernet/IPv4/TCP/UDP من سداسي عشري بايتًا بايت مع خريطة أوكتِت.</p>
+          <textarea id="sniffHex" class="tool-input" rows="3" dir="ltr" placeholder="(فارغ = توليد نموذج)"></textarea>
+          <div class="regex-actions"><button type="button" id="sniffDecode" class="btn btn-sm btn-primary">فك</button><button type="button" id="sniffSample" class="btn btn-sm btn-ghost">مثال</button></div>
+          <div class="sniff-octets" id="sniffOctets" dir="ltr"></div>
+          <pre id="sniffOut" class="tool-out" dir="ltr"></pre>
+        </article>
+
+        <article class="tool-card reveal" id="tool-portscan">
+          <h3 class="tool-title">ماسح منافذ (مرئي)</h3>
+          <p class="tool-desc">امسح مضيفًا على شبكتك الافتراضية وراقب حالات المنافذ open/closed/filtered.</p>
+          <div class="regex-actions"><input id="portHost" class="tool-input" value="10.0.0.5" dir="ltr" /><button type="button" id="portRun" class="btn btn-sm btn-primary">امسح</button></div>
+          <div id="portViz" class="port-viz"></div>
+          <pre id="portOut" class="tool-out" dir="ltr"></pre>
+        </article>
+
+        <article class="tool-card reveal" id="tool-playground">
+          <h3 class="tool-title">ملعب التشفير/فك التشفير</h3>
+          <p class="tool-desc">Caesar · Vigenere · XOR · RC4 · A1Z26 · Base64 — لأغراض تعليمية فقط.</p>
+          <select id="cpAlgo" class="tool-input">
+            <option value="caesar">Caesar (shift)</option>
+            <option value="vigenere">Vigenere</option>
+            <option value="xor">XOR</option>
+            <option value="rc4">RC4 (تعليمي)</option>
+            <option value="a1z26">A1Z26</option>
+            <option value="b64">Base64</option>
+          </select>
+          <input id="cpKey" class="tool-input" placeholder="المفتاح" dir="ltr" />
+          <textarea id="cpIn" class="tool-input" rows="2" placeholder="النص" dir="auto"></textarea>
+          <div class="regex-actions"><button type="button" id="cpEnc" class="btn btn-sm btn-primary">تشفير</button><button type="button" id="cpDec" class="btn btn-sm btn-ghost">فك</button></div>
+          <pre id="cpOut" class="tool-out" dir="ltr"></pre>
+        </article>
+
+      </div>
+    </section>
+    <!-- LABS HUB -->
+    <section class="section labs" id="labs" aria-labelledby="labsTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="labs.eyebrow">المعامل العملية</p>
+        <h2 class="section-title" id="labsTitle" data-i18n-html="labs.title">المعامل <em class="grad">التطبيقية</em> والتدريب العملي</h2>
+        <p class="section-sub" data-i18n="labs.sub">أربع معامل محاكاة تعمل كاملة داخل متصفحك — من محاكاة الهجمات إلى الاستجابة للحوادث وفك الشفرات.</p>
+      </div>
+      <div class="labs-grid">
+        <a href="#redteam" class="lab-link reveal">
+          <span class="lab-link-ico" aria-hidden="true">🖥️</span>
+          <h3 data-i18n="labs.redteam">المختبر الهجومي</h3>
+          <p data-i18n="labs.redteam.sub">طرفية Bash وقاعدة بيانات قابلة للحقن وبناء حزم الشبكة — افهم كيف تُنفَّذ الهجمات وكيف تُمنع.</p>
+          <span class="btn btn-sm btn-ghost" data-i18n="labs.enter">ادخل المعمل</span>
+        </a>
+        <a href="#ir" class="lab-link reveal">
+          <span class="lab-link-ico" aria-hidden="true">🚨</span>
+          <h3 data-i18n="labs.ir">الاستجابة للحوادث</h3>
+          <p data-i18n="labs.ir.sub">محاكاة زمنية حقيقية مع لوحة SIEM وتحليل الخط الزمني وتحديات تحديد السبب الجذري.</p>
+          <span class="btn btn-sm btn-ghost" data-i18n="labs.enter">ادخل المعمل</span>
+        </a>
+        <a href="#cryptolab" class="lab-link reveal">
+          <span class="lab-link-ico" aria-hidden="true">🔐</span>
+          <h3 data-i18n="labs.crypto">مختبر التشفير</h3>
+          <p data-i18n="labs.crypto.sub">فيجينير وإنجما وRSA خطوة بخطوة وتحليل التردد — شاهد خوارزميات التشفير تعمل أمامك.</p>
+          <span class="btn btn-sm btn-ghost" data-i18n="labs.enter">ادخل المعمل</span>
+        </a>
+        <a href="#games" class="lab-link reveal">
+          <span class="lab-link-ico" aria-hidden="true">🎮</span>
+          <h3 data-i18n="labs.games">تحديات CTF</h3>
+          <p data-i18n="labs.games.sub">سيناريوهات اختراق مصغّرة (SQLi، فحص منافذ، DDoS) عبر طرفية أوامر — احل وتعلّم.</p>
+          <span class="btn btn-sm btn-ghost" data-i18n="labs.enter">ادخل المعمل</span>
+        </a>
+      </div>
+    </section>
+    <!-- FLASHCARDS -->
+    <section class="section flash-sec" id="flash">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="flash.eyebrow">البطاقات التعليمية</p>
+        <h2 class="section-title" data-i18n-html="flash.title">راجع المصطلحات <em class="grad">بالبطاقات</em></h2>
+        <p class="section-sub" data-i18n="flash.sub">اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.</p>
+      </div>
+      <!-- Collapsible hub: the full card grid expands on demand to keep the page light. -->
+      <details class="collapsible reveal" open>
+        <summary class="collapsible-summary">
+          <span data-i18n="collapsible.showCards">عرض كل البطاقات (18)</span>
+          <span class="collapsible-chev" aria-hidden="true">▾</span>
+        </summary>
+        <div class="collapsible-body">
+          <div class="flash-toolbar">
+            <input id="flashSearch" type="search" class="flash-search" placeholder="ابحث عن مصطلح…" aria-label="بحث في البطاقات التعليمية" />
+            <button type="button" id="flashShuffle" class="btn btn-sm btn-ghost" data-i18n="flash.shuffle">خلط البطاقات</button>
+          </div>
+          <div id="flashGrid" class="flash-grid"></div>
+          <p class="empty-state" id="flashEmpty" hidden>لا توجد بطاقات مطابقة لبحثك.</p>
+        </div>
+      </details>
+    </section>
+    <!-- QUIZ -->
+    <section class="section quiz-sec" id="quiz">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="quiz.eyebrow">الاختبارات التجريبية</p>
+        <h2 class="section-title" data-i18n="quiz.title">اختبر نفسك في كل مادة</h2>
+        <p class="section-sub" data-i18n="quiz.sub">أسئلة لكل مادة مع شرح فوري لكل إجابة، وضع مؤقّت اختياري، وحفظ تلقائي للنتائج.</p>
+      </div>
+      <!-- Collapsible hub: the quiz surface expands on demand; default open
+           so keyboard/screen-reader users land directly on the picker. -->
+      <details class="collapsible reveal" open>
+        <summary class="collapsible-summary">
+          <span data-i18n="collapsible.showQuizzes">عرض بنوك الأسئلة</span>
+          <span class="collapsible-chev" aria-hidden="true">▾</span>
+        </summary>
+        <div class="collapsible-body">
+          <div id="quizApp" class="quiz-grid"></div>
+          <p class="quiz-hint" data-i18n="quiz.hint">💡 اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="section progress-sec" id="progress" aria-labelledby="progressTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="progress.eyebrow">متابعة التعلم</p>
+        <h2 class="section-title" id="progressTitle" data-i18n-html="progress.title">تقدمك <em class="grad">في المنصة</em></h2>
+        <p class="section-sub" data-i18n="progress.sub">نتائج اختباراتك وأفضل درجاتك محفوظة على جهازك فقط — تابع من حيث توقفت متى شئت.</p>
+      </div>
+      <div id="progressApp" class="progress-grid reveal" aria-live="polite"></div>
+      <!-- Phase 4 · transparent local revision queue (MODULE 52): mistakes,
+           unfinished lessons, bookmarks and stale reviews from local data. -->
+      <div id="revisionApp" class="revision-app reveal" aria-live="polite"></div>
+      <div id="examApp" class="exam-app reveal" aria-live="polite"></div>
+    </section>
+
+    <!-- GAMES -->
+    <section class="section games" id="games" aria-labelledby="gamesTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="games.eyebrow">مختبر الحوادث + التحدي (CTF)</p>
+        <h2 class="section-title" id="gamesTitle" data-i18n-html="games.title">قائد <em class="grad">الاستجابة للحوادث</em></h2>
+        <p class="section-sub" data-i18n="games.sub">محاكاة حقيقية: تستقبل تنبيهات هجمات (SQLi، فحص منافذ، DDoS، تشفير)، وتتعامل معها عبر طرفية أوامر — حلّل، خفّف، ثم استخرج العَلَم.</p>
+      </div>
+
+      <div id="labMeta-games" class="lab-meta-mount"></div>
+
+      <div class="games-app" id="gamesApp">
+        <!-- شاشة القائمة -->
+        <div class="games-panel" id="gameMenu">
+          <p class="games-intro">🛰️ تجهيزاتُ رصد الشبكة رصدت نشاطًا خبيثًا في نطاقات متعددة. اختر سيناريو واحبِ اللغز — كل سيناريو مسجّل يتطلب أسلوب تحليل مختلف.</p>
+          <div class="games-scenarios" id="gamesScenarios" role="list"></div>
+          <p class="games-progress-title" id="gamesProgressTitle" role="status"></p>
+          <div class="games-progress" id="gamesProgress" role="list"></div>
+        </div>
+
+        <!-- شاشة اللعب: طرفية + معلومات -->
+        <div class="games-panel is-hidden" id="gamePlay">
+          <div class="games-topbar">
+            <div class="games-meta">
+              <span class="games-title" id="gameTitle"></span>
+              <span class="games-domain" id="gameDomain"></span>
+            </div>
+            <div class="games-top-actions">
+              <span class="games-timer" id="gameTimer" role="timer">00:00</span>
+              <button type="button" class="btn btn-ghost" id="gameQuit">قائمة السيناريوهات</button>
+            </div>
+          </div>
+          <p class="games-brief" id="gameBrief"></p>
+
+          <div class="games-layout">
+            <aside class="games-side hide-mobile" id="gameSide" aria-label="حالة الخادم"></aside>
+            <div class="games-console">
+              <div class="console-shell">
+                <div class="console-head">
+                  <span class="console-title" dir="ltr">sec-lab &gt; ir-console</span>
+                  <span class="console-led" aria-hidden="true"></span>
+                </div>
+                <div class="console-log" id="gameConsoleLog" role="log" aria-live="polite"></div>
+                <form class="console-form" id="gameConsoleForm">
+                  <span class="console-prompt" aria-hidden="true">root@ev</span>
+                  <input class="console-input" id="gameConsoleInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr" aria-label="أمر الطرفية" />
+                </form>
+              </div>
+              <p class="console-help">اكتب <kbd>help</kbd> للأوامر و <kbd>hint</kbd> لتلميح (يكلف نقاطًا).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REDTEAM -->
+    <section class="section redteam" id="redteam" aria-labelledby="redTeamTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow">المختبر الهجومي — محاكاة حقيقية</p>
+        <h2 class="section-title" id="redTeamTitle">مختبر <em class="grad">الهجوم والاختراق</em></h2>
+        <p class="section-sub">محاكاة محلية بالكامل: طرفية Bash مع قاعدة بيانات قابلة للحقن، وبناء حزم الشبكة بالمجاميع الاختبارية، ومخابر OWASP التفاعلية داخل <a href="#games">قسم الألعاب</a>.</p>
+      </div>
+
+      <div id="labMeta-redteam" class="lab-meta-mount"></div>
+
+      <div class="rt-grid">
+        <article class="lab-card reveal" id="bashCard">
+          <h3>🖥️ Bash + SQL Lab</h3>
+          <p class="lab-hint">نفّذ أوامر بيس أو استعلامات SQL ضد جدول <code dir="ltr">students</code> — ثم جرّب حقن <code dir="ltr">' OR 1=1 --</code> لرؤية الأثر، وتعلّم كيف تحول المعاملات (parameterization) دونها.</p>
+          <div class="rt-layout">
+            <div class="console-shell">
+              <div class="console-head"><span class="console-title" dir="ltr">bash &gt; sql-lab</span><span class="console-led" aria-hidden="true"></span></div>
+              <div class="console-log" id="bashLog" role="log" aria-live="polite"></div>
+              <form class="console-form" id="bashForm">
+                <span class="console-prompt" aria-hidden="true">student@sec$</span>
+                <input class="console-input" id="bashInput" type="text" autocomplete="off" spellcheck="false" dir="ltr" aria-label="أمر Bash / SQL" />
+              </form>
+            </div>
+            <pre class="bash-schema" id="bashSchema" dir="ltr">students(id, name, course, grade)
+مثال SQL:
+  select * from students where course='networks'
+حقن ضار:
+  select * from students where id='1' OR 1=1 --</pre>
+          </div>
+        </article>
+
+        <article class="lab-card reveal" id="netCard">
+          <h3>🌐 NetLab — بناء حزم الشبكة</h3>
+          <p class="lab-hint">ابنِ حزمة TCP/UDP بمرورها بعقد موجّهات، وشاهد المجموع الاختباري (checksum) يُحسب خطوة بخطوة والمُعامل (TTL) يُنقص.</p>
+          <div class="net-form">
+            <div class="net-row">
+              <label>المصدر<input class="tool-input" id="netSrcIp" value="192.168.1.10" dir="ltr" /></label>
+              <label>الوجهة<input class="tool-input" id="netDstIp" value="8.8.8.8" dir="ltr" /></label>
+              <label>Src Port<input class="tool-input" id="netSrcPort" type="number" value="55123" dir="ltr" /></label>
+              <label>Dst Port<input class="tool-input" id="netDstPort" type="number" value="443" dir="ltr" /></label>
+              <label>TTL<input class="tool-input" id="netTtl" type="number" value="64" dir="ltr" /></label>
+              <label>البروتوكول
+                <select class="tool-input" id="netProto"><option value="tcp">TCP</option><option value="udp">UDP</option></select>
+              </label>
+            </div>
+            <label>الحمولة<input class="tool-input" id="netPayload" value="GET / HTTP/1.1" dir="ltr" /></label>
+            <div class="net-actions">
+              <button type="button" class="btn btn-sm btn-primary" id="netBuild">ابنِ الحزمة وأرسلها</button>
+            </div>
+          </div>
+          <svg class="net-svg" id="netSvg" viewBox="0 0 560 120" role="img" aria-label="مسار الحزمة بين العقد"></svg>
+          <p class="net-check" id="netCheck" role="status"></p>
+          <pre class="net-hex" id="netHex" dir="ltr"></pre>
+        </article>
+      </div>
+    </section>
+<!-- IR -->
+    <section class="section ir" id="ir" aria-labelledby="irTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow">الاستجابة للحوادث — تدريب عملي</p>
+        <h2 class="section-title" id="irTitle">مركز <em class="grad">الاستجابة للحوادث</em></h2>
+        <p class="section-sub">محاكاة زمنية حقيقية + لوحة SIEM مبسطة + تحليل خط زمني (kill-chain) + تحديات تحديد السبب الجذري، مع فريق افتراضي يقدّم التلميحات.</p>
+      </div>
+
+      <div id="labMeta-ir" class="lab-meta-mount"></div>
+
+      <nav class="ir-tabs" role="tablist" aria-label="أقسام مركز الاستجابة">
+        <button type="button" role="tab" aria-selected="true" data-ir-tab="siem">لوحة SIEM</button>
+        <button type="button" role="tab" aria-selected="false" data-ir-tab="timeline">الخط الزمني</button>
+        <button type="button" role="tab" aria-selected="false" data-ir-tab="live">محاكاة حية</button>
+        <button type="button" role="tab" aria-selected="false" data-ir-tab="rca">تحديات RCA</button>
+      </nav>
+
+      <div class="ir-panel" data-ir-panel="siem">
+        <div class="siem-toolbar">
+          <select class="tool-input" id="siemType" aria-label="نوع الحدث"><option value="all">كل الأنواع</option></select>
+          <select class="tool-input" id="siemSev" aria-label="الخطورة"><option value="all">كل الخطورة</option></select>
+          <input class="tool-input siem-query" id="siemQuery" placeholder='استعلام: type=brute src=203.0.113.7 sev&gt;=high' dir="ltr" />
+          <button type="button" class="btn btn-sm btn-primary" id="siemRun">بحث</button>
+          <button type="button" class="btn btn-sm btn-ghost" id="siemReset">إعادة</button>
+        </div>
+        <div class="siem-charts">
+          <div class="siem-bar" id="siemBar"></div>
+          <div class="siem-donut" id="siemDonut"></div>
+        </div>
+        <div class="siem-table-wrap"><table class="siem-table"><thead><tr><th>الوقت</th><th>المصدر</th><th>الوجهة</th><th>المستخدم</th><th>النوع</th><th>الخطورة</th><th>المرحلة</th></tr></thead><tbody id="siemBody"></tbody></table></div>
+      </div>
+
+      <div class="ir-panel" data-ir-panel="timeline" hidden>
+        <div class="tl-actions">
+          <button type="button" class="btn btn-sm btn-primary" id="tlLink">اربط الأحداث (حملة)</button>
+          <span class="tl-note" id="tlNote"></span>
+        </div>
+        <div class="tl-buckets" id="tlBuckets"></div>
+        <div class="tl-detail" id="tlDetail" hidden></div>
+      </div>
+
+      <div class="ir-panel" data-ir-panel="live" hidden>
+        <div class="live-layout">
+          <div class="console-shell">
+            <div class="console-head"><span class="console-title" dir="ltr">soc &gt; live-incident</span><span class="console-led" aria-hidden="true"></span></div>
+            <div class="console-log" id="irLog" role="log" aria-live="polite"></div>
+            <form class="console-form" id="irForm">
+              <span class="console-prompt" aria-hidden="true">soc@ir</span>
+              <input class="console-input" id="irInput" type="text" autocomplete="off" spellcheck="false" dir="ltr" aria-label="أمر الاستجابة" />
+            </form>
+          </div>
+          <div class="ir-team">
+            <div class="team-head">👥 فريق الاستجابة <span class="team-badge" id="teamPhase"></span></div>
+            <div class="team-log" id="teamLog" role="log" aria-live="polite"></div>
+            <form class="team-form" id="teamForm">
+              <input class="console-input" id="teamInput" placeholder="اسأل الفريق أو اكتب ملاحظة…" dir="ltr" />
+              <button type="submit" class="btn btn-sm btn-primary">إرسال</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="ir-panel" data-ir-panel="rca" hidden>
+        <div id="rcaList"></div>
+      </div>
+    </section>
+<!-- CRYPTOLAB -->
+    <section class="section cryptolab" id="cryptolab" aria-labelledby="cryptoTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow">مركز تعلم التشفير</p>
+        <h2 class="section-title" id="cryptoTitle">مختبر <em class="grad">التشفير التفاعلي</em></h2>
+        <p class="section-sub">شفرات تاريخية (فيجينير، إنجما)، RSA خطوة بخطوة، دورة DES الأولى بتنسيقاتها الحقيقية، تحليل التردد، وإثبات تصادم التجزئة — كلها داخل متصفحك.</p>
+      </div>
+
+      <div id="labMeta-cryptolab" class="lab-meta-mount"></div>
+
+      <div class="crypto-grid">
+        <article class="lab-card">
+          <h3>🔁 فيجينير</h3>
+          <div class="c-form">
+            <input id="vigText" class="tool-input" placeholder="النص" dir="auto" />
+            <input id="vigKey" class="tool-input" placeholder="المفتاح (A-Z)" dir="ltr" />
+          </div>
+          <div class="c-actions"><button type="button" class="btn btn-sm btn-primary" id="vigEnc">تشفير</button><button type="button" class="btn btn-sm btn-ghost" id="vigDec">فك</button></div>
+          <p id="vigOut" class="tool-out" dir="ltr">—</p>
+        </article>
+
+        <article class="lab-card">
+          <h3>🎛️ إنجما</h3>
+          <div class="c-form">
+            <label>الدوارات (يسار ← يمين) <input id="enigmaRotors" class="tool-input" value="I III II" dir="ltr" /></label>
+            <label>المواضع <input id="enigmaPos" class="tool-input" value="ABC" dir="ltr" /></label>
+            <label>الأسلاك (مثال AB CD) <input id="enigmaPlug" class="tool-input" value="AB CD EF" dir="ltr" /></label>
+          </div>
+          <div class="c-actions"><input id="enigmaIn" class="tool-input" placeholder="الرسالة" dir="auto" /><button type="button" class="btn btn-sm btn-primary" id="enigmaRun">شغّل الدارة</button></div>
+          <p id="enigmaOut" class="tool-out" dir="ltr">—</p>
+        </article>
+
+        <article class="lab-card">
+          <h3>🔢 RSA خطوة بخطوة</h3>
+          <div class="c-form">
+            <input id="rsaP" class="tool-input" type="number" placeholder="p أولي (مثال 61)" dir="ltr" />
+            <input id="rsaQ" class="tool-input" type="number" placeholder="q أولي (مثال 53)" dir="ltr" />
+            <input id="rsaMsg" class="tool-input" placeholder="رسالة (أحرف)" dir="auto" />
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" id="rsaRun">توليد المفاتيح وتشفير</button>
+          <pre id="rsaOut" class="tool-out" dir="ltr"></pre>
+        </article>
+
+        <article class="lab-card">
+          <h3>🔷 دورة DES الأولى</h3>
+          <div class="c-form">
+            <input id="desKey" class="tool-input" value="133457799BBCDFF1" placeholder="مفتاح 16-hex" dir="ltr" />
+            <input id="desBlock" class="tool-input" value="0123456789ABCDEF" placeholder="بلوك 16-hex" dir="ltr" />
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" id="desRun">اعرض الدورة</button>
+          <pre id="desOut" class="tool-out" dir="ltr"></pre>
+        </article>
+
+        <article class="lab-card">
+          <h3>📊 تحليل التردد</h3>
+          <textarea id="freqIn" class="tool-input" rows="3" placeholder="نص للتحليل… (إنجليزي/عربي)" dir="auto"></textarea>
+          <button type="button" class="btn btn-sm btn-primary" id="freqRun">حلل</button>
+          <div id="freqSvg" class="freq-svg"></div>
+          <div id="freqOut" class="tool-out"></div>
+        </article>
+
+        <article class="lab-card">
+          <h3>💥 تصادم التجزئة</h3>
+          <p class="lab-hint">بحث بأسلوب عيد الميلاد عن نصّين مختلفين يشتركان في نفس بصمة FNV-1a (32 بت) — دليل عملي على أن الدوال المخفِّضة ليست مفتاحية.</p>
+          <button type="button" class="btn btn-sm btn-primary" id="colRun">ابحث عن تصادم</button>
+          <div class="pw-meter"><span id="colFill" class="pw-meter-fill"></span></div>
+          <pre id="colOut" class="tool-out" dir="ltr"></pre>
+        </article>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section about" id="about">
+      <div class="about-inner reveal">
+        <p class="eyebrow" data-i18n="about.eyebrow">عن المنصة</p>
+        <h2 class="section-title" data-i18n-html="about.title">لماذا هذه <em class="grad">المنصة؟</em></h2>
+        <p class="section-sub" data-i18n="about.sub">منصة عربية لطلاب دبلوم أمن المعلومات تجمع بين التعليم والتدريب العملي — تعلّم المادة نظريًا ثم طبّقها بالأدوات والمعامل.</p>
+        <p class="about-lead" data-i18n="about.lead">منصة عربية متكاملة لطالب دبلوم أمن المعلومات: المحتوى النظري للمواد، أدوات عملية، معامل محاكاة، ومساعد ذكي يجيب من محتوى المنصة — كل ذلك يعمل محليًا وفي وضع عدم الاتصال.</p>
+        <ul class="about-points">
+          <li><strong data-i18n="about.p1">محتوى منظم</strong><span data-i18n="about.p1d">لكل مادة: تجميعة، ملخصات، وبنك أسئلة جاهز للطباعة.</span></li>
+          <li><strong data-i18n="about.p2">اختبارات ذكية</strong><span data-i18n="about.p2d">شرح فوري لكل إجابة، تتبّع أفضل نتيجة، واستكمال المحاولة السابقة.</span></li>
+          <li><strong data-i18n="about.p3">يعمل دون إنترنت</strong><span data-i18n="about.p3d">تقنية PWA — ثبّت المنصة على هاتفك واستخدمها بدون اتصال.</span></li>
+          <li><strong data-i18n="about.p4">خصوصية كاملة</strong><span data-i18n="about.p4d">لا حسابات ولا تتبّع — نتائجك تُحفظ على جهازك فقط.</span></li>
+          <li><strong data-i18n="about.p5">تدريب عملي</strong><span data-i18n="about.p5d">معامل محاكاة للهجمات والاستجابة للحوادث وتحديات CTF داخل المتصفح.</span></li>
+          <li><strong data-i18n="about.p6">مساعد ذكي</strong><span data-i18n="about.p6d">يجيب عن أسئلتك من محتوى المنصة نفسها — في أي وقت وبدون إنترنت.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section contact" id="contact">
+      <div class="contact-grid">
+        <div class="contact-info reveal">
+          <p class="eyebrow" data-i18n="contact.eyebrow">تواصل معنا</p>
+          <h2 class="section-title" data-i18n-html="contact.title">سؤال أو <em class="grad">اقتراح؟</em></h2>
+          <p class="section-sub" data-i18n="contact.sub">نسعد بملاحظاتك ومساهماتك في المحتوى — أرسل رسالتك وسنعود إليك بأسرع وقت.</p>
+          <a class="contact-mail" href="mailto:motmi757@gmail.com" dir="ltr">motmi757@gmail.com</a>
+        </div>
+        <form class="contact-form reveal" id="contactForm" action="https://formspree.io/f/movkqjzz" method="POST" novalidate>
+          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" class="hp-guard" aria-hidden="true" />
+          <div class="form-field">
+            <label for="cfName" data-i18n="contact.name">اسمك</label>
+            <input id="cfName" name="name" required minlength="2" placeholder="الاسم الكامل" autocomplete="name" aria-invalid="false" aria-describedby="cfNameError" />
+            <small class="error-msg" id="cfNameError">فضلاً أدخل اسمك (حرفان على الأقل).</small>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="cfEmail" data-i18n="contact.email">بريدك الإلكتروني</label>
+              <input id="cfEmail" type="email" name="email" required placeholder="you@example.com" dir="ltr" autocomplete="email" aria-invalid="false" aria-describedby="cfEmailError" />
+              <small class="error-msg" id="cfEmailError">فضلاً أدخل بريدًا إلكترونيًا صحيحًا.</small>
+            </div>
+            <div class="form-field">
+              <label for="cfService" data-i18n="contact.type">نوع الرسالة</label>
+              <select id="cfService" name="service" aria-invalid="false" aria-describedby="cfServiceError">
+                <option value="اقتراح عام">اقتراح عام</option>
+                <option value="تلخيص مادة">تلخيص مادة</option>
+                <option value="بنك أسئلة">بنك أسئلة</option>
+                <option value="تصحيح خطأ">تصحيح خطأ</option>
+              </select>
+              <small class="error-msg" id="cfServiceError">اختر نوع الرسالة.</small>
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="cfMessage" data-i18n="contact.message">رسالتك</label>
+            <textarea id="cfMessage" name="message" rows="5" required minlength="10" placeholder="اكتب رسالتك هنا…" aria-invalid="false" aria-describedby="cfMessageError"></textarea>
+            <small class="error-msg" id="cfMessageError">فضلاً اكتب رسالة من 10 أحرف على الأقل.</small>
+          </div>
+          <button class="btn btn-primary form-submit" type="submit"><span class="submit-text" data-i18n="contact.submit">إرسال المساهمة ✦</span></button>
+          <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">منصة<span class="logo-dot">.</span></a>
+      <ul class="footer-links">
+        <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
+        <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
+        <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
+        <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
+        <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+        <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
+        <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
+        <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
+        <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
+        <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
+        <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
+      </ul>
+      <div class="footer-social">
+        <a href="https://github.com/motmii" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GH</a>
+        <a href="mailto:motmi757@gmail.com" aria-label="البريد الإلكتروني">✉</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p data-i18n="footer.copy">© 2026 منصة أمن المعلومات — صُمّم وطُوّر بواسطة أحمد مطمي.</p>
+      <p class="footer-local" data-i18n="footer.local">دبلوم أمن المعلومات (تجسير مهني) • الترم الحالي</p>
+    </div>
+  </footer>
+
+  <!-- Back-to-top (MODULE 31). Fixed & out of flow → zero CLS. -->
+  <button type="button" id="toTop" class="to-top" aria-label="العودة إلى أعلى الصفحة" disabled>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path d="M12 4l8 8h-5v8h-6v-8H4z" fill="currentColor"/></svg>
+  </button>
+
+  <!-- ============================================================
+       مساعد المنصة (MODULE 33 · AI.Assistant)
+       Floating Arabic-first assistant. Works fully offline via the
+       local knowledge engine; can proxy to a real LLM through a
+       configurable endpoint (window.PLATFORM_AI.endpoint, e.g.
+       "/api/chat") — never a provider key in frontend code.
+       ============================================================ -->
+  <div id="assistantRoot" class="assistant-root">
+    <section id="assistantPanel" class="assistant-panel" role="dialog" aria-modal="false"
+             aria-label="مساعد المنصة — المحادثة" aria-hidden="true">
+      <header class="assistant-head">
+        <span class="assistant-avatar" aria-hidden="true">✦</span>
+        <div class="assistant-id">
+          <strong>مساعد المنصة</strong>
+          <span id="assistantStatus" class="assistant-status">يعمل محليًا داخل متصفحك</span>
+        </div>
+        <button type="button" id="assistantClose" class="assistant-x" aria-label="إغلاق المساعد" title="إغلاق">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
+      </header>
+      <div id="assistantLog" class="assistant-log" role="log" aria-live="polite" aria-label="سجل المحادثة"></div>
+      <div id="assistantChips" class="assistant-chips" aria-label="أسئلة مقترحة"></div>
+      <form id="assistantForm" class="assistant-form">
+        <input id="assistantInput" class="assistant-input" type="text" autocomplete="off"
+               placeholder="اسأل عن أي شيء في المنصة…" aria-label="اكتب سؤالك للمساعد" maxlength="500" />
+        <button type="submit" class="assistant-send" aria-label="إرسال السؤال">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path d="M3 11.5L21 3l-8.5 18-2.4-7.1L3 11.5z" fill="currentColor"/>
+          </svg>
+        </button>
+      </form>
+      <p class="assistant-note">إجابات مبنية على محتوى المنصة — للمراجعة الأكاديمية اعتمد على مذكرات المادة.</p>
+    </section>
+    <!-- Standalone Floating Action Button (FAB) — permanently visible and the
+         panel's ONLY toggle (aria-expanded / aria-controls). It is deliberately
+         independent: no notification shares this corner any more. -->
+    <button type="button" id="assistantFab" class="assistant-fab" aria-expanded="false"
+            aria-controls="assistantPanel" aria-label="افتح مساعد المنصة">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+        <path d="M12 3a8 8 0 0 1 8 8 8 8 0 0 1-8 8H8l-4 3v-4.6A8 8 0 0 1 12 3z" fill="currentColor" opacity="0.95"/>
+        <circle cx="9" cy="11" r="1.3" fill="var(--bg, #120c0e)"/><circle cx="12.5" cy="11" r="1.3" fill="var(--bg, #120c0e)"/><circle cx="16" cy="11" r="1.3" fill="var(--bg, #120c0e)"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ============================================================
+       GLOBAL SEARCH (MODULE 48) — command-palette style dialog.
+       Searches lessons, learning paths, tools, quizzes, flashcards
+       and glossary terms (flashcard explanations). Fully keyboard
+       navigable: / or Ctrl+K opens, Esc closes, ↑↓ + Enter pick.
+       ============================================================ -->
+  <div id="searchOverlay" class="search-overlay" hidden></div>
+  <div id="searchDialog" class="search-dialog" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="searchDialogTitle" inert>
+    <div class="search-panel" role="document">
+      <h2 id="searchDialogTitle" class="sr-only" data-i18n="search.title">بحث في المنصة</h2>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="searchInput" type="search" autocomplete="off" spellcheck="false"
+               data-i18n-placeholder="search.placeholder" placeholder="ابحث: درس، مسار، أداة، اختبار، مصطلح…"
+               aria-label="بحث في المنصة" role="combobox" aria-expanded="false" aria-controls="searchResults" aria-activedescendant="" />
+        <button type="button" id="searchClose" class="search-close" aria-label="إغلاق البحث" title="إغلاق">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <ul id="searchResults" class="search-results" role="listbox" aria-label="نتائج البحث"></ul>
+      <p class="search-foot"><kbd>/</kbd> <span data-i18n="search.hint">أو Ctrl+K للفتح · Esc للإغلاق · ↑↓ للتنقل</span></p>
+    </div>
+  </div>
+
+  <script src="current-semester.js" defer></script>
+  <script src="script.js" defer></script>
+  <script src="assistant.js" defer></script>
+  <!-- SW registration must happen after script.js so navigator.serviceWorker is available.
+       Scope is intentionally relative (./) so it works under GH Pages project paths. -->
+  <script>
+    (function () {
+      "use strict";
+      var scope = "./";
+      var swPath = "./sw.js";
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register(swPath, { scope: scope })
+            .then(function (reg) {
+              if (reg.active) { window.dispatchEvent(new CustomEvent("nova:sw-ready", { detail: { reg: reg } })); }
+            })
+            .catch(function (err) { console.warn("[SW] registration skipped:", err && err.message); });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
