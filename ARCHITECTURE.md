@@ -73,9 +73,14 @@ Main IIFE ("use strict")
 ├── M31  Nav.ToTop        Back-to-top button (appears after 600px)
 ├── M32  Nav.ScrollSpy    Highlights the section in view via aria-current
 ├── M33  ViewSwitcher     Instantly switches views while keeping one page
-├── M36  ThemeSwitch      Dark default · light persisted (explicit choice wins,
-│                         else OS prefers-color-scheme; pre-paint restore in
-│                         index.html prevents theme-flash on load)
+├── M36  ThemeSwitch      Light (Rose Blush) default · dark (Rose Noir) persisted
+│                         (explicit choice wins, else OS prefers-color-scheme;
+│                         pre-paint restore in index.html prevents theme-flash)
+├── M36b PaletteSwitch    Rose (current) ↔ Classic (legacy violet/cyan/pink),
+│                         orthogonal to M36 — applies in BOTH dark and light
+│                         modes (explicit palette wins, else rose; persisted
+│                         under "motmi-portal:palette", pre-paint restored,
+│                         button text --on-grad flips with the palette)
 ├── M37  ProgressHub      #progress — "تابع من حيث توقفت" resume card + best-score
 │                         cards, built from the quiz engine's localStorage store.
 │                         Phase 5 adds a stats strip (completed lessons, quiz
@@ -160,7 +165,7 @@ Main IIFE ("use strict")
 │                         class from the official timetable), HeroTabs tablist,
 │                         HeroAdaptiveNext strip, and the navbar WhatsNew
 │                         changelog popover (see README for the full list).
-└── M59  HeroMedia        Animated hero background — two pointer-inert layers:
+├── M59  HeroMedia        Animated hero background — two pointer-inert layers:
                           `.hero-bg` (the hero photo, drifting with a pure-CSS
                           heroDrift zoom/pan) and `.hero-media` (a 10s, 1280×720,
                           silent local loop `images/hero-bg.mp4` derived from the
@@ -180,6 +185,32 @@ Main IIFE ("use strict")
                           preload="none" means a vetoed device downloads 0 bytes.
                           Publishes window.PlatformHeroMedia; covered by
                           tests/hero-bg.test.js.
+├── M60  BrandLockup      Top bar gains the platform shield lockup and one clearly
+                          primary action (index.html markup + style.css layer —
+                          CSS-only module, no script.js block; documented in
+                          "The top bar" section below).
+└── M61  LectureGuide     #guide — the lecture access guide. script.js renders it
+                          from current-semester.js → lectureGuide (bilingual
+                          single source of truth): phishing-awareness warning,
+                          weekly timetable DERIVED from each subject's
+                          meta.schedule (never duplicated), 6 ordered joining
+                          steps, 3 real Microsoft endpoints (https only,
+                          target="_blank" + rel="noopener noreferrer" + one-tap
+                          copy), 5 native <details> troubleshooting entries and
+                          an honest note that the real meeting link is published
+                          by the department inside Teams. Three surfaces, one
+                          data source: the standalone shareable route
+                          (#guideBody), a compact inline card in #semester
+                          (#semesterGuide — deliberately outside #semesterGrid,
+                          so the subject grid is untouched) and a contextual
+                          #heroNowGuide link in the HeroNow strip shown only
+                          when a class is live, today or tomorrow (MODULE 55).
+                          Entry links also sit in the navbar "المزيد" menu, the
+                          mobile menu and every subject card (MODULE 00b / 43
+                          chips). DOM is built with createElement/textContent
+                          only — never raw HTML, never a network call — and the
+                          whole view re-renders on locale switch. Covered by
+                          tests/lecture-guide.test.js.
 ```
 
 `M33 · AI.Assistant` lives in its own file, `assistant.js` (loaded after

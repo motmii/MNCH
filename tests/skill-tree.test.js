@@ -74,7 +74,7 @@ check("prerequisite edges have no duplicates", noDuplicateEdges);
 check("prerequisite edges have no self references", noSelfEdges);
 
 console.log("\n— view, navigation & accessible alternative —");
-check("registers #skills as a routed view", js.includes('$id("hero"), $id("semester"), $id("paths"), $id("skills")'));
+check("registers #skills as a routed view", js.includes('$id("hero"), $id("semester"), $id("guide"), $id("paths"), $id("skills")'));
 check("adds #skills section", html.includes('id="skills"') && html.includes('id="skillsTree"'));
 check("adds desktop and mobile navigation links", (html.match(/href="#skills"/g) || []).length >= 2);
 check("accessible list alternative is present", html.includes('id="skillsListAlt"') && html.includes('id="skillsList"'));

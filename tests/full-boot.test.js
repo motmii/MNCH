@@ -46,7 +46,7 @@ function makeEl(id) {
 }
 
 const ids = [
-  "preloader","nav","navBurger","mobileMenu","langToggle","themeToggle","toTop",
+  "preloader","nav","navBurger","mobileMenu","langToggle","themeToggle","paletteToggle","toTop",
   "quizApp","flashGrid","flashSearch","flashShuffle","flashEmpty","subjectSearch","resultsCount","emptyState","subjectsGrid",
   "progressApp","heroContinue","heroContinueMeta","heroContinueBtn",
   "pathsGrid","pathDetailBody","lessonBody","lessonView",

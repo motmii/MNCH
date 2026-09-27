@@ -1,6 +1,6 @@
 # منصة أمن المعلومات — الترم الحالي
 
-A responsive, dark-themed cybersecurity education platform for Information Security diploma students (دبلوم أمن المعلومات — تجسير مهني, current semester). Built as a single-page application with zero dependencies — pure HTML, CSS, and vanilla JavaScript.
+A responsive cybersecurity education platform for Information Security diploma students (دبلوم أمن المعلومات — تجسير مهني, current semester), themed in the platform's Rose palette — light-first (Rose Blush) with a dark Rose Noir option. Built as a single-page application with zero dependencies — pure HTML, CSS, and vanilla JavaScript.
 
 ## ✨ Features
 
@@ -22,6 +22,7 @@ A responsive, dark-themed cybersecurity education platform for Information Secur
 - **Additive architecture** — the original 12 tool cards in HTML are untouched; all educational context is injected dynamically by JS (MODULE 42 · ToolsEdu) from embedded TOOLS_META + LABS_META data, so tool behavior is never rewritten
 ### Phase 5)
 - **Current Semester dashboard (`#semester`) — implemented** — a dedicated view rendered by `script.js` (MODULE 43 · SemesterDashboard) from `window.PLATFORM_CURRENT_SEMESTER` in `current-semester.js` (single source of truth, no data duplication). It shows the semester title, program name, description, subject count and total credit hours, plus one card per official subject: course code, credit hours, weekly day/time schedule, difficulty, estimated study hours, short description, prerequisites, learning outcomes, common mistakes and key terms — with honest links to existing quiz banks (via the `data-quiz-jump` flow), tool cards (`data-tool-jump`) and lab views only; missing entries are never faked. Lesson arrays are currently empty, so each card shows the honest «سيتم إضافة الدروس قريبًا» (lessons will be added soon) empty state until authored lessons ship. The `#semester` route is a real view: desktop and mobile nav links scroll to it, mobile menu closes on tap, Back/Forward work, and opening `…/#semester` directly renders the dashboard (bilingual AR/EN, re-rendered on locale switch).
+- **Lecture access guide (`#guide`) — implemented** — MODULE 61 · LectureGuide renders the official "how do I join my live class" walkthrough from `current-semester.js → lectureGuide` (single source of truth): a phishing-awareness warning, the weekly timetable **derived** from each subject's `meta.schedule`, 6 ordered joining steps, 3 real Microsoft endpoints (https only, `target="_blank"` + `rel="noopener noreferrer"`, one-tap copy) and 5 troubleshooting disclosures in native `<details>` — plus an honest note that the actual meeting link is published by the department inside Teams, never here. Reachable from the desktop «المزيد» menu, the mobile menu, a compact inline card in `#semester` (`#semesterGuide`, outside `#semesterGrid`), a chip on every subject card (MODULE 00b / 43), and a contextual link in the hero "Now" strip shown only when a class is live, today or tomorrow (MODULE 55). It is its own shareable `…/#guide` route, fully bilingual, re-rendered on locale switch, DOM built with `createElement`/`textContent` (no raw HTML, no network) — covered by `tests/lecture-guide.test.js`.
 - **Single-page SPA preserved** — pure HTML/CSS/JS, no build step
 - **AI Assistant** — Arabic-first study assistant (MODULE 33) grounded in the platform's own content. It prefers platform material, adapts to the student's level, gives examples and step-by-step explanations, recommends lessons/tools/quizzes/labs, honestly flags topics outside its content, and refuses (or safely redirects) requests targeting real systems, credential theft, malware or unauthorized access. Ships with Arabic example prompts: «اشرح لي الفرق بين التشفير والترميز», «اختبرني في أساسيات الشبكات», «اشرح لي معنى هذا الجزء من JWT بشكل آمن», «ما المسار المناسب للمبتدئ في أمن المعلومات؟»
 - **Optional first-time Onboarding (MODULE 38)** — a skippable 3-step wizard (level → subjects of interest → learning style) that recommends a starting path and lands you on `#path/fundamentals`. No registration required; choice persists in `motmi-portal:onboarding`.
@@ -178,17 +179,29 @@ Released under the [MIT License](LICENSE) — free to use, study, modify and sha
 
 ## 🎨 Design System
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--bg` | `#07070d` | Page background |
-| `--surface` | `#12121e` | Card backgrounds |
-| `--accent` | `#8b5cf6` | Primary accent (violet) |
-| `--accent-2` | `#22d3ee` | Secondary accent (cyan) |
-| `--accent-3` | `#f472b6` | Tertiary accent (pink) |
-| `--font-display` | Tajawal / Space Grotesk | Headings |
-| `--font-body` | Tajawal / Inter | Body text |
+Both themes are built on the **four layered rose tones** the brand is defined
+by — `#D79198` · `#DC9DA3` · `#DCAFB3` · `#D6C1C3`. They are **surface and fill
+colours only**: a pastel rose behind white text measures 1.7–2.5:1, so every
+text token is an ink tone of the same family (`#55292F` · `#3B2326` · `#2A1418`).
+Every text/background pair was measured against WCAG AA (text ≥ 4.5:1,
+non-text ≥ 3:1); semantic states (ok / bad / warn) deliberately stay outside
+the rose hue so meaning survives the repaint.
 
-Dark cyber theme · Glassmorphism · RTL layout · Custom cursor · Particle canvas
+| Token | Light · Rose Blush (default) | Dark · Rose Noir | Usage |
+|-------|------------------------------|------------------|-------|
+| `--bg` | `#D6C1C3` | `#120C0E` | Page background |
+| `--surface` / `--surface-2` | `#DCAFB3` / `#DC9DA3` | `#221618` / `#2A1C1F` | Cards & alt fills |
+| `--text` / `--muted` | `#2A1418` / `#5B3034` | `#F3E4E5` / `#C7A9AE` | Body & secondary text |
+| `--accent` | `#55292F` | `#D79198` | Primary accent |
+| `--accent-2` | `#3F2A45` | `#DCAFB3` | Secondary accent |
+| `--accent-3` | `#4A2B33` | `#C9A2C4` | Tertiary accent (mauve) |
+| `--grad` | `linear-gradient(100deg, #D79198, #DCAFB3 52%, #D6C1C3)` — identical in both themes, carries **ink** text (`--on-grad`, 6.9–10.1:1) | | Primary buttons / brand ribbon |
+| `--accent-rgb` | `85 41 47` | `215 145 152` | Feeds `rgb(var(--accent-rgb) / α)` washes so translucent tints follow the theme |
+| `--ok` / `--bad` / `--warn` | `#15803D` / `#B91C1C` / `#B45309` | `#4ADE80` / `#F87171` / `#FBBF24` | Semantic states — intentionally **not** rose |
+| `--font-display` | Tajawal / Space Grotesk | | Headings |
+| `--font-body` | Tajawal / Inter | | Body text |
+
+Rose Blush + Rose Noir themes · Glassmorphism · RTL layout · Custom cursor · Particle canvas
 
 **Navbar & brand (MODULE 60)**: the top bar is one fixed, frosted surface with
 three groups — logo lockup · links (`المزيد` dropdown + updates trigger) ·
@@ -199,7 +212,9 @@ tracking would break the letter joins. One **primary CTA** (`nav.cta` → `#path
 closes the bar: outlined over the hero photo, filled once the bar frosts, and
 hidden ≤1180px where the mobile menu already carries it.
 
-**Theme switcher**: a navbar toggle flips between a dark-by-default theme and a light educational theme. The choice is persisted, an explicit stored choice wins, and otherwise the OS `prefers-color-scheme` is followed (with a pre-paint script to prevent any flash of the wrong theme).
+**Theme switcher**: a navbar toggle flips between the light **Rose Blush** theme (the default) and the dark **Rose Noir** theme. The choice is persisted, an explicit stored choice wins, and otherwise the OS `prefers-color-scheme` is followed (with a pre-paint script that resolves the theme before the first paint, so there is never a flash of the wrong theme).
+
+**Palette switcher (MODULE 36b)**: a second navbar toggle (🎨 لوحة الألوان) flips between the current **Rose** palette (default) and the legacy **Classic** palette (violet/cyan/pink). It is orthogonal to the theme switcher — the classic token set applies in both dark and light modes — persists under `motmi-portal:palette`, restores pre-paint, and even flips the primary-button text (`--on-grad`: ink on the pastel rose ribbon, white on the dark classic ribbon) so contrast stays AA in both palettes.
 
 ## ♿ Accessibility
 

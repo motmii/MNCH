@@ -1239,6 +1239,9 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
     } else {
       html += `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">بنك الأسئلة</span>`;
     }
+    /* MODULE 61 · contextual entry point to the lecture access guide
+       (translated by MODULE 22 on boot and on every locale switch). */
+    html += `<a href="#guide" class="card-link is-guide" data-i18n="guide.cardChip">دليل المحاضرة</a>`;
     html += materialsHtml(s);
     html += `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">الملخصات</span>`;
     return html;
@@ -2812,7 +2815,7 @@ async function loadLessonData() {
     for (let i = 0; i < hex.length; i += 2) {
       const b = parseInt(hex.slice(i, i + 2), 16);
       if (Number.isNaN(b)) {
-        cells.push(`<i style="background:#334155"></i>`);
+        cells.push(`<i style="background:#8e5f68"></i>`);
         continue;
       }
       cells.push(
@@ -2834,7 +2837,7 @@ async function loadLessonData() {
     for (let i = 0; i < hex.length; i += 2) {
       const b = parseInt(hex.slice(i, i + 2), 16);
       if (Number.isNaN(b)) {
-        cells.push(`<i style="background:#334155"></i>`);
+        cells.push(`<i style="background:#8e5f68"></i>`);
         continue;
       }
       cells.push(
@@ -3877,6 +3880,30 @@ const Lang = (() => {
       "semester.tools": "أدوات ذات صلة",
       "semester.labs": "معامل ذات صلة",
       "semester.missingData": "بيانات الترم الحالي غير متوفرة حاليًا.",
+      /* ---------- MODULE 61 · LectureGuide (#guide + inline block) ---------- */
+      "nav.guide": "دليل المحاضرات",
+      "guide.eyebrow": "الوصول إلى المحاضرات",
+      "guide.title": "دليل <em class=\"grad\">الدخول إلى المحاضرات</em>",
+      "guide.sub": "كل ما تحتاجه لدخول محاضرتك الحالية: جدول الأسبوع، الخطوات بالترتيب، الروابط الرسمية، وحلول أكثر المشاكل تكرارًا.",
+      "guide.back": "رجوع إلى لوحة الترم الحالي",
+      "guide.warning": "تنبيه مهم",
+      "guide.scheduleTitle": "جدول المحاضرات الأسبوعي",
+      "guide.thSubject": "المادة",
+      "guide.thCode": "رمز المقرر",
+      "guide.thDay": "اليوم",
+      "guide.thTime": "الوقت",
+      "guide.stepsTitle": "خطوات الدخول بالموبايل أو الكمبيوتر",
+      "guide.linksTitle": "الروابط الرسمية",
+      "guide.open": "فتح",
+      "guide.copy": "نسخ الرابط",
+      "guide.copied": "تم نسخ الرابط ✓",
+      "guide.copyFailed": "تعذّر النسخ — انسخ الرابط يدويًا.",
+      "guide.problemsTitle": "مشاكل شائعة وحلولها",
+      "guide.nowCta": "كيف أصل للمحاضرة؟",
+      "guide.cardTitle": "لا تعرف كيف تدخل المحاضرة؟",
+      "guide.cardDesc": "دليل مختصر: جدول الأسبوع، الدخول بحسابك الجامعي، الروابط الرسمية، وحلول المشاكل المتكررة.",
+      "guide.cardCta": "افتح دليل المحاضرات",
+      "guide.cardChip": "دليل المحاضرة",
        "semester.materials": "المواد التعليمية",
 
       /* ---------- MODULE 48 · GlobalSearch (Phase 6) ---------- */
@@ -3928,6 +3955,30 @@ const Lang = (() => {
 
       "semester.labs": "Related labs",
       "semester.missingData": "Current-semester data is not available right now.",
+      /* ---------- MODULE 61 · LectureGuide (#guide + inline block) ---------- */
+      "nav.guide": "Lecture guide",
+      "guide.eyebrow": "Getting into class",
+      "guide.title": "The <em class=\"grad\">lecture access</em> guide",
+      "guide.sub": "Everything you need to join today's live class: the weekly timetable, the steps in order, the official links and fixes for the most common problems.",
+      "guide.back": "Back to the current-semester board",
+      "guide.warning": "Important",
+      "guide.scheduleTitle": "Weekly lecture timetable",
+      "guide.thSubject": "Subject",
+      "guide.thCode": "Course code",
+      "guide.thDay": "Day",
+      "guide.thTime": "Time",
+      "guide.stepsTitle": "Joining steps — phone or computer",
+      "guide.linksTitle": "Official links",
+      "guide.open": "Open",
+      "guide.copy": "Copy link",
+      "guide.copied": "Link copied ✓",
+      "guide.copyFailed": "Copy failed — copy the link manually.",
+      "guide.problemsTitle": "Common problems and fixes",
+      "guide.nowCta": "How do I join?",
+      "guide.cardTitle": "Not sure how to get into the lecture?",
+      "guide.cardDesc": "A short guide: the weekly timetable, signing in with your student account, the official links and fixes for recurring problems.",
+      "guide.cardCta": "Open the lecture guide",
+      "guide.cardChip": "Lecture guide",
       "nav.more": "More",
       "nav.home": "Home", "nav.semester": "Current Semester",
       "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
@@ -5675,7 +5726,7 @@ window.Lang = Lang;
 
   /** All switchable views: hero header + section elements. @type {HTMLElement[]} */
   const VIEWS = [
-    $id("hero"), $id("semester"), $id("paths"), $id("skills"), $id("path"), $id("subjects"), $id("tools"),
+    $id("hero"), $id("semester"), $id("guide"), $id("paths"), $id("skills"), $id("path"), $id("subjects"), $id("tools"),
     $id("labs"), $id("flash"), $id("quiz"), $id("progress"),
     $id("games"), $id("redteam"), $id("ir"), $id("cryptolab"),
     $id("about"), $id("contact"), $id("lesson"),
@@ -5888,14 +5939,17 @@ window.Lang = Lang;
 })();
 
 /* ============================================================
-   MODULE 36 · ThemeSwitch — dark default · light persisted
+   MODULE 36 · ThemeSwitch — light default · dark persisted
    Resolution order: explicit stored choice ("motmi-portal:theme"
    in localStorage via Store) → system preference
-   (prefers-color-scheme) → dark. The pre-paint inline <head>
+   (prefers-color-scheme) → light. The pre-paint inline <head>
    script mirrors this logic so there is no flash of the wrong
    theme. While no explicit choice is stored, live OS switches
    (light↔dark) update the page immediately; once the user taps
    the toggle their choice wins and OS changes are ignored.
+   NOTE: <html data-theme="dark"> is now an explicit opt-in; the
+   :root token block still holds the dark (Rose Noir) palette so a
+   missing attribute can never flash a light page on a dark shell.
    ============================================================ */
 (function () {
   const root = document.documentElement;
@@ -5903,7 +5957,7 @@ window.Lang = Lang;
   const LBL_LIGHT = "الوضع الداكن / Dark mode";   /* shown while light is ON */
   const LBL_DARK = "الوضع الفاتح / Light mode";   /* shown while dark is ON  */
   const mq = (typeof window.matchMedia === "function")
-    ? window.matchMedia("(prefers-color-scheme: light)")
+    ? window.matchMedia("(prefers-color-scheme: dark)")
     : null;
 
   /**
@@ -5913,15 +5967,14 @@ window.Lang = Lang;
    */
   function apply(mode) {
     const isLight = mode === "light";
-    if (isLight) root.setAttribute("data-theme", "light");
-    else root.removeAttribute("data-theme");
+    root.setAttribute("data-theme", isLight ? "light" : "dark");
     if (btn) {
       btn.setAttribute("aria-pressed", String(isLight));
       btn.title = isLight ? LBL_LIGHT : LBL_DARK;
       btn.setAttribute("aria-label", isLight ? LBL_LIGHT : LBL_DARK);
     }
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", isLight ? "#f4f5f7" : "#0b0f19");
+    if (meta) meta.setAttribute("content", isLight ? "#d6c1c3" : "#120c0e");
   }
 
   /** Stored user choice, or null when the user never picked manually.
@@ -5931,8 +5984,8 @@ window.Lang = Lang;
     return v === "light" || v === "dark" ? v : null;
   }
 
-  /* Restore: stored choice → system preference → dark (default). */
-  apply(storedChoice() || (mq && mq.matches ? "light" : "dark"));
+  /* Restore: stored choice → system preference → light (default). */
+  apply(storedChoice() || (mq && mq.matches ? "dark" : "light"));
 
   if (btn) {
     btn.addEventListener("click", () => {
@@ -5945,10 +5998,80 @@ window.Lang = Lang;
   /* Follow live OS theme changes until the user makes an explicit choice. */
   if (mq) {
     const onSystemChange = (e) => {
-      if (storedChoice() === null) apply(e.matches ? "light" : "dark");
+      if (storedChoice() === null) apply(e.matches ? "dark" : "light");
     };
     if (typeof mq.addEventListener === "function") mq.addEventListener("change", onSystemChange);
     else if (typeof mq.addListener === "function") mq.addListener(onSystemChange); /* legacy Safari */
+  }
+})();
+
+/* ============================================================
+   MODULE 36b · PaletteSwitch — rose (current) ↔ classic (legacy)
+   Orthogonal to MODULE 36 (dark↔light): <html data-palette="classic">
+   picks the legacy violet/cyan/pink token set in BOTH modes; the
+   attribute absent means rose. Persisted under "motmi-portal:palette"
+   and restored pre-paint by the inline <head> script (no FOUC).
+   The theme-color meta follows theme AND palette so the browser
+   chrome matches the visible canvas.
+   ============================================================ */
+(function () {
+  const root = document.documentElement;
+  const btn = $id("paletteToggle");
+  const LBL_ROSE = "اللون الكلاسيكي / Classic palette";   /* shown while rose is ON */
+  const LBL_CLASSIC = "اللون الوردي / Rose palette";       /* shown while classic is ON */
+  const DARK_META = { rose: "#120c0e", classic: "#0b0f19" };
+  const LIGHT_META = { rose: "#d6c1c3", classic: "#f4f5f7" };
+  const CLASSIC_BTN_TEXT = "#ffffff"; /* white on the classic violet/cyan/pink ribbon (≥5.1:1) */
+
+  /**
+   * Apply a palette to <html>, the toggle state and the theme-color meta.
+   * @param {"rose"|"classic"} pal Target palette.
+   * @returns {void}
+   */
+  function applyPalette(pal) {
+    const classic = pal === "classic";
+    if (classic) root.setAttribute("data-palette", "classic");
+    else root.removeAttribute("data-palette");
+    /* Buttons paint their text from --on-grad; the classic ribbon is dark
+       so it needs white text, the rose ribbon needs ink text. */
+    root.style.setProperty("--on-grad", classic ? CLASSIC_BTN_TEXT : "#2a1418");
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(classic));
+      btn.title = classic ? LBL_CLASSIC : LBL_ROSE;
+      btn.setAttribute("aria-label", classic ? LBL_CLASSIC : LBL_ROSE);
+    }
+    const mode = root.getAttribute("data-theme") === "light" ? "light" : "dark";
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", mode === "light" ? LIGHT_META[pal] : DARK_META[pal]);
+  }
+
+  /** Re-sync the meta when MODULE 36 changes the mode (palette kept). @returns {void} */
+  function syncMeta() {
+    const pal = root.getAttribute("data-palette") === "classic" ? "classic" : "rose";
+    const mode = root.getAttribute("data-theme") === "light" ? "light" : "dark";
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", mode === "light" ? LIGHT_META[pal] : DARK_META[pal]);
+  }
+
+  /** Stored palette choice, defaulting to rose. @returns {"rose"|"classic"} */
+  function storedPalette() {
+    return Store.get("palette") === "classic" ? "classic" : "rose";
+  }
+
+  applyPalette(storedPalette());
+  /* Observe MODULE 36's mode flips so the meta never goes stale. */
+  if ("MutationObserver" in window) {
+    new MutationObserver((muts) => {
+      if (muts.some((m) => m.attributeName === "data-theme")) syncMeta();
+    }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+  }
+
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const next = root.getAttribute("data-palette") === "classic" ? "rose" : "classic";
+      applyPalette(next);
+      Store.set("palette", next);
+    });
   }
 })();
 
@@ -6273,11 +6396,11 @@ function draw(f) {
       const c = document.createElementNS(NS, "circle");
       c.setAttribute("cx", x); c.setAttribute("cy", 60);
       c.setAttribute("r", i === 0 || i === 4 ? 16 : 11);
-      c.setAttribute("fill", i === 0 || i === 4 ? "var(--accent-2, #22d3ee)" : "var(--surface-2, #1e293b)");
-      c.setAttribute("stroke", "var(--accent, #a78bfa)");
+      c.setAttribute("fill", i === 0 || i === 4 ? "var(--accent-2, #dcafb3)" : "var(--surface-2, #2a1c1f)");
+      c.setAttribute("stroke", "var(--accent, #d79198)");
       const t = document.createElementNS(NS, "text");
       t.setAttribute("x", x); t.setAttribute("y", 96); t.setAttribute("text-anchor", "middle");
-      t.setAttribute("font-size", "11"); t.setAttribute("fill", "var(--muted, #94a3b8)");
+      t.setAttribute("font-size", "11"); t.setAttribute("fill", "var(--muted, #c7a9ae)");
       t.textContent = labels[i];
       g.appendChild(c); g.appendChild(t);
       svgEl.appendChild(g);
@@ -6287,12 +6410,12 @@ function draw(f) {
       const l = document.createElementNS(NS, "line");
       l.setAttribute("x1", nodes[i].x + 12); l.setAttribute("y1", 60);
       l.setAttribute("x2", nodes[i + 1].x - 12); l.setAttribute("y2", 60);
-      l.setAttribute("stroke", "var(--line, rgba(148,163,184,.3))");
+      l.setAttribute("stroke", "var(--line, rgba(214,193,195,.3))");
       l.setAttribute("stroke-width", "2"); l.setAttribute("stroke-dasharray", "4 4");
       svgEl.appendChild(l);
     }
     const dot = document.createElementNS(NS, "circle");
-    dot.setAttribute("r", 6); dot.setAttribute("fill", "var(--accent-3, #f472b6)");
+    dot.setAttribute("r", 6); dot.setAttribute("fill", "var(--accent-3, #c9a2c4)");
     svgEl.appendChild(dot);
     const ttlTxt = document.createElementNS(NS, "text");
     ttlTxt.setAttribute("x", 380); ttlTxt.setAttribute("y", 36);
@@ -7111,7 +7234,7 @@ function rxMatch(node, s, i) {
     regexSvg.innerHTML = "";
     const t = document.createElementNS(NS, "text");
     t.setAttribute("x", 14); t.setAttribute("y", 30);
-    t.setAttribute("fill", "var(--muted, #94a3b8)"); t.setAttribute("font-size", "13");
+    t.setAttribute("fill", "var(--muted, #c7a9ae)"); t.setAttribute("font-size", "13");
     t.textContent = "نمط: " + pat + (plain ? "  — النص المميز: " + text.slice(0, 90) : " (رسم مبسط)");
     regexSvg.appendChild(t);
   }
@@ -9510,6 +9633,9 @@ const LABS_META = {
   /** Links to EXISTING quiz banks / tool cards / lab views (or ""). @param {object} s @returns {string} */
   function linksHtml(s) {
     let html = "";
+    /* MODULE 61 · contextual link to the lecture access guide. */
+    html += '<a class="path-chip is-guide" href="#guide">' +
+      escHtmlL(T10("guide.cardChip") || "Lecture guide") + "</a>";
     (Array.isArray(s.quizzes) ? s.quizzes : []).forEach((k) => {
       const n = quizCount(k);
       html += '<a class="path-chip is-quiz" href="#quiz" data-quiz-jump="' + esc(k) + '">' +
@@ -12313,6 +12439,8 @@ const LABS_META = {
   const strip = document.getElementById("heroNow");
   const textEl = document.getElementById("heroNowText");
   const chipEl = document.getElementById("heroNowChip");
+  /* MODULE 61 · contextual "how do I join" link (hidden by default). */
+  const guideEl = document.getElementById("heroNowGuide");
   if (!strip || !textEl) return;
 
   function resolveLang() {
@@ -12415,6 +12543,7 @@ const LABS_META = {
     if (!found) {
       textEl.textContent = greeting + " · " + (T("now.noSchedule") || "مرحبًا بك في منصة أمن المعلومات");
       if (chipEl) chipEl.hidden = true;
+      if (guideEl) guideEl.hidden = true;
       return;
     }
 
@@ -12442,6 +12571,11 @@ const LABS_META = {
         chipEl.className = "hero-now-chip";
         chipEl.hidden = false;
       }
+
+      /* MODULE 61 contextual entry point: the guide is offered only while
+         it is actually useful — a live class, or one starting today or
+         tomorrow. Every other state keeps the strip to a single line. */
+      if (guideEl) guideEl.hidden = !(found.status === "ongoing" || found.daysAway <= 1);
     }
   }
 
@@ -12768,6 +12902,24 @@ const LABS_META = {
   if (typeof btn.addEventListener !== "function") return;
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
+    {
+      date: "2026-09-27",
+      tag: "improve",
+      title: { ar: "هوية بصرية جديدة — لوحة الورد", en: "New visual identity — the Rose palette" },
+      desc: {
+        ar: "إعادة تلوين كاملة مبنية على أربع درجات وردية متدرّجة. الوضع الفاتح «Rose Blush» أصبح الافتراضي (خلفية ورقية وردية وبطاقات وردية أغمق قليلًا)، والوضع الداكن «Rose Noir» بخلفية برقوقية مع توهّج وردي. كل زوج نص/خلفية قيس للوصول إلى WCAG AA في الثيمين، وألوان النجاح والخطأ والتنبيه بقيت مميّزة عن هوية المنصة.",
+        en: "A full repaint built on four layered rose tones. The light Rose Blush theme is now the default (a rose-paper canvas with slightly deeper rose cards) and the dark Rose Noir theme sits on a plum canvas with a rose halo. Every text/background pair was measured against WCAG AA in both themes, and the success / danger / warning colours stay clearly distinct from the brand hue."
+      }
+    },
+    {
+      date: "2026-09-27",
+      tag: "new",
+      title: { ar: "دليل الدخول إلى المحاضرات", en: "Lecture access guide" },
+      desc: {
+        ar: "دليل رسمي مختصر للوصول إلى المحاضرة المباشرة: جدول الأسبوع المأخوذ من الخطة المعتمدة، 6 خطوات للدخول بحسابك الجامعي، الروابط الرسمية بأزرار نسخ، وحلول 5 مشاكل متكررة — متاح كقسم مستقل (#guide) وكبطاقة داخل لوحة الترم الحالي، مع تنبيه في شريط «الآن» عند اقتراب الحصة.",
+        en: "A short official guide to joining a live class: the weekly timetable taken from the approved plan, six steps to get in with your student account, and the official links with copy buttons, plus fixes for five recurring problems — shipped as its own view (#guide), as a card inside the semester board, and with a contextual alert in the \"Now\" strip when a class is close."
+      }
+    },
     {
       date: "2026-09-26",
       tag: "new",
@@ -13163,3 +13315,382 @@ const LABS_META = {
     started: function () { return started; }
   };
 })();
+
+/* ============================================================
+   MODULE 61 · LectureGuide — دليل الوصول إلى المحاضرات
+   ------------------------------------------------------------
+   Renders the official "how do I join a live class" guide from
+   window.PLATFORM_CURRENT_SEMESTER.lectureGuide — current-semester.js
+   stays the single source of truth, nothing is authored here:
+   - an inline card inside the Current Semester dashboard (#semesterGuide),
+     deliberately OUTSIDE #semesterGrid so the subject grid is untouched;
+   - the standalone, shareable #guide view (#guideBody). The router
+     (MODULE 33) already serves #guide as a real view: deep link,
+     Back/Forward and nav aria-current come for free;
+   - a weekly timetable DERIVED from each official subject's
+     meta.schedule — never duplicated in the data file.
+   Rules honored:
+   - Zero network requests, zero personal data: external links open in a
+     new tab with rel="noopener noreferrer"; "copy" uses the clipboard
+     API with a text-area fallback and never sends anything anywhere.
+   - The DOM is built with createElement/textContent only — no raw HTML
+     strings — so bilingual data text can never inject markup.
+   - Missing mounts, a stubbed DOM or missing data → honest empty state
+     or a silent no-op, never a thrown error. Re-renders on locale switch.
+   ============================================================ */
+(function initLectureGuide() {
+  "use strict";
+
+  const view = document.getElementById("guide");
+  const body = document.getElementById("guideBody");
+  const inlineMount = document.getElementById("semesterGuide");
+  if (!view && !inlineMount) return;                         /* not this page */
+  if (typeof document.createElement !== "function") return;   /* stub-safe boot */
+
+  /* ---------- locale helpers (this module sits outside the main IIFE) ------- */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+
+  /** Active locale code. @returns {string} */
+  function locale() { return (L10N && L10N.current) || "ar"; }
+
+  /** Dictionary text that never leaks a raw key. @param {string} key @returns {string} */
+  function T(key) {
+    let s = "";
+    try { s = (L10N && typeof L10N.t === "function") ? L10N.t(key) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+
+  /** Active side of a bilingual { ar, en } field. @param {*} v @returns {string} */
+  function bi(v) {
+    if (v == null) return "";
+    if (typeof v !== "object") return String(v);
+    const s = (v[locale()] != null) ? v[locale()] : (v.ar != null ? v.ar : v.en);
+    return s == null ? "" : String(s);
+  }
+
+  /* ---------- minimal DOM builders ---------- */
+  /** @param {string} tag @param {string=} className @param {string=} text */
+  function el(tag, className, text) {
+    const n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text != null) n.textContent = String(text);
+    return n;
+  }
+  /** Remove every child of a node. @param {Object|null} node */
+  function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+  /** Only real https endpoints may become links — no invented URLs. */
+  function safeUrl(u) { return /^https:\/\/[^\s"']+$/i.test(String(u || "")) ? String(u) : ""; }
+
+  /* ---------- data (single source of truth) ---------- */
+  /** @returns {Object|null} The authored guide object, or null. */
+  function guideData() {
+    try {
+      const cs = (typeof window !== "undefined" && window.PLATFORM_CURRENT_SEMESTER) || {};
+      return cs.lectureGuide || null;
+    } catch (e) { return null; }
+  }
+
+  /**
+   * Weekly rows derived from the official subject schedules.
+   * Order follows the study-plan array (already chronological); days and
+   * times that are missing simply keep the row out — nothing is invented.
+   * @returns {Array<{name:string,code:string,day:string,time:string}>}
+   */
+  function scheduleRows() {
+    const rows = [];
+    try {
+      const cs = (typeof window !== "undefined" && window.PLATFORM_CURRENT_SEMESTER) || {};
+      (Array.isArray(cs.subjects) ? cs.subjects : []).forEach((s) => {
+        const sch = s && s.meta && s.meta.schedule;
+        if (!sch || !sch.startTime) return;
+        rows.push({
+          name: bi(s.name),
+          code: String(s.code || s.id || ""),
+          day: bi(sch.day),
+          time: String(sch.startTime) + " – " + String(sch.endTime || "")
+        });
+      });
+    } catch (e) { /* no timetable → the table block is skipped */ }
+    return rows;
+  }
+
+  /* ---------- copy to clipboard (local only) ---------- */
+  /** Legacy path for browsers without the async clipboard. @returns {boolean} */
+  function legacyCopy(text) {
+    try {
+      if (!document.body || typeof document.execCommand !== "function") return false;
+      const ta = document.createElement("textarea");
+      ta.value = String(text);
+      ta.setAttribute("readonly", "");
+      ta.setAttribute("aria-hidden", "true");
+      ta.className = "guide-copy-helper";
+      document.body.appendChild(ta);
+      if (typeof ta.select === "function") ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return !!ok;
+    } catch (e) { return false; }
+  }
+
+  /**
+   * Copy a link to the clipboard: async Clipboard API first, then the
+   * text-area fallback. Nothing ever leaves the device.
+   * @param {string} text Text to copy.
+   * @returns {Promise<boolean>} Resolves true on success.
+   */
+  function copyText(text) {
+    const value = String(text || "");
+    if (!value) return Promise.resolve(false);
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard &&
+          typeof navigator.clipboard.writeText === "function") {
+        const p = navigator.clipboard.writeText(value);
+        if (p && typeof p.then === "function") return p.then(() => true, () => legacyCopy(value));
+        return Promise.resolve(true);
+      }
+    } catch (e) { /* fall through to the legacy path */ }
+    return Promise.resolve(legacyCopy(value));
+  }
+
+  /**
+   * Transient feedback — reuses the platform's existing toast styling so
+   * the guide adds no new visual language.
+   * @param {string} msg Text. @param {string=} variant e.g. "warn".
+   */
+  function toast(msg, variant) {
+    if (!msg || !document.body || typeof setTimeout !== "function") return;
+    try {
+      let stack = document.getElementById("labToastStack");
+      if (!stack) {
+        stack = document.createElement("div");
+        stack.id = "labToastStack";
+        stack.className = "lab-toast-stack";
+        stack.setAttribute("aria-live", "polite");
+        document.body.appendChild(stack);
+      }
+      const t = document.createElement("div");
+      t.className = "lab-toast" + (variant ? " is-" + variant : "");
+      t.textContent = msg;
+      stack.appendChild(t);
+      setTimeout(() => { if (t.classList) t.classList.add("is-in"); }, 16);
+      setTimeout(() => {
+        if (t.classList) t.classList.remove("is-in");
+        setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 500);
+      }, 3200);
+    } catch (e) { /* feedback is cosmetic, never fatal */ }
+  }
+
+  /**
+   * Copy button for one endpoint. The URL lives in a data attribute so a
+   * single delegated listener serves every copy button on the page.
+   * @param {string} url Link to copy. @returns {Object} The button element.
+   */
+  function copyButton(url) {
+    const btn = el("button", "btn btn-ghost btn-sm guide-copy", T("guide.copy") || "Copy");
+    btn.type = "button";
+    btn.setAttribute("data-guide-copy", url);
+    return btn;
+  }
+
+  document.addEventListener("click", (ev) => {
+    const target = ev && ev.target;
+    const btn = (target && typeof target.closest === "function") ? target.closest("[data-guide-copy]") : null;
+    if (!btn) return;
+    const url = btn.getAttribute("data-guide-copy") || "";
+    if (!url) return;
+    const original = btn.textContent;
+    copyText(url).then((ok) => {
+      btn.textContent = ok ? (T("guide.copied") || "Copied ✓") : (T("guide.copyFailed") || "Copy failed");
+      toast(ok ? T("guide.copied") : T("guide.copyFailed"), ok ? "" : "warn");
+      setTimeout(() => { btn.textContent = original; }, 2200);
+    });
+  });
+
+
+  /* ---------- inline card in the Current Semester dashboard ---------- */
+  /**
+   * Compact entry point rendered into #semesterGuide (outside the grid).
+   * @param {Object} g lectureGuide data.
+   * @returns {void}
+   */
+  function buildInline(g) {
+    clear(inlineMount);
+    const card = el("div", "sem-guide");
+    const ico = el("span", "sem-guide-ico", "🎓");
+    ico.setAttribute("aria-hidden", "true");
+    const txt = el("div", "sem-guide-text");
+    txt.appendChild(el("strong", null, T("guide.cardTitle")));
+    txt.appendChild(el("span", null, T("guide.cardDesc")));
+    const acts = el("div", "sem-guide-actions");
+    const cta = el("a", "btn btn-primary btn-sm", T("guide.cardCta"));
+    cta.href = "#guide";
+    acts.appendChild(cta);
+    const first = (Array.isArray(g.links) && g.links.length) ? g.links[0] : null;
+    const url = first ? safeUrl(first.url) : "";
+    if (url) acts.appendChild(copyButton(url));
+    card.appendChild(ico);
+    card.appendChild(txt);
+    card.appendChild(acts);
+    inlineMount.appendChild(card);
+  }
+
+  /* ---------- standalone #guide view ---------- */
+  /** @param {Object} parent @param {string} text @returns {Object} The heading. */
+  function head(parent, text) {
+    const h = el("h3", "guide-h", text);
+    parent.appendChild(h);
+    return h;
+  }
+
+  /**
+   * Build the whole guide body from the data file: warning, timetable,
+   * steps, official links, problems, note. Any missing part is simply
+   * skipped — the module never invents content to fill a gap.
+   * @param {Object} g lectureGuide data.
+   * @returns {void}
+   */
+  function buildGuide(g) {
+    clear(body);
+
+    const steps = Array.isArray(g.steps) ? g.steps : [];
+    const links = (Array.isArray(g.links) ? g.links : []).filter((l) => safeUrl(l.url));
+    const problems = Array.isArray(g.problems) ? g.problems : [];
+    const rows = scheduleRows();
+
+    if (!steps.length && !links.length && !rows.length) {
+      body.appendChild(el("p", "guide-empty", T("semester.missingData") || ""));
+      return;
+    }
+
+    /* 1 · the official warning, announced without stealing focus */
+    const warn = el("p", "guide-warning");
+    warn.setAttribute("role", "note");
+    warn.appendChild(el("b", "guide-warning-label", (T("guide.warning") || "") + " · "));
+    warn.appendChild(el("span", null, bi(g.warning)));
+    body.appendChild(warn);
+
+    /* 2 · weekly timetable — derived from meta.schedule, never duplicated */
+    if (rows.length) {
+      const wrap = el("div", "guide-table-wrap");
+      const table = el("table", "guide-table");
+      table.appendChild(el("caption", null, T("guide.scheduleTitle")));
+      const thead = el("thead");
+      const htr = el("tr");
+      ["guide.thSubject", "guide.thCode", "guide.thDay", "guide.thTime"].forEach((k) => {
+        const th = el("th", null, T(k));
+        th.setAttribute("scope", "col");
+        htr.appendChild(th);
+      });
+      thead.appendChild(htr);
+      table.appendChild(thead);
+      const tb = el("tbody");
+      rows.forEach((r) => {
+        const tr = el("tr");
+        tr.appendChild(el("td", "guide-td-subject", r.name));
+        tr.appendChild(el("td", "guide-td-code", r.code));
+        tr.appendChild(el("td", "guide-td-day", r.day));
+        tr.appendChild(el("td", "guide-td-time", r.time));
+        tb.appendChild(tr);
+      });
+      table.appendChild(tb);
+      wrap.appendChild(table);
+      body.appendChild(wrap);
+    }
+
+    /* 3 · the ordered steps */
+    if (steps.length) {
+      const box = el("section", "guide-block");
+      head(box, T("guide.stepsTitle"));
+      const ol = el("ol", "guide-steps");
+      steps.forEach((st, i) => {
+        const li = el("li", "guide-step");
+        li.appendChild(el("span", "guide-step-n", String(i + 1)));
+        const cell = el("div", "guide-step-body");
+        cell.appendChild(el("strong", null, bi(st.t)));
+        cell.appendChild(el("p", null, bi(st.d)));
+        li.appendChild(cell);
+        ol.appendChild(li);
+      });
+      box.appendChild(ol);
+      body.appendChild(box);
+    }
+
+    /* 4 · official links — https only, new tab, copy button per row */
+    if (links.length) {
+      const box = el("section", "guide-block");
+      head(box, T("guide.linksTitle"));
+      const ul = el("ul", "guide-links");
+      links.forEach((l) => {
+        const li = el("li", "guide-link");
+        const info = el("div", "guide-link-info");
+        info.appendChild(el("strong", null, bi(l.title)));
+        info.appendChild(el("p", null, bi(l.desc)));
+        if (l.host) info.appendChild(el("code", "guide-link-host", String(l.host)));
+        const acts = el("div", "guide-link-actions");
+        const open = el("a", "btn btn-primary btn-sm", T("guide.open") || "Open");
+        open.href = safeUrl(l.url);
+        open.target = "_blank";
+        open.rel = "noopener noreferrer";
+        acts.appendChild(open);
+        acts.appendChild(copyButton(safeUrl(l.url)));
+        li.appendChild(info);
+        li.appendChild(acts);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+      body.appendChild(box);
+    }
+
+    /* 5 · recurring problems as native disclosure (no custom widget) */
+    if (problems.length) {
+      const box = el("section", "guide-block");
+      head(box, T("guide.problemsTitle"));
+      problems.forEach((p) => {
+        const det = el("details", "guide-faq");
+        det.appendChild(el("summary", null, bi(p.q)));
+        det.appendChild(el("p", "guide-faq-a", bi(p.a)));
+        box.appendChild(det);
+      });
+      body.appendChild(box);
+    }
+
+    /* 6 · honest note about the data source */
+    if (g.note) body.appendChild(el("p", "guide-note", bi(g.note)));
+  }
+
+  /* ---------- render + re-render on locale switch ---------- */
+  function render() {
+    const g = guideData();
+    if (inlineMount) {
+      if (g) buildInline(g);
+      else clear(inlineMount);
+    }
+    if (body) {
+      if (g) buildGuide(g);
+      else {
+        clear(body);
+        body.appendChild(el("p", "guide-empty", T("semester.missingData") || ""));
+      }
+    }
+  }
+
+  render();
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); }
+  catch (e) { /* a missing hook must never break boot */ }
+
+  /* Public surface for tests and other modules — defensive by design. */
+  try {
+    window.PlatformLectureGuide = {
+      data: guideData,
+      schedule: scheduleRows,
+      render: render,
+      copy: copyText
+    };
+  } catch (e) { /* read-only window */ }
+})();
+

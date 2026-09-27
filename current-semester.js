@@ -541,7 +541,153 @@ const CURRENT_SEMESTER = {
         }
       }
     }
-  ]
+  ],
+
+  /* ------------------------------------------------------------
+     LECTURE ACCESS GUIDE — the official "how do I get into today's
+     live class" walkthrough, rendered by script.js MODULE 61 both
+     inline in the Current Semester dashboard (#semesterGuide) and
+     as the standalone shareable view (#guide).
+
+     Rules honored here (same as the rest of this file):
+     - Everything is bilingual { ar, en } — the renderer never mixes.
+     - Only REAL, publicly known Microsoft endpoints are listed:
+       no invented meeting URLs and no fake deep links. The meeting
+       link itself is published by the department inside each course
+       team, which is stated honestly in `note`.
+     - The weekly timetable shown in the guide is DERIVED from the
+       `meta.schedule` of the official subjects above — never
+       duplicated here.
+     ------------------------------------------------------------ */
+  lectureGuide: {
+    id: "lecture-access-guide",
+
+    warning: {
+      ar: "انتبه: رابط المحاضرة يُنشر فقط داخل قنوات القسم الرسمية (فرق Teams أو منصة الجامعة). لا تفتح روابط المحاضرات من رسائل مجهولة، ولا تُدخل بريدك الجامعي وكلمة مرورك في أي صفحة خارج Teams — من يطلب كلمة مرورك أو رمز التحقق يقوم بعملية احتيال.",
+      en: "Heads-up: lecture links are published only inside the department's official channels (Microsoft Teams or the university portal). Never open lecture links from unknown messages, and never type your student e-mail and password on any page outside Teams — anyone asking for your password or one-time code is phishing you."
+    },
+
+    steps: [
+      {
+        t: { ar: "اعرف موعد حصتك", en: "Know your class slot" },
+        d: {
+          ar: "راجع جدولك الأسبوعي في «لوحة الترم الحالي» أو شريط «الآن» في الصفحة الرئيسية: يوم المحاضرة ووقتها الرسمي لكل مادة كما ورد في الخطة المعتمدة.",
+          en: "Check your weekly timetable in the Current Semester board or the \"Now\" strip on the home page: the day and official time of every class exactly as listed in the approved plan."
+        }
+      },
+      {
+        t: { ar: "افتح Teams بحسابك الجامعي", en: "Open Teams with your student account" },
+        d: {
+          ar: "سجّل الدخول ببريدك الجامعي فقط، وفعّل التحقق بخطوتين إن كان متاحًا في حسابك. لا تنشئ حسابًا شخصيًا للمحاضرات ولا تشارك حسابك مع أي شخص.",
+          en: "Sign in with your university e-mail only, and turn on two-step verification if your account offers it. Never create a personal account for lectures and never share your account with anyone."
+        }
+      },
+      {
+        t: { ar: "ادخل فريق المادة", en: "Enter the course team" },
+        d: {
+          ar: "من قائمة الفرق في Teams اختر فريق المادة باسمها أو برمز المقرر، ثم افتح القناة المخصصة للمحاضرة (غالبًا General أو قناة بعنوان الأسبوع/الفصل).",
+          en: "From the Teams list pick the course team by name or course code, then open the channel used for the lecture (usually General or a week/chapter-named channel)."
+        }
+      },
+      {
+        t: { ar: "انضم من القناة أو التقويم", en: "Join from the channel or the calendar" },
+        d: {
+          ar: "اضغط Join الآن داخل مشاركة الاجتماع في القناة، أو افتح تبويب Calendar وحدّد موعد الحصة ثم Join. زر الانضمام يتفعّل قبل الموعد بدقائق.",
+          en: "Press Join inside the meeting post in the channel, or open the Calendar tab, pick the class occurrence and press Join. The Join button becomes active a few minutes before the start."
+        }
+      },
+      {
+        t: { ar: "اضبط الصوت والميكروفون قبل البدء", en: "Set audio and mic before you start" },
+        d: {
+          ar: "في شاشة الدخول اختر السماعة والميكروفون الصحيحين، وأبقِ ميكروفونك مغلقًا حتى يتحدث المحاضر، واكتب أسئلتك في محادثة القناة.",
+          en: "On the pre-join screen pick the right speaker and microphone, keep your mic muted until the instructor speaks, and write your questions in the channel conversation."
+        }
+      },
+      {
+        t: { ar: "بعد المحاضرة: راجّع وسجّل", en: "After class: review and log it" },
+        d: {
+          ar: "التسجيل وملفات المحاضرة تبقى في قناة المادة نفسها (Recordings و Files). حمّلها، ثم راجع بنك الأسئلة الخاص بالمادة في المنصة وحدّد نقاط ضعفك قبل الاختبار.",
+          en: "The recording and the class files stay in the same channel (Recordings and Files). Download them, then run the subject's question bank here on the platform and mark your weak points before the exam."
+        }
+      }
+    ],
+
+    links: [
+      {
+        id: "teams-web",
+        title: { ar: "فتح Microsoft Teams في المتصفح", en: "Open Microsoft Teams in the browser" },
+        desc: {
+          ar: "الدخول المباشر لواجهة Teams — سجّل الدخول ببريدك الجامعي ثم اختر فريق المادة.",
+          en: "Direct access to Teams — sign in with your university e-mail, then open the course team."
+        },
+        url: "https://teams.microsoft.com/",
+        host: "teams.microsoft.com"
+      },
+      {
+        id: "teams-app",
+        title: { ar: "تنزيل تطبيق Microsoft Teams", en: "Download the Microsoft Teams app" },
+        desc: {
+          ar: "تطبيق سطح المكتب والجوال من موقع Microsoft الرسمي — أكثر استقرارًا للمحاضرات الطويلة.",
+          en: "The desktop and mobile app from the official Microsoft site — more stable for long lectures."
+        },
+        url: "https://www.microsoft.com/en-us/microsoft-teams/download-app",
+        host: "microsoft.com"
+      },
+      {
+        id: "teams-support",
+        title: { ar: "مركز مساعدة Microsoft Teams", en: "Microsoft Teams help centre" },
+        desc: {
+          ar: "حلول رسمية لمشاكل تسجيل الدخول والصوت والانضمام بالاجتماع.",
+          en: "Official fixes for sign-in, audio and meeting-join problems."
+        },
+        url: "https://support.microsoft.com/",
+        host: "support.microsoft.com"
+      }
+    ],
+
+    problems: [
+      {
+        q: { ar: "الرابط لا يفتح، أو طلب تسجيل الدخول ثم رفض الحساب", en: "The link will not open, or it rejects my sign-in" },
+        a: {
+          ar: "افتح Teams من الرابط الرسمي أعلاه وسجّل الدخول ببريدك الجامعي. إذا قُبل الحساب ولم يظهر فريق المادة فحسابك لم يُضَف إلى الفريق بعد — راجع إعلان القسم أو تواصل مع أستاذ المادة من البريد الجامعي.",
+          en: "Open Teams from the official link above and sign in with your university e-mail. If the account is accepted but the course team is missing, you have not been added to the team yet — check the department announcement or contact the instructor from your university e-mail."
+        }
+      },
+      {
+        q: { ar: "ظهرت لي شاشة «قاعة الانتظار» ولم يُدخلني المحاضر", en: "I am stuck in the \"waiting room\"" },
+        a: {
+          ar: "هذه إعدادات يتحكم فيها المحاضر: انتظر داخل قاعة الانتظار ولا تُغلق النافذة، وإن تأخر الدخول اكتب رسالة في قناة الفريق أو راسل المحاضر من داخل Teams.",
+          en: "This is an instructor-controlled setting: stay in the waiting room instead of closing the window, and if access is delayed post in the team channel or message the instructor inside Teams."
+        }
+      },
+      {
+        q: { ar: "لا أسمع الصوت أو الميكروفون لا يعمل", en: "No audio, or my microphone does not work" },
+        a: {
+          ar: "من داخل Teams: الإعدادات ثم Device settings واختر السماعة والميكروفون الصحيحين، وأغلق أي تطبيق آخر يستخدم الميكروفون، ثم حدّث المتصفح أو استخدم التطبيق بدل الموقع.",
+          en: "Inside Teams open Settings then Device settings and pick the correct speaker and microphone, close every other app using the mic, then refresh the browser or use the desktop app instead of the web one."
+        }
+      },
+      {
+        q: { ar: "فاتتني الحصة أو انقطع عني الاتصال", en: "I missed the class or got disconnected" },
+        a: {
+          ar: "شاهد تسجيل المحاضرة وملفاتها في قناة المادة، وأبلغ أستاذ المادة بالاعتذار في نفس اليوم عبر البريد الجامعي، وسجّل المهام أو الاختبارات القصيرة التي فاتتك فورًا.",
+          en: "Watch the lecture recording and its files in the course channel, send the instructor a same-day excuse by university e-mail, and immediately log any assignment or short quiz you missed."
+        }
+      },
+      {
+        q: { ar: "كيف أتأكد أن الرابط أو الطلب رسمي؟", en: "How do I verify a link or request is official?" },
+        a: {
+          ar: "تأكد من عنوان الصفحة (نطاق الجامعة أو teams.microsoft.com) ومن أن الرسالة وصلت داخل قنوات القسم. لا تُرسل كلمة مرورك أو رمز التحقق لأي شخص مهما ادّعى — هذا هو التطبيق العملي لما تدرسه في مادتي السياسات والتصميم الأمني.",
+          en: "Check the address bar (the university domain or teams.microsoft.com) and confirm the message arrived inside the department channels. Never send your password or one-time code to anyone, whatever they claim — that is the practical side of what you study in the Policies and Security Design courses."
+        }
+      }
+    ],
+
+    note: {
+      ar: "الجدول أعلاه مأخوذ من خطة الترم الحالية المعتمدة في المنصة؛ أي تغيير في المواعيد أو الروابط يعلنه القسم رسميًا — راجع إعلان المادة قبل الحصة بدقائق.",
+      en: "The timetable above comes from the approved current-semester plan on this platform; any change to times or links is announced officially by the department — read the course announcement a few minutes before class."
+    }
+  }
 };
 
 /* Expose as a plain data registry (window.PLATFORM_CURRENT_SEMESTER).
