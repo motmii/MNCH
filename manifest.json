@@ -9,8 +9,8 @@
   "orientation": "portrait-primary",
   "lang": "ar",
   "dir": "rtl",
-  "background_color": "#07070d",
-  "theme_color": "#07070d",
+  "background_color": "#d6c1c3",
+  "theme_color": "#d6c1c3",
   "categories": ["education"],
   "icons": [
     {

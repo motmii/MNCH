@@ -36,20 +36,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.22.20" />
+  <link rel="stylesheet" href="style.css?v=1.22.24" />
   <link rel="manifest" href="manifest.json" />
   <script>
-    /* MODULE 36 · pre-paint theme restore — runs before first paint (no FOUC).
-       Resolution mirrors script.js MODULE 36: explicit stored choice wins;
-       otherwise follow the OS (prefers-color-scheme); dark is the fallback. */
+    /* MODULE 36 · pre-paint theme + palette restore — runs before first paint
+       (no FOUC). Resolution mirrors script.js MODULE 36: explicit stored
+       choice wins; otherwise follow the OS (prefers-color-scheme); LIGHT
+       (Rose Blush) is the fallback. <html data-theme="dark"> is therefore an
+       explicit opt-in, while :root keeps the dark Rose Noir tokens (never a
+       light flash on a dark shell). Palette (rose/classic) restores the same
+       way via "motmi-portal:palette" (default: rose → no attribute). */
     (function () {
       var t = null;
       try { t = JSON.parse(localStorage.getItem("motmi-portal:theme") || "null"); } catch (e) {}
-      var sysLight = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches);
-      if (t === "light" || (t !== "dark" && sysLight)) document.documentElement.setAttribute("data-theme", "light");
+      var sysDark = !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      var dark = t === "dark" || (t !== "light" && sysDark);
+      document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      var p = null;
+      try { p = JSON.parse(localStorage.getItem("motmi-portal:palette") || "null"); } catch (e) {}
+      if (p === "classic") document.documentElement.setAttribute("data-palette", "classic");
     })();
   </script>
-  <meta name="theme-color" content="#0b0f19" />
+  <meta name="theme-color" content="#d6c1c3" />
   <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
   <noscript>
     <style>
@@ -111,6 +119,7 @@
               <summary data-i18n="nav.more">المزيد</summary>
               <ul class="nav-more-menu">
                 <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
+                <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
                 <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
                 <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
                 <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
@@ -165,6 +174,9 @@
             <svg class="ico-moon" viewBox="0 0 24 24"><path d="M20.8 13.2A8.5 8.5 0 1 1 10.8 3.2a6.8 6.8 0 0 0 10 10z"/></svg>
           </span>
         </button>
+        <button id="paletteToggle" class="palette-toggle" type="button" aria-pressed="false" aria-label="اللون الكلاسيكي / Classic palette" title="اللون الكلاسيكي / Classic palette">
+          <span class="palette-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="9.2" cy="9.6" r="1.3" fill="currentColor" stroke="none"/><circle cx="14.8" cy="9.6" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="14.9" r="1.3" fill="currentColor" stroke="none"/></svg></span>
+        </button>
         <button type="button" class="nav-burger" id="navBurger" aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobileMenu">
           <span></span><span></span>
         </button>
@@ -181,6 +193,7 @@
       <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
       <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
       <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
+      <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
       <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
       <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
       <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
@@ -313,6 +326,9 @@
           <span class="hero-now-ico" aria-hidden="true">🗓</span>
           <span class="hero-now-text" id="heroNowText" data-i18n="now.loading">جارٍ تحديد موعد حصتك القادمة…</span>
           <span class="hero-now-chip" id="heroNowChip" hidden></span>
+          <!-- MODULE 61 contextual entry point: shown by MODULE 55 only when a
+               class is live or starts today/tomorrow — one tap to the access guide. -->
+          <a class="hero-now-guide" id="heroNowGuide" href="#guide" data-i18n="guide.nowCta" hidden>كيف أصل للمحاضرة؟</a>
         </div>
 
         <!-- Platform identity — clear name in Arabic & English + short description -->
@@ -614,7 +630,30 @@
       </div>
 
       <div class="semester-summary reveal" id="semesterMeta"></div>
+
+      <!-- MODULE 61 · LectureGuide inline block (rendered from
+           current-semester.js → lectureGuide). Deliberately OUTSIDE
+           #semesterGrid so the subject-card grid stays untouched. -->
+      <div class="sem-guide-mount reveal" id="semesterGuide"></div>
+
       <div class="semester-grid" id="semesterGrid"></div>
+    </section>
+
+    <!-- ============================================================
+         LECTURE ACCESS GUIDE (MODULE 61) — the official step-by-step
+         guide to joining a live class, plus the weekly timetable
+         derived from the approved plan and a troubleshooting list.
+         Shareable through its own #guide route and every block is
+         rendered from current-semester.js (single source of truth).
+         ============================================================ -->
+    <section class="section lecture-guide" id="guide" aria-labelledby="guideTitle">
+      <a href="#semester" class="btn btn-ghost btn-sm path-back" data-i18n="guide.back">رجوع إلى لوحة الترم الحالي</a>
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="guide.eyebrow">الوصول إلى المحاضرات</p>
+        <h2 class="section-title" id="guideTitle" data-i18n-html="guide.title">دليل <em class="grad">الدخول إلى المحاضرات</em></h2>
+        <p class="section-sub" data-i18n="guide.sub">كل ما تحتاجه لدخول محاضرتك الحالية: جدول الأسبوع، الخطوات بالترتيب، الروابط الرسمية، وحلول أكثر المشاكل تكرارًا.</p>
+      </div>
+      <div class="guide-body" id="guideBody"></div>
     </section>
 
     <!-- SUBJECTS & RESOURCES -->
@@ -1290,7 +1329,7 @@
             aria-controls="assistantPanel" aria-label="افتح مساعد المنصة">
       <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
         <path d="M12 3a8 8 0 0 1 8 8 8 8 0 0 1-8 8H8l-4 3v-4.6A8 8 0 0 1 12 3z" fill="currentColor" opacity="0.95"/>
-        <circle cx="9" cy="11" r="1.3" fill="var(--bg, #0b1020)"/><circle cx="12.5" cy="11" r="1.3" fill="var(--bg, #0b1020)"/><circle cx="16" cy="11" r="1.3" fill="var(--bg, #0b1020)"/>
+        <circle cx="9" cy="11" r="1.3" fill="var(--bg, #120c0e)"/><circle cx="12.5" cy="11" r="1.3" fill="var(--bg, #120c0e)"/><circle cx="16" cy="11" r="1.3" fill="var(--bg, #120c0e)"/>
       </svg>
     </button>
   </div>
