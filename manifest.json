@@ -1,0 +1,29 @@
+{
+  "name": "منصة أمن المعلومات — الترم الحالي",
+  "short_name": "أمن المعلومات",
+  "description": "منصة تعليمية لطلاب دبلوم أمن المعلومات: اختبارات تجريبية، ملخصات، أدوات أمنية تفاعلية — تعمل دون اتصال.",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "background_color": "#d6c1c3",
+  "theme_color": "#d6c1c3",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "images/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

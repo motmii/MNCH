@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Zero-dependency test suites — plain Node scripts.
+      - name: Run all test suites
+        run: npm test
+
+      # Guard: every asset precached by the service worker must exist,
+        # otherwise offline installs break for students.
+      - name: Verify precached assets exist
+        run: |
+          node -e "
+            const fs = require('fs');
+            const sw = fs.readFileSync('sw.js', 'utf8');
+            const m = sw.match(/PRECACHE_ASSETS\s*=\s*\[([\s\S]*?)\]/);
+            if (!m) throw new Error('PRECACHE_ASSETS not found');
+            const assets = [...m[1].matchAll(/\"(\.\/[^\"]*)\"/g)].map(x => x[1]);
+            const missing = assets.filter(a => a !== './' && !fs.existsSync(a));
+            if (missing.length) { console.error('Missing precached assets:', missing); process.exit(1); }
+            console.log('✓ all', assets.length, 'precached assets exist');
+          "
