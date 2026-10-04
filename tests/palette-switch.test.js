@@ -85,7 +85,7 @@ check("runs without throwing", !threw);
 if (threw) console.error("  -> " + threw.message);
 
 const m = /CACHE_VERSION\s*=\s*"v(\d+)\.(\d+)\.(\d+)"/.exec(sw);
-check("cache bumped", !!m && +m[3] >= 23);
+check("cache bumped", !!m && (+m[1] > 1 || (+m[1] === 1 && (+m[2] > 22 || (+m[2] === 22 && +m[3] >= 24)))));
 console.log(failures ? "FAIL " + failures : "ALL PASS");
 process.exit(failures ? 1 : 0);
 

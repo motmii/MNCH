@@ -12,6 +12,48 @@
   "background_color": "#d6c1c3",
   "theme_color": "#d6c1c3",
   "categories": ["education"],
+  "screenshots": [
+    {
+      "src": "images/screenshots/home-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "لوحة الطالب — التقدّم والخطوة التالية"
+    },
+    {
+      "src": "images/screenshots/home-narrow.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "لوحة الطالب على الجوال"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ابدأ الاختبارات",
+      "short_name": "الاختبارات",
+      "url": "./index.html#quiz",
+      "icons": [{ "src": "images/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "مراجعة اليوم",
+      "short_name": "المراجعة",
+      "url": "./index.html#progress",
+      "icons": [{ "src": "images/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "البطاقات التعليمية",
+      "short_name": "البطاقات",
+      "url": "./index.html#flash",
+      "icons": [{ "src": "images/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "أدوات الطالب",
+      "short_name": "أدواتي",
+      "url": "./index.html#student",
+      "icons": [{ "src": "images/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ],
   "icons": [
     {
       "src": "images/icon-maskable.svg",

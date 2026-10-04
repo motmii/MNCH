@@ -52,8 +52,8 @@ const ids = [
   "pathsGrid","pathDetailBody","lessonBody","lessonView",
   "semesterGrid","semesterMeta",
   /* ViewSwitcher sections (VIEWS registry) */
-  "hero","semester","paths","path","subjects","tools","labs","flash","quiz",
-  "progress","games","redteam","ir","cryptolab","about","contact","lesson",
+  "hero","semester","paths","path","subjects","tools","labs","flash","quiz","kali",
+  "progress","games","redteam","ir","cryptolab","about","contact","lesson","depth",
   "heroDash","heroDashPct","heroDashBar","heroDashLesson","heroDashQuiz","heroDashContinue",
   "searchOpenBtn","searchOverlay","searchDialog","searchInput","searchResults","searchClose",
   "onboardingOverlay","onboardingBack","onboardingSkip","onboardingNext","onboardingStart",

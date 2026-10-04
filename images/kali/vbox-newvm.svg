@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="bgK3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#120c0e"/><stop offset="1" stop-color="#1a1214"/></linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bgK3)"/>
+  <rect x="150" y="50" width="500" height="400" rx="10" fill="#150e10" stroke="#3a2428" stroke-width="2"/>
+  <rect x="150" y="50" width="500" height="36" rx="10" fill="#2a1c1f"/>
+  <text x="180" y="73" font-family="monospace" font-size="12" fill="#c7a9ae">VirtualBox — Create Virtual Machine</text>
+  <text x="180" y="125" font-family="monospace" font-size="12" fill="#d79198">Name: Kali-Linux</text>
+  <rect x="180" y="140" width="440" height="30" rx="6" fill="#241619" stroke="#5a343a"/>
+  <text x="195" y="161" font-family="monospace" font-size="11" fill="#f3d5d8">Type: Linux · Version: Debian (64-bit)</text>
+  <text x="180" y="205" font-family="monospace" font-size="12" fill="#d79198">Memory: 4096 MB ━━━━●━━ 8192</text>
+  <rect x="180" y="225" width="440" height="30" rx="6" fill="#241619" stroke="#5a343a"/>
+  <text x="195" y="246" font-family="monospace" font-size="11" fill="#f3d5d8">Disk: Create VDI · Dynamically · 60 GB</text>
+  <rect x="420" y="290" width="100" height="36" rx="8" fill="#2e7d46"/>
+  <text x="440" y="313" font-family="monospace" font-size="12" fill="#fff">Next</text>
+  <rect x="530" y="290" width="90" height="36" rx="8" fill="#241619" stroke="#5a343a"/>
+  <text x="545" y="313" font-family="monospace" font-size="12" fill="#c7a9ae">Back</text>
+</svg>
