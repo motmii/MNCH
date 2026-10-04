@@ -6484,9 +6484,747 @@ body.search-open { overflow: hidden; }
   --warn: #b45309;
   --glow: rgba(14, 116, 144, 0.16);
 }
+/* ============================================================
+   MODULE 62/63/64 · Srs · Backup · MockExam
+   ------------------------------------------------------------
+   Local-only learning utilities that sit next to the existing
+   progress surfaces: a spaced-repetition queue, a JSON backup
+   panel, and a full mock exam. They follow the same visual
+   language as MODULE 52/53 (soft card, hairline border, calm
+   spacing) and use only theme tokens, so both themes and both
+   palettes pick them up for free.
+   ============================================================ */
+
+/* ---- MODULE 62 · Srs ---- */
+.srs-app, .backup-app, .mock-app { margin-top: 1.5rem; }
+.srs-shell, .srs-card, .bk-shell, .mk-shell, .mk-card, .mk-summary {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem;
+}
+.srs-head h3, .bk-head h3, .mk-head h3, .mk-summary h3 { margin: 0 0 .3rem; font-size: 1.05rem; color: var(--text); }
+.srs-head p, .bk-head p, .mk-head p { margin: 0 0 .9rem; font-size: .92rem; color: var(--muted); }
+.srs-metrics { display: flex; flex-wrap: wrap; gap: .6rem 1.4rem; margin-bottom: .9rem; }
+.srs-metric { font-size: .9rem; color: var(--muted); }
+.srs-metric b { color: var(--text); font-size: 1.1rem; margin-inline-end: .3rem; }
+.srs-actions, .bk-actions, .mk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; }
+.srs-empty, .mk-empty { margin: 0; color: var(--muted); font-size: .92rem; }
+.srs-meta, .mk-counter, .mk-subject, .bk-note, .mk-meta { font-size: .85rem; color: var(--muted); }
+.srs-q, .mk-q { margin: .5rem 0 .8rem; color: var(--text); font-weight: 700; line-height: 1.7; }
+.srs-opts, .mk-opts { display: grid; gap: .5rem; }
+.srs-opt, .mk-opt {
+  text-align: start; width: 100%; cursor: pointer;
+  padding: .65rem .85rem; border-radius: .7rem;
+  border: 1px solid var(--line); background: var(--surface-2);
+  color: var(--text); font: inherit; font-size: .95rem;
+  transition: border-color .2s ease, background .2s ease;
+}
+.srs-opt:hover:not(:disabled), .mk-opt:hover:not(:disabled) { border-color: var(--accent); }
+.srs-opt.is-correct { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.srs-opt.is-wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); }
+.mk-opt.is-selected { border-color: var(--accent); background: var(--tint-accent); }
+.srs-opt:disabled, .mk-opt:disabled { cursor: default; opacity: .85; }
+.srs-ex { margin: .7rem 0 0; color: var(--muted); font-size: .9rem; line-height: 1.75; }
+.srs-ex.is-hidden { display: none; }
+.srs-grades { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .8rem; }
+.srs-card-actions { margin-top: .9rem; }
+.srs-grade[data-srs-grade="0"], .srs-grade[data-srs-grade="1"] { border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+
+/* ---- MODULE 63 · Backup ---- */
+.bk-privacy, .bk-msg { margin: .8rem 0 0; font-size: .85rem; color: var(--dim); }
+.bk-msg { color: var(--text); }
+.bk-note { margin: 0 0 .7rem; }
+.bk-file { display: none; }
+
+/* ---- MODULE 64 · MockExam ---- */
+.mk-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; }
+.mk-clock { font-variant-numeric: tabular-nums; font-weight: 800; color: var(--accent-2); }
+.mk-actions { margin-top: 1rem; }
+.mk-score { font-size: 1.6rem; font-weight: 800; color: var(--text); margin: .4rem 0 .2rem; }
+.mk-answered, .mk-timeup { margin: 0 0 .6rem; font-size: .9rem; color: var(--muted); }
+.mk-timeup { color: var(--warn); }
+.mk-summary h4 { margin: 1rem 0 .5rem; font-size: .95rem; color: var(--muted); }
+.mk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.mk-row { display: flex; justify-content: space-between; gap: 1rem; font-size: .9rem; color: var(--text); }
+.mk-row-score { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .srs-opt, .mk-opt { transition: none; }
+}
+/* END MODULE 62/63/64 */
+
+/* ============================================================
+   MODULE 65 · A11yExtras
+   The read-aloud toggle mirrors the platform's button system; the
+   pressed state is a colour + border change only, and the whole
+   layer disappears under reduced-motion like the other card effects.
+   ============================================================ */
+#flashSpeakBtn.is-active { border-color: var(--accent); color: var(--text); background: var(--tint-accent); }
+#flashSpeakBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  #flashSpeakBtn { transition: none; }
+}
+/* END MODULE 65 */
+
+/* ============================================================
+   MODULE 66 · SwUpdate
+   The update bar is a fixed, calm strip pinned to the bottom of the
+   viewport. It never blocks content, disappears on "later", and is
+   built from the platform's own button classes.
+   ============================================================ */
+.sw-update {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem 1rem;
+  padding: .8rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
+}
+.sw-update-text { font-size: .92rem; }
+
+@media (max-width: 560px) {
+  .sw-update { inset-inline: .75rem; bottom: .75rem; }
+  .sw-update { flex-direction: column; text-align: center; }
+}
+/* END MODULE 66 */
+
+/* ============================================================
+   MODULE 67 · MaterialViewer
+   A calm full-screen sheet: the embedded PDF keeps the whole
+   viewport, the head bar stays reachable, and on small screens
+   the panel becomes a plain full-bleed reader.
+   ============================================================ */
+.mat-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: clamp(.75rem, 3vw, 2rem);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(6px);
+}
+.mat-viewer[aria-hidden="true"] { display: none; }
+.mat-viewer-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, 100%);
+  height: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.mat-viewer-head {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .7rem .9rem;
+  border-bottom: 1px solid var(--line);
+}
+.mat-viewer-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mat-viewer-body { flex: 1 1 auto; min-height: 0; }
+.mat-viewer-frame { width: 100%; height: 100%; border: 0; }
+.mat-viewer-fallback { margin: 1.5rem; color: var(--muted); font-size: .95rem; }
+
+@media (max-width: 640px) {
+  .mat-viewer { padding: 0; }
+  .mat-viewer-panel { border-radius: 0; border: 0; }
+}
+/* END MODULE 67 */
+
 /* Shield logo stops follow the palette too (both themes). */
 :root[data-palette="classic"] .logo-mark .logo-stop-a { stop-color: #a78bfa; }
 :root[data-palette="classic"] .logo-mark .logo-stop-b { stop-color: #22d3ee; }
 :root[data-palette="classic"][data-theme="light"] .logo-mark .logo-stop-a { stop-color: #6d28d9; }
 :root[data-palette="classic"][data-theme="light"] .logo-mark .logo-stop-b { stop-color: #0e7490; }
 /* END MODULE 61 · LectureGuide */
+
+
+/* ============================================================
+   MODULE 68/69/70 · Student tools (#student)
+   ------------------------------------------------------------
+   One additive layer for the GPA calculator, the timetable/calendar
+   exporter and the study timer. Same visual language as MODULE 52/53
+   and 62/63/64 — soft card, hairline border, calm spacing, one radius
+   scale — and theme tokens only, so BOTH themes and BOTH palettes
+   (rose · classic) pick the whole section up for free: no hard-coded
+   colour ever wins over a token. RTL-safe logical properties, a
+   focus-visible ring on every field, a phone breakpoint, a print sheet.
+   ============================================================ */
+.student-sec { display: grid; gap: 1.25rem; }
+.student-card { margin: 0; }
+
+/* ---------- the card shell shared by the three tools ---------- */
+.student-shell {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem;
+  display: grid;
+  gap: 0.9rem;
+}
+.student-head { display: grid; gap: 0.3rem; }
+/* .student-h is the <h3> the three modules build, so it is styled by
+   the class (a bare .student-head h3 would miss older cached markup). */
+.student-h, .student-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.student-sub { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.7; }
+.student-h4 { margin: 0.25rem 0 0; font-size: 0.95rem; color: var(--muted); font-weight: 700; }
+
+/* ---------- fields, hints, notes, status ---------- */
+.student-field { display: grid; gap: 0.4rem; }
+.student-lbl { font-size: 0.86rem; color: var(--muted); }
+.student-input {
+  width: 100%;
+  max-width: 20rem;
+  padding: 0.5rem 0.65rem;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.student-input:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.student-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.student-hint { margin: 0; font-size: 0.84rem; color: var(--muted); }
+.student-hint.is-warn, .student-status.is-warn { color: var(--warn); }
+.student-empty { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.student-note { margin: 0; font-size: 0.84rem; color: var(--muted); }
+.student-note-soft { opacity: 0.85; }
+.student-status {
+  margin: 0;
+  padding: 0.45rem 0.7rem;
+  border-inline-start: 3px solid var(--accent);
+  background: var(--tint-accent);
+  border-radius: 0.7rem;
+  font-size: 0.88rem;
+  min-height: 0;
+}
+.student-status:empty { display: none; }
+.student-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.student-btn { cursor: pointer; }
+.student-copy-helper { position: fixed; inset-block-start: -1000px; inset-inline-start: -1000px; opacity: 0; }
+
+/* ---------- MODULE 68 · GPA ---------- */
+.gpa-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.gpa-row {
+  display: grid;
+  grid-template-columns: 1fr auto minmax(6rem, 8rem);
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface-2);
+  transition: border-color 0.2s ease;
+}
+/* Typing in the points field lights the whole row — the field is 8rem
+   wide, so a row-level cue is the honest target. */
+.gpa-row:hover, .gpa-row:focus-within { border-color: var(--accent); }
+.gpa-subject { display: grid; gap: 0.15rem; min-width: 0; }
+.gpa-name { font-size: 0.95rem; color: var(--text); overflow-wrap: anywhere; }
+.gpa-code {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.gpa-credits { font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+.gpa-points { max-width: 100%; text-align: center; font-variant-numeric: tabular-nums; }
+.student-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.6rem;
+  align-items: stretch;
+}
+/* The two "extreme" lines and the empty state are sentences, not
+   numbers: they take the full width instead of a metric column. */
+.student-results > .gpa-extreme,
+.student-results > .student-empty { grid-column: 1 / -1; }
+.gpa-metric {
+  display: grid;
+  gap: 0.15rem;
+  align-content: start;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface);
+}
+.gpa-metric-label { font-size: 0.8rem; color: var(--muted); }
+.gpa-metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+/* The third metric carries a whole sentence (credits counted), never a
+   bare number, so it steps down to body size instead of a display size.
+   It is the last <div> in the results grid; the extremes are <p>. */
+.student-results .gpa-metric:last-of-type .gpa-metric-value { font-size: 1rem; }
+.gpa-extreme { margin: 0; font-size: 0.84rem; color: var(--muted); }
+.gpa-extreme:empty { display: none; }
+.gpa-prior { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); align-items: end; }
+.gpa-prior .student-h4 { grid-column: 1 / -1; }
+.gpa-target { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); align-items: end; }
+.gpa-target .student-h4, .gpa-target .gpa-metric, .gpa-target .student-hint { grid-column: 1 / -1; }
+/* END MODULE 68 */
+
+/* ---------- MODULE 69 · timetable / calendar export ---------- */
+.ics-form { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); align-items: end; }
+/* Same table language as the lecture guide (.guide-table): hairline row
+   rules instead of a full grid, a muted micro-caps header and a row
+   hover wash. RTL-safe (logical border + text-align: start). */
+.ics-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.ics-table th, .ics-table td {
+  padding: 0.5rem 0.6rem;
+  text-align: start;
+  vertical-align: middle;
+  border-block-start: 1px solid var(--line);
+}
+.ics-table thead th {
+  border-block-start: 0;
+  color: var(--muted);
+  background: var(--wash-neutral);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.ics-table tbody tr:hover { background: var(--wash-neutral); }
+.ics-day { white-space: nowrap; }
+.ics-subject { display: grid; gap: 0.1rem; }
+.ics-time { white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* END MODULE 69 */
+
+/* ---------- MODULE 70 · study timer ---------- */
+.timer-form { grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); align-items: end; }
+.timer-clock {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: center;
+  padding: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.timer-time {
+  margin: 0;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+.timer-state { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.timer-sound { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; color: var(--muted); cursor: pointer; }
+.timer-sound input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.timer-log {
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--surface-2);
+  display: grid;
+  gap: 0.6rem;
+}
+.timer-log-head { display: flex; flex-wrap: wrap; gap: 0.35rem 0.75rem; font-size: 0.86rem; color: var(--muted); }
+/* The two totals were unstyled spans: the sentence gets the token colour,
+   the number columns stay tabular so they line up at any length. */
+.timer-log-total, .timer-log-today { font-variant-numeric: tabular-nums; }
+.timer-log-total { color: var(--text); }
+.timer-log-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+.timer-log-row { display: grid; gap: 0.3rem; }
+.timer-log-name { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: space-between; font-size: 0.86rem; }
+.timer-log-min { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Same meter as the progress hub (.progress-bar): the shared track token
+   and the palette ribbon for the fill. */
+.timer-bar { height: 8px; border-radius: 999px; background: var(--track); overflow: hidden; }
+.timer-bar-fill { display: block; height: 100%; width: 0; background: var(--grad); transition: width 0.3s ease; }
+/* END MODULE 70 */
+
+@media (max-width: 720px) {
+  .gpa-row { grid-template-columns: 1fr; }
+  .gpa-points { width: 100%; }
+  .student-results { grid-template-columns: 1fr 1fr; }
+  .ics-table { font-size: 0.84rem; }
+  .ics-table th, .ics-table td { padding: 0.4rem 0.45rem; }
+  .timer-time { font-size: 1.8rem; }
+}
+@media (max-width: 480px) {
+  .student-results { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-input, .gpa-row, .timer-bar-fill { transition: none; }
+}
+
+/* Print sheet: the timetable (and the GPA rows) instead of the whole
+   single-page app. Scoped to #student so nothing else changes, and the
+   overlays that could sit above it (update bar, chapter viewer) go too. */
+@media print {
+  .nav, .mobile-menu, .preloader, #toTop, .assistant-root, .lab-toast-stack,
+  .sw-update, .mat-viewer { display: none !important; }
+  body { background: #fff; }
+  main > :not(#student) { display: none !important; }
+  #student { display: block !important; }
+  .student-sec { gap: 0; }
+  .student-card { break-inside: avoid; }
+  .student-card + .student-card { break-before: page; }
+  .student-shell { border: 0; border-radius: 0; background: #fff; color: #000; padding: 0; }
+  .student-sec button, .student-sec select { display: none !important; }
+  .student-sec input {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #000;
+    max-width: 100%;
+    min-height: 0;
+    padding: 0;
+  }
+  .ics-table { font-size: 0.9rem; }
+  .ics-table th, .ics-table td { border: 1px solid #000; }
+  .ics-table thead { display: table-header-group; }
+  .ics-table thead th, .ics-table tbody tr:hover { background: transparent; }
+  .gpa-row, .gpa-metric, .timer-clock, .timer-log, .student-status { background: transparent; border-color: #000; }
+  .student-note, .student-sub, .gpa-code, .gpa-credits, .gpa-extreme, .gpa-metric-label,
+  .ics-table thead th, .timer-state, .timer-log-head, .timer-log-min { color: #333; }
+}
+/* END MODULE 68/69/70 · Student tools */
+
+/* ============================================================
+   MODULE 71 · DepthScene — scroll-driven parallax (#depth)
+   ------------------------------------------------------------
+   Three plates at three depths: while the section crosses the viewport
+   every plate is translated, the DEEPEST one least and the CLOSEST one
+   most, so the stack reads as depth as you scroll. Driven by CSS
+   scroll-driven animations (one view() progress timeline per plate) and
+   by design:
+     · no JavaScript and no scroll listener — nothing to jank,
+     · NO `background-attachment: fixed` (iOS Safari ignores it by
+       design, and it repaints every frame),
+     · only `transform`/`opacity` animated — compositor properties only.
+   The effect is opt-in TWICE: @supports must confirm the browser knows
+   the timeline AND the visitor must not have asked for reduced motion.
+   Everything else in this layer is the fallback, and the fallback is a
+   compact, readable, ordinary list — which is exactly why the tall
+   runway lives INSIDE the feature query instead of being a permanent
+   135vh of empty page for everybody.
+   ============================================================ */
+.px-sec { display: grid; gap: 1.25rem; }
+.px-runway { display: grid; align-content: center; justify-items: center; }
+.px-stage {
+  position: relative;
+  width: 100%;
+  max-width: 62rem;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  /* The block padding is the drifting plates' headroom: the farthest
+     plate moves ±1.25rem and the closest one ±3.75rem, so the panel is
+     never clipped by its own frame. */
+  padding: clamp(4rem, 9vw, 6rem) clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;       /* the decorative planes stay inside the panel */
+  isolation: isolate;     /* …and their z-index: -1 stays inside too      */
+}
+
+/* ---------- the decorative planes (never announced) ---------- */
+.px-decor { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.px-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 2.5rem 2.5rem;
+}
+.px-halo {
+  position: absolute;
+  inset-block-start: 4%;
+  inset-inline-start: 8%;
+  width: min(26rem, 70%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(var(--accent-rgb) / 0.26), transparent 68%);
+}
+
+/* ---------- the three plates ---------- */
+.px-legend {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  text-align: center;
+}
+.px-deck {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* The generous gap is what keeps the differential drift from ever
+     collapsing the stack: the offsets differ by ±1.25rem per step, so
+     the smallest gap left at either end of the scroll stays ~1.75rem. */
+  gap: 3rem;
+  width: 100%;
+  max-width: 42rem;
+}
+.px-plate {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem 1.05rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: var(--surface-2);
+}
+/* Depth cues: the deepest plate is widest and flattest, the closest one
+   is inset, raised and the only one carrying a shadow. Every inset is
+   logical, so RTL/LTR mirroring is free. */
+.px-plate--back { width: 100%; }
+.px-plate--mid { width: calc(100% - 1.75rem); margin-inline-start: 1.75rem; }
+.px-plate--front {
+  width: calc(100% - 3.5rem);
+  margin-inline-start: 3.5rem;
+  background: var(--surface);
+  box-shadow: 0 10px 26px -18px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.px-depth {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.px-plate-title { margin: 0; font-size: 0.98rem; color: var(--text); }
+.px-plate-note { margin: 0; font-size: 0.88rem; line-height: 1.7; color: var(--muted); }
+.px-note { margin: 0; max-width: 56ch; text-align: center; font-size: 0.82rem; color: var(--muted); }
+/* Honesty note that exists only for visitors who asked for less motion:
+   revealed by the media query at the end of this layer. */
+.px-still {
+  display: none;
+  margin: 0;
+  max-width: 56ch;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--warn);
+}
+
+@media (max-width: 720px) {
+  /* On a phone the stagger would eat the reading width — keep the depth
+     cue, halve it. */
+  .px-plate--mid { width: calc(100% - 1rem); margin-inline-start: 1rem; }
+  .px-plate--front { width: calc(100% - 2rem); margin-inline-start: 2rem; }
+}
+
+/* ---------- the scroll-driven layer (opt-in twice) ----------
+   `animation-timeline` MUST come AFTER the `animation` shorthand: the
+   shorthand resets animation-timeline to `auto`, so a timeline declared
+   first is silently discarded and the plate never moves.
+   `view()` is the section-scoped scroll-driven timeline — progress runs
+   while THIS element crosses the scrollport. A `scroll()` timeline would
+   instead measure the whole document's scroll range, so a section in the
+   middle of a long page would drift by an arbitrary, near-invisible
+   fraction of the keyframes; `animation-range: entry/exit` is not even
+   valid on a scroll() timeline for the same reason. Same API family,
+   correct frame of reference. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* The runway only exists when the effect does: it is scroll room for
+       the plates, not decoration. */
+    .px-runway { min-height: 135vh; }
+    .px-decor,
+    .px-plate { will-change: transform; }
+
+    .px-decor {
+      animation: px-decor-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    /* Three depths, three speeds — the deepest plate travels least. */
+    .px-plate--back {
+      animation: px-plate-far linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .px-plate--mid {
+      animation: px-plate-mid linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .px-plate--front {
+      animation: px-plate-near linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* transform + opacity only: nothing here triggers layout, paint or a
+   style recalculation on the scroll thread. */
+@keyframes px-decor-drift {
+  from { transform: translate3d(0, 2rem, 0) scale(1); opacity: 0.45; }
+  to { transform: translate3d(0, -2rem, 0) scale(1.06); opacity: 0.8; }
+}
+@keyframes px-plate-far {
+  from { transform: translate3d(0, 1.25rem, 0); }
+  to { transform: translate3d(0, -1.25rem, 0); }
+}
+@keyframes px-plate-mid {
+  from { transform: translate3d(0, 2.5rem, 0); }
+  to { transform: translate3d(0, -2.5rem, 0); }
+}
+@keyframes px-plate-near {
+  from { transform: translate3d(0, 3.75rem, 0); }
+  to { transform: translate3d(0, -3.75rem, 0); }
+}
+
+/* Belt and braces. The effect already cannot start without an explicit
+   `no-preference`, and here a mid-session change of the OS preference
+   also drops any held frame back to the layout position — the plates sit
+   exactly where the plain list puts them, plus the honest note. */
+@media (prefers-reduced-motion: reduce) {
+  .px-decor,
+  .px-plate { animation: none; transform: none; }
+  .px-still { display: block; }
+}
+
+/* Printing never gets a held frame: `animation-fill-mode: both` would
+   otherwise freeze the plates at their start offset on paper, and the
+   scroll runway would print as a blank page. */
+@media print {
+  .px-runway { min-height: 0; }
+  .px-decor,
+  .px-plate { animation: none; transform: none; }
+  .px-stage { overflow: visible; background: #fff; }
+  .px-decor { display: none; }
+}
+/* END MODULE 71 · DepthScene */
+
+/* ============================================================
+   MODULE 72 · KaliGuide — the Kali-on-VirtualBox install guide
+   ------------------------------------------------------------
+   Static, honest, offline-first: copy only, no JS behaviour.
+   RTL-safe logical properties throughout (margin-inline-start,
+   inset-inline-start, text-align: start). Numbered steps alternate
+   figure/text on wide screens and stack on phones.
+   ============================================================ */
+.kali-sec { display: grid; gap: 1.5rem; }
+.kali-req {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+}
+.kali-req-card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 1.1rem 1.2rem;
+  display: grid; gap: 0.4rem; align-content: start;
+}
+.kali-req-ico { font-size: 1.6rem; line-height: 1; }
+.kali-req-card h3 { margin: 0; font-size: 1rem; }
+.kali-req-card p { margin: 0; font-size: 0.88rem; line-height: 1.7; color: var(--muted); }
+.kali-dl {
+  display: grid; gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+.kali-dl-card {
+  display: flex; gap: 0.8rem; align-items: flex-start;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 1rem 1.1rem;
+  text-decoration: none; color: inherit;
+}
+.kali-dl-card:hover { border-color: var(--accent); }
+.kali-dl-card strong { display: block; font-size: 0.95rem; margin-block-end: 0.25rem; }
+.kali-dl-card small { display: block; font-size: 0.82rem; line-height: 1.6; color: var(--muted); }
+.kali-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.5rem; counter-reset: kali; }
+.kali-step {
+  display: grid; gap: 1.25rem; align-items: center;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 1.25rem;
+}
+.kali-step:nth-child(even) .kali-fig { order: 2; }
+.kali-fig { margin: 0; display: grid; gap: 0.5rem; }
+.kali-fig img {
+  width: 100%; height: auto; display: block;
+  border: 1px solid var(--line); border-radius: calc(var(--radius) - 4px);
+}
+.kali-fig figcaption { font-size: 0.75rem; color: var(--muted); text-align: center; }
+.kali-step-body { display: grid; gap: 0.6rem; align-content: start; }
+.kali-step-body h3 { margin: 0; font-size: 1.05rem; display: flex; gap: 0.6rem; align-items: center; }
+.kali-num {
+  inline-size: 2rem; block-size: 2rem; flex: none;
+  display: inline-grid; place-items: center;
+  border-radius: 50%; font-size: 0.95rem; font-weight: 700;
+  color: #fff; background: var(--accent);
+}
+.kali-step-body p { margin: 0; line-height: 1.8; color: var(--text); }
+.kali-code {
+  display: block; padding: 0.7rem 0.9rem; overflow-x: auto;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.82rem; direction: ltr; text-align: left;
+  background: #0d1526; color: #7dd3fc;
+  border: 1px solid var(--line); border-radius: 8px;
+}
+.kali-errs { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.9rem; }
+.kali-errs li {
+  display: grid; gap: 0.25rem;
+  padding-inline-start: 0.9rem;
+  border-inline-start: 3px solid var(--warn);
+}
+.kali-errs strong { font-size: 0.95rem; }
+.kali-errs span { font-size: 0.88rem; line-height: 1.7; color: var(--muted); }
+.kali-ethics {
+  margin: 0; padding: 1rem 1.2rem;
+  border: 1px solid var(--warn); border-radius: var(--radius);
+  background: rgb(var(--warn-rgb, 245 158 11) / 0.08);
+  font-size: 0.9rem; line-height: 1.8;
+}
+@media (max-width: 900px) {
+  .kali-step { grid-template-columns: 1fr; }
+  .kali-step:nth-child(even) .kali-fig { order: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kali-dl-card, .kali-req-card, .kali-step { transition: none; }
+}
+@media print {
+  .kali-sec { gap: 1rem; }
+  .kali-step { break-inside: avoid; }
+}
+/* END MODULE 72 · KaliGuide */
+

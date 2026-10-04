@@ -4,6 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>منصة أمن المعلومات | Information Security Platform — الترم الحالي</title>
+  <!-- MODULE 67 · MaterialViewer: read a chapter PDF in place instead of
+       downloading it. Hidden until a real chapter link is clicked. -->
+  <div class="mat-viewer" id="matViewer" role="dialog" aria-modal="true" aria-labelledby="matViewerTitle" aria-hidden="true" inert>
+    <div class="mat-viewer-panel">
+      <div class="mat-viewer-head">
+        <h2 id="matViewerTitle" class="mat-viewer-title">عرض الفصل</h2>
+        <a class="btn btn-sm btn-ghost mat-viewer-open" id="matViewerOpen" target="_blank" rel="noopener">فتح في تبويب جديد</a>
+        <button type="button" class="btn btn-sm btn-ghost mat-viewer-close" id="matViewerClose" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="mat-viewer-body">
+        <object class="mat-viewer-frame" id="matViewerFrame" type="application/pdf" aria-label="عرض الفصل">
+          <p class="mat-viewer-fallback">لا يدعم متصفحك العرض المدمج — <a id="matViewerLink" href="#" download>حمّل الفصل</a> بدلًا من ذلك.</p>
+        </object>
+      </div>
+    </div>
+  </div>
   <meta name="description" content="منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال. An Arabic-first learning platform for Information Security diploma students: learning paths, quizzes, security tools and labs — offline-ready." />
   <meta name="keywords" content="أمن المعلومات, منصة تعليمية, اختبارات, سيبراني, information security, cybersecurity, learning platform, quizzes" />
   <link rel="canonical" href="https://motmii.github.io/MNCH/" />
@@ -36,7 +52,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.22.24" />
+  <link rel="stylesheet" href="style.css?v=1.25.0" />
   <link rel="manifest" href="manifest.json" />
   <script>
     /* MODULE 36 · pre-paint theme + palette restore — runs before first paint
@@ -111,6 +127,7 @@
           <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
           <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
           <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+          <li><a href="#kali" data-i18n="nav.kali">تثبت كالي</a></li>
           <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
           <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
           <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
@@ -121,9 +138,11 @@
                 <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
                 <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
                 <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
+                <li><a href="#student" data-i18n="nav.student">أدوات الطالب</a></li>
                 <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
                 <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
                 <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
+                <li><a href="#depth" data-i18n="nav.depth">العمق الدفاعي</a></li>
                 <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
               </ul>
             </details>
@@ -189,15 +208,18 @@
       <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
       <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
       <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+      <li><a href="#kali" data-i18n="nav.kali">تثبت كالي</a></li>
       <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
       <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
       <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
       <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
       <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
       <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
+      <li><a href="#student" data-i18n="nav.student">أدوات الطالب</a></li>
       <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
       <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
       <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
+      <li><a href="#depth" data-i18n="nav.depth">العمق الدفاعي</a></li>
       <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
     </ul>
     <a href="#paths" class="btn btn-primary" data-i18n="nav.cta">ابدأ التعلم</a>
@@ -904,6 +926,8 @@
           <div class="flash-toolbar">
             <input id="flashSearch" type="search" class="flash-search" placeholder="ابحث عن مصطلح…" aria-label="بحث في البطاقات التعليمية" />
             <button type="button" id="flashShuffle" class="btn btn-sm btn-ghost" data-i18n="flash.shuffle">خلط البطاقات</button>
+            <!-- MODULE 65 · A11yExtras: read the card aloud (opt-in, local). -->
+            <button type="button" id="flashSpeakBtn" class="btn btn-sm btn-ghost" aria-pressed="false" data-i18n="flash.speak" title="قراءة البطاقة صوتيًا">🔊 اقرأ البطاقة</button>
           </div>
           <div id="flashGrid" class="flash-grid"></div>
           <p class="empty-state" id="flashEmpty" hidden>لا توجد بطاقات مطابقة لبحثك.</p>
@@ -929,8 +953,167 @@
           <p class="quiz-hint" data-i18n="quiz.hint">💡 اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
         </div>
       </details>
+      <!-- MODULE 64 · MockExam — one full paper from every bank, one total timer. -->
+      <div id="mockApp" class="mock-app reveal" aria-live="polite"></div>
     </section>
 
+    <!-- KALI-SEC-START -->
+    <!-- KALI INSTALL GUIDE (MODULE 72): static copy translated by
+         MODULE 22 (Lang). Figures are honest illustrations, not real
+         screenshots. All kali.* keys live in BOTH dicts (ar + en). -->
+    <section class="section kali-sec" id="kali" aria-labelledby="kaliTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="kali.eyebrow">معملك الافتراضي</p>
+        <h2 class="section-title" id="kaliTitle" data-i18n-html="kali.title">ثبّت <em class="grad">كالي لينكس</em> على VirtualBox</h2>
+        <p class="section-sub" data-i18n="kali.sub">دليل مصوّر خطوة بخطوة: من تحميل البرامج الرسمية إلى أول تشغيل محدَّث — داخل جهاز افتراضي آمن لا يمسّ نظامك الحقيقي.</p>
+      </div>
+      <ul class="kali-req reveal">
+        <li class="kali-req-card">
+          <span class="kali-req-ico" aria-hidden="true">🖥️</span>
+          <h3 data-i18n="kali.reqCpu">معالج 64-بت</h3>
+          <p data-i18n="kali.reqCpuD">معالج حديث 64-بت مع تفعيل المحاكاة الافتراضية VT-x / AMD-V من إعدادات الـ BIOS.</p>
+        </li>
+        <li class="kali-req-card">
+          <span class="kali-req-ico" aria-hidden="true">🧠</span>
+          <h3 data-i18n="kali.reqRam">ذاكرة 4GB على الأقل</h3>
+          <p data-i18n="kali.reqRamD">نخصّص 4GB للجهاز الافتراضي، فاحرص أن يملك جهازك 8GB أو أكثر ليعمل النظامان معًا بسلاسة.</p>
+        </li>
+        <li class="kali-req-card">
+          <span class="kali-req-ico" aria-hidden="true">💾</span>
+          <h3 data-i18n="kali.reqDisk">مساحة 60GB فارغة</h3>
+          <p data-i18n="kali.reqDiskD">قرص افتراضي ديناميكي بحدّ أقصى 60GB — يستهلك من قرصك الحقيقي بقدر ما يستخدمه كالي فعلًا.</p>
+        </li>
+        <li class="kali-req-card">
+          <span class="kali-req-ico" aria-hidden="true">🌐</span>
+          <h3 data-i18n="kali.reqNet">اتصال إنترنت</h3>
+          <p data-i18n="kali.reqNetD">لتحميل VirtualBox (نحو 110MB) وصورة كالي (نحو 4GB) ثم تحديثات أول تشغيل.</p>
+        </li>
+      </ul>
+      <div class="kali-dl reveal">
+        <a class="kali-dl-card" href="https://www.virtualbox.org/wiki/Downloads" target="_blank" rel="noopener noreferrer">
+          <span class="kali-req-ico" aria-hidden="true">📦</span>
+          <strong data-i18n="kali.dlVbox">تحميل VirtualBox</strong>
+          <small data-i18n="kali.dlVboxD">الموقع الرسمي virtualbox.org — اختر نسخة نظامك.</small>
+        </a>
+        <a class="kali-dl-card" href="https://www.kali.org/get-kali/" target="_blank" rel="noopener noreferrer">
+          <span class="kali-req-ico" aria-hidden="true">🐉</span>
+          <strong data-i18n="kali.dlKali">تحميل صورة Kali</strong>
+          <small data-i18n="kali.dlKaliD">الموقع الرسمي kali.org — نسخة Installer بمعمارية 64-bit.</small>
+        </a>
+        <a class="kali-dl-card" href="https://www.kali.org/get-kali/" target="_blank" rel="noopener noreferrer">
+          <span class="kali-req-ico" aria-hidden="true">⚡</span>
+          <strong data-i18n="kali.dlVm">أو: صورة VirtualBox الجاهزة</strong>
+          <small data-i18n="kali.dlVmD">قسم Virtual Machines في صفحة kali.org — جهاز جاهز يُستورد مباشرة.</small>
+        </a>
+        <a class="kali-dl-card" href="https://www.kali.org/docs/community/verify-kali-linux-checksums/" target="_blank" rel="noopener noreferrer">
+          <span class="kali-req-ico" aria-hidden="true">🔍</span>
+          <strong data-i18n="kali.dlHash">التحقق من البصمة SHA256</strong>
+          <small data-i18n="kali.dlHashD">قارن بصمة ملفك بما تنشره kali.org قبل التثبيت.</small>
+        </a>
+      </div>
+      <ol class="kali-steps">
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/vbox-download.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">1</span> <span data-i18n="kali.s1t">ثبّت VirtualBox</span></h3>
+            <p data-i18n="kali.s1d">حمّله من موقعه الرسمي وثبّته بالخيارات الافتراضية، ووافق على تعريفات الشبكة التي تمنح أجهزتك الافتراضية الإنترنت.</p>
+          </div>
+        </li>
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/kali-download.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">2</span> <span data-i18n="kali.s2t">حمّل Kali وتحقق من سلامتها</span></h3>
+            <p data-i18n="kali.s2d">حمّل نسخة Installer بمعمارية 64-bit من kali.org، ثم قارن بصمتها بالقيمة المنشورة.</p>
+            <code class="kali-code" dir="ltr">certutil -hashfile kali-linux.iso SHA256</code>
+          </div>
+        </li>
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/vbox-newvm.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">3</span> <span data-i18n="kali.s3t">أنشئ جهازًا افتراضيًا جديدًا</span></h3>
+            <p data-i18n="kali.s3d">اختر New وسمِّه Kali-Linux: النوع Linux والإصدار Debian بمعمارية 64-bit، الذاكرة 4096MB، وقرص VDI ديناميكي بحدّ أقصى 60GB.</p>
+          </div>
+        </li>
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/vbox-storage-iso.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">4</span> <span data-i18n="kali.s4t">وصّل ملف الـ ISO والشبكة</span></h3>
+            <p data-i18n="kali.s4d">من Settings ← Storage حدّد ملف الآيزو لمحرك الأقراص، وتأكد أن Network على وضع NAT.</p>
+          </div>
+        </li>
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/kali-installer.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">5</span> <span data-i18n="kali.s5t">ثبّت النظام بالتثبيت الرسومي</span></h3>
+            <p data-i18n="kali.s5d">اختر Graphical install وتابع اللغة والحساب، واختر Guided — use entire disk (قرص الجهاز الافتراضي فقط)، وثبّت GRUB على ‎/dev/sda‎.</p>
+          </div>
+        </li>
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/kali-firstboot.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">6</span> <span data-i18n="kali.s6t">أول تشغيل: حدّث النظام</span></h3>
+            <p data-i18n="kali.s6d">افصل الآيزو وأعد التشغيل، ثم نفّذ التحديث الكامل من الطرفية.</p>
+            <code class="kali-code" dir="ltr">sudo apt update &amp;&amp; sudo apt full-upgrade -y</code>
+          </div>
+        </li>
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/kali-firstboot.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">7</span> <span data-i18n="kali.s7t">ثبّت إضافات الضيف Guest Additions</span></h3>
+            <p data-i18n="kali.s7d">تمنحك ملء الشاشة والحافظة المشتركة — ثبّتها ثم أعد التشغيل.</p>
+            <code class="kali-code" dir="ltr">sudo apt install -y --reinstall virtualbox-guest-x11</code>
+          </div>
+        </li>
+        <li class="kali-step reveal">
+          <figure class="kali-fig">
+            <img src="images/kali/vbox-newvm.svg" alt="رسم توضيحي" loading="lazy" width="800" height="500" />
+            <figcaption data-i18n="kali.figCap">رسوم توضيحية للشرح — ليست لقطات حقيقية</figcaption>
+          </figure>
+          <div class="kali-step-body">
+            <h3><span class="kali-num" aria-hidden="true">8</span> <span data-i18n="kali.s8t">لمسات أخيرة: لقطة وشبكة</span></h3>
+            <p data-i18n="kali.s8d">خذ لقطة Snapshot للجهاز وهو سليم لتعود إليها متى كسرت شيئًا أثناء التعلّم.</p>
+          </div>
+        </li>
+      </ol>
+      <details class="collapsible reveal">
+        <summary class="collapsible-summary">
+          <span data-i18n="kali.errT">مشاكل شائعة وحلولها</span>
+          <span class="collapsible-chev" aria-hidden="true">▾</span>
+        </summary>
+        <div class="collapsible-body">
+          <ul class="kali-errs">
+            <li><strong data-i18n="kali.e1t">خطأ VT-x / AMD-V غير مفعّل</strong><span data-i18n="kali.e1d">فعّل Virtualization من إعدادات BIOS/UEFI ثم احفظ وأعد التشغيل.</span></li>
+            <li><strong data-i18n="kali.e2t">شاشة سوداء عند الإقلاع</strong><span data-i18n="kali.e2d">فعّل EFI من Settings ← System وزد ذاكرة الفيديو إلى 128MB.</span></li>
+            <li><strong data-i18n="kali.e3t">الدقة صغيرة ولا تملأ الشاشة</strong><span data-i18n="kali.e3d">ثبّت إضافات الضيف (الخطوة 7) ثم أعد التشغيل.</span></li>
+            <li><strong data-i18n="kali.e4t">الجهاز بطيء جدًا</strong><span data-i18n="kali.e4d">امنح الجهاز معالجين وتأكد أن ذاكرتك الحقيقية 8GB أو أكثر.</span></li>
+            <li><strong data-i18n="kali.e5t">لا إنترنت داخل كالي</strong><span data-i18n="kali.e5d">تأكد أن Network على وضع NAT وأن الكابل الافتراضي موصول.</span></li>
+          </ul>
+        </div>
+      </details>
+      <p class="kali-ethics reveal"><strong data-i18n="kali.ethT">تذكير أخلاقي: </strong><span data-i18n="kali.ethD">أدوات كالي للتعلم على أنظمة تملك إذنًا صريحًا باختبارها فقط.</span></p>
+    </section>
+    <!-- KALI-SEC-END -->
     <!-- PROGRESS -->
     <section class="section progress-sec" id="progress" aria-labelledby="progressTitle">
       <div class="section-head reveal">
@@ -943,6 +1126,25 @@
            unfinished lessons, bookmarks and stale reviews from local data. -->
       <div id="revisionApp" class="revision-app reveal" aria-live="polite"></div>
       <div id="examApp" class="exam-app reveal" aria-live="polite"></div>
+      <!-- MODULE 62 · Srs — spaced repetition over the learner's own mistakes,
+           MODULE 63 · Backup — export/import the local progress as a JSON file. -->
+      <div id="srsApp" class="srs-app reveal" aria-live="polite"></div>
+      <div id="backupApp" class="backup-app reveal" aria-live="polite"></div>
+    </section>
+
+    <!-- STUDENT TOOLS — MODULE 68 (GPA) · 69 (timetable / .ics) · 70 (study timer).
+         Three additive mounts, each rendered by its own module from the official
+         study-plan data (current-semester.js) — no timetable, credit hours or
+         subject name is duplicated here. -->
+    <section class="section student-sec" id="student" aria-labelledby="studentTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="student.eyebrow">أدوات الطالب</p>
+        <h2 class="section-title" id="studentTitle" data-i18n-html="student.title">أدوات <em class="grad">الطالب</em></h2>
+        <p class="section-sub" data-i18n="student.sub">احسب معدلك التراكمي وتوقّع ما تحتاجه، وصدّر جدول محاضراتك إلى تقويمك، وسجّل ساعات دراستك — كل ذلك على جهازك فقط.</p>
+      </div>
+      <div id="gpaApp" class="student-card reveal" aria-live="polite"></div>
+      <div id="icsApp" class="student-card reveal" aria-live="polite"></div>
+      <div id="timerApp" class="student-card reveal" aria-live="polite"></div>
     </section>
 
     <!-- GAMES -->
@@ -1192,6 +1394,53 @@
       </div>
     </section>
 
+    <!-- DEPTH — MODULE 71 · DepthScene (العمق الدفاعي / defence in depth).
+         Three plates at three depths drift at different speeds while this
+         section crosses the viewport: the deepest plate travels least, the
+         closest one most. The motion is CSS scroll-driven animation (a
+         view() progress timeline per plate) — no JavaScript, no scroll
+         listener, no background-attachment: fixed (iOS Safari ignores it
+         by design), and only transform/opacity are animated. It is opt-in
+         twice: the browser must support the timeline and the visitor must
+         not have asked for reduced motion — otherwise the plates stand
+         still and this is an ordinary, compact, readable list. -->
+    <section class="section px-sec" id="depth" aria-labelledby="depthTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-i18n="px.eyebrow">مبدأ الدفاع في العمق</p>
+        <h2 class="section-title" id="depthTitle" data-i18n-html="px.title">ثلاث <em class="grad">طبقات</em> تتحرك مع تمريرك</h2>
+        <p class="section-sub" data-i18n="px.sub">الحماية ليست ضابطًا واحدًا: كل طبقة هنا تتحرك بسرعة مختلفة مع تمريرك — الأبعد أبطأ، والأقرب أسرع. تسقط طبقة واحدة، فتبقى التي بعدها.</p>
+      </div>
+
+      <div class="px-runway">
+        <div class="px-stage">
+          <div class="px-decor" aria-hidden="true">
+            <span class="px-grid"></span>
+            <span class="px-halo"></span>
+          </div>
+          <p class="px-legend" data-i18n="px.legend">ثلاث طبقات · ثلاث سرعات</p>
+          <ul class="px-deck">
+            <li class="px-plate px-plate--back">
+              <span class="px-depth" aria-hidden="true">01</span>
+              <h3 class="px-plate-title" data-i18n="px.back">المحيط والشبكة</h3>
+              <p class="px-plate-note" data-i18n="px.backNote">البوابة النارية، تقسيم الشبكة، والوصول الآمن عن بُعد — أول طبقة يقابلها المهاجم.</p>
+            </li>
+            <li class="px-plate px-plate--mid">
+              <span class="px-depth" aria-hidden="true">02</span>
+              <h3 class="px-plate-title" data-i18n="px.mid">المضيف والنظام</h3>
+              <p class="px-plate-note" data-i18n="px.midNote">التحديثات، تصغير سطح الهجوم، أقل صلاحية ممكنة، والتسجيل — ما يحدّ من أثر الاختراق الأول.</p>
+            </li>
+            <li class="px-plate px-plate--front">
+              <span class="px-depth" aria-hidden="true">03</span>
+              <h3 class="px-plate-title" data-i18n="px.front">البيانات والهوية</h3>
+              <p class="px-plate-note" data-i18n="px.frontNote">التحقق متعدد العوامل، التشفير، والنسخ الاحتياطي — آخر خط دفاع وأهمّه لأنه يحمي القيمة نفسها.</p>
+            </li>
+          </ul>
+          <p class="px-note" data-i18n="px.note">تأثير بصري تعليمي فقط: عند تفعيل «تقليل الحركة» في نظامك تتوقف الطبقات تمامًا ويعمل القسم بتمرير عادي.</p>
+          <p class="px-still" data-i18n="px.still">الحركة متوقفة الآن — تفضيلك «تقليل الحركة» مُحترم.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ABOUT -->
     <section class="section about" id="about">
       <div class="about-inner reveal">
@@ -1264,6 +1513,7 @@
         <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
         <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
         <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
+        <li><a href="#kali" data-i18n="nav.kali">تثبت كالي</a></li>
         <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
         <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
         <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>

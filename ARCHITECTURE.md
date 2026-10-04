@@ -165,6 +165,43 @@ Main IIFE ("use strict")
 │                         class from the official timetable), HeroTabs tablist,
 │                         HeroAdaptiveNext strip, and the navbar WhatsNew
 │                         changelog popover (see README for the full list).
+├── M62  Srs              Spaced repetition in #progress (#srsApp): a review queue
+│                         seeded ONLY from the missed-question bank, scheduled
+│                         by a PURE small SM-2 variant (lapse → due today,
+│                         good/easy → 1 / 3 / interval·ef days, ease floored at
+│                         1.3, two passes graduate the card). Store
+│                         "motmi-portal:srs"; self-rated grades, no timers and
+│                         no notifications. Keyboard: 1-9 answer, Enter = "got it".
+├── M63  Backup           Export/import the whole local progress as one JSON file
+│                         (#backupApp). collect() reads only "motmi-portal:*" plus
+│                         the quiz store; validate() accepts a payload only when it
+│                         is tagged and every kept key is a platform key holding a
+│                         structured value; restore() writes only that. Blob
+│                         download + FileReader, 512 KB cap, zero network.
+├── M64  MockExam         One full paper in the quiz section (#mockApp): an equal,
+│                         non-over-sampled, shuffled slice from every real bank,
+│                         with a SINGLE total countdown (45s/question clamped to
+│                         2–90 min) instead of a per-question timer, answers
+│                         hidden until the end, then a per-subject breakdown.
+│                         Own state only — the quiz engine, the missed bank and the
+│                         subject stores are never written.
+├── M65  A11yExtras       Additive accessibility: quiz shortcuts (1-9 answer,
+│                         Enter/Space = next) that only fire while a question is on
+│                         screen, never while typing and never while another
+│                         overlay is open; plus an opt-in read-aloud flashcards
+│                         toggle (Web Speech API, ar-SA, cancelled on view change).
+│                         Touches no existing control.
+├── M66  SwUpdate         Replaces the silent SW swap with an honest optional bar:
+│                         shown only for a worker that installed while a controller
+│                         existed. DOM built with createElement/textContent only;
+│                         reload posts SKIP_WAITING (answered in sw.js) and
+│                         "later" just dismisses.
+├── M67  MaterialViewer   Chapter PDFs open in place inside a hidden, inert
+│                         role="dialog" instead of only downloading. isLocalPdf()
+│                         accepts relative "materials/*.pdf" only (absolute,
+│                         protocol-relative, data: and non-PDF are refused), the
+│                         click delegation upgrades the existing chapter links,
+│                         and the embedded document is released on close/Escape.
 ├── M59  HeroMedia        Animated hero background — two pointer-inert layers:
                           `.hero-bg` (the hero photo, drifting with a pure-CSS
                           heroDrift zoom/pan) and `.hero-media` (a 10s, 1280×720,
@@ -189,7 +226,7 @@ Main IIFE ("use strict")
                           primary action (index.html markup + style.css layer —
                           CSS-only module, no script.js block; documented in
                           "The top bar" section below).
-└── M61  LectureGuide     #guide — the lecture access guide. script.js renders it
+├── M61  LectureGuide     #guide — the lecture access guide. script.js renders it
                           from current-semester.js → lectureGuide (bilingual
                           single source of truth): phishing-awareness warning,
                           weekly timetable DERIVED from each subject's
@@ -211,6 +248,22 @@ Main IIFE ("use strict")
                           only — never raw HTML, never a network call — and the
                           whole view re-renders on locale switch. Covered by
                           tests/lecture-guide.test.js.
+└── M72  KaliGuide        #kali — «تثبت كالي»: an illustrated 8-step guide to
+                          installing Kali Linux inside VirtualBox. Static
+                          markup translated by MODULE 22 (Lang); every string
+                          has a data-i18n key in BOTH dicts (ar + en). Four
+                          requirement cards, official download links
+                          (virtualbox.org / kali.org, https only,
+                          target="_blank" + rel="noopener noreferrer"), six
+                          local SVG figures in images/kali/ (precached, honest
+                          «not a real screenshot» captions), two LTR command
+                          blocks, 5 troubleshooting <details> entries and an
+                          ethical-use reminder. Own shareable route (#kali)
+                          registered in the ViewSwitcher; link sits in the
+                          desktop nav, mobile menu and footer. Layer closed in
+                          style.css (MODULE 72) with a ≤900px stack rule,
+                          reduced-motion and print rules. Covered by
+                          tests/kali-guide.test.js.
 ```
 
 `M33 · AI.Assistant` lives in its own file, `assistant.js` (loaded after

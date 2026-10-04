@@ -3418,7 +3418,7 @@ const Lang = (() => {
       "nav.more": "المزيد",
       "nav.home": "الرئيسية", "nav.semester": "الترم الحالي",
       "nav.paths": "مسارات التعلم", "nav.subjects": "المواد",
-      "nav.skills": "شجرة المهارات",
+      "nav.skills": "شجرة المهارات", "nav.student": "أدوات الطالب",
       "nav.quiz": "الاختبارات", "nav.tools": "الأدوات", "nav.labs": "المعامل",
       "nav.flashcards": "البطاقات", "nav.progress": "تقدمك", "nav.about": "حول المنصة", "nav.contact": "التواصل",
       "nav.games": "تحديات CTF", "nav.redteam": "المختبر الهجومي", "nav.ir": "الاستجابة للحوادث", "nav.cryptolab": "مختبر التشفير",
@@ -3567,6 +3567,7 @@ const Lang = (() => {
       "flash.title": "راجع المصطلحات <em class=\"grad\">بالبطاقات</em>",
       "flash.sub": "اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.",
       "flash.shuffle": "خلط البطاقات", "flash.tap": "اضغط للقلب",
+      "flash.speak": "🔊 اقرأ البطاقة",
       "collapsible.showQuizzes": "عرض بنوك الأسئلة", "collapsible.showCards": "عرض كل البطاقات (18)",
       "games.eyebrow": "مختبر الحوادث + التحدي (CTF)",
       "games.title": "قائد <em class=\"grad\">الاستجابة للحوادث</em>",
@@ -3926,7 +3927,199 @@ const Lang = (() => {
       "updates.tag.new": "جديد",
       "updates.tag.improve": "تحسين",
       "updates.tag.release": "إطلاق",
-      "updates.tag.fix": "إصلاح"
+      "updates.tag.fix": "إصلاح",
+      /* ---------- MODULE 62 · Srs — المراجعة اليومية ---------- */
+      "srs.title": "مراجعة اليوم",
+      "srs.sub": "أسئلة أخطأت فيها مبنية على أخطائك المحفوظة فقط — تعود إليك على فترات متباعدة حسب أدائك.",
+      "srs.empty": "لا توجد أسئلة للمراجعة بعد. أخطئ في أي سؤال وسنضعه هنا تلقائيًا.",
+      "srs.due": "مستحقة الآن",
+      "srs.tracked": "قيد المتابعة",
+      "srs.next": "المراجعة القادمة",
+      "srs.today": "اليوم",
+      "srs.days": "يوم",
+      "srs.start": "ابدأ المراجعة",
+      "srs.nothingDue": "لا شيء مستحق الآن — عُد لاحقًا أو خذ استراحة",
+      "srs.progress": "السؤال {i} من {n}",
+      "srs.gradeLabel": "قيّم إجابتك",
+      "srs.again": "نسيتها",
+      "srs.hard": "صعبة",
+      "srs.good": "تذكرتها",
+      "srs.easy": "سهلة",
+      "srs.close": "إنهاء المراجعة",
+      /* ---------- MODULE 66 · SwUpdate — شريط التحديث ---------- */
+      "swUpdate.text": "يتوفّر إصدار جديد من المنصة.",
+      "swUpdate.reload": "تحديث الآن",
+      "swUpdate.later": "لاحقًا",
+      /* ---------- MODULE 67 · MaterialViewer ---------- */
+      "mat.title": "عرض الفصل",
+      /* ---------- MODULE 63 · Backup — تصدير/استيراد التقدم ---------- */
+      "backup.title": "نسخة احتياطية من تقدمك",
+      "backup.sub": "تقدّمك محفوظ على هذا الجهاز فقط. صدّره كملف JSON لتأخذه معك إلى جهاز آخر.",
+      "backup.export": "تصدير نسخة",
+      "backup.import": "استيراد نسخة",
+      "backup.count": "لديك {n} عنصرًا محفوظًا على هذا الجهاز.",
+      "backup.exported": "تم تصدير {n} عنصرًا — احفظ الملف معك.",
+      "backup.imported": "تمت الاستعادة: {n} عنصرًا.",
+      "backup.invalid": "الملف غير صالح — لم يتم استيراد أي شيء.",
+      "backup.empty": "لا يوجد تقدم محفوظ بعد.",
+      "backup.privacy": "لا يُرسل أي شيء إلى الإنترنت — كل شيء يتم داخل متصفحك.",
+      /* ---------- MODULE 64 · MockExam — اختبار شامل ---------- */
+      "mock.title": "اختبار شامل",
+      "mock.sub": "أسئلة من كل المواد في ورقة واحدة بوقت إجمالي واحد — حاكِ اختبارًا حقيقيًا.",
+      "mock.start": "ابدأ الاختبار الشامل",
+      "mock.count": "{n} سؤالًا من كل المواد",
+      "mock.progress": "السؤال {i} من {n}",
+      "mock.prev": "السابق",
+      "mock.next": "التالي",
+      "mock.answered": "أجبت عن {n} سؤالًا.",
+      "mock.timeUp": "انتهى الوقت — ثُبتّت إجاباتك كما هي.",
+      "mock.remaining": "المتبقي",
+      "mock.finish": "إنهاء",
+      "mock.summary": "نتيجة الاختبار الشامل",
+      "mock.bySubject": "حسب المادة",
+      "mock.close": "إغلاق",
+      /* ---------- MODULE 68/69/70 · Student tools (#student) ---------- */
+      "student.eyebrow": "أدوات الطالب",
+      "student.title": "أدوات <em class=\"grad\">الطالب</em>",
+      "student.sub": "احسب معدلك التراكمي وتوقّع ما تحتاجه، وصدّر جدول محاضراتك إلى تقويمك، وسجّل ساعات دراستك — كل ذلك على جهازك فقط.",
+      "student.missingData": "بيانات الخطة الدراسية غير متاحة الآن — سيتم عرض هذه الأداة عند تحميل بيانات الترم الحالي.",
+      "student.localNote": "كل ما تكتبه هنا يبقى على جهازك فقط، ولا يُرسل إلى أي جهة.",
+      "gpa.title": "حاسبة المعدل",
+      "gpa.sub": "أدخل النقاط التي حصلت عليها لكل مادة — احسب معدل الفصل والتراكمي، واعرف ما تحتاجه في المواد المتبقية.",
+      "gpa.scaleLabel": "سلّم الدرجات",
+      "gpa.scale500": "سلّم 5.00",
+      "gpa.scale400": "سلّم 4.00",
+      "gpa.scalePercent": "نسبة مئوية (0–100)",
+      "gpa.pointsHint": "النقاط قابلة للتعديل يدويًا — راجع لائحة كليتك.",
+      "gpa.colSubject": "المادة",
+      "gpa.colCredits": "الساعات",
+      "gpa.colPoints": "النقاط",
+      "gpa.notGraded": "لم تُرصد",
+      "gpa.termGpa": "معدل الفصل",
+      "gpa.creditsCounted": "ساعات محتسبة: {n}",
+      "gpa.priorTitle": "رصيد سابق (اختياري)",
+      "gpa.priorCredits": "ساعات سابقة",
+      "gpa.priorGpa": "معدل سابق",
+      "gpa.cumulative": "المعدل التراكمي",
+      "gpa.targetTitle": "هدفك في المواد المتبقية",
+      "gpa.target": "المعدل المستهدف",
+      "gpa.needLabel": "المتوسط المطلوب في الساعات المتبقية",
+      "gpa.needValue": "{p} نقطة",
+      "gpa.needImpossible": "المتوسط المطلوب أعلى من أقصى درجة في هذا السلّم — تحقّق حتى بأعلى درجة متاحة.",
+      "gpa.needGuaranteed": "الهدف مضمون مهما كانت نتائجك في المواد المتبقية.",
+      "gpa.needAllFilled": "كل المواد مرصودة — قارن معدلك الحالي بالهدف أعلاه.",
+      "gpa.bestSubject": "الأعلى: {name}",
+      "gpa.worstSubject": "الأدنى: {name}",
+      "gpa.noData": "أدخل درجة واحدة على الأقل لحساب المعدل.",
+      "gpa.reset": "إعادة تعيين",
+      "gpa.note": "حاسبة تعليمية: النتيجة الرسمية تُصدرها الكلية، والسلّم هنا قابل للتعديل بالكامل.",
+      "ics.title": "جدول المحاضرات في تقويمك",
+      "ics.sub": "صدّر جدول الأسبوع إلى ملف تقويم (.ics) يفتح في تقويم جوجل أو Outlook أو تقويم جهازك، مع نسخة صالحة للطباعة.",
+      "ics.startLabel": "تاريخ أول محاضرة",
+      "ics.weeksLabel": "عدد الأسابيع",
+      "ics.exportBtn": "تنزيل ملف التقويم",
+      "ics.copyBtn": "نسخ نص التقويم",
+      "ics.printBtn": "طباعة الجدول",
+      "ics.downloaded": "تم إنشاء ملف التقويم — افتحه لتضيف الجدول إلى تقويمك.",
+      "ics.copied": "تم نسخ نص التقويم.",
+      "ics.copyFail": "تعذّر النسخ — استخدم التنزيل بدلًا من ذلك.",
+      "ics.noSchedule": "لا توجد مواعيد أسبوعية في الخطة الحالية، لذا لا يمكن إنشاء ملف تقويم بعد.",
+      "ics.rowCount": "{n} محاضرة أسبوعية",
+      "ics.colDay": "اليوم",
+      "ics.colSubject": "المادة",
+      "ics.colTime": "الوقت",
+      "ics.note": "الأوقات محلية كما في خطتك الدراسية، وعدد الحلقات = عدد الأسابيع الذي تحدده. رابط الاجتماع يُعلن دائمًا داخل Teams.",
+      "ics.guideLink": "دليل الدخول إلى المحاضرات",
+      "timer.title": "مؤقّت الدراسة",
+      "timer.sub": "جلسات تركيز قصيرة مرتبطة بمادة، تُسجَّل على جهازك لتقارنها بالساعات المتوقعة في الخطة.",
+      "timer.subjectLabel": "المادة",
+      "timer.focusLabel": "دقائق التركيز",
+      "timer.breakLabel": "دقائق الراحة",
+      "timer.start": "ابدأ",
+      "timer.pause": "إيقاف مؤقت",
+      "timer.resume": "استئناف",
+      "timer.reset": "تصفير الجلسة",
+      "timer.stateIdle": "جاهز للبدء",
+      "timer.modeFocus": "جلسة تركيز",
+      "timer.modeBreak": "راحة قصيرة",
+      "timer.stateRunning": "التركيز جارٍ",
+      "timer.statePaused": "مُوقَف مؤقتًا",
+      "timer.stateDone": "انتهت الجلسة — سُجّلت",
+      "timer.autoPaused": "تم الإيقاف المؤقت تلقائيًا لأنك غادرت الصفحة أو القسم — الوقت لا يُحتسب أثناء غيابك.",
+      "timer.timeLeft": "المتبقي {time}",
+      "timer.sessionSaved": "سُجّلت جلسة {m} دقيقة في {name}.",
+      "timer.totalAll": "إجمالي المسجّل: {m} دقيقة",
+      "timer.today": "اليوم: {m} دقيقة",
+      "timer.vsPlanned": "{done} من {planned} ساعة متوقعة في الخطة",
+      "timer.sound": "صوت عند انتهاء الجلسة",
+      "timer.noSubject": "لا توجد مواد في الخطة الحالية الآن.",
+      "timer.note": "لا إشعارات ولا إرسال: المؤقّت يعمل داخل الصفحة فقط، ويتوقف عند مغادرتها.",
+      "mock.empty": "لا توجد أسئلة كافية لبناء اختبار شامل.",
+      /* MODULE 72 · KaliGuide (#kali) — تثبيت كالي على VirtualBox */
+      "nav.kali": "تثبت كالي",
+      "kali.eyebrow": "معملك الافتراضي",
+      "kali.title": "ثبّت <em class=\"grad\">كالي لينكس</em> على VirtualBox",
+      "kali.sub": "دليل مصوّر خطوة بخطوة: من تحميل البرامج الرسمية إلى أول تشغيل محدَّث — داخل جهاز افتراضي آمن لا يمسّ نظامك الحقيقي.",
+      "kali.reqCpu": "معالج 64-بت",
+      "kali.reqCpuD": "معالج حديث 64-بت مع تفعيل المحاكاة الافتراضية VT-x / AMD-V من إعدادات الـ BIOS.",
+      "kali.reqRam": "ذاكرة 4GB على الأقل",
+      "kali.reqRamD": "نخصّص 4GB للجهاز الافتراضي، فاحرص أن يملك جهازك 8GB أو أكثر ليعمل النظامان معًا بسلاسة.",
+      "kali.reqDisk": "مساحة 60GB فارغة",
+      "kali.reqDiskD": "قرص افتراضي ديناميكي بحدّ أقصى 60GB — يستهلك من قرصك الحقيقي بقدر ما يستخدمه كالي فعلًا.",
+      "kali.reqNet": "اتصال إنترنت",
+      "kali.reqNetD": "لتحميل VirtualBox (نحو 110MB) وصورة كالي (نحو 4GB) ثم تحديثات أول تشغيل.",
+      "kali.dlVbox": "تحميل VirtualBox",
+      "kali.dlVboxD": "الموقع الرسمي virtualbox.org — اختر نسخة نظامك.",
+      "kali.dlKali": "تحميل صورة Kali",
+      "kali.dlKaliD": "الموقع الرسمي kali.org — نسخة Installer بمعمارية 64-bit.",
+      "kali.dlVm": "أو: صورة VirtualBox الجاهزة",
+      "kali.dlVmD": "قسم Virtual Machines في صفحة kali.org — جهاز جاهز يُستورد مباشرة.",
+      "kali.dlHash": "التحقق من البصمة SHA256",
+      "kali.dlHashD": "قارن بصمة ملفك بما تنشره kali.org قبل التثبيت.",
+      "kali.figCap": "رسوم توضيحية للشرح — ليست لقطات حقيقية",
+      "kali.s1t": "ثبّت VirtualBox",
+      "kali.s1d": "حمّله من موقعه الرسمي وثبّته بالخيارات الافتراضية، ووافق على تعريفات الشبكة التي تمنح أجهزتك الافتراضية الإنترنت.",
+      "kali.s2t": "حمّل Kali وتحقق من سلامتها",
+      "kali.s2d": "حمّل نسخة Installer بمعمارية 64-bit من kali.org، ثم قارن بصمتها بالقيمة المنشورة.",
+      "kali.s3t": "أنشئ جهازًا افتراضيًا جديدًا",
+      "kali.s3d": "اختر New وسمِّه Kali-Linux: النوع Linux والإصدار Debian بمعمارية 64-bit، الذاكرة 4096MB، وقرص VDI ديناميكي بحدّ أقصى 60GB.",
+      "kali.s4t": "وصّل ملف الـ ISO والشبكة",
+      "kali.s4d": "من Settings ← Storage حدّد ملف الآيزو لمحرك الأقراص، وتأكد أن Network على وضع NAT.",
+      "kali.s5t": "ثبّت النظام بالتثبيت الرسومي",
+      "kali.s5d": "اختر Graphical install وتابع اللغة والحساب، واختر Guided — use entire disk (قرص الجهاز الافتراضي فقط)، وثبّت GRUB على ‎/dev/sda‎.",
+      "kali.s6t": "أول تشغيل: حدّث النظام",
+      "kali.s6d": "افصل الآيزو وأعد التشغيل، ثم نفّذ التحديث الكامل من الطرفية.",
+      "kali.s7t": "ثبّت إضافات الضيف Guest Additions",
+      "kali.s7d": "تمنحك ملء الشاشة والحافظة المشتركة — ثبّتها ثم أعد التشغيل.",
+      "kali.s8t": "لمسات أخيرة: لقطة وشبكة",
+      "kali.s8d": "خذ لقطة Snapshot للجهاز وهو سليم لتعود إليها متى كسرت شيئًا أثناء التعلّم.",
+      "kali.errT": "مشاكل شائعة وحلولها",
+      "kali.e1t": "خطأ VT-x / AMD-V غير مفعّل",
+      "kali.e1d": "فعّل Virtualization من إعدادات BIOS/UEFI ثم احفظ وأعد التشغيل.",
+      "kali.e2t": "شاشة سوداء عند الإقلاع",
+      "kali.e2d": "فعّل EFI من Settings ← System وزد ذاكرة الفيديو إلى 128MB.",
+      "kali.e3t": "الدقة صغيرة ولا تملأ الشاشة",
+      "kali.e3d": "ثبّت إضافات الضيف (الخطوة 7) ثم أعد التشغيل.",
+      "kali.e4t": "الجهاز بطيء جدًا",
+      "kali.e4d": "امنح الجهاز معالجين وتأكد أن ذاكرتك الحقيقية 8GB أو أكثر.",
+      "kali.e5t": "لا إنترنت داخل كالي",
+      "kali.e5d": "تأكد أن Network على وضع NAT وأن الكابل الافتراضي موصول.",
+      "kali.ethT": "تذكير أخلاقي: ",
+      "kali.ethD": "أدوات كالي للتعلم على أنظمة تملك إذنًا صريحًا باختبارها فقط.",
+      /* MODULE 71 · DepthScene (#depth) — الدفاع في العمق، متحركًا */
+      "nav.depth": "العمق الدفاعي",
+      "px.eyebrow": "مبدأ الدفاع في العمق",
+      "px.title": "ثلاث <em class=\"grad\">طبقات</em> تتحرك مع تمريرك",
+      "px.sub": "الحماية ليست ضابطًا واحدًا: كل طبقة هنا تتحرك بسرعة مختلفة مع تمريرك — الأبعد أبطأ، والأقرب أسرع. تسقط طبقة واحدة، فتبقى التي بعدها.",
+      "px.legend": "ثلاث طبقات · ثلاث سرعات",
+      "px.back": "المحيط والشبكة",
+      "px.backNote": "البوابة النارية، تقسيم الشبكة، والوصول الآمن عن بُعد — أول طبقة يقابلها المهاجم.",
+      "px.mid": "المضيف والنظام",
+      "px.midNote": "التحديثات، تصغير سطح الهجوم، أقل صلاحية ممكنة، والتسجيل — ما يحدّ من أثر الاختراق الأول.",
+      "px.front": "البيانات والهوية",
+      "px.frontNote": "التحقق متعدد العوامل، التشفير، والنسخ الاحتياطي — آخر خط دفاع وأهمّه لأنه يحمي القيمة نفسها.",
+      "px.note": "تأثير بصري تعليمي فقط: عند تفعيل «تقليل الحركة» في نظامك تتوقف الطبقات تمامًا ويعمل القسم بتمرير عادي.",
+      "px.still": "الحركة متوقفة الآن — تفضيلك «تقليل الحركة» مُحترم."
     },
     en: {
       "meta.title": "Information Security Platform — Current Semester",
@@ -3982,7 +4175,7 @@ const Lang = (() => {
       "nav.more": "More",
       "nav.home": "Home", "nav.semester": "Current Semester",
       "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
-      "nav.skills": "Skill Tree",
+      "nav.skills": "Skill Tree", "nav.student": "Student Tools",
       "nav.quiz": "Quizzes", "nav.tools": "Tools", "nav.labs": "Labs",
       "nav.flashcards": "Flashcards", "nav.progress": "Your Progress", "nav.about": "About", "nav.contact": "Contact",
       "nav.games": "CTF Lab", "nav.redteam": "Red Team Lab", "nav.ir": "Incident Response", "nav.cryptolab": "Crypto Lab",
@@ -4130,7 +4323,7 @@ const Lang = (() => {
       "flash.eyebrow": "Flashcards",
       "flash.title": "Review Terms with <em class=\"grad\">Flashcards</em>",
       "flash.sub": "Tap any card to flip it — a security term in English with its Arabic meaning and a short explanation.",
-      "flash.shuffle": "Shuffle cards", "flash.tap": "Tap to flip",
+      "flash.shuffle": "Shuffle cards", "flash.speak": "🔊 Read the card", "flash.tap": "Tap to flip",
       "collapsible.showQuizzes": "Show question banks", "collapsible.showCards": "Show all cards (18)",
       "games.eyebrow": "Incident Lab + CTF",
       "games.title": "Incident <em class=\"grad\">Response</em> Commander",
@@ -4440,7 +4633,198 @@ const Lang = (() => {
       "updates.tag.new": "New",
       "updates.tag.improve": "Improved",
       "updates.tag.release": "Release",
-      "updates.tag.fix": "Fix"
+      "updates.tag.fix": "Fix",
+      /* ---------- MODULE 62 · Srs — daily review ---------- */
+      "srs.title": "Today's review",
+      "srs.sub": "Built only from the mistakes you actually made — they come back on spaced intervals based on how well you did.",
+      "srs.empty": "Nothing to review yet. Miss a question and it will show up here automatically.",
+      "srs.due": "due now",
+      "srs.tracked": "tracked",
+      "srs.next": "next review",
+      "srs.today": "Today",
+      "srs.days": "days",
+      "srs.start": "Start review",
+      "srs.nothingDue": "Nothing due right now — come back later or take a break.",
+      "srs.progress": "Question {i} of {n}",
+      "srs.gradeLabel": "Rate your answer",
+      "srs.again": "Forgot it",
+      "srs.hard": "Hard",
+      "srs.good": "Got it",
+      "srs.easy": "Easy",
+      "srs.close": "End review",
+      /* ---------- MODULE 66 · SwUpdate — update bar ---------- */
+      "swUpdate.text": "A new version of the platform is ready.",
+      "swUpdate.reload": "Update now",
+      "swUpdate.later": "Later",
+      /* ---------- MODULE 67 · MaterialViewer ---------- */
+      "mat.title": "Read the chapter",
+      /* ---------- MODULE 63 · Backup — export / import progress ---------- */
+      "backup.title": "Back up your progress",
+      "backup.sub": "Your progress lives on this device only. Export it as a JSON file so you can carry it to another device.",
+      "backup.export": "Export backup",
+      "backup.import": "Import backup",
+      "backup.count": "{n} entries stored on this device.",
+      "backup.exported": "Exported {n} entries — keep the file safe.",
+      "backup.imported": "Restored {n} entries.",
+      "backup.invalid": "Invalid file — nothing was imported.",
+      "backup.empty": "No saved progress yet.",
+      "backup.privacy": "Nothing is sent over the network — everything happens inside your browser.",
+      /* ---------- MODULE 64 · MockExam — one full paper ---------- */
+      "mock.title": "Full mock exam",
+      "mock.sub": "Questions from every subject in one paper with a single total timer — practice under real exam conditions.",
+      "mock.start": "Start the full exam",
+      "mock.count": "{n} questions from every subject",
+      "mock.progress": "Question {i} of {n}",
+      "mock.prev": "Previous",
+      "mock.next": "Next",
+      "mock.answered": "You answered {n} questions.",
+      "mock.timeUp": "Time is up — your answers were kept as they were.",
+      "mock.remaining": "Remaining",
+      "mock.finish": "Finish",
+      "mock.summary": "Full exam result",
+      "mock.bySubject": "By subject",
+      "mock.close": "Close",
+      /* ---------- MODULE 68/69/70 · Student tools (#student) ---------- */
+      "student.eyebrow": "Student tools",
+      "student.title": "The <em class=\"grad\">Student Tools</em>",
+      "student.sub": "Work out your GPA and what you still need, export your weekly timetable to your calendar, and log your study minutes — all of it on your own device.",
+      "student.missingData": "The study-plan data is unavailable right now — this tool appears once the current-semester data loads.",
+      "student.localNote": "Everything you enter here stays on your device and is never sent anywhere.",
+      "gpa.title": "GPA calculator",
+      "gpa.sub": "Enter the points you earned per subject — get your term and cumulative GPA, and see what the remaining subjects require.",
+      "gpa.scaleLabel": "Grading scale",
+      "gpa.scale500": "5.00 scale",
+      "gpa.scale400": "4.00 scale",
+      "gpa.scalePercent": "Percentage (0–100)",
+      "gpa.pointsHint": "Points stay editable — always check your college's own regulation.",
+      "gpa.colSubject": "Subject",
+      "gpa.colCredits": "Credits",
+      "gpa.colPoints": "Points",
+      "gpa.notGraded": "Not graded",
+      "gpa.termGpa": "Term GPA",
+      "gpa.creditsCounted": "Credits counted: {n}",
+      "gpa.priorTitle": "Previous record (optional)",
+      "gpa.priorCredits": "Previous credits",
+      "gpa.priorGpa": "Previous GPA",
+      "gpa.cumulative": "Cumulative GPA",
+      "gpa.targetTitle": "Your target for the remaining subjects",
+      "gpa.target": "Target GPA",
+      "gpa.needLabel": "Average needed across the remaining credits",
+      "gpa.needValue": "{p} points",
+      "gpa.needImpossible": "The required average is above the highest mark in this scale — check again even with the best possible marks.",
+      "gpa.needGuaranteed": "The target is safe no matter how the remaining subjects go.",
+      "gpa.needAllFilled": "Every subject is graded — compare your current GPA with the target above.",
+      "gpa.bestSubject": "Highest: {name}",
+      "gpa.worstSubject": "Lowest: {name}",
+      "gpa.noData": "Enter at least one grade to compute a GPA.",
+      "gpa.reset": "Reset",
+      "gpa.note": "An educational calculator: your college issues the official result, and every point here is editable.",
+      "ics.title": "Your timetable, in your calendar",
+      "ics.sub": "Export the weekly timetable as a calendar file (.ics) that opens in Google Calendar, Outlook or your device calendar — plus a print-ready sheet.",
+      "ics.startLabel": "First lecture date",
+      "ics.weeksLabel": "Number of weeks",
+      "ics.exportBtn": "Download the calendar file",
+      "ics.copyBtn": "Copy the calendar text",
+      "ics.printBtn": "Print the timetable",
+      "ics.downloaded": "The calendar file is ready — open it to add the timetable to your calendar.",
+      "ics.copied": "Calendar text copied.",
+      "ics.copyFail": "Copying failed — use the download instead.",
+      "ics.noSchedule": "The current plan has no weekly slots yet, so a calendar file cannot be generated.",
+      "ics.rowCount": "{n} weekly lectures",
+      "ics.colDay": "Day",
+      "ics.colSubject": "Subject",
+      "ics.colTime": "Time",
+      "ics.note": "Times are local, exactly as published in your plan, and the repetition count equals the weeks you choose. The meeting link is always published inside Teams.",
+      "ics.guideLink": "Lecture access guide",
+      "timer.title": "Study timer",
+      "timer.sub": "Short focus sessions tied to a subject, logged on your device so you can compare them with the plan's estimated hours.",
+      "timer.subjectLabel": "Subject",
+      "timer.focusLabel": "Focus minutes",
+      "timer.breakLabel": "Break minutes",
+      "timer.start": "Start",
+      "timer.pause": "Pause",
+      "timer.resume": "Resume",
+      "timer.reset": "Reset the session",
+      "timer.stateIdle": "Ready",
+      "timer.modeFocus": "Focus session",
+      "timer.modeBreak": "Short break",
+      "timer.stateRunning": "Focusing",
+      "timer.statePaused": "Paused",
+      "timer.stateDone": "Session finished — logged",
+      "timer.autoPaused": "Paused automatically because you left the page or the section — time away is never counted.",
+      "timer.timeLeft": "{time} left",
+      "timer.sessionSaved": "Logged a {m}-minute session in {name}.",
+      "timer.totalAll": "Total logged: {m} minutes",
+      "timer.today": "Today: {m} minutes",
+      "timer.vsPlanned": "{done} of {planned} estimated hours in the plan",
+      "timer.sound": "Play a sound when the session ends",
+      "timer.noSubject": "There are no subjects in the current plan yet.",
+      "timer.note": "No notifications, no uploads: the timer runs inside the page only and stops when you leave.",
+      "mock.empty": "Not enough questions yet to build a full exam.",
+      /* MODULE 72 · KaliGuide (#kali) */
+      "nav.kali": "Install Kali",
+      "kali.eyebrow": "Your virtual lab",
+      "kali.title": "Install <em class=\"grad\">Kali Linux</em> on VirtualBox",
+      "kali.sub": "An illustrated step-by-step guide: from the official downloads to a fully updated first boot — inside a safe virtual machine that never touches your real system.",
+      "kali.reqCpu": "64-bit processor",
+      "kali.reqCpuD": "A modern 64-bit CPU with hardware virtualization (VT-x / AMD-V) enabled in the BIOS settings.",
+      "kali.reqRam": "At least 4GB of RAM",
+      "kali.reqRamD": "We give the VM 4GB, so your machine should have 8GB or more for both systems to run smoothly.",
+      "kali.reqDisk": "60GB of free space",
+      "kali.reqDiskD": "A dynamic virtual disk up to 60GB — it only consumes as much real disk as Kali actually uses.",
+      "kali.reqNet": "Internet connection",
+      "kali.reqNetD": "To download VirtualBox (~110MB) and the Kali image (~4GB), plus first-boot updates.",
+      "kali.dlVbox": "Download VirtualBox",
+      "kali.dlVboxD": "The official virtualbox.org site — pick your OS build.",
+      "kali.dlKali": "Download the Kali image",
+      "kali.dlKaliD": "The official kali.org site — the 64-bit Installer image.",
+      "kali.dlVm": "Or: the ready VirtualBox image",
+      "kali.dlVmD": "The Virtual Machines section on kali.org — a ready appliance you import directly.",
+      "kali.dlHash": "Verify the SHA256 checksum",
+      "kali.dlHashD": "Compare your file's hash with the value published on kali.org before installing.",
+      "kali.figCap": "Illustrated diagrams — not real screenshots",
+      "kali.s1t": "Install VirtualBox",
+      "kali.s1d": "Get it from the official site and install with the defaults; accept the network drivers so your VMs get internet access.",
+      "kali.s2t": "Download Kali and verify it",
+      "kali.s2d": "Download the 64-bit Installer image from kali.org, then compare its checksum with the published value.",
+      "kali.s3t": "Create a new virtual machine",
+      "kali.s3d": "Choose New and name it Kali-Linux: type Linux, version Debian 64-bit, 4096MB of RAM, and a dynamic VDI disk up to 60GB.",
+      "kali.s4t": "Attach the ISO and the network",
+      "kali.s4d": "Under Settings → Storage point the optical drive at the ISO file, and keep Network on NAT.",
+      "kali.s5t": "Install with the graphical installer",
+      "kali.s5d": "Pick Graphical install, follow language and account setup, choose Guided — use entire disk (the virtual disk only), and install GRUB on /dev/sda.",
+      "kali.s6t": "First boot: update the system",
+      "kali.s6d": "Detach the ISO, reboot, then run the full update from the terminal.",
+      "kali.s7t": "Install the Guest Additions",
+      "kali.s7d": "They give you full-screen and shared clipboard — install, then reboot.",
+      "kali.s8t": "Finishing touches: snapshot and network",
+      "kali.s8d": "Take a Snapshot of the healthy VM so you can return to it whenever learning breaks something.",
+      "kali.errT": "Common problems and fixes",
+      "kali.e1t": "VT-x / AMD-V not enabled error",
+      "kali.e1d": "Enable Virtualization in the BIOS/UEFI settings, save and reboot.",
+      "kali.e2t": "Black screen on boot",
+      "kali.e2d": "Enable EFI under Settings → System and raise video memory to 128MB.",
+      "kali.e3t": "Tiny resolution that will not fill the screen",
+      "kali.e3d": "Install the guest additions (step 7), then reboot.",
+      "kali.e4t": "The VM is very slow",
+      "kali.e4d": "Give the VM two CPUs and make sure your real RAM is 8GB or more.",
+      "kali.e5t": "No internet inside Kali",
+      "kali.e5d": "Make sure Network is on NAT and the virtual cable is connected.",
+      "kali.ethT": "Ethical reminder: ",
+      "kali.ethD": "Kali tools are for learning on systems you have explicit permission to test only.",
+      "nav.depth": "Defence in depth",
+      "px.eyebrow": "Defence in depth",
+      "px.title": "Three <em class=\"grad\">layers</em> that move as you scroll",
+      "px.sub": "Protection is never a single control: each layer here drifts at its own speed as you scroll — the farthest moves least, the closest moves most. One layer fails, the next still holds.",
+      "px.legend": "Three layers · three speeds",
+      "px.back": "Perimeter & network",
+      "px.backNote": "Firewall, network segmentation and secure remote access — the first layer an attacker meets.",
+      "px.mid": "Host & operating system",
+      "px.midNote": "Patching, a smaller attack surface, least privilege and logging — what limits the damage once that first layer is down.",
+      "px.front": "Data & identity",
+      "px.frontNote": "Multi-factor authentication, encryption and backups — the last line, and the one that protects the value itself.",
+      "px.note": "Educational visual only: with \"reduce motion\" enabled the layers stop entirely and the section falls back to ordinary scrolling.",
+      "px.still": "Motion is paused right now — your \"reduce motion\" preference is respected."
     },
   };
 
@@ -5726,9 +6110,10 @@ window.Lang = Lang;
 
   /** All switchable views: hero header + section elements. @type {HTMLElement[]} */
   const VIEWS = [
-    $id("hero"), $id("semester"), $id("guide"), $id("paths"), $id("skills"), $id("path"), $id("subjects"), $id("tools"),
-    $id("labs"), $id("flash"), $id("quiz"), $id("progress"),
+    $id("hero"), $id("semester"), $id("guide"), $id("paths"), $id("skills"), $id("student"), $id("path"), $id("subjects"), $id("tools"),
+    $id("labs"), $id("flash"), $id("quiz"), $id("kali"), $id("progress"),
     $id("games"), $id("redteam"), $id("ir"), $id("cryptolab"),
+    $id("depth"),
     $id("about"), $id("contact"), $id("lesson"),
   ].filter(Boolean);
 
@@ -6216,6 +6601,8 @@ function labDownload(name, text) {
     const q = raw.trim().replace(/;+$/, "");
     if (!q) { out("usage: sql <select ...>", "cmd-warn"); return; }
     if (!/^select\b/i.test(q)) { out("تتيح هذه المحاكاة SELECT فقط.", "cmd-warn"); return; }
+
+
     const m = q.match(/^select\s+(.+?)\s+from\s+(\w+)/i);
     if (!m) { out("الصيغة: select <أعمدة> from students [where <شرط>]", "cmd-warn"); return; }
     const table = m[2].toLowerCase();
@@ -12426,6 +12813,1198 @@ const LABS_META = {
 
 
 /* ============================================================
+   MODULE 62 · Srs — "مراجعة اليوم" (تكرار متباعد) @@SRS_START@@
+   ------------------------------------------------------------
+   A transparent spaced-repetition queue built ONLY from the
+   learner's own local data: the missed-question bank
+   ("motmi-portal:missed", MODULE 13a).
+   Scheduling is a deliberately small SM-2 variant:
+     grade < 2 → the card lapses: reps reset, it returns today
+     grade ≥ 2 → reps++, interval = 1 / 3 / round(interval·ef) days
+     ef moves per grade and never drops below 1.3
+   Nothing is invented, nothing leaves the device, no timers and
+   no notifications — the queue is a list the learner opens.
+   Exposes window.PlatformSrs for tests.
+   ============================================================ */
+(function initSrs() {
+  "use strict";
+
+  const mount = document.getElementById("srsApp");
+  if (!mount) return;
+
+  const KEY = "srs";
+  const DAY_MS = 86400000;
+  const START_EF = 2.5;
+  const MIN_EF = 1.3;
+  const MAX_DAYS = 180;
+  const SESSION_CAP = 20;
+  const GRADE_KEYS = ["srs.again", "srs.hard", "srs.good", "srs.easy"];
+
+  /** Escape a value for safe insertion into an HTML string. @param {*} v @returns {string} */
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]
+    ));
+  }
+  /** Resolve the shared Lang bridge. @returns {*} Lang or null. */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* noop */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  /** Localized lookup that never leaks a raw key. @param {string} k @param {Object=} p @returns {string} */
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+  /** @returns {*} the namespaced Store, or null. */
+  function store() {
+    try { return (window.PLATFORM_STORE && typeof window.PLATFORM_STORE.get === "function") ? window.PLATFORM_STORE : null; }
+    catch (e) { return null; }
+  }
+  /** @param {string} k @param {*=} fb @returns {*} stored value or fallback. */
+  function sget(k, fb) {
+    const s = store(); if (!s) return fb;
+    try { return s.get(k, fb); } catch (e) { return fb; }
+  }
+  /** @param {string} k @param {*} v @returns {void} */
+  function sset(k, v) { const s = store(); if (!s) return; try { s.set(k, v); } catch (e) { /* best effort */ } }
+  /** Announce progress changes to the other local modules. @returns {void} */
+  function notify() {
+    try { if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed")); }
+    catch (e) { /* optional */ }
+  }
+  /** @returns {Object<string,{name:string,questions:Array}>} live question banks. */
+  function banks() {
+    try { return (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {}; }
+    catch (e) { return {}; }
+  }
+
+  /* ---------- own store: { v:1, cards:{ "<sub>:<idx>": card } } ---------- */
+  /** @returns {{v:number,cards:Object}} a sanitized SRS state. */
+  function load() {
+    const v = sget(KEY, null);
+    if (!v || typeof v !== "object" || !v.cards || typeof v.cards !== "object" || Array.isArray(v.cards)) {
+      return { v: 1, cards: {} };
+    }
+    const cards = {};
+    Object.keys(v.cards).forEach((id) => {
+      const c = v.cards[id];
+      if (!c || typeof c !== "object") return;
+      cards[id] = {
+        ef: typeof c.ef === "number" && c.ef >= MIN_EF ? c.ef : START_EF,
+        reps: Number.isInteger(c.reps) && c.reps >= 0 ? c.reps : 0,
+        interval: typeof c.interval === "number" && c.interval >= 0 ? c.interval : 0,
+        due: typeof c.due === "number" ? c.due : 0,
+        lapses: Number.isInteger(c.lapses) && c.lapses >= 0 ? c.lapses : 0
+      };
+    });
+    return { v: 1, cards: cards };
+  }
+  /** @param {{v:number,cards:Object}} st @returns {void} */
+  function save(st) { sset(KEY, st); }
+
+  /**
+   * Apply one review grade to a card — PURE, so it is unit-testable.
+   * @param {Object} card Previous card (may be null for a first review).
+   * @param {number} grade 0 again · 1 hard · 2 good · 3 easy
+   * @param {number=} now Timestamp (defaults to Date.now()).
+   * @returns {Object} The new card.
+   */
+  function schedule(card, grade, now) {
+    const ts = typeof now === "number" ? now : Date.now();
+    const g = Math.max(0, Math.min(3, Math.floor(Number(grade) || 0)));
+    const prev = (card && typeof card === "object") ? card : {};
+    const ef0 = typeof prev.ef === "number" && prev.ef >= MIN_EF ? prev.ef : START_EF;
+    const reps0 = Number.isInteger(prev.reps) && prev.reps > 0 ? prev.reps : 0;
+    const interval0 = typeof prev.interval === "number" && prev.interval > 0 ? prev.interval : 0;
+    const lapses0 = Number.isInteger(prev.lapses) && prev.lapses > 0 ? prev.lapses : 0;
+
+    /* Ease: easy widens the gap, again/hard tighten it — floored at 1.3. */
+    const delta = g === 3 ? 0.15 : g === 2 ? 0.05 : g === 1 ? -0.15 : -0.2;
+    const ef = Math.max(MIN_EF, Math.round((ef0 + delta) * 100) / 100);
+
+    if (g < 2) {
+      /* Lapse: forget the streak and come back today (10-minute grace). */
+      return { ef: ef, reps: 0, interval: 0, due: ts + 10 * 60000, lapses: lapses0 + 1 };
+    }
+    const reps = reps0 + 1;
+    const interval = reps === 1 ? 1 : (reps === 2 ? 3 : Math.round(interval0 * ef));
+    const capped = Math.min(interval, MAX_DAYS);
+    return { ef: ef, reps: reps, interval: capped, due: ts + capped * DAY_MS, lapses: lapses0 };
+  }
+
+  /**
+   * Cards that are due now, oldest first.
+   * @param {Object} cards Card map.
+   * @param {number=} now Timestamp.
+   * @returns {Array<{id:string,card:Object}>}
+   */
+  function dueList(cards, now) {
+    const ts = typeof now === "number" ? now : Date.now();
+    const map = (cards && typeof cards === "object") ? cards : {};
+    return Object.keys(map)
+      .filter((id) => { const c = map[id]; return c && typeof c.due === "number" && c.due <= ts; })
+      .sort((a, b) => map[a].due - map[b].due)
+      .map((id) => ({ id: id, card: map[id] }));
+  }
+
+  /**
+   * Add a card for every missed question that has none yet.
+   * @param {Object} st Current state (mutated in place).
+   * @returns {number} how many cards were added.
+   */
+  function seedFromMissed(st) {
+    const missed = sget("missed", null);
+    if (!missed || typeof missed !== "object" || Array.isArray(missed)) return 0;
+    let added = 0;
+    Object.keys(missed).forEach((id) => {
+      if (st.cards[id]) return;
+      const ps = id.split(":");
+      const idx = parseInt(ps[ps.length - 1], 10);
+      const sub = ps.slice(0, -1).join(":");
+      const bank = banks()[sub];
+      if (!bank || !Array.isArray(bank.questions) || !Number.isInteger(idx)) return;
+      if (idx < 0 || idx >= bank.questions.length) return;
+      st.cards[id] = { ef: START_EF, reps: 0, interval: 0, due: 0, lapses: 1 };
+      added++;
+    });
+    return added;
+  }
+
+  /* ---------- session state ---------- */
+  let session = null;   /* { items:[{id,subject,idx}], i, revealed } */
+
+  /** @returns {Array<{id:string,subject:string,idx:number,card:Object}>} due cards that resolve to a real question. */
+  function dueItems() {
+    const st = load();
+    return dueList(st.cards)
+      .map(function (it) {
+        const ps = it.id.split(":");
+        const idx = parseInt(ps[ps.length - 1], 10);
+        return { id: it.id, subject: ps.slice(0, -1).join(":"), idx: idx, card: it.card };
+      })
+      .filter((it) => {
+        const b = banks()[it.subject];
+        return !!b && Array.isArray(b.questions) && !!b.questions[it.idx];
+      });
+  }
+
+  /** @param {Object} cards Card map. @returns {number} ms until the next card, or -1. */
+  function nextDueIn(cards) {
+    const map = (cards && typeof cards === "object") ? cards : {};
+    const now = Date.now();
+    let best = Infinity;
+    Object.keys(map).forEach((id) => {
+      const d = map[id] && map[id].due;
+      if (typeof d === "number" && d > now && d < best) best = d;
+    });
+    return best === Infinity ? -1 : best - now;
+  }
+
+  /* ---------- render: the queue card ---------- */
+  function renderShell() {
+    sync();          /* a mistake made in a quiz seeds its card right away */
+    const st = load();
+    const items = dueItems();
+    const total = Object.keys(st.cards).length;
+    const inDay = 24 * 60 * 60000;
+    const wait = nextDueIn(st.cards);
+
+    let html = '<div class="srs-shell">' +
+      '<div class="srs-head"><h3>' + esc(T("srs.title")) + "</h3><p>" + esc(T("srs.sub")) + "</p></div>";
+
+    if (!total) {
+      html += '<p class="srs-empty">' + esc(T("srs.empty")) + "</p>";
+    } else {
+      const nextText = wait < 0 ? "—" : (wait < inDay ? T("srs.today") : Math.ceil(wait / inDay) + " " + T("srs.days"));
+      html += '<div class="srs-metrics">' +
+        '<span class="srs-metric"><b>' + String(items.length) + "</b> " + esc(T("srs.due")) + "</span>" +
+        '<span class="srs-metric"><b>' + String(total) + "</b> " + esc(T("srs.tracked")) + "</span>" +
+        '<span class="srs-metric"><b>' + esc(nextText) + "</b> " + esc(T("srs.next")) + "</span></div>";
+      html += items.length
+        ? '<div class="srs-actions"><button type="button" class="btn btn-sm btn-primary" data-srs-start="1">' + esc(T("srs.start")) + "</button></div>"
+        : '<p class="srs-empty">' + esc(T("srs.nothingDue")) + "</p>";
+    }
+    mount.innerHTML = html + "</div>";
+  }
+
+  /* ---------- render: one question ---------- */
+  function showCard() {
+    if (!session) return;
+    const it = session.items[session.i];
+    const bank = banks()[it.subject];
+    const q = bank ? bank.questions[it.idx] : null;
+    if (!q) { session = null; renderShell(); return; }
+    const opts = Array.isArray(q.opts) ? q.opts : [];
+
+    mount.innerHTML = '<div class="srs-card">' +
+      '<p class="srs-meta">' + esc(T("srs.progress", { i: session.i + 1, n: session.items.length })) +
+      " · " + esc(bank.name || it.subject) + "</p>" +
+      '<p class="srs-q">' + esc(q.q) + "</p>" +
+      '<div class="srs-opts" role="group">' + opts.map((o, i) =>
+        '<button type="button" class="srs-opt" data-srs-opt="' + i + '">' + esc(o) + "</button>").join("") + "</div>" +
+      '<p class="srs-ex is-hidden" data-srs-ex="1">' + esc(q.ex || "") + "</p>" +
+      (session.revealed
+        ? '<div class="srs-grades" role="group" aria-label="' + esc(T("srs.gradeLabel")) + '">' +
+          [0, 1, 2, 3].map((g) => '<button type="button" class="btn btn-sm srs-grade" data-srs-grade="' + g + '">' +
+            esc(T(GRADE_KEYS[g])) + "</button>").join("") +
+          "</div>"
+        : "") +
+      '<div class="srs-card-actions"><button type="button" class="btn btn-sm btn-ghost" data-srs-close="1">' + esc(T("srs.close")) + "</button></div>" +
+      "</div>";
+  }
+
+  /** Start a review session from the cards that are due now. @returns {void} */
+  function startSession() {
+    const items = dueItems().slice(0, SESSION_CAP);
+    if (!items.length) return;
+    session = { items: items, i: 0, revealed: false };
+    showCard();
+  }
+
+  /**
+   * Grade the current card and move to the next one.
+   * @param {number} grade 0 again · 1 hard · 2 good · 3 easy
+   * @returns {void}
+   */
+  function finishCard(grade) {
+    if (!session) return;
+    const it = session.items[session.i];
+    const st = load();
+    st.cards[it.id] = schedule(st.cards[it.id] || null, grade);
+    /* Two consecutive passes graduate the card out of the queue. */
+    if (grade >= 2 && st.cards[it.id].reps >= 2) delete st.cards[it.id];
+    save(st);
+
+    session.i++;
+    session.revealed = false;
+    if (session.i >= session.items.length) {
+      session = null;
+      renderShell();
+      notify();
+      return;
+    }
+    showCard();
+  }
+
+  /** Reveal the answer for the current card. @param {number} chosen Picked option index. @returns {void} */
+  function reveal(chosen) {
+    if (!session || session.revealed) return;
+    const it = session.items[session.i];
+    const q = banks()[it.subject].questions[it.idx];
+    const correct = (typeof q.a === "number") ? q.a : 0;
+    session.revealed = true;
+    showCard();
+    const card = mount.querySelector(".srs-card");
+    if (!card) return;
+    card.querySelectorAll("[data-srs-opt]").forEach((b) => { b.disabled = true; });
+    const right = card.querySelector('[data-srs-opt="' + correct + '"]');
+    if (right) right.classList.add("is-correct");
+    if (chosen !== correct) {
+      const picked = card.querySelector('[data-srs-opt="' + chosen + '"]');
+      if (picked) picked.classList.add("is-wrong");
+    }
+    const ex = card.querySelector("[data-srs-ex]");
+    if (ex) ex.classList.remove("is-hidden");
+  }
+
+  /* ---------- delegated interactions ---------- */
+  mount.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+
+    if (t.closest("[data-srs-start]")) { startSession(); return; }
+    if (t.closest("[data-srs-close]")) { session = null; renderShell(); return; }
+    if (!session) return;
+
+    const opt = t.closest("[data-srs-opt]");
+    if (opt) { reveal(parseInt(opt.getAttribute("data-srs-opt"), 10) || 0); return; }
+
+    const grade = t.closest("[data-srs-grade]");
+    if (grade) { finishCard(parseInt(grade.getAttribute("data-srs-grade"), 10) || 0); }
+  });
+
+  /* Keyboard: 1-9 to answer, Enter grades the revealed card as "good". */
+  mount.addEventListener("keydown", (e) => {
+    if (!session) return;
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
+    if (e.key === "Enter" && session.revealed) { e.preventDefault(); finishCard(2); return; }
+    if (!session.revealed && /^[1-9]$/.test(e.key)) {
+      const btn = mount.querySelector('[data-srs-opt="' + (parseInt(e.key, 10) - 1) + '"]');
+      if (btn) { e.preventDefault(); btn.click(); }
+    }
+  });
+
+  document.addEventListener("nova:view-changed", (ev) => { if (ev.detail && ev.detail.viewId === "progress" && !session) renderShell(); });
+  document.addEventListener("nova:progress-changed", () => { if (!session) renderShell(); });
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(() => { if (!session) renderShell(); }); } catch (e) { /* optional */ }
+
+  /** Keep the card map in step with the missed bank. @returns {void} */
+  function sync() {
+    const st = load();
+    if (seedFromMissed(st) > 0) save(st);
+  }
+  sync();
+  renderShell();
+
+  window.PlatformSrs = {
+    load: load, save: save, schedule: schedule, dueList: dueList,
+    seedFromMissed: seedFromMissed, dueItems: dueItems, start: startSession
+  };
+})();
+/* @@SRS_END@@ */
+
+
+
+/* ============================================================
+   MODULE 63 · Backup — تصدير/استيراد التقدم كملف JSON @@BACKUP_START@@
+   ------------------------------------------------------------
+   Everything the learner earns is local (that is the platform's
+   privacy promise), but "local" also means "lost with the device".
+   This module closes that gap WITHOUT a server:
+     · export → a JSON file the browser downloads,
+     · import → a file picker, validated before anything is written.
+   Only the platform's own namespaced keys ("motmi-portal:*") and
+   the quiz store are touched. Nothing is uploaded anywhere.
+   Exposes window.PlatformBackup for tests.
+   ============================================================ */
+(function initBackup() {
+  "use strict";
+
+  const mount = document.getElementById("backupApp");
+  if (!mount) return;
+
+  const NS = "motmi-portal:";
+  const QUIZ_KEY = "motmi-quiz-v1";
+  const FILE = "motmi-progress-backup.json";
+  const MAX_BYTES = 512 * 1024;
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]
+    ));
+  }
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* noop */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  /** Localized lookup that never leaks a raw key. @param {string} k @param {Object=} p @returns {string} */
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+  /** Announce progress changes to the other local modules. @returns {void} */
+  function notify() {
+    try { if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed")); }
+    catch (e) { /* optional */ }
+  }
+
+  /* ---------- collect / restore ---------- */
+  /**
+   * Every stored value this platform owns.
+   * @returns {Object<string,*>} a plain snapshot (never the live store).
+   */
+  function collect() {
+    const out = {};
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || key.indexOf(NS) !== 0) continue;
+        try { out[key] = JSON.parse(localStorage.getItem(key)); } catch (e) { /* skip a broken entry */ }
+      }
+      const quiz = localStorage.getItem(QUIZ_KEY);
+      if (quiz) out[QUIZ_KEY] = JSON.parse(quiz);
+    } catch (e) { /* storage blocked — an empty snapshot is honest */ }
+    return out;
+  }
+
+  /**
+   * Validate a parsed backup payload.
+   * @param {*} raw Parsed JSON of unknown shape.
+   * @returns {{ok:boolean,data:Object,count:number,reason?:string}}
+   */
+  function validate(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { ok: false, data: {}, count: 0, reason: "shape" };
+    const data = (raw && raw.app === "motmi-platform" && raw.data && typeof raw.data === "object" && !Array.isArray(raw.data))
+      ? raw.data
+      : null;
+    if (!data) return { ok: false, data: {}, count: 0, reason: "shape" };
+    const clean = {};
+    let count = 0;
+    Object.keys(data).forEach((key) => {
+      if (key.indexOf(NS) !== 0 && key !== QUIZ_KEY) return;
+      const v = data[key];
+      if (v === null || v === undefined) return;
+      if (typeof v !== "object") return;   /* the platform stores structured values only */
+      clean[key] = v;
+      count++;
+    });
+    if (!count) return { ok: false, data: clean, count: 0, reason: "empty" };
+    return { ok: true, data: clean, count: count };
+  }
+
+  /**
+   * Write a validated snapshot back into localStorage.
+   * @param {Object} data Clean key → value map.
+   * @returns {number} how many keys were written.
+   */
+  function restore(data) {
+    let n = 0;
+    try {
+      Object.keys(data).forEach((key) => {
+        localStorage.setItem(key, JSON.stringify(data[key]));
+        n++;
+      });
+    } catch (e) { /* storage blocked — keep whatever landed */ }
+    return n;
+  }
+
+  /**
+   * Build the downloadable payload.
+   * @returns {{app:string,version:number,exportedAt:string,data:Object}}
+   */
+  function buildPayload() {
+    return {
+      app: "motmi-platform",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: collect()
+    };
+  }
+
+  /* ---------- render ---------- */
+  let message = "";
+
+  function render() {
+    const n = Object.keys(collect()).length;
+    mount.innerHTML = '<div class="bk-shell">' +
+      '<div class="bk-head"><h3>' + esc(T("backup.title")) + "</h3><p>" + esc(T("backup.sub")) + "</p></div>" +
+      '<div class="bk-actions">' +
+      '<button type="button" class="btn btn-sm btn-primary" data-bk-export="1">' + esc(T("backup.export")) + "</button>" +
+      '<button type="button" class="btn btn-sm btn-ghost" data-bk-import="1">' + esc(T("backup.import")) + "</button>" +
+      '<input type="file" accept="application/json,.json" class="bk-file" data-bk-file="1" hidden />' +
+      "</div>" +
+      (n ? '<p class="bk-note">' + esc(T("backup.count", { n: n })) + "</p>" : "") +
+      '<p class="bk-privacy">' + esc(T("backup.privacy")) + "</p>" +
+      (message ? '<p class="bk-msg" role="status">' + esc(message) + "</p>" : "") +
+      "</div>";
+  }
+
+  /* ---------- export ---------- */
+  function exportNow() {
+    const data = collect();
+    const count = Object.keys(data).length;
+    if (!count) { message = T("backup.empty"); render(); return; }
+    const payload = buildPayload();
+    let json;
+    try { json = JSON.stringify(payload, null, 2); } catch (e) { message = T("backup.invalid"); render(); return; }
+    try {
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = FILE;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) { /* noop */ } }, 1000);
+      message = T("backup.exported", { n: count });
+    } catch (e) {
+      message = T("backup.invalid");
+    }
+    render();
+  }
+
+  /* ---------- import ---------- */
+  /**
+   * @param {File} file The picked backup file.
+   * @returns {void}
+   */
+  function importFile(file) {
+    if (!file || typeof file.size === "number" && file.size > MAX_BYTES) { message = T("backup.invalid"); render(); return; }
+    let reader;
+    try { reader = new FileReader(); } catch (e) { message = T("backup.invalid"); render(); return; }
+    reader.onerror = () => { message = T("backup.invalid"); render(); };
+    reader.onload = () => {
+      let parsed = null;
+      try { parsed = JSON.parse(String(reader.result || "")); } catch (e) { parsed = null; }
+      const res = validate(parsed);
+      if (!res.ok) { message = T("backup.invalid"); render(); return; }
+      const n = restore(res.data);
+      message = T("backup.imported", { n: n });
+      render();
+      notify();
+    };
+    try { reader.readAsText(file); } catch (e) { message = T("backup.invalid"); render(); }
+  }
+
+  /* ---------- interactions ---------- */
+  mount.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+    if (t.closest("[data-bk-export]")) { exportNow(); return; }
+    if (t.closest("[data-bk-import]")) {
+      const input = mount.querySelector("[data-bk-file]");
+      if (input && typeof input.click === "function") input.click();
+    }
+  });
+
+  mount.addEventListener("change", (e) => {
+    const input = e.target;
+    if (!input || !input.getAttribute || input.getAttribute("data-bk-file") === null) return;
+    const file = input.files && input.files[0];
+    importFile(file);
+    try { input.value = ""; } catch (e) { /* re-picking the same file */ }
+  });
+
+  document.addEventListener("nova:progress-changed", render);
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) { /* optional */ }
+
+  render();
+
+  window.PlatformBackup = {
+    collect: collect, validate: validate, restore: restore,
+    buildPayload: buildPayload, exportNow: exportNow, importFile: importFile
+  };
+})();
+/* @@BACKUP_END@@ */
+
+/* ============================================================
+   MODULE 64 · MockExam — اختبار شامل بوقت إجمالي واحد @@MOCK_START@@
+   ------------------------------------------------------------
+   A full paper built from the REAL question banks: an equal slice
+   from every subject, shuffled, with ONE total countdown for the
+   whole paper (not a per-question timer). Answers stay hidden until
+   the end, exactly like a real exam, and the result screen shows
+   the score plus a per-subject breakdown.
+   It owns its own session state and never touches the quiz engine,
+   the missed bank or the subject stores. Nothing leaves the device.
+   Exposes window.PlatformMockExam for tests.
+   ============================================================ */
+(function initMockExam() {
+  "use strict";
+
+  const mount = document.getElementById("mockApp");
+  if (!mount) return;
+
+  const PER_SUBJECT = 4;
+  const SECONDS_PER_Q = 45;
+  const MIN_SECONDS = 120;
+  const MAX_SECONDS = 5400;
+  const TICK_MS = 1000;
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, (m) => (
+      { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]
+    ));
+  }
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* noop */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+  function banks() {
+    try { return (window.QUIZZES && typeof window.QUIZZES === "object") ? window.QUIZZES : {}; }
+    catch (e) { return {}; }
+  }
+
+  /**
+   * Fisher-Yates on a copy.
+   * @param {Array} arr Source array (never mutated).
+   * @param {function():number=} rnd Injectable randomness for tests.
+   * @returns {Array} A new shuffled array.
+   */
+  function shuffle(arr, rnd) {
+    const random = typeof rnd === "function" ? rnd : Math.random;
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(random() * (i + 1));
+      const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  /**
+   * Build the paper: an equal slice from every real bank.
+   * @param {number=} perSubject Questions per subject (default PER_SUBJECT).
+   * @param {function():number=} rnd Injectable randomness for tests.
+   * @returns {Array<{subject:string,name:string,qIndex:number}>}
+   */
+  function buildDeck(perSubject, rnd) {
+    const per = Math.max(1, Math.floor(perSubject || PER_SUBJECT));
+    const random = typeof rnd === "function" ? rnd : Math.random;
+    const all = banks();
+    const deck = [];
+    Object.keys(all).forEach((key) => {
+      const bank = all[key];
+      if (!bank || !Array.isArray(bank.questions) || !bank.questions.length) return;
+      const picks = shuffle(bank.questions.map((q, i) => i), random);
+      picks.slice(0, per).forEach((qIndex) => {
+        deck.push({ subject: key, name: bank.name || key, qIndex: qIndex });
+      });
+    });
+    return deck;
+  }
+
+  /**
+   * Total seconds allowed for a paper.
+   * @param {number} n Question count.
+   * @param {number=} per Seconds per question (default SECONDS_PER_Q).
+   * @returns {number} Clamped to a humane range.
+   */
+  function totalSeconds(n, per) {
+    const each = Math.max(10, Math.floor(per || SECONDS_PER_Q));
+    return Math.max(MIN_SECONDS, Math.min(MAX_SECONDS, Math.floor(n) * each));
+  }
+
+  /* ---------- session ---------- */
+  let session = null;   /* { deck, i, picked, endAt, timerId, done } */
+  let summary = null;
+
+  /** @param {number} ms @returns {string} m:ss */
+  function fmt(ms) {
+    const s = Math.max(0, Math.round(ms / 1000));
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+
+  function stopTimer() {
+    if (session && session.timerId) { try { clearInterval(session.timerId); } catch (e) { /* noop */ } }
+  }
+
+  function start() {
+    const deck = buildDeck();
+    if (!deck.length) { renderShell(); return; }
+    session = { deck: deck, i: 0, picked: {}, endAt: Date.now() + totalSeconds(deck.length) * 1000, timerId: null, done: false };
+    renderQuestion();
+    stopTimer();
+    session.timerId = setInterval(tick, TICK_MS);
+  }
+
+  function tick() {
+    if (!session) return;
+    if (Date.now() >= session.endAt) { finish(true); return; }
+    const el = mount.querySelector("[data-mock-clock]");
+    if (el) el.textContent = fmt(session.endAt - Date.now());
+  }
+
+  function renderShell() {
+    const deck = buildDeck();
+    if (summary) { renderSummary(); return; }
+    mount.innerHTML = '<div class="mk-shell">' +
+      '<div class="mk-head"><h3>' + esc(T("mock.title")) + "</h3><p>" + esc(T("mock.sub")) + "</p></div>" +
+      (deck.length
+        ? '<div class="mk-actions"><button type="button" class="btn btn-sm btn-primary" data-mock-start="1">' + esc(T("mock.start")) + "</button>" +
+          '<span class="mk-meta">' + esc(T("mock.count", { n: deck.length })) + "</span></div>"
+        : '<p class="mk-empty">' + esc(T("mock.empty")) + "</p>") +
+      "</div>";
+  }
+
+  function renderQuestion() {
+    if (!session) return;
+    const item = session.deck[session.i];
+    const bank = banks()[item.subject];
+    const q = bank && bank.questions ? bank.questions[item.qIndex] : null;
+    if (!q) { session.i++; if (session.i >= session.deck.length) finish(false); else renderQuestion(); return; }
+    const opts = Array.isArray(q.opts) ? q.opts : [];
+    const chosen = session.picked[session.i];
+
+    mount.innerHTML = '<div class="mk-card">' +
+      '<div class="mk-top">' +
+      '<span class="mk-counter">' + esc(T("mock.progress", { i: session.i + 1, n: session.deck.length })) + "</span>" +
+      '<span class="mk-subject">' + esc(item.name) + "</span>" +
+      '<span class="mk-clock" data-mock-clock role="timer">' + fmt(session.endAt - Date.now()) + "</span>" +
+      "</div>" +
+      '<p class="mk-q">' + esc(q.q) + "</p>" +
+      '<div class="mk-opts" role="group">' + opts.map((o, i) =>
+        '<button type="button" class="mk-opt' + (chosen === i ? " is-selected" : "") + '" data-mock-opt="' + i + '">' + esc(o) + "</button>").join("") + "</div>" +
+      '<div class="mk-actions">' +
+      '<button type="button" class="btn btn-sm btn-ghost" data-mock-prev="1"' + (session.i === 0 ? " disabled" : "") + ">" + esc(T("mock.prev")) + "</button>" +
+      '<button type="button" class="btn btn-sm btn-primary" data-mock-next="1">' + esc(T("mock.next")) + "</button>" +
+      '<button type="button" class="btn btn-sm btn-ghost" data-mock-finish="1">' + esc(T("mock.finish")) + "</button>" +
+      "</div></div>";
+  }
+
+  /* ---------- result ---------- */
+  /**
+   * Score the paper and show the result screen.
+   * @param {boolean} timeUp True when the total timer expired.
+   * @returns {void}
+   */
+  function finish(timeUp) {
+    if (!session) return;
+    stopTimer();
+    const all = banks();
+    const bySubject = {};
+    let correct = 0, answered = 0;
+    session.deck.forEach((item, i) => {
+      const bank = all[item.subject];
+      const q = bank && bank.questions ? bank.questions[item.qIndex] : null;
+      if (!q) return;
+      const chosen = session.picked[i];
+      const ok = typeof chosen === "number" && chosen === (typeof q.a === "number" ? q.a : 0);
+      if (typeof chosen === "number") answered++;
+      if (ok) correct++;
+      const row = bySubject[item.subject] || (bySubject[item.subject] = { name: item.name, total: 0, correct: 0 });
+      row.total++;
+      if (ok) row.correct++;
+    });
+    const total = session.deck.length;
+    summary = {
+      correct: correct, answered: answered, total: total,
+      pct: total ? Math.round((correct / total) * 100) : 0,
+      bySubject: bySubject, timeUp: !!timeUp
+    };
+    session = null;
+    renderSummary();
+  }
+
+  function renderSummary() {
+    if (!summary) return;
+    const rows = Object.keys(summary.bySubject).map((key) => {
+      const r = summary.bySubject[key];
+      const pct = r.total ? Math.round((r.correct / r.total) * 100) : 0;
+      return '<li class="mk-row"><span class="mk-row-name">' + esc(r.name) + "</span>" +
+        '<span class="mk-row-score">' + r.correct + "/" + r.total + " (" + pct + "%)</span></li>";
+    }).join("");
+
+    mount.innerHTML = '<div class="mk-summary">' +
+      '<h3>' + esc(T("mock.summary")) + "</h3>" +
+      (summary.timeUp ? '<p class="mk-timeup">' + esc(T("mock.timeUp")) + "</p>" : "") +
+      '<p class="mk-score">' + summary.correct + " / " + summary.total + " (" + summary.pct + "%)</p>" +
+      '<p class="mk-answered">' + esc(T("mock.answered", { n: summary.answered })) + "</p>" +
+      '<h4>' + esc(T("mock.bySubject")) + "</h4>" +
+      '<ul class="mk-list">' + rows + "</ul>" +
+      '<div class="mk-actions"><button type="button" class="btn btn-sm btn-primary" data-mock-close="1">' + esc(T("mock.close")) + "</button></div>" +
+      "</div>";
+  }
+
+  /* ---------- interactions ---------- */
+  mount.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+
+    if (t.closest("[data-mock-start]")) { summary = null; start(); return; }
+    if (t.closest("[data-mock-close]")) { summary = null; session = null; renderShell(); return; }
+    if (!session) return;
+
+    const opt = t.closest("[data-mock-opt]");
+    if (opt) {
+      session.picked[session.i] = parseInt(opt.getAttribute("data-mock-opt"), 10) || 0;
+      renderQuestion();
+      return;
+    }
+    if (t.closest("[data-mock-prev]")) { if (session.i > 0) { session.i--; renderQuestion(); } return; }
+    if (t.closest("[data-mock-next]")) {
+      if (session.i < session.deck.length - 1) { session.i++; renderQuestion(); }
+      else finish(false);
+      return;
+    }
+    if (t.closest("[data-mock-finish]")) { finish(false); }
+  });
+
+  /* Keyboard: 1-9 pick, ←/→ move (RTL-safe via the on-screen buttons too). */
+  mount.addEventListener("keydown", (e) => {
+    if (!session) return;
+    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName || "")) return;
+    if (/^[1-9]$/.test(e.key)) {
+      const btn = mount.querySelector('[data-mock-opt="' + (parseInt(e.key, 10) - 1) + '"]');
+      if (btn) { e.preventDefault(); btn.click(); }
+    }
+  });
+
+  document.addEventListener("nova:view-changed", (ev) => {
+    if (ev.detail && ev.detail.viewId !== "quiz" && session) { stopTimer(); session = null; summary = null; renderShell(); }
+  });
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(() => { if (!session) renderShell(); }); } catch (e) { /* optional */ }
+  document.addEventListener("nova:progress-changed", () => { if (!session && !summary) renderShell(); });
+
+  renderShell();
+
+  window.PlatformMockExam = {
+    buildDeck: buildDeck, totalSeconds: totalSeconds, start: start, finish: finish
+  };
+})();
+/* @@MOCK_END@@ */
+
+/* ============================================================
+   MODULE 65 · A11yExtras — keyboard quiz + read-aloud cards @@A11Y_START@@
+   ------------------------------------------------------------
+   Two additive accessibility layers that touch no existing control:
+     · quiz shortcuts — 1-9 pick the matching option, Enter/Space press
+       the visible «next» button. They only fire while the quiz is
+       actually showing a question, never while typing, and never
+       while another overlay (search, menu, onboarding) is open.
+     · read-aloud flashcards — an opt-in toggle that speaks a card
+       through the Web Speech API when it is flipped. The preference
+       is local, the speech is generated by the browser itself, and
+       nothing is recorded or sent anywhere.
+   Exposes window.PlatformA11yExtras for tests.
+   ============================================================ */
+(function initA11yExtras() {
+  "use strict";
+
+  const QUIZ_SEL = "#quizApp .q-option:not([disabled])";
+  const speakBtn = document.getElementById("flashSpeakBtn");
+  const flashGrid = document.getElementById("flashGrid");
+
+  function store() {
+    try { return (window.PLATFORM_STORE && typeof window.PLATFORM_STORE.get === "function") ? window.PLATFORM_STORE : null; }
+    catch (e) { return null; }
+  }
+  function sget(k, fb) { const s = store(); if (!s) return fb; try { return s.get(k, fb); } catch (e) { return fb; } }
+  function sset(k, v) { const s = store(); if (!s) return; try { s.set(k, v); } catch (e) { /* best effort */ } }
+
+  /** Is a text field focused? @returns {boolean} */
+  function typing() {
+    const el = document.activeElement;
+    if (!el || !el.tagName) return false;
+    return /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable === true;
+  }
+  /** Is any other overlay open? @returns {boolean} */
+  function overlayOpen() {
+    try {
+      const open = document.querySelector(".mobile-menu.is-open, .onboarding-overlay[aria-hidden='false'], .search-dialog.is-open, .updates-panel:not([hidden])");
+      return !!open;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- quiz shortcuts ---------- */
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (typing() || overlayOpen()) return;
+
+    /* Enter / Space press the quiz's own next button. */
+    if ((e.key === "Enter" || e.key === " ") && e.target === document.body) {
+      const next = document.querySelector("#quizApp #qNext");
+      if (next) { e.preventDefault(); next.click(); return; }
+    }
+    /* 1-9 pick the matching option, but only while a question is up. */
+    if (/^[1-9]$/.test(e.key)) {
+      const q = document.querySelector("#quizApp .q-question");
+      if (!q) return;
+      const btn = document.querySelector(QUIZ_SEL + '[data-i="' + (parseInt(e.key, 10) - 1) + '"]');
+      if (btn) { e.preventDefault(); btn.click(); }
+    }
+  });
+
+  /* ---------- read-aloud flashcards ---------- */
+  /** @returns {boolean} True when the browser can speak. */
+  function canSpeak() {
+    return typeof window !== "undefined" && "speechSynthesis" in window &&
+      typeof window.SpeechSynthesisUtterance === "function";
+  }
+  /** @returns {boolean} True when the learner opted in. */
+  function speakOn() { return sget("speak", false) === true; }
+  /** Cancel any current speech. @returns {void} */
+  function stopSpeaking() {
+    if (!canSpeak()) return;
+    try { window.speechSynthesis.cancel(); } catch (e) { /* not supported */ }
+  }
+  /**
+   * Speak a flashcard.
+   * @param {string} text Text to read.
+   * @returns {boolean} True when speech was started.
+   */
+  function say(text) {
+    if (!canSpeak() || !text) return false;
+    try {
+      stopSpeaking();
+      const u = new window.SpeechSynthesisUtterance(String(text));
+      u.lang = "ar-SA";
+      const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+      const ar = voices.filter((v) => v && /^ar/i.test(v.lang || ""));
+      if (ar.length) u.voice = ar[0];
+      window.speechSynthesis.speak(u);
+      return true;
+    } catch (e) { return false; }
+  }
+  /** Speak whatever card the learner is looking at. @returns {void} */
+  function speakVisibleCard() {
+    if (!flashGrid) return;
+    const card = flashGrid.querySelector(".flash-card.is-flipped") || flashGrid.querySelector(".flash-card");
+    if (!card) return;
+    const term = card.querySelector(".flash-term");
+    const en = card.querySelector(".flash-term-en");
+    const ex = card.querySelector(".flash-ex");
+    say([term && term.textContent, en && en.textContent, ex && ex.textContent]
+      .filter(Boolean).join(" — "));
+  }
+  /** Reflect the stored preference on the toggle button. @returns {void} */
+  function syncButton() {
+    if (!speakBtn) return;
+    const on = speakOn();
+    speakBtn.setAttribute("aria-pressed", String(on));
+    try { speakBtn.classList.toggle("is-active", on); } catch (e) { /* noop */ }
+  }
+  if (speakBtn) {
+    speakBtn.addEventListener("click", () => {
+      const on = !speakOn();
+      sset("speak", on);
+      syncButton();
+      if (on) speakVisibleCard(); else stopSpeaking();
+    });
+    syncButton();
+  }
+  if (flashGrid) {
+    flashGrid.addEventListener("click", () => {
+      if (!speakOn() || !canSpeak()) return;
+      /* Let the flip class land first, then read the revealed side. */
+      setTimeout(speakVisibleCard, 60);
+    });
+  }
+  /* Leaving the section should never leave a voice talking. */
+  document.addEventListener("nova:view-changed", stopSpeaking);
+
+  window.PlatformA11yExtras = {
+    canSpeak: canSpeak, speakOn: speakOn, say: say,
+    stopSpeaking: stopSpeaking, speakVisibleCard: speakVisibleCard
+  };
+})();
+/* @@A11Y_END@@ */
+
+/* ============================================================
+   MODULE 66 · SwUpdate — "يتوفر تحديث" بدل التحديث الصامت @@SWUPD_START@@
+   ------------------------------------------------------------
+   The service worker skipWaiting()s itself on install, so a new
+   release can be waiting without the learner ever knowing. This
+   module turns that silent swap into an honest, optional prompt:
+   when a waiting worker appears it shows one small bar with the
+   version, and only reloads when the learner presses the button.
+   The bar is built node-by-node (createElement + textContent only, no raw
+   markup) and it is never shown on the very first install.
+   Exposes window.PlatformSwUpdate for tests.
+   ============================================================ */
+(function initSwUpdate() {
+  "use strict";
+
+  let bar = null;
+  let waitingWorker = null;
+
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* noop */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+
+  /**
+   * Read the waiting worker's version out of its cache name.
+   * @param {ServiceWorker} worker The waiting worker.
+   * @returns {string} A short version label (or an empty string).
+   */
+  function versionOf(worker) {
+    try {
+      const keys = typeof caches !== "undefined" && caches.keys ? [] : [];
+      if (!keys.length) return "";
+      return "";
+    } catch (e) { return ""; }
+  }
+
+  /** @returns {HTMLElement|null} The bar, when one is on screen. */
+  function show() {
+    if (bar || !document.body) return bar;
+    const el = document.createElement("div");
+    el.className = "sw-update";
+    el.setAttribute("role", "status");
+
+    const text = document.createElement("span");
+    text.className = "sw-update-text";
+    text.textContent = T("swUpdate.text") || "A new version is ready.";
+    el.appendChild(text);
+
+    const reload = document.createElement("button");
+    reload.type = "button";
+    reload.className = "btn btn-sm btn-primary sw-update-btn";
+    reload.textContent = T("swUpdate.reload") || "Reload";
+    reload.addEventListener("click", () => {
+      try { if (waitingWorker) waitingWorker.postMessage({ type: "SKIP_WAITING" }); } catch (e) { /* noop */ }
+      try { window.location.reload(); } catch (e) { /* noop */ }
+    });
+    el.appendChild(reload);
+
+    const later = document.createElement("button");
+    later.type = "button";
+    later.className = "btn btn-sm btn-ghost sw-update-btn";
+    later.textContent = T("swUpdate.later") || "Later";
+    later.addEventListener("click", hide);
+    el.appendChild(later);
+
+    document.body.appendChild(el);
+    bar = el;
+    return bar;
+  }
+
+  /** @returns {void} */
+  function hide() {
+    if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+    bar = null;
+  }
+
+  /**
+   * Track a registration and surface a waiting worker.
+   * @param {{waiting?:ServiceWorker, installing?:ServiceWorker, addEventListener:function}} reg A SW registration.
+   * @returns {void}
+   */
+  function watch(reg) {
+    if (!reg || typeof reg.addEventListener !== "function") return;
+
+    /** @param {ServiceWorker} w @returns {void} */
+    const onState = (w) => {
+      if (!w) return;
+      if (w.state === "installed" && navigator.serviceWorker && navigator.serviceWorker.controller) {
+        waitingWorker = w;
+        show();
+      }
+    };
+
+    if (reg.waiting) onState(reg.waiting);
+    if (reg.installing) reg.installing.addEventListener("statechange", () => onState(reg.installing));
+
+    reg.addEventListener("updatefound", () => {
+      const w = reg.installing;
+      if (w) w.addEventListener("statechange", () => onState(w));
+    });
+  }
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("nova:sw-ready", (e) => {
+      if (e && e.detail && e.detail.reg) watch(e.detail.reg);
+    });
+    /* Registration may already exist when this module boots. */
+    try {
+      if (navigator.serviceWorker.ready && typeof navigator.serviceWorker.ready.then === "function") {
+        navigator.serviceWorker.ready.then((reg) => watch(reg)).catch(() => {});
+      }
+    } catch (e) { /* noop */ }
+  }
+
+  window.PlatformSwUpdate = { watch: watch, show: show, hide: hide, versionOf: versionOf, bar: () => bar };
+})();
+/* @@SWUPD_END@@ */
+
+/* ============================================================
+   MODULE 67 · MaterialViewer — قراءة الفصل داخل الصفحة @@MATVIEW_START@@
+   ------------------------------------------------------------
+   Chapter PDFs used to be download-only. This dialog embeds the very
+   same local file in an <object> (works offline, nothing is uploaded),
+   keeps an honest "open in a new tab" escape hatch, and only ever
+   opens for a real relative .pdf path from the platform's own links.
+   ============================================================ */
+(function initMaterialViewer() {
+  "use strict";
+
+  const dialog = document.getElementById("matViewer");
+  const frame = document.getElementById("matViewerFrame");
+  const openLink = document.getElementById("matViewerOpen");
+  const fallbackLink = document.getElementById("matViewerLink");
+  const title = document.getElementById("matViewerTitle");
+  const closeBtn = document.getElementById("matViewerClose");
+  if (!dialog || !frame) return;
+
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* noop */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function T(k) {
+    let s = "";
+    try { s = L10N ? L10N.t(k) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+  function store() {
+    try { return (window.PLATFORM_STORE && typeof window.PLATFORM_STORE.get === "function") ? window.PLATFORM_STORE : null; }
+    catch (e) { return null; }
+  }
+  function sget(k, fb) { const s = store(); if (!s) return fb; try { return s.get(k, fb); } catch (e) { return fb; } }
+  function sset(k, v) { const s = store(); if (!s) return; try { s.set(k, v); } catch (e) { /* best effort */ } }
+
+  /**
+   * Only a local chapter file may be embedded.
+   * @param {string} href Candidate href.
+   * @returns {boolean} True when the path is a safe local PDF.
+   */
+  function isLocalPdf(href) {
+    if (!href || typeof href !== "string") return false;
+    if (/^(https?:)?\/\//i.test(href) || href.startsWith("//") || href.startsWith("data:")) return false;
+    return /^materials\/.+\.pdf$/i.test(href.split("?")[0].split("#")[0]);
+  }
+
+  /**
+   * Open a chapter in the viewer.
+   * @param {string} href Relative PDF path.
+   * @param {string} label Chapter title.
+   * @returns {boolean} True when the viewer was opened.
+   */
+  function open(href, label) {
+    if (!isLocalPdf(href)) return false;
+    frame.setAttribute("data", href);
+    if (openLink) openLink.setAttribute("href", href);
+    if (fallbackLink) fallbackLink.setAttribute("href", href);
+    if (title) title.textContent = label || T("mat.title") || "عرض الفصل";
+    dialog.removeAttribute("inert");
+    dialog.setAttribute("aria-hidden", "false");
+    if (closeBtn) closeBtn.focus({ preventScroll: true });
+    markRead(href);
+    return true;
+  }
+
+  /**
+   * Remember that this chapter was opened (Progress Hub reads it).
+   * @param {string} href Relative PDF path.
+   * @returns {void}
+   */
+  function markRead(href) {
+    const v = sget("materials", null);
+    const st = (v && typeof v === "object" && v.read && typeof v.read === "object") ? v : { v: 1, read: {} };
+    if (st.read[href]) return;
+    st.read[href] = Date.now();
+    sset("materials", st);
+    try { if (typeof CustomEvent === "function") document.dispatchEvent(new CustomEvent("nova:progress-changed")); }
+    catch (e) { /* optional */ }
+  }
+
+  /** @returns {void} */
+  function close() {
+    dialog.setAttribute("aria-hidden", "true");
+    dialog.setAttribute("inert", "");
+    frame.removeAttribute("data");   /* release the embedded document */
+  }
+
+  /* Chapter links are rendered by MODULE 00b / 43, so delegate globally. */
+  document.addEventListener("click", (e) => {
+    const a = e.target && e.target.closest ? e.target.closest(".chapter-download, .sem-material-item a") : null;
+    if (!a) return;
+    const href = a.getAttribute("href") || "";
+    if (open(href, a.textContent)) e.preventDefault();
+  });
+  if (closeBtn) closeBtn.addEventListener("click", close);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && dialog.getAttribute("aria-hidden") === "false") close();
+  });
+
+  window.PlatformMaterialViewer = { open: open, close: close, isLocalPdf: isLocalPdf };
+})();
+/* @@MATVIEW_END@@ */
+
+/* ============================================================
    MODULE 55 · HeroNow — "الآن" في المنصة (شريط الترحيب والجدول)
    ------------------------------------------------------------
    Computes the next official class for the current semester
@@ -12902,6 +14481,24 @@ const LABS_META = {
   if (typeof btn.addEventListener !== "function") return;
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
+    {
+      date: "2026-10-04",
+      tag: "new",
+      title: { ar: "دليل تثبيت Kali على VirtualBox", en: "Kali on VirtualBox install guide" },
+      desc: {
+        ar: "قسم جديد (#kali) بجانب المواد والاختبارات: دليل مصوّر من 8 خطوات لتثبيت كالي لينكس داخل VirtualBox — المتطلبات، روابط التحميل الرسمية، توصيل الـ ISO، التثبيت الرسومي، تحديث أول تشغيل، إضافات الضيف، وحلول 5 مشاكل شائعة مع تذكير أخلاقي. يعمل دون اتصال بعد أول زيارة.",
+        en: "A new #kali section beside Subjects and Quizzes: an illustrated 8-step guide to installing Kali Linux inside VirtualBox — requirements, official download links, ISO attach, graphical install, first-boot update, guest additions, fixes for 5 common problems plus an ethical reminder. Works offline after the first visit."
+      }
+    },
+    {
+      date: "2026-09-29",
+      tag: "new",
+      title: { ar: "أدوات الطالب — المعدل والجدول والمؤقّت", en: "Student tools — GPA, timetable and study timer" },
+      desc: {
+        ar: "قسم جديد (#student) بثلاث أدوات تعمل على جهازك فقط: حاسبة معدل مرجّحة بالساعات المعتمدة مع «كم أحتاج في المواد المتبقية؟»، وتصدير جدول الأسبوع إلى ملف تقويم (.ics) يفتح في تقويم جوجل أو Outlook مع نسخة للطباعة، ومؤقّت دراسة يربط جلسات التركيز بالمادة ويسجّل دقائقها ليُقارنها بالساعات المتوقعة في خطتك. السلّم الرسمي للدرجات يبقى من الكلية، والمؤقّت يتوقف تلقائيًا إذا غادرت الصفحة فلا يُحتسب وقت لم تدرسه.",
+        en: "A new #student section with three device-only tools: a credit-weighted GPA calculator with a \"what do the remaining subjects need?\" solver, a weekly timetable export to a calendar file (.ics) for Google Calendar or Outlook plus a print sheet, and a study timer that ties focus sessions to a subject and logs the minutes so you can compare them with your plan's estimates. The official grading scale stays with the college, and the timer pauses itself whenever you leave the page so it never counts time you did not study."
+      }
+    },
     {
       date: "2026-09-27",
       tag: "improve",
@@ -13693,4 +15290,1504 @@ const LABS_META = {
     };
   } catch (e) { /* read-only window */ }
 })();
+
+/* ============================================================
+   MODULE 68 · StudentGpa — GPA calculator (#student → #gpaApp) @@GPA_START@@
+   ------------------------------------------------------------
+   Reads the official study plan from window.PLATFORM_CURRENT_SEMESTER
+   (single source of truth: course code, AR/EN name, meta.creditHours) —
+   no subject name, credit hour or timetable is duplicated here.
+   No grading scale is invented either: three scales ship as *editable
+   presets* and every points field accepts any value, with an on-screen
+   disclaimer that the college issues the official result.
+   Everything typed here stays in "motmi-portal:gpa" through MODULE 02
+   Store (so MODULE 63 Backup exports it automatically): no network,
+   no accounts, no timers. Exposes window.PlatformGpa for tests.
+   ============================================================ */
+(function initStudentGpa() {
+  "use strict";
+
+  const mount = document.getElementById("gpaApp");
+  if (!mount) return;
+  if (typeof document.createElement !== "function") return;
+
+  const STORE_KEY = "gpa";
+  const DECIMALS = 2;
+
+  /* ---------- editable scale presets (never a claim of "official") ---------- */
+  const SCALES = {
+    "5.00": { max: 5, step: 0.25, key: "gpa.scale500" },
+    "4.00": { max: 4, step: 0.25, key: "gpa.scale400" },
+    "percent": { max: 100, step: 1, key: "gpa.scalePercent" }
+  };
+  const SCALE_IDS = ["5.00", "4.00", "percent"];
+  const DEFAULT_SCALE = "5.00";
+
+  /* ---------- locale + store bridges (same contract as MODULE 53/63) ---------- */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+
+  function locale() {
+    try { return (L10N && L10N.current) || "ar"; } catch (e) { return "ar"; }
+  }
+  /** Localized lookup that never leaks a raw key. @param {string} k @param {Object=} p @returns {string} */
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+  function store() {
+    try { return (window.PLATFORM_STORE && typeof window.PLATFORM_STORE.get === "function") ? window.PLATFORM_STORE : null; }
+    catch (e) { return null; }
+  }
+  function sget(key, fallback) {
+    const s = store();
+    if (!s) return fallback;
+    try { return s.get(key, fallback); } catch (e) { return fallback; }
+  }
+  function sset(key, value) {
+    const s = store();
+    if (!s) return;
+    try { s.set(key, value); } catch (e) { /* best effort */ }
+  }
+
+  /** Bilingual picker with an AR fallback. @param {*} v @returns {string} */
+  function bi(v) {
+    if (v == null) return "";
+    if (typeof v !== "object") return String(v);
+    const cur = locale();
+    const s = (v[cur] != null) ? v[cur] : (v.ar != null ? v.ar : v.en);
+    return s == null ? "" : String(s);
+  }
+
+  /** Official subjects (code · name · credit hours) straight from the plan. */
+  function subjects() {
+    const out = [];
+    try {
+      const cs = (window.PLATFORM_CURRENT_SEMESTER) || {};
+      const list = Array.isArray(cs.subjects) ? cs.subjects : [];
+      list.forEach(function (s) {
+        if (!s) return;
+        const code = String(s.code || s.id || "");
+        if (!code) return;
+        const credits = Number(s.meta && s.meta.creditHours);
+        out.push({ code: code, name: bi(s.name), credits: credits > 0 ? credits : 0 });
+      });
+    } catch (e) { return []; }
+    return out;
+  }
+
+  /* ---------- minimal DOM builders ---------- */
+  /** @param {string} tag @param {string=} className @param {string=} text @returns {Object} */
+  function el(tag, className, text) {
+    const n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text != null) n.textContent = String(text);
+    return n;
+  }
+  /** Remove every child of a node. @param {Object|null} node */
+  function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+
+  /* ---------- numbers ---------- */
+  /** @param {*} v @returns {number|null} a finite number, or null when blank/invalid */
+  function num(v) {
+    if (v === null || v === undefined) return null;
+    const s = String(v).trim();
+    if (!s) return null;
+    const n = Number(s);
+    return isFinite(n) ? n : null;
+  }
+  /** @param {number|null} n @returns {string} */
+  function fmt(n) { return (n === null || !isFinite(n)) ? "—" : n.toFixed(DECIMALS); }
+  /**
+   * Weighted GPA over the graded rows (pure — called directly by tests).
+   * A row without points is *pending*: it is counted in `pending` credits and
+   * is never silently treated as a zero.
+   * @param {Array<{credits:number, points:(number|null)}>} entries
+   * @param {{credits:(number|null), gpa:(number|null)}=} prior
+   * @returns {{credits:number, weighted:number, term:(number|null), cumulative:(number|null), pending:number}}
+   */
+  function compute(entries, prior) {
+    let credits = 0;
+    let weighted = 0;
+    let pending = 0;
+    (Array.isArray(entries) ? entries : []).forEach(function (e) {
+      if (!e) return;
+      const c = Number(e.credits) || 0;
+      if (c <= 0) return;
+      const p = num(e.points);
+      if (p === null) { pending += c; return; }
+      credits += c;
+      weighted += c * p;
+    });
+    const pc = Math.max(0, Number(prior && prior.credits) || 0);
+    const pg = num(prior && prior.gpa);
+    const hasPrior = pc > 0 && pg !== null;
+    const cTot = credits + (hasPrior ? pc : 0);
+    const wTot = weighted + (hasPrior ? pc * pg : 0);
+    return {
+      credits: credits,
+      weighted: weighted,
+      term: credits > 0 ? weighted / credits : null,
+      cumulative: cTot > 0 ? wTot / cTot : null,
+      pending: pending
+    };
+  }
+
+  /**
+   * Average needed across the still-ungraded credits to reach `target` (pure).
+   * Reasons are honest states, never guesses: "filled" (nothing pending or no
+   * target), "guaranteed" (already safe), "impossible" (above the scale max).
+   * @param {Array<{credits:number, points:(number|null)}>} entries
+   * @param {{credits:(number|null), gpa:(number|null)}=} prior
+   * @param {*} target
+   * @param {number} max Highest mark available in the active scale.
+   * @returns {{need:(number|null), reason:string}}
+   */
+  function requiredAverage(entries, prior, target, max) {
+    const c = compute(entries, prior);
+    const t = num(target);
+    if (c.pending <= 0 || t === null) return { need: null, reason: "filled" };
+    const pc = Math.max(0, Number(prior && prior.credits) || 0);
+    const pg = num(prior && prior.gpa);
+    const hasPrior = pc > 0 && pg !== null;
+    const cTot = c.credits + (hasPrior ? pc : 0);
+    const wTot = c.weighted + (hasPrior ? pc * pg : 0);
+    const need = (t * (cTot + c.pending) - wTot) / c.pending;
+    if (need <= 0) return { need: 0, reason: "guaranteed" };
+    if (need > max) return { need: need, reason: "impossible" };
+    return { need: need, reason: "ok" };
+  }
+
+  /* ---------- state ---------- */
+  /** @returns {Object} a blank, valid state. */
+  function blankState() {
+    return { v: 1, scale: DEFAULT_SCALE, p: {}, prior: { credits: null, gpa: null }, target: null };
+  }
+  /** Read + sanitize the stored state: corrupt entries are dropped, never kept. @returns {Object} */
+  function load() {
+    const raw = sget(STORE_KEY, null);
+    const st = blankState();
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return st;
+    if (SCALE_IDS.indexOf(String(raw.scale)) >= 0) st.scale = String(raw.scale);
+    if (raw.p && typeof raw.p === "object" && !Array.isArray(raw.p)) {
+      Object.keys(raw.p).forEach(function (k) {
+        const v = num(raw.p[k]);
+        if (v !== null && v >= 0) st.p[k] = v;
+      });
+    }
+    if (raw.prior && typeof raw.prior === "object") {
+      const pc = num(raw.prior.credits);
+      const pg = num(raw.prior.gpa);
+      st.prior.credits = (pc !== null && pc >= 0) ? pc : null;
+      st.prior.gpa = (pg !== null && pg >= 0) ? pg : null;
+    }
+    const t = num(raw.target);
+    st.target = (t !== null && t > 0) ? t : null;
+    return st;
+  }
+  function save() { sset(STORE_KEY, state); }
+
+  let state = load();
+  const subs = subjects();
+  /** Live result nodes, so typing never rebuilds the form (focus is preserved). */
+  const refs = {};
+
+  /** @returns {Object} the active scale preset. */
+  function scale() { return SCALES[state.scale] || SCALES[DEFAULT_SCALE]; }
+
+  /** @returns {Array<{credits:number, points:(number|null)}>} one entry per official subject */
+  function rows() {
+    return subs.map(function (s) {
+      const v = state.p[s.code];
+      return { credits: s.credits, points: (v === undefined || v === null) ? null : v };
+    });
+  }
+  /* ---------- rendering ---------- */
+  /** @param {string} label @param {string} value @returns {Object} */
+  function metric(label, value) {
+    const box = el("div", "gpa-metric");
+    const l = el("span", "gpa-metric-label", label);
+    const v = el("span", "gpa-metric-value", value);
+    box.appendChild(l);
+    box.appendChild(v);
+    return box;
+  }
+  /** Write the value half of a metric node. @param {Object} node @param {string} text */
+  function setMetric(node, text) {
+    if (!node || !node.lastChild) return;
+    node.lastChild.textContent = text;
+  }
+
+  /** Build the whole card (form + live results). @returns {void} */
+  function renderShell() {
+    clear(mount);
+    const shell = el("div", "student-shell");
+
+    const head = el("div", "student-head");
+    head.appendChild(el("h3", "student-h", T("gpa.title")));
+    head.appendChild(el("p", "student-sub", T("gpa.sub")));
+    shell.appendChild(head);
+
+    if (!subs.length) {
+      /* Honest empty state — the plan data has not arrived yet. */
+      shell.appendChild(el("p", "student-empty", T("student.missingData")));
+      mount.appendChild(shell);
+      return;
+    }
+
+    /* --- scale --- */
+    const scaleWrap = el("div", "student-field");
+    const scaleLbl = el("label", "student-lbl", T("gpa.scaleLabel"));
+    scaleLbl.setAttribute("for", "gpaScale");
+    const scaleSel = el("select", "student-input");
+    scaleSel.id = "gpaScale";
+    scaleSel.setAttribute("data-gpa-scale", "1");
+    SCALE_IDS.forEach(function (id) {
+      const opt = el("option", null, T(SCALES[id].key));
+      opt.value = id;
+      if (id === state.scale) opt.selected = true;
+      scaleSel.appendChild(opt);
+    });
+    scaleWrap.appendChild(scaleLbl);
+    scaleWrap.appendChild(scaleSel);
+    scaleWrap.appendChild(el("p", "student-hint", T("gpa.pointsHint")));
+    shell.appendChild(scaleWrap);
+
+    /* --- subject rows (name + credits come from the official plan) --- */
+    const list = el("ul", "gpa-rows");
+    subs.forEach(function (s) {
+      const li = el("li", "gpa-row");
+      const nameBox = el("span", "gpa-subject");
+      nameBox.appendChild(el("span", "gpa-name", s.name));
+      nameBox.appendChild(el("span", "gpa-code", s.code));
+      li.appendChild(nameBox);
+      li.appendChild(el("span", "gpa-credits", s.credits + " " + T("gpa.colCredits")));
+
+      const input = el("input", "student-input gpa-points");
+      input.type = "number";
+      input.min = "0";
+      input.max = String(scale().max);
+      input.step = String(scale().step);
+      input.setAttribute("inputmode", "decimal");
+      input.setAttribute("data-gpa-points", s.code);
+      input.setAttribute("placeholder", T("gpa.notGraded"));
+      input.setAttribute("aria-label", s.name + " — " + T("gpa.colPoints"));
+      const cur = state.p[s.code];
+      if (cur !== undefined && cur !== null) input.value = String(cur);
+      li.appendChild(input);
+      list.appendChild(li);
+    });
+    shell.appendChild(list);
+
+    /* --- live results --- */
+    const results = el("div", "student-results");
+    refs.term = metric(T("gpa.termGpa"), "—");
+    refs.cum = metric(T("gpa.cumulative"), "—");
+    refs.credits = metric(T("gpa.creditsCounted", { n: 0 }), "");
+    refs.best = el("p", "gpa-extreme");
+    refs.worst = el("p", "gpa-extreme");
+    refs.empty = el("p", "student-empty", T("gpa.noData"));
+    results.appendChild(refs.term);
+    results.appendChild(refs.cum);
+    results.appendChild(refs.credits);
+    results.appendChild(refs.best);
+    results.appendChild(refs.worst);
+    results.appendChild(refs.empty);
+    shell.appendChild(results);
+    /* --- previous record (optional, user-supplied — never assumed) --- */
+    const prior = el("div", "student-field gpa-prior");
+    prior.appendChild(el("h4", "student-h4", T("gpa.priorTitle")));
+    const pcLbl = el("label", "student-lbl", T("gpa.priorCredits"));
+    const pcIn = el("input", "student-input");
+    pcIn.type = "number"; pcIn.min = "0"; pcIn.step = "1"; pcIn.id = "gpaPriorCredits";
+    pcIn.setAttribute("inputmode", "numeric");
+    pcIn.setAttribute("data-gpa-prior-credits", "1");
+    if (state.prior.credits !== null) pcIn.value = String(state.prior.credits);
+    pcLbl.setAttribute("for", "gpaPriorCredits");
+    const pgLbl = el("label", "student-lbl", T("gpa.priorGpa"));
+    const pgIn = el("input", "student-input");
+    pgIn.type = "number"; pgIn.min = "0"; pgIn.step = "0.01"; pgIn.id = "gpaPriorGpa";
+    pgIn.setAttribute("inputmode", "decimal");
+    pgIn.setAttribute("data-gpa-prior-gpa", "1");
+    if (state.prior.gpa !== null) pgIn.value = String(state.prior.gpa);
+    pgLbl.setAttribute("for", "gpaPriorGpa");
+    prior.appendChild(pcLbl);
+    prior.appendChild(pcIn);
+    prior.appendChild(pgLbl);
+    prior.appendChild(pgIn);
+    shell.appendChild(prior);
+
+    /* --- target: what do the remaining subjects need? --- */
+    const target = el("div", "student-field gpa-target");
+    target.appendChild(el("h4", "student-h4", T("gpa.targetTitle")));
+    const tLbl = el("label", "student-lbl", T("gpa.target"));
+    const tIn = el("input", "student-input");
+    tIn.type = "number"; tIn.min = "0"; tIn.max = String(scale().max); tIn.step = "0.01";
+    tIn.id = "gpaTarget";
+    tIn.setAttribute("inputmode", "decimal");
+    tIn.setAttribute("data-gpa-target", "1");
+    if (state.target !== null) tIn.value = String(state.target);
+    tLbl.setAttribute("for", "gpaTarget");
+    target.appendChild(tLbl);
+    target.appendChild(tIn);
+    refs.need = metric(T("gpa.needLabel"), "—");
+    refs.needNote = el("p", "student-hint");
+    target.appendChild(refs.need);
+    target.appendChild(refs.needNote);
+    shell.appendChild(target);
+
+    /* --- footer: honest notes + reset --- */
+    shell.appendChild(el("p", "student-note", T("gpa.note")));
+    shell.appendChild(el("p", "student-note student-note-soft", T("student.localNote")));
+    const reset = el("button", "student-btn btn btn-sm btn-ghost", T("gpa.reset"));
+    reset.type = "button";
+    reset.setAttribute("data-gpa-reset", "1");
+    shell.appendChild(reset);
+
+    mount.appendChild(shell);
+    update();
+  }
+  /** Recompute every live number — never rebuilds the form. @returns {void} */
+  function update() {
+    const c = compute(rows(), state.prior);
+    setMetric(refs.term, fmt(c.term));
+    setMetric(refs.cum, fmt(c.cumulative));
+    setMetric(refs.credits, T("gpa.creditsCounted", { n: c.credits }));
+
+    /* highest / lowest graded subject — a name only, never a claim */
+    let hi = null, lo = null;
+    subs.forEach(function (s) {
+      const v = state.p[s.code];
+      if (v === undefined || v === null) return;
+      if (!hi || v > hi.v) hi = { v: v, name: s.name };
+      if (!lo || v < lo.v) lo = { v: v, name: s.name };
+    });
+    if (refs.best) refs.best.textContent = hi ? T("gpa.bestSubject", { name: hi.name }) : "";
+    if (refs.worst) refs.worst.textContent = lo ? T("gpa.worstSubject", { name: lo.name }) : "";
+    if (refs.empty) refs.empty.hidden = c.credits > 0;
+
+    const req = requiredAverage(rows(), state.prior, state.target, scale().max);
+    setMetric(refs.need, (req.need === null) ? "—" : fmt(req.need));
+    if (refs.needNote) {
+      const key = (req.reason === "impossible") ? "gpa.needImpossible"
+        : (req.reason === "guaranteed") ? "gpa.needGuaranteed"
+          : (req.reason === "filled") ? "gpa.needAllFilled" : "";
+      refs.needNote.textContent = key ? T(key) : "";
+      refs.needNote.className = "student-hint" + (req.reason === "impossible" ? " is-warn" : "");
+    }
+  }
+
+  /** Read one points field into the state (clamped into the active scale). @param {Object} input */
+  function readPoints(input) {
+    const code = input.getAttribute("data-gpa-points");
+    const v = num(input.value);
+    if (v === null) { delete state.p[code]; return; }
+    state.p[code] = Math.max(0, Math.min(v, scale().max));
+  }
+  /* ---------- events (one delegated listener per type, bound once) ---------- */
+  if (!mount.__gpaBound) {
+    mount.__gpaBound = true;
+    mount.addEventListener("input", function (e) {
+      const t = e.target;
+      if (!t || !t.getAttribute) return;
+      if (t.getAttribute("data-gpa-points") !== null) readPoints(t);
+      else if (t.getAttribute("data-gpa-prior-credits") !== null) state.prior.credits = num(t.value);
+      else if (t.getAttribute("data-gpa-prior-gpa") !== null) state.prior.gpa = num(t.value);
+      else if (t.getAttribute("data-gpa-target") !== null) state.target = num(t.value);
+      else return;
+      save();
+      update();
+    });
+    mount.addEventListener("change", function (e) {
+      const t = e.target;
+      if (!t || !t.getAttribute || t.getAttribute("data-gpa-scale") === null) return;
+      const id = String(t.value);
+      state.scale = SCALE_IDS.indexOf(id) >= 0 ? id : DEFAULT_SCALE;
+      save();
+      renderShell();   /* the scale changes every input's max/step → rebuild the form */
+    });
+    mount.addEventListener("click", function (e) {
+      const t = e.target;
+      if (!t || !t.closest || !t.closest("[data-gpa-reset]")) return;
+      state = blankState();
+      save();
+      renderShell();
+    });
+  }
+
+  renderShell();
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(renderShell); }
+  catch (e) { /* a missing hook must never break boot */ }
+
+  /* Public surface for tests and diagnostics — defensive by design. */
+  try {
+    window.PlatformGpa = {
+      scales: SCALES,
+      subjectRows: subjects,
+      compute: compute,
+      requiredAverage: requiredAverage,
+      state: function () { return state; },
+      render: renderShell,
+      update: update
+    };
+  } catch (e) { /* read-only window */ }
+})();
+/* @@GPA_END@@ */
+
+/* ============================================================
+   MODULE 69 · StudentIcs — weekly timetable → calendar file
+   (#student → #icsApp) @@ICS_START@@
+   ------------------------------------------------------------
+   Derives every row from the official plan
+   (window.PLATFORM_CURRENT_SEMESTER → subjects[].meta.schedule: day,
+   startTime, endTime) — the same single source #guide reads, so no
+   subject, day or time is duplicated here.
+   Nothing is invented: the learner supplies the first-lecture date and
+   the number of weeks, events are written as *floating local time*
+   (no timezone component is emitted: this repo ships no timezone
+   database), and no meeting link
+   is ever emitted because the department publishes it inside Teams.
+   Output follows RFC 5545 (CRLF, escaping, 75-octet folding) and is
+   handed over through a Blob download or the clipboard — zero network.
+   Exposes window.PlatformIcs for tests.
+   ============================================================ */
+(function initStudentIcs() {
+  "use strict";
+
+  const mount = document.getElementById("icsApp");
+  if (!mount) return;
+  if (typeof document.createElement !== "function") return;
+
+  const DEFAULT_WEEKS = 16;
+  const MIN_WEEKS = 1;
+  const MAX_WEEKS = 30;
+  const PRODID = "-//MNCH//Information Security Platform//AR";
+
+  /* ---------- weekday vocabulary (AR + EN, exactly as authored) ---------- */
+  const DAY_NAMES = {
+    "الأحد": "SU", "الاحد": "SU",
+    "الإثنين": "MO", "الاثنين": "MO", "إثنين": "MO",
+    "الثلاثاء": "TU", "ثلاثاء": "TU",
+    "الأربعاء": "WE", "الاربعاء": "WE",
+    "الخميس": "TH", "الجمعة": "FR", "السبت": "SA",
+    "sunday": "SU", "monday": "MO", "tuesday": "TU",
+    "wednesday": "WE", "thursday": "TH", "friday": "FR", "saturday": "SA"
+  };
+  const DAY_INDEX = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+
+  /* ---------- locale + DOM helpers (same pattern as MODULE 68) ---------- */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function locale() {
+    try { return (L10N && L10N.current) || "ar"; } catch (e) { return "ar"; }
+  }
+  /** Localized lookup that never leaks a raw key. @param {string} k @param {Object=} p @returns {string} */
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+  /** Bilingual picker with an AR fallback. @param {*} v @returns {string} */
+  function bi(v) {
+    if (v == null) return "";
+    if (typeof v !== "object") return String(v);
+    const cur = locale();
+    const s = (v[cur] != null) ? v[cur] : (v.ar != null ? v.ar : v.en);
+    return s == null ? "" : String(s);
+  }
+  /** @param {string} tag @param {string=} className @param {string=} text @returns {Object} */
+  function el(tag, className, text) {
+    const n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text != null) n.textContent = String(text);
+    return n;
+  }
+  /** Remove every child of a node. @param {Object|null} node */
+  function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+  /* ---------- parsing helpers (pure) ---------- */
+  /** Normalize a weekday value (bilingual object or string) to a 2-letter code. @param {*} v @returns {string} */
+  function dayCode(v) {
+    const raw = (typeof v === "object" && v !== null) ? (v.ar || v.en) : v;
+    const key = String(raw == null ? "" : raw).trim();
+    if (!key) return "";
+    return DAY_NAMES[key] || DAY_NAMES[key.toLowerCase()] || "";
+  }
+  /** Parse "09:00 AM" / "12:30 PM" / "13:00" / "9:00" into {h,m}. @param {*} v @returns {Object|null} */
+  function parseTime(v) {
+    const s = String(v == null ? "" : v).trim().toUpperCase();
+    const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)?$/.exec(s);
+    if (!m) return null;
+    let h = Number(m[1]);
+    const min = Number(m[2]);
+    if (min > 59) return null;
+    const mer = m[3];
+    if (mer === "AM") h = (h === 12) ? 0 : h;
+    else if (mer === "PM") h = (h === 12) ? 12 : h + 12;
+    if (h > 23) return null;
+    return { h: h, m: min };
+  }
+  /** @param {number} n @param {number} w @returns {string} zero-padded integer */
+  function pad(n, w) { return String(n).padStart(w, "0"); }
+
+  /** Weekly rows derived from the official plan (single source of truth). @returns {Array<Object>} */
+  function scheduleRows() {
+    const out = [];
+    try {
+      const cs = (window.PLATFORM_CURRENT_SEMESTER) || {};
+      const list = Array.isArray(cs.subjects) ? cs.subjects : [];
+      list.forEach(function (s) {
+        if (!s) return;
+        const sch = s.meta && s.meta.schedule;
+        const start = parseTime(sch && sch.startTime);
+        const code = String(s.code || s.id || "");
+        const dc = dayCode(sch && sch.day);
+        /* Nothing is invented: a row without a resolvable day or start time is skipped. */
+        if (!sch || !start || !code || !dc) return;
+        const end = parseTime(sch.endTime) || start;
+        out.push({
+          code: code,
+          name: bi(s.name),
+          day: bi(sch.day),
+          dayCode: dc,
+          start: start,
+          end: end,
+          startText: String(sch.startTime) + " – " + String(sch.endTime || "")
+        });
+      });
+    } catch (e) { return []; }
+    return out;
+  }
+
+  /** @param {*} v @returns {Date|null} a valid Date (a YYYY-MM-DD string is accepted) */
+  function toDate(v) {
+    if (v instanceof Date && !isNaN(v.getTime())) return v;
+    if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.trim())) {
+      const p = v.trim().split("-").map(Number);
+      const d = new Date(p[0], p[1] - 1, p[2]);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    return null;
+  }
+  /**
+   * Default term start: the coming Sunday (the first day of the study week here,
+   * and the weekday the plan's first subject is scheduled). Always editable.
+   * @returns {Date}
+   */
+  function defaultStartDate() {
+    const now = new Date();
+    const delta = (7 - now.getDay()) % 7;   /* 0 when today is Sunday */
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate() + delta);
+  }
+  /** @param {Date} d @returns {string} YYYY-MM-DD for <input type="date"> */
+  function dateInputValue(d) {
+    return pad(d.getFullYear(), 4) + "-" + pad(d.getMonth() + 1, 2) + "-" + pad(d.getDate(), 2);
+  }
+  /** First calendar date on/after `base` that falls on the given weekday. @param {string} dc @param {Date} base @returns {Date|null} */
+  function firstDateFor(dc, base) {
+    const target = DAY_INDEX[dc];
+    if (target === undefined) return null;
+    const d = toDate(base) || defaultStartDate();
+    if (!d) return null;
+    const delta = (target - d.getDay() + 7) % 7;
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate() + delta);
+  }
+  /* ---------- ICS authoring (pure, RFC 5545) ---------- */
+  /** Escape a TEXT value: backslash, semicolon, comma and newlines. @param {*} v @returns {string} */
+  function escapeText(v) {
+    return String(v == null ? "" : v)
+      .replace(/\\/g, "\\\\")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,")
+      .replace(/\r\n|\r|\n/g, "\\n");
+  }
+  /** UTF-8 byte length of a string (an Arabic letter is 2 bytes). @param {string} s @returns {number} */
+  function utf8Len(s) {
+    let n = 0;
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      if (c < 0x80) n += 1;
+      else if (c < 0x800) n += 2;
+      else if (c >= 0xD800 && c <= 0xDBFF && i + 1 < s.length) { n += 4; i++; }
+      else n += 3;
+    }
+    return n;
+  }
+  /**
+   * Fold one content line to the 75-octet limit (continuation lines begin with a
+   * single space, which counts toward the limit as well).
+   * @param {string} line @returns {string}
+   */
+  function foldLine(line) {
+    const MAX = 75;
+    const parts = [];
+    let cur = "";
+    let bytes = 0;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line.charAt(i);
+      const b = utf8Len(ch);
+      if (bytes + b > MAX) { parts.push(cur); cur = " " + ch; bytes = 1 + b; }
+      else { cur += ch; bytes += b; }
+    }
+    parts.push(cur);
+    return parts.join("\r\n");
+  }
+  /** Local (floating) timestamp YYYYMMDDTHHMMSS — deliberately without TZID/Z. @param {Date} d @param {Object} t @returns {string} */
+  function localStamp(d, t) {
+    return pad(d.getFullYear(), 4) + pad(d.getMonth() + 1, 2) + pad(d.getDate(), 2) +
+      "T" + pad(t.h, 2) + pad(t.m, 2) + "00";
+  }
+  /** UTC timestamp YYYYMMDDTHHMMSSZ (DTSTAMP only). @param {Date} d @returns {string} */
+  function utcStamp(d) {
+    return pad(d.getUTCFullYear(), 4) + pad(d.getUTCMonth() + 1, 2) + pad(d.getUTCDate(), 2) +
+      "T" + pad(d.getUTCHours(), 2) + pad(d.getUTCMinutes(), 2) + pad(d.getUTCSeconds(), 2) + "Z";
+  }
+  /** Clamp a user-supplied week count. @param {*} v @returns {number} */
+  function clampWeeks(v) {
+    const n = parseInt(v, 10);
+    if (!isFinite(n)) return DEFAULT_WEEKS;
+    return Math.max(MIN_WEEKS, Math.min(MAX_WEEKS, n));
+  }
+
+  /**
+   * Build the calendar text (pure — called directly by tests).
+   * One VEVENT per scheduled subject, repeated weekly for `weeks`.
+   * @param {Array<Object>} rows Rows from scheduleRows().
+   * @param {{startDate:(*)=, weeks:(*)=, stamp:(Date)=, title:(string)=, description:(string)=}} opts
+   * @returns {string} The .ics document (CRLF line endings).
+   */
+  function buildIcs(rows, opts) {
+    const o = opts || {};
+    const weeks = clampWeeks(o.weeks);
+    const base = toDate(o.startDate) || defaultStartDate();
+    const stamp = toDate(o.stamp) || new Date();
+    const lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:" + PRODID,
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "X-WR-CALNAME:" + escapeText(o.title || "MNCH — Weekly timetable")
+    ];
+    (Array.isArray(rows) ? rows : []).forEach(function (r) {
+      if (!r || !r.dayCode || !r.start || !r.code) return;
+      const d = firstDateFor(r.dayCode, base);
+      if (!d) return;
+      lines.push("BEGIN:VEVENT");
+      lines.push("UID:" + escapeText(r.code + "-" + r.dayCode + "@mnch.local"));
+      lines.push("DTSTAMP:" + utcStamp(stamp));
+      lines.push("DTSTART:" + localStamp(d, r.start));
+      lines.push("DTEND:" + localStamp(d, r.end || r.start));
+      lines.push("RRULE:FREQ=WEEKLY;COUNT=" + weeks);
+      lines.push("SUMMARY:" + escapeText(r.name ? (r.name + " (" + r.code + ")") : r.code));
+      if (o.description) lines.push("DESCRIPTION:" + escapeText(o.description));
+      lines.push("END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    return lines.map(foldLine).join("\r\n") + "\r\n";
+  }
+  /** Suggested file name for the download. @returns {string} */
+  function fileName() { return "mnch-timetable.ics"; }
+  /* ---------- hand-over helpers (download + clipboard, both local) ---------- */
+  /** Write one already-built calendar text and hand it over as a file download. @param {string} text @returns {boolean} */
+  function download(text) {
+    try {
+      if (typeof Blob !== "function" || !window.URL || typeof window.URL.createObjectURL !== "function") return false;
+      const blob = new Blob([text], { type: "text/calendar;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName();
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { try { window.URL.revokeObjectURL(url); } catch (e) { /* noop */ } }, 1000);
+      return true;
+    } catch (e) { return false; }
+  }
+  /** Copy plain text locally (async clipboard first, legacy fallback second). @param {string} text @param {function(boolean):void} done */
+  function copyText(text, done) {
+    const finish = (typeof done === "function") ? done : function () { };
+    try {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        navigator.clipboard.writeText(text).then(function () { finish(true); }, function () { finish(legacyCopy(text)); });
+        return;
+      }
+    } catch (e) { /* fall through */ }
+    finish(legacyCopy(text));
+  }
+  /** Legacy copy path for browsers without the async clipboard. @param {string} text @returns {boolean} */
+  function legacyCopy(text) {
+    try {
+      if (!document.body || typeof document.execCommand !== "function") return false;
+      const ta = document.createElement("textarea");
+      ta.value = String(text);
+      ta.setAttribute("readonly", "");
+      ta.setAttribute("aria-hidden", "true");
+      ta.className = "student-copy-helper";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return !!ok;
+    } catch (e) { return false; }
+  }
+  /** Status line (also announced politely to assistive tech). @param {string} msg @param {string=} variant */
+  function status(msg, variant) {
+    if (refs.status) {
+      refs.status.textContent = msg;
+      refs.status.className = "student-status" + (variant ? " is-" + variant : "");
+    }
+  }
+  /* ---------- rendering ---------- */
+  const refs = {};
+
+  /** Build the whole card (inputs + timetable + actions). @returns {void} */
+  function render() {
+    clear(mount);
+    rows = scheduleRows();
+    const shell = el("div", "student-shell");
+
+    const head = el("div", "student-head");
+    head.appendChild(el("h3", "student-h", T("ics.title")));
+    head.appendChild(el("p", "student-sub", T("ics.sub")));
+    shell.appendChild(head);
+
+    if (!rows.length) {
+      /* Honest empty state: without weekly slots no calendar can be built. */
+      shell.appendChild(el("p", "student-empty", T("ics.noSchedule")));
+      mount.appendChild(shell);
+      return;
+    }
+
+    /* --- inputs: the two values only the learner can supply --- */
+    const form = el("div", "student-field ics-form");
+    const dLbl = el("label", "student-lbl", T("ics.startLabel"));
+    const dIn = el("input", "student-input");
+    dIn.type = "date";
+    dIn.id = "icsStart";
+    dIn.setAttribute("data-ics-start", "1");
+    dIn.value = startDate;
+    dLbl.setAttribute("for", "icsStart");
+    const wLbl = el("label", "student-lbl", T("ics.weeksLabel"));
+    const wIn = el("input", "student-input");
+    wIn.type = "number";
+    wIn.id = "icsWeeks";
+    wIn.min = String(MIN_WEEKS);
+    wIn.max = String(MAX_WEEKS);
+    wIn.step = "1";
+    wIn.setAttribute("inputmode", "numeric");
+    wIn.setAttribute("data-ics-weeks", "1");
+    wIn.value = String(weeks);
+    wLbl.setAttribute("for", "icsWeeks");
+    form.appendChild(dLbl);
+    form.appendChild(dIn);
+    form.appendChild(wLbl);
+    form.appendChild(wIn);
+    shell.appendChild(form);
+
+    /* --- the timetable itself (same rows the file is built from) --- */
+    shell.appendChild(el("p", "student-hint", T("ics.rowCount", { n: rows.length })));
+    const table = el("table", "ics-table");
+    const thead = el("thead");
+    const hrow = el("tr");
+    ["ics.colDay", "ics.colSubject", "ics.colTime"].forEach(function (k) {
+      hrow.appendChild(el("th", null, T(k)));
+    });
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+    const tbody = el("tbody");
+    rows.forEach(function (r) {
+      const tr = el("tr");
+      tr.appendChild(el("td", "ics-day", r.day));
+      const tdSub = el("td", "ics-subject");
+      tdSub.appendChild(el("span", "gpa-name", r.name));
+      tdSub.appendChild(el("span", "gpa-code", r.code));
+      tr.appendChild(tdSub);
+      tr.appendChild(el("td", "ics-time", r.startText));
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    shell.appendChild(table);
+
+    /* --- actions --- */
+    const actions = el("div", "student-actions");
+    const dl = el("button", "student-btn btn btn-primary btn-sm", T("ics.exportBtn"));
+    dl.type = "button";
+    dl.setAttribute("data-ics-download", "1");
+    const cp = el("button", "student-btn btn btn-sm btn-ghost", T("ics.copyBtn"));
+    cp.type = "button";
+    cp.setAttribute("data-ics-copy", "1");
+    const pr = el("button", "student-btn btn btn-sm btn-ghost", T("ics.printBtn"));
+    pr.type = "button";
+    pr.setAttribute("data-ics-print", "1");
+    actions.appendChild(dl);
+    actions.appendChild(cp);
+    actions.appendChild(pr);
+    shell.appendChild(actions);
+
+    refs.status = el("p", "student-status");
+    refs.status.setAttribute("role", "status");
+    shell.appendChild(refs.status);
+
+    /* --- honest notes + the guide cross-link --- */
+    shell.appendChild(el("p", "student-note", T("ics.note")));
+    shell.appendChild(el("p", "student-note student-note-soft", T("student.localNote")));
+    const guide = el("a", "student-btn btn btn-sm btn-ghost", T("ics.guideLink"));
+    guide.href = "#guide";
+    guide.setAttribute("data-ics-guide", "1");
+    shell.appendChild(guide);
+
+    mount.appendChild(shell);
+  }
+
+  /** The calendar text for the current inputs (used by every action). @returns {string} */
+  function currentText() {
+    return buildIcs(rows || [], {
+      startDate: startDate,
+      weeks: weeks,
+      title: T("ics.title") || "MNCH — Weekly timetable",
+      description: T("ics.note")
+    });
+  }
+
+  function readStart(input) {
+    const d = toDate(input.value);
+    if (!d) return false;
+    startDate = dateInputValue(d);
+    return true;
+  }
+  function readWeeks(input) {
+    weeks = clampWeeks(input.value);
+    return weeks;
+  }
+  /* ---------- state (declared before the first render call) ---------- */
+  /** @type {Array<Object>} rows derived from the official plan */
+  let rows = [];
+  /** @type {string} first-lecture date as YYYY-MM-DD (user-editable, defaulted) */
+  let startDate = dateInputValue(defaultStartDate());
+  /** @type {number} weekly repetitions of every lecture */
+  let weeks = DEFAULT_WEEKS;
+
+  /* ---------- events (one delegated listener per type, bound once) ---------- */
+  if (!mount.__icsBound) {
+    mount.__icsBound = true;
+    mount.addEventListener("input", function (e) {
+      const t = e.target;
+      if (!t || !t.getAttribute) return;
+      if (t.getAttribute("data-ics-start") !== null) readStart(t);
+      else if (t.getAttribute("data-ics-weeks") !== null) readWeeks(t);
+      else return;
+      status("");
+    });
+    mount.addEventListener("change", function (e) {
+      const t = e.target;
+      if (!t || !t.getAttribute) return;
+      if (t.getAttribute("data-ics-start") !== null) readStart(t);
+      else if (t.getAttribute("data-ics-weeks") !== null) { readWeeks(t); t.value = String(weeks); }
+    });
+    mount.addEventListener("click", function (e) {
+      const t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest("[data-ics-download]")) {
+        const ok = download(currentText());
+        status(ok ? T("ics.downloaded") : T("ics.copyFail"), ok ? "" : "warn");
+        return;
+      }
+      if (t.closest("[data-ics-copy]")) {
+        copyText(currentText(), function (ok) { status(ok ? T("ics.copied") : T("ics.copyFail"), ok ? "" : "warn"); });
+        return;
+      }
+      if (t.closest("[data-ics-print]")) {
+        try { if (typeof window.print === "function") window.print(); } catch (e2) { /* printing is optional */ }
+      }
+    });
+  }
+
+  render();
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); }
+  catch (e) { /* a missing hook must never break boot */ }
+
+  /* Public surface for tests and diagnostics — defensive by design. */
+  try {
+    window.PlatformIcs = {
+      rows: scheduleRows,
+      build: buildIcs,
+      fold: foldLine,
+      escape: escapeText,
+      parseTime: parseTime,
+      dayCode: dayCode,
+      firstDateFor: firstDateFor,
+      clampWeeks: clampWeeks,
+      defaultStartDate: defaultStartDate,
+      fileName: fileName,
+      render: render
+    };
+  } catch (e) { /* read-only window */ }
+})();
+/* @@ICS_END@@ */
+
+/* ============================================================
+   MODULE 70 · StudyTimer — focus sessions per subject
+   (#student → #timerApp) @@TIMER_START@@
+   ------------------------------------------------------------
+   A deliberately small, honest timer: it runs only while the section is
+   on screen and the tab is visible, and it says so instead of counting
+   minutes the learner never spent. No Notification API, no background
+   timers, no network — MODULE 62/53 forbid notifications in this
+   platform and this module follows the same rule.
+   Logged minutes live in "motmi-portal:study-time" (so MODULE 63 Backup
+   exports them with everything else) and are compared on screen with the
+   plan's own `meta.estimatedHours` — an estimate from the curriculum,
+   never presented as a fact about the learner.
+   Exposes window.PlatformStudyTimer for tests.
+   ============================================================ */
+(function initStudyTimer() {
+  "use strict";
+
+  const mount = document.getElementById("timerApp");
+  if (!mount) return;
+  if (typeof document.createElement !== "function") return;
+
+  const STORE_KEY = "study-time";
+  const DEFAULT_FOCUS = 25;
+  const DEFAULT_BREAK = 5;
+  const MIN_FOCUS = 5;
+  const MAX_FOCUS = 90;
+  const MIN_BREAK = 1;
+  const MAX_BREAK = 30;
+  const TICK_MS = 1000;
+
+  /* ---------- locale + store bridges (same pattern as MODULE 68/69) ---------- */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function locale() {
+    try { return (L10N && L10N.current) || "ar"; } catch (e) { return "ar"; }
+  }
+  /** Localized lookup that never leaks a raw key. @param {string} k @param {Object=} p @returns {string} */
+  function T(k, p) {
+    let s = "";
+    try { s = L10N ? L10N.t(k, p) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? "" : s;
+  }
+  /** Bilingual picker with an AR fallback. @param {*} v @returns {string} */
+  function bi(v) {
+    if (v == null) return "";
+    if (typeof v !== "object") return String(v);
+    const cur = locale();
+    const s = (v[cur] != null) ? v[cur] : (v.ar != null ? v.ar : v.en);
+    return s == null ? "" : String(s);
+  }
+  function store() {
+    try { return (window.PLATFORM_STORE && typeof window.PLATFORM_STORE.get === "function") ? window.PLATFORM_STORE : null; }
+    catch (e) { return null; }
+  }
+  function sget(key, fallback) {
+    const s = store();
+    if (!s) return fallback;
+    try { return s.get(key, fallback); } catch (e) { return fallback; }
+  }
+  function sset(key, value) {
+    const s = store();
+    if (!s) return;
+    try { s.set(key, value); } catch (e) { /* best effort */ }
+  }
+  /** @param {string} tag @param {string=} className @param {string=} text @returns {Object} */
+  function el(tag, className, text) {
+    const n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text != null) n.textContent = String(text);
+    return n;
+  }
+  /** Remove every child of a node. @param {Object|null} node */
+  function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+
+  /* ---------- plan data (single source of truth, nothing duplicated) ---------- */
+  /** @returns {Array<{code:string,name:string,estimatedHours:number}>} */
+  function subjects() {
+    const out = [];
+    try {
+      const cs = (window.PLATFORM_CURRENT_SEMESTER) || {};
+      const list = Array.isArray(cs.subjects) ? cs.subjects : [];
+      list.forEach(function (s) {
+        if (!s) return;
+        const code = String(s.code || s.id || "");
+        if (!code) return;
+        const hours = Number(s.estimatedHours);
+        out.push({ code: code, name: bi(s.name), estimatedHours: (hours > 0 ? hours : 0) });
+      });
+    } catch (e) { return []; }
+    return out;
+  }
+  /* ---------- pure logic ---------- */
+  /** @param {number} v @param {number} lo @param {number} hi @param {number} dflt @returns {number} */
+  function clampInt(v, lo, hi, dflt) {
+    const n = parseInt(v, 10);
+    if (!isFinite(n)) return dflt;
+    return Math.max(lo, Math.min(hi, n));
+  }
+  /** Seconds left until `endAt` (never negative) — pure, so tests can drive it. @param {number} endAt @param {number} now @returns {number} */
+  function computeRemaining(endAt, now) {
+    const left = Math.round((Number(endAt) - Number(now)) / 1000);
+    return (isFinite(left) && left > 0) ? left : 0;
+  }
+  /** @param {number} sec @returns {string} mm:ss (or h:mm:ss past an hour) */
+  function mmss(sec) {
+    const s = Math.max(0, Math.round(Number(sec) || 0));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const r = s % 60;
+    const p = function (n) { return String(n).padStart(2, "0"); };
+    return h > 0 ? (h + ":" + p(m) + ":" + p(r)) : (p(m) + ":" + p(r));
+  }
+  /** Local day key YYYY-MM-DD. @param {Date=} d @returns {string} */
+  function dayKey(d) {
+    const x = (d instanceof Date) ? d : new Date();
+    return String(x.getFullYear()) + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0");
+  }
+  /**
+   * Add minutes to one subject and to a day bucket (pure — returns a new log).
+   * Non-positive amounts are refused, so nothing is invented.
+   * @param {Object} log Stored log object.
+   * @param {string} code Subject code.
+   * @param {number} minutes Whole minutes to add.
+   * @param {Date=} at When the session ended.
+   * @returns {Object} A new log object.
+   */
+  function addMinutes(log, code, minutes, at) {
+    const m = Math.round(Number(minutes));
+    const src = (log && typeof log === "object" && !Array.isArray(log)) ? log : {};
+    const out = {
+      v: 1,
+      prefs: (src.prefs && typeof src.prefs === "object") ? src.prefs : {},
+      totals: (src.totals && typeof src.totals === "object") ? Object.assign({}, src.totals) : {},
+      days: (src.days && typeof src.days === "object") ? Object.assign({}, src.days) : {},
+      last: (src.last && typeof src.last === "object") ? src.last : {}
+    };
+    if (!code || !isFinite(m) || m <= 0) return out;
+    out.totals[code] = Math.round(Number(out.totals[code]) || 0) + m;
+    const k = dayKey(at);
+    out.days[k] = Math.round(Number(out.days[k]) || 0) + m;
+    out.last = { code: code, at: (at instanceof Date ? at.getTime() : Date.now()) };
+    return out;
+  }
+  /** @param {*} v @returns {Object} a sanitized log (corrupt buckets are dropped) */
+  function sanitizeLog(raw) {
+    const out = { v: 1, prefs: {}, totals: {}, days: {}, last: {} };
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+    if (raw.prefs && typeof raw.prefs === "object") {
+      const f = clampInt(raw.prefs.focus, MIN_FOCUS, MAX_FOCUS, DEFAULT_FOCUS);
+      const b = clampInt(raw.prefs.break, MIN_BREAK, MAX_BREAK, DEFAULT_BREAK);
+      out.prefs = {
+        code: String(raw.prefs.code || ""),
+        focus: f,
+        break: b,
+        sound: raw.prefs.sound === true
+      };
+    }
+    ["totals", "days"].forEach(function (bucket) {
+      const src = raw[bucket];
+      if (!src || typeof src !== "object" || Array.isArray(src)) return;
+      Object.keys(src).forEach(function (k) {
+        const n = Math.round(Number(src[k]));
+        if (isFinite(n) && n > 0) out[bucket][k] = n;
+      });
+    });
+    if (raw.last && typeof raw.last === "object" && raw.last.code) {
+      out.last = { code: String(raw.last.code), at: Number(raw.last.at) || 0 };
+    }
+    return out;
+  }
+  function loadLog() {
+    const st = sanitizeLog(sget(STORE_KEY, null));
+    if (!st.prefs.focus) st.prefs = { code: "", focus: DEFAULT_FOCUS, break: DEFAULT_BREAK, sound: false };
+    return st;
+  }
+  function saveLog() { sset(STORE_KEY, session.log); }
+  function logMinutes(code) { return Math.round(Number(session.log.totals[code]) || 0); }
+  function todayMinutes() { return Math.round(Number(session.log.days[dayKey()]) || 0); }
+  function totalMinutes() {
+    let sum = 0;
+    Object.keys(session.log.totals).forEach(function (k) { sum += Math.round(Number(session.log.totals[k]) || 0); });
+    return sum;
+  }
+  /* ---------- session state + engine ---------- */
+  const subs = subjects();
+  const refs = {};
+  const session = {
+    log: loadLog(),
+    status: "idle",      /* idle · running · paused · done */
+    mode: "focus",       /* focus · break */
+    endAt: 0,
+    remaining: 0,
+    autoPaused: false,
+    message: "",
+    timerId: 0
+  };
+
+  /** Minutes the current mode is set to. @returns {number} */
+  function modeMinutes() {
+    return session.mode === "break" ? session.log.prefs.break : session.log.prefs.focus;
+  }
+  /* Before the first start the clock already shows the configured focus length,
+     so the learner sees what pressing «ابدأ» will run. */
+  session.remaining = session.log.prefs.focus * 60;
+  /** @param {string} code @returns {string} */
+  function subjectName(code) {
+    for (let i = 0; i < subs.length; i++) { if (subs[i].code === code) return subs[i].name; }
+    return code;
+  }
+  /** Stop the ticking interval (always safe to call). @returns {void} */
+  function clearTick() {
+    if (session.timerId) {
+      try { clearInterval(session.timerId); } catch (e) { /* noop */ }
+      session.timerId = 0;
+    }
+  }
+  /** Tick once per second while running (nothing runs in the background). @returns {void} */
+  function tick() {
+    if (session.status !== "running") return;
+    session.remaining = computeRemaining(session.endAt, Date.now());
+    if (session.remaining <= 0) { complete(); return; }
+    paintTime();
+  }
+  function schedule() {
+    clearTick();
+    if (session.status !== "running") return;
+    try { session.timerId = setInterval(tick, TICK_MS); } catch (e) { session.timerId = 0; }
+  }
+  /** Opt-in chime through the shared Web Audio synth (silent by default). @returns {void} */
+  function playChime() {
+    if (session.log.prefs.sound !== true) return;
+    try { if (typeof Sfx !== "undefined" && Sfx && typeof Sfx.play === "function") Sfx.play("good"); }
+    catch (e) { /* audio is optional */ }
+  }
+  /** Start (or resume) the current mode. @returns {void} */
+  function start() {
+    if (session.status === "running") return;
+    if (session.remaining <= 0) session.remaining = modeMinutes() * 60;
+    session.endAt = Date.now() + session.remaining * 1000;
+    session.status = "running";
+    session.autoPaused = false;
+    session.message = "";
+    schedule();
+    paint();
+  }
+  /** Pause without losing the remaining time. @param {boolean=} auto @returns {void} */
+  function pause(auto) {
+    if (session.status !== "running") return;
+    session.remaining = computeRemaining(session.endAt, Date.now());
+    clearTick();
+    session.status = "paused";
+    session.autoPaused = !!auto;
+    paint();
+  }
+  /** Session finished: a focus session is logged, a break simply returns to focus. @returns {void} */
+  function complete() {
+    clearTick();
+    session.remaining = 0;
+    if (session.mode === "focus") {
+      const code = session.log.prefs.code;
+      const mins = session.log.prefs.focus;
+      if (code) {
+        session.log = addMinutes(session.log, code, mins, new Date());
+        saveLog();
+        session.message = T("timer.sessionSaved", { m: mins, name: subjectName(code) });
+      } else {
+        session.message = T("timer.noSubject");
+      }
+      session.status = "done";
+      session.mode = "break";                        /* the break is armed, never auto-started */
+      session.remaining = session.log.prefs.break * 60;
+      playChime();
+    } else {
+      session.mode = "focus";
+      session.status = "idle";
+      session.remaining = session.log.prefs.focus * 60;
+      session.message = "";
+    }
+    paint();
+    paintLog();
+  }
+  /** Reset the current session (the logged minutes stay untouched). @returns {void} */
+  function reset() {
+    clearTick();
+    session.status = "idle";
+    session.mode = "focus";
+    session.autoPaused = false;
+    session.message = "";
+    session.remaining = session.log.prefs.focus * 60;
+    paint();
+  }
+  /* ---------- rendering ---------- */
+  /** @returns {string} the localized state label. */
+  function stateLabel() {
+    if (session.status === "running") return T(session.mode === "break" ? "timer.modeBreak" : "timer.modeFocus");
+    if (session.status === "paused") return T("timer.statePaused");
+    if (session.status === "done") return T("timer.stateDone");
+    return T("timer.stateIdle");
+  }
+  function paintTime() { if (refs.time) refs.time.textContent = mmss(session.remaining); }
+
+  /** Repaint the controls + state line (called by the engine, never the reverse). @returns {void} */
+  function paint() {
+    paintTime();
+    if (refs.state) refs.state.textContent = stateLabel();
+    if (refs.msg) refs.msg.textContent = session.message || "";
+    if (refs.autoNote) refs.autoNote.hidden = !(session.status === "paused" && session.autoPaused);
+    if (refs.start) {
+      refs.start.textContent = (session.status === "paused") ? T("timer.resume") : T("timer.start");
+      refs.start.disabled = (session.status === "running");
+    }
+    if (refs.pause) refs.pause.disabled = (session.status !== "running");
+  }
+
+  /** Repaint the logged-minutes block (totals, today, per-subject vs the plan). @returns {void} */
+  function paintLog() {
+    if (refs.totalAll) refs.totalAll.textContent = T("timer.totalAll", { m: totalMinutes() });
+    if (refs.today) refs.today.textContent = T("timer.today", { m: todayMinutes() });
+    if (!refs.list) return;
+    clear(refs.list);
+    if (!subs.length) return;
+    subs.forEach(function (s) {
+      const done = logMinutes(s.code);
+      const li = el("li", "timer-log-row");
+      const nameRow = el("div", "timer-log-name");
+      nameRow.appendChild(el("span", "gpa-name", s.name));
+      const planned = s.estimatedHours > 0 ? (done / 60).toFixed(1) + " / " + s.estimatedHours : String(done / 60);
+      nameRow.appendChild(el("span", "timer-log-min", T("timer.vsPlanned", { done: (done / 60).toFixed(1), planned: s.estimatedHours })));
+      li.appendChild(nameRow);
+      const bar = el("div", "timer-bar");
+      const fill = el("span", "timer-bar-fill");
+      const pct = s.estimatedHours > 0 ? Math.min(100, (done / 60 / s.estimatedHours) * 100) : 0;
+      fill.style.width = pct.toFixed(1) + "%";
+      bar.appendChild(fill);
+      li.appendChild(bar);
+      li.setAttribute("data-timer-log", s.code);
+      li.setAttribute("title", planned);
+      refs.list.appendChild(li);
+    });
+  }
+  /** Build the whole card. @returns {void} */
+  function render() {
+    clear(mount);
+    for (const k in refs) { if (Object.prototype.hasOwnProperty.call(refs, k)) delete refs[k]; }
+    const shell = el("div", "student-shell");
+
+    const head = el("div", "student-head");
+    head.appendChild(el("h3", "student-h", T("timer.title")));
+    head.appendChild(el("p", "student-sub", T("timer.sub")));
+    shell.appendChild(head);
+
+    if (!subs.length) {
+      shell.appendChild(el("p", "student-empty", T("timer.noSubject")));
+      mount.appendChild(shell);
+      return;
+    }
+
+    /* --- settings: subject + durations (persisted with the log) --- */
+    const form = el("div", "student-field timer-form");
+    const sLbl = el("label", "student-lbl", T("timer.subjectLabel"));
+    const sSel = el("select", "student-input");
+    sSel.id = "timerSubject";
+    sSel.setAttribute("data-timer-subject", "1");
+    sLbl.setAttribute("for", "timerSubject");
+    let selected = false;
+    subs.forEach(function (s) {
+      const opt = el("option", null, s.name);
+      opt.value = s.code;
+      if (s.code === session.log.prefs.code) { opt.selected = true; selected = true; }
+      sSel.appendChild(opt);
+    });
+    if (!selected && subs.length) {
+      sSel.value = subs[0].code;
+      session.log.prefs.code = subs[0].code;
+    }
+    const fLbl = el("label", "student-lbl", T("timer.focusLabel"));
+    const fIn = el("input", "student-input");
+    fIn.type = "number"; fIn.id = "timerFocus";
+    fIn.min = String(MIN_FOCUS); fIn.max = String(MAX_FOCUS); fIn.step = "5";
+    fIn.setAttribute("data-timer-focus", "1");
+    fIn.value = String(session.log.prefs.focus);
+    fLbl.setAttribute("for", "timerFocus");
+    const bLbl = el("label", "student-lbl", T("timer.breakLabel"));
+    const bIn = el("input", "student-input");
+    bIn.type = "number"; bIn.id = "timerBreak";
+    bIn.min = String(MIN_BREAK); bIn.max = String(MAX_BREAK); bIn.step = "1";
+    bIn.setAttribute("data-timer-break", "1");
+    bIn.value = String(session.log.prefs.break);
+    bLbl.setAttribute("for", "timerBreak");
+    form.appendChild(sLbl);
+    form.appendChild(sSel);
+    form.appendChild(fLbl);
+    form.appendChild(fIn);
+    form.appendChild(bLbl);
+    form.appendChild(bIn);
+    shell.appendChild(form);
+
+    /* --- clock + state (one polite live region, updated on state changes) --- */
+    const clock = el("div", "timer-clock");
+    refs.time = el("p", "timer-time", mmss(session.remaining));
+    refs.state = el("p", "timer-state", stateLabel());
+    refs.state.setAttribute("role", "status");
+    clock.appendChild(refs.time);
+    clock.appendChild(refs.state);
+    shell.appendChild(clock);
+
+    /* --- controls --- */
+    const actions = el("div", "student-actions");
+    refs.start = el("button", "student-btn btn btn-primary btn-sm", T("timer.start"));
+    refs.start.type = "button";
+    refs.start.setAttribute("data-timer-start", "1");
+    refs.pause = el("button", "student-btn btn btn-sm btn-ghost", T("timer.pause"));
+    refs.pause.type = "button";
+    refs.pause.setAttribute("data-timer-pause", "1");
+    const rst = el("button", "student-btn btn btn-sm btn-ghost", T("timer.reset"));
+    rst.type = "button";
+    rst.setAttribute("data-timer-reset", "1");
+    actions.appendChild(refs.start);
+    actions.appendChild(refs.pause);
+    actions.appendChild(rst);
+    shell.appendChild(actions);
+
+    /* --- honest notes: auto-pause + optional sound --- */
+    refs.autoNote = el("p", "student-status is-warn", T("timer.autoPaused"));
+    refs.autoNote.hidden = true;
+    shell.appendChild(refs.autoNote);
+    refs.msg = el("p", "student-status");
+    shell.appendChild(refs.msg);
+
+    const soundWrap = el("label", "timer-sound");
+    const sound = el("input", null);
+    sound.type = "checkbox";
+    sound.setAttribute("data-timer-sound", "1");
+    if (session.log.prefs.sound === true) sound.checked = true;
+    soundWrap.appendChild(sound);
+    soundWrap.appendChild(el("span", null, T("timer.sound")));
+    shell.appendChild(soundWrap);
+
+    /* --- logged minutes --- */
+    const logBox = el("div", "timer-log");
+    const logHead = el("div", "timer-log-head");
+    refs.totalAll = el("span", "timer-log-total", T("timer.totalAll", { m: totalMinutes() }));
+    refs.today = el("span", "timer-log-today", T("timer.today", { m: todayMinutes() }));
+    logHead.appendChild(refs.totalAll);
+    logHead.appendChild(refs.today);
+    logBox.appendChild(logHead);
+    refs.list = el("ul", "timer-log-list");
+    logBox.appendChild(refs.list);
+    shell.appendChild(logBox);
+
+    shell.appendChild(el("p", "student-note", T("timer.note")));
+    shell.appendChild(el("p", "student-note student-note-soft", T("student.localNote")));
+
+    mount.appendChild(shell);
+    paintLog();
+    paint();
+  }
+  /* ---------- events (one delegated listener per type, bound once) ---------- */
+  if (!mount.__timerBound) {
+    mount.__timerBound = true;
+    mount.addEventListener("input", function (e) {
+      const t = e.target;
+      if (!t || !t.getAttribute) return;
+      if (t.getAttribute("data-timer-subject") !== null) {
+        session.log.prefs.code = String(t.value);
+        saveLog();
+        return;
+      }
+      if (t.getAttribute("data-timer-focus") !== null) {
+        session.log.prefs.focus = clampInt(t.value, MIN_FOCUS, MAX_FOCUS, DEFAULT_FOCUS);
+        saveLog();
+        if (session.status === "idle") { session.remaining = session.log.prefs.focus * 60; paint(); }
+        return;
+      }
+      if (t.getAttribute("data-timer-break") !== null) {
+        session.log.prefs.break = clampInt(t.value, MIN_BREAK, MAX_BREAK, DEFAULT_BREAK);
+        saveLog();
+      }
+    });
+    mount.addEventListener("change", function (e) {
+      const t = e.target;
+      if (!t || !t.getAttribute) return;
+      if (t.getAttribute("data-timer-focus") !== null) {
+        session.log.prefs.focus = clampInt(t.value, MIN_FOCUS, MAX_FOCUS, DEFAULT_FOCUS);
+        t.value = String(session.log.prefs.focus);
+        saveLog();
+        if (session.status !== "running") { session.remaining = session.log.prefs.focus * 60; paint(); }
+        return;
+      }
+      if (t.getAttribute("data-timer-break") !== null) {
+        session.log.prefs.break = clampInt(t.value, MIN_BREAK, MAX_BREAK, DEFAULT_BREAK);
+        t.value = String(session.log.prefs.break);
+        saveLog();
+        return;
+      }
+      if (t.getAttribute("data-timer-sound") !== null) {
+        session.log.prefs.sound = t.checked === true;
+        saveLog();
+      }
+    });
+    mount.addEventListener("click", function (e) {
+      const t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest("[data-timer-start]")) { start(); return; }
+      if (t.closest("[data-timer-pause]")) { pause(false); return; }
+      if (t.closest("[data-timer-reset]")) { reset(); }
+    });
+  }
+
+  /* Auto-pause is the honest part: leaving the tab or the section never counts
+     as study time. No notifications are raised for it (platform rule). */
+  if (typeof document.addEventListener === "function") {
+    document.addEventListener("visibilitychange", function () {
+      try { if (document.hidden === true) pause(true); } catch (e) { /* noop */ }
+    });
+    document.addEventListener("nova:view-changed", function (ev) {
+      const id = ev && ev.detail ? ev.detail.viewId : "";
+      if (id !== "student") pause(true);
+    });
+  }
+
+  render();
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); }
+  catch (e) { /* a missing hook must never break boot */ }
+
+  /* Public surface for tests and diagnostics — defensive by design. */
+  try {
+    window.PlatformStudyTimer = {
+      subjects: subjects,
+      computeRemaining: computeRemaining,
+      addMinutes: addMinutes,
+      sanitizeLog: sanitizeLog,
+      dayKey: dayKey,
+      mmss: mmss,
+      state: function () {
+        return { status: session.status, mode: session.mode, remaining: session.remaining, message: session.message, prefs: session.log.prefs, totals: session.log.totals, days: session.log.days };
+      },
+      start: start,
+      pause: pause,
+      reset: reset,
+      tick: tick,
+      render: render
+    };
+  } catch (e) { /* read-only window */ }
+})();
+/* @@TIMER_END@@ */
+
+
+
 

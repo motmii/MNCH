@@ -17,7 +17,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.22.24";
+const CACHE_VERSION = "v1.25.0";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
@@ -60,7 +60,13 @@ const PRECACHE_ASSETS = [
   "./images/flashcards/social-engineering.svg",
   "./images/flashcards/vulnerability.svg",
   "./images/flashcards/reconnaissance.svg",
-  "./images/flashcards/malware.svg"];
+  "./images/flashcards/malware.svg",
+  "./images/kali/vbox-download.svg",
+  "./images/kali/kali-download.svg",
+  "./images/kali/vbox-newvm.svg",
+  "./images/kali/vbox-storage-iso.svg",
+  "./images/kali/kali-installer.svg",
+  "./images/kali/kali-firstboot.svg"];
 
 
 /**
