@@ -52,16 +52,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.25.0" />
+  <link rel="stylesheet" href="style.css?v=1.26.0" />
   <link rel="manifest" href="manifest.json" />
   <script>
     /* MODULE 36 · pre-paint theme + palette restore — runs before first paint
        (no FOUC). Resolution mirrors script.js MODULE 36: explicit stored
-       choice wins; otherwise follow the OS (prefers-color-scheme); LIGHT
-       (Rose Blush) is the fallback. <html data-theme="dark"> is therefore an
-       explicit opt-in, while :root keeps the dark Rose Noir tokens (never a
-       light flash on a dark shell). Palette (rose/classic) restores the same
-       way via "motmi-portal:palette" (default: rose → no attribute). */
+       choice wins; otherwise follow the OS (prefers-color-scheme); DARK
+       (Slate Indigo) is the fallback. <html data-theme="dark"> is what a
+       dark-preferring or explicitly-dark visitor gets, and it is also the
+       no-JS-safe default because :root itself holds the dark tokens (never
+       a light flash on a dark shell). Palette (slate/ocean) restores the
+       same way via "motmi-portal:palette" (default: slate → no attribute). */
     (function () {
       var t = null;
       try { t = JSON.parse(localStorage.getItem("motmi-portal:theme") || "null"); } catch (e) {}
@@ -73,7 +74,7 @@
       if (p === "classic") document.documentElement.setAttribute("data-palette", "classic");
     })();
   </script>
-  <meta name="theme-color" content="#d6c1c3" />
+  <meta name="theme-color" content="#0E1116" />
   <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
   <noscript>
     <style>

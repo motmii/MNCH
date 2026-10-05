@@ -1,6 +1,6 @@
 {
   "name": "infosec-platform",
-  "version": "1.25.0",
+  "version": "1.26.0",
   "description": "منصة أمن المعلومات — الترم الحالي · A zero-dependency Arabic-first cybersecurity education platform (quizzes, tools, labs, learning paths) for Information Security diploma students.",
   "private": true,
   "scripts": {

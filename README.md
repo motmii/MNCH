@@ -189,29 +189,37 @@ Released under the [MIT License](LICENSE) — free to use, study, modify and sha
 
 ## 🎨 Design System
 
-Both themes are built on the **four layered rose tones** the brand is defined
-by — `#D79198` · `#DC9DA3` · `#DCAFB3` · `#D6C1C3`. They are **surface and fill
-colours only**: a pastel rose behind white text measures 1.7–2.5:1, so every
-text token is an ink tone of the same family (`#55292F` · `#3B2326` · `#2A1418`).
+Both palettes are built on a **single low-chroma slate-indigo family** — the
+canvas is a desaturated blue-slate and the accents are three closely-spaced
+indigo/violet tones. Low chroma is the whole point: nothing on the page is
+allowed to shout, and the cards lift only ~4% in lightness off the canvas so
+the page reads as one surface rather than a stack of boxes.
+
 Every text/background pair was measured against WCAG AA (text ≥ 4.5:1,
-non-text ≥ 3:1); semantic states (ok / bad / warn) deliberately stay outside
-the rose hue so meaning survives the repaint.
+non-text ≥ 3:1) in all four combinations (2 themes × 2 palettes); the worst
+pair in the set sits at **4.5:1**. Semantic states (ok / bad / warn) stay
+outside the accent hue so meaning survives the repaint, and the primary
+ribbon (`--grad`) stays light in *both* themes so it always carries dark
+ink at 6.9–9.4:1.
 
-| Token | Light · Rose Blush (default) | Dark · Rose Noir | Usage |
-|-------|------------------------------|------------------|-------|
-| `--bg` | `#D6C1C3` | `#120C0E` | Page background |
-| `--surface` / `--surface-2` | `#DCAFB3` / `#DC9DA3` | `#221618` / `#2A1C1F` | Cards & alt fills |
-| `--text` / `--muted` | `#2A1418` / `#5B3034` | `#F3E4E5` / `#C7A9AE` | Body & secondary text |
-| `--accent` | `#55292F` | `#D79198` | Primary accent |
-| `--accent-2` | `#3F2A45` | `#DCAFB3` | Secondary accent |
-| `--accent-3` | `#4A2B33` | `#C9A2C4` | Tertiary accent (mauve) |
-| `--grad` | `linear-gradient(100deg, #D79198, #DCAFB3 52%, #D6C1C3)` — identical in both themes, carries **ink** text (`--on-grad`, 6.9–10.1:1) | | Primary buttons / brand ribbon |
-| `--accent-rgb` | `85 41 47` | `215 145 152` | Feeds `rgb(var(--accent-rgb) / α)` washes so translucent tints follow the theme |
-| `--ok` / `--bad` / `--warn` | `#15803D` / `#B91C1C` / `#B45309` | `#4ADE80` / `#F87171` / `#FBBF24` | Semantic states — intentionally **not** rose |
-| `--font-display` | Tajawal / Space Grotesk | | Headings |
-| `--font-body` | Tajawal / Inter | | Body text |
+| Token | Light · Mist | Dark · Slate Indigo (default) | Usage |
+|-------|--------------|-------------------------------|-------|
+| `--bg` | `#F2F4F8` | `#0E1116` | Page background |
+| `--surface` / `--surface-2` | `#FFFFFF` / `#F5F7FA` | `#171D26` / `#1F2733` | Cards & alt fills |
+| `--text` / `--muted` | `#141922` / `#4A5568` | `#E6EAF2` / `#A8B2C1` | Body & secondary text |
+| `--accent` | `#3F4FA8` (7.3:1) | `#9FB0EE` (8.0:1) | Primary accent |
+| `--accent-2` | `#2E3A8C` (10.0:1) | `#C3C9F2` (10.5:1) | Secondary accent |
+| `--accent-3` | `#5B3F9E` (7.9:1) | `#B49FE0` (7.2:1) | Tertiary accent (soft violet) |
+| `--grad` | `linear-gradient(100deg, #A9B6F2, #97A5EE 52%, #8B9AE6)` — identical in both themes, carries **ink** text (`--on-grad`, 6.9–9.4:1) | | Primary buttons / brand ribbon |
+| `--accent-rgb` | `63 79 168` | `159 176 238` | Feeds `rgb(var(--accent-rgb) / α)` washes so translucent tints follow the theme |
+| `--ok` / `--bad` / `--warn` | `#157F4B` / `#B32424` / `#8A5A00` | `#5FD69B` / `#F08A8A` / `#E9C46A` | Semantic states — intentionally **not** indigo |
+| `--on-media` / `--on-media-2` | `#F1F4F9` / `#C2CCDB` (same in both) | | Ink over the hero photo, which always carries a dark scrim |
+| `--hue-sat` / `--hue-light` | `46%` / `40%` | `34%` / `72%` | The five per-subject accent hues are declared in `script.js`; only the hue travels in JS, so the same ramp re-pitches itself per theme |
+| `--shadow-rgb` | `20 30 48` | `4 7 12` | Every shadow and dark scrim composes its alpha from this one ink |
+| `--font-display` | Space Grotesk / Tajawal | | Headings |
+| `--font-body` | Inter / Tajawal | | Body text |
 
-Rose Blush + Rose Noir themes · Glassmorphism · RTL layout · Custom cursor · Particle canvas
+Slate Indigo + Mist themes · Glassmorphism · RTL layout · Custom cursor · Particle canvas
 
 **Navbar & brand (MODULE 60)**: the top bar is one fixed, frosted surface with
 three groups — logo lockup · links (`المزيد` dropdown + updates trigger) ·
@@ -222,9 +230,9 @@ tracking would break the letter joins. One **primary CTA** (`nav.cta` → `#path
 closes the bar: outlined over the hero photo, filled once the bar frosts, and
 hidden ≤1180px where the mobile menu already carries it.
 
-**Theme switcher**: a navbar toggle flips between the light **Rose Blush** theme (the default) and the dark **Rose Noir** theme. The choice is persisted, an explicit stored choice wins, and otherwise the OS `prefers-color-scheme` is followed (with a pre-paint script that resolves the theme before the first paint, so there is never a flash of the wrong theme).
+**Theme switcher**: a navbar toggle flips between the dark **Slate Indigo** theme (the default) and the light **Mist** theme. The choice is persisted and an explicit stored choice always wins; with no stored choice the page boots dark and then follows the OS `prefers-color-scheme` live (a pre-paint script resolves the theme before the first paint, so there is never a flash of the wrong theme). Because `:root` itself holds the dark tokens, a missing `data-theme` can never flash a light page on a dark shell.
 
-**Palette switcher (MODULE 36b)**: a second navbar toggle (🎨 لوحة الألوان) flips between the current **Rose** palette (default) and the legacy **Classic** palette (violet/cyan/pink). It is orthogonal to the theme switcher — the classic token set applies in both dark and light modes — persists under `motmi-portal:palette`, restores pre-paint, and even flips the primary-button text (`--on-grad`: ink on the pastel rose ribbon, white on the dark classic ribbon) so contrast stays AA in both palettes.
+**Palette switcher (MODULE 36b)**: a second navbar toggle (🎨 لوحة الألوان) flips between the default **Slate** palette and the **Ocean** palette (a calm deep-teal set). It is orthogonal to the theme switcher — the Ocean token set applies in both dark and light modes — persists under `motmi-portal:palette`, and restores pre-paint. Both palettes keep a light primary ribbon, so `--on-grad` stays dark ink and contrast holds at AA in either one.
 
 ## ♿ Accessibility
 

@@ -1,27 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
   <defs>
-    <linearGradient id="bgALG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#120c0e"/><stop offset="1" stop-color="#1a1214"/></linearGradient>
+    <linearGradient id="bgALG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
     <filter id="gA1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
   <rect width="800" height="600" fill="url(#bgALG)"/>
-  <rect x="140" y="60" width="520" height="480" rx="10" fill="#150e10" stroke="#3a2428" stroke-width="2"/>
-  <rect x="140" y="60" width="520" height="36" rx="10" fill="#2a1c1f"/>
-  <circle cx="165" cy="78" r="6" fill="#ef4444" opacity="0.8"/>
-  <circle cx="188" cy="78" r="6" fill="#f59e0b" opacity="0.8"/>
-  <circle cx="211" cy="78" r="6" fill="#22c55e" opacity="0.8"/>
-  <text x="240" y="83" font-family="monospace" font-size="12" fill="#c7a9ae">algos.py — sort(array)</text>
-  <path d="M180 140 h90 v50 h-90 v-50 z" fill="#1a1214" stroke="#d79198" stroke-width="2" filter="url(#gA1)"/>
-  <text x="198" y="165" font-family="monospace" font-size="11" fill="#dcafb3">n = len(a)</text>
-  <path d="M225 190 v40 h60 v-40 h-60" fill="none" stroke="#dcafb3" stroke-width="1.5"/>
-  <path d="M180 230 h90 v50 h-90 v-50 z" fill="#1a1214" stroke="#d79198" stroke-width="2"/>
-  <text x="198" y="255" font-family="monospace" font-size="11" fill="#dcafb3">for i→n:</text>
-  <path d="M225 280 v40 h90 v-40 h-90" fill="none" stroke="#dcafb3" stroke-width="1.5"/>
-  <path d="M245 320 l30 30 30-30" fill="none" stroke="#d79198" stroke-width="2"/>
-  <text x="295" y="333" font-family="monospace" font-size="11" fill="#dcafb3">a[i] &lt; a[i+1]?</text>
-  <path d="M245 350 v30 h120 v30 h-120" fill="none" stroke="#dcafb3" stroke-width="1.5"/>
-  <path d="M340 410 h60 v36 h-60 v-36 z" fill="#1a1214" stroke="#d79198" stroke-width="2" filter="url(#gA1)"/>
-  <text x="352" y="431" font-family="monospace" font-size="10" fill="#dcafb3">swap</text>
-  <g font-family="monospace" font-size="9" fill="#d79198" opacity="0.16">
+  <rect x="140" y="60" width="520" height="480" rx="10" fill="#10161D" stroke="#2B3644" stroke-width="2"/>
+  <rect x="140" y="60" width="520" height="36" rx="10" fill="#1F2733"/>
+  <circle cx="165" cy="78" r="6" fill="#F08A8A" opacity="0.8"/>
+  <circle cx="188" cy="78" r="6" fill="#E9C46A" opacity="0.8"/>
+  <circle cx="211" cy="78" r="6" fill="#5FD69B" opacity="0.8"/>
+  <text x="240" y="83" font-family="monospace" font-size="12" fill="#A8B2C1">algos.py — sort(array)</text>
+  <path d="M180 140 h90 v50 h-90 v-50 z" fill="#141A21" stroke="#9FB0EE" stroke-width="2" filter="url(#gA1)"/>
+  <text x="198" y="165" font-family="monospace" font-size="11" fill="#C3C9F2">n = len(a)</text>
+  <path d="M225 190 v40 h60 v-40 h-60" fill="none" stroke="#C3C9F2" stroke-width="1.5"/>
+  <path d="M180 230 h90 v50 h-90 v-50 z" fill="#141A21" stroke="#9FB0EE" stroke-width="2"/>
+  <text x="198" y="255" font-family="monospace" font-size="11" fill="#C3C9F2">for i→n:</text>
+  <path d="M225 280 v40 h90 v-40 h-90" fill="none" stroke="#C3C9F2" stroke-width="1.5"/>
+  <path d="M245 320 l30 30 30-30" fill="none" stroke="#9FB0EE" stroke-width="2"/>
+  <text x="295" y="333" font-family="monospace" font-size="11" fill="#C3C9F2">a[i] &lt; a[i+1]?</text>
+  <path d="M245 350 v30 h120 v30 h-120" fill="none" stroke="#C3C9F2" stroke-width="1.5"/>
+  <path d="M340 410 h60 v36 h-60 v-36 z" fill="#141A21" stroke="#9FB0EE" stroke-width="2" filter="url(#gA1)"/>
+  <text x="352" y="431" font-family="monospace" font-size="10" fill="#C3C9F2">swap</text>
+  <g font-family="monospace" font-size="9" fill="#9FB0EE" opacity="0.16">
     <text x="160" y="510">[3, 1, 4, 1, 5, 9, 2, 6] → [1, 1, 2, 3, 4, 5, 6, 9]</text>
     <text x="300" y="535">BUBBLE SORT · O(n²) · STABLE</text>
   </g>
