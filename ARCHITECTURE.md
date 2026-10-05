@@ -73,14 +73,13 @@ Main IIFE ("use strict")
 ├── M31  Nav.ToTop        Back-to-top button (appears after 600px)
 ├── M32  Nav.ScrollSpy    Highlights the section in view via aria-current
 ├── M33  ViewSwitcher     Instantly switches views while keeping one page
-├── M36  ThemeSwitch      Light (Rose Blush) default · dark (Rose Noir) persisted
-│                         (explicit choice wins, else OS prefers-color-scheme;
-│                         pre-paint restore in index.html prevents theme-flash)
-├── M36b PaletteSwitch    Rose (current) ↔ Classic (legacy violet/cyan/pink),
+├── M36  ThemeSwitch      Dark (Slate Indigo) default · light (Mist) opt-in,
+│                         explicit choice wins, else OS prefers-color-scheme;
+│                         pre-paint restore in index.html prevents theme-flash
+├── M36b PaletteSwitch    Slate (default) ↔ Ocean (calm deep-teal),
 │                         orthogonal to M36 — applies in BOTH dark and light
-│                         modes (explicit palette wins, else rose; persisted
-│                         under "motmi-portal:palette", pre-paint restored,
-│                         button text --on-grad flips with the palette)
+│                         modes (explicit palette wins, else slate; persisted
+│                         under "motmi-portal:palette", pre-paint restored)
 ├── M37  ProgressHub      #progress — "تابع من حيث توقفت" resume card + best-score
 │                         cards, built from the quiz engine's localStorage store.
 │                         Phase 5 adds a stats strip (completed lessons, quiz

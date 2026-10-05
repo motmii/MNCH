@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
   <defs>
-    <linearGradient id="bgK1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#120c0e"/><stop offset="1" stop-color="#1a1214"/></linearGradient>
+    <linearGradient id="bgK1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
   </defs>
   <rect width="800" height="500" fill="url(#bgK1)"/>
-  <rect x="150" y="50" width="500" height="400" rx="10" fill="#150e10" stroke="#3a2428" stroke-width="2"/>
-  <rect x="150" y="50" width="500" height="36" rx="10" fill="#2a1c1f"/>
-  <circle cx="175" cy="68" r="6" fill="#ef4444" opacity="0.8"/><circle cx="198" cy="68" r="6" fill="#f59e0b" opacity="0.8"/><circle cx="221" cy="68" r="6" fill="#22c55e" opacity="0.8"/>
-  <text x="250" y="73" font-family="monospace" font-size="12" fill="#c7a9ae">virtualbox.org — Downloads</text>
-  <rect x="220" y="150" width="360" height="52" rx="8" fill="#1a1214" stroke="#d79198" stroke-width="2"/>
-  <text x="250" y="182" font-family="monospace" font-size="13" fill="#f3d5d8">Windows hosts — amd64 ⬇</text>
-  <rect x="220" y="220" width="360" height="40" rx="8" fill="#241619" stroke="#5a343a" stroke-width="1.5"/>
-  <text x="250" y="246" font-family="monospace" font-size="12" fill="#c7a9ae">macOS / Linux hosts…</text>
-  <rect x="220" y="290" width="360" height="44" rx="8" fill="#2e7d46"/>
+  <rect x="150" y="50" width="500" height="400" rx="10" fill="#10161D" stroke="#2B3644" stroke-width="2"/>
+  <rect x="150" y="50" width="500" height="36" rx="10" fill="#1F2733"/>
+  <circle cx="175" cy="68" r="6" fill="#F08A8A" opacity="0.8"/><circle cx="198" cy="68" r="6" fill="#E9C46A" opacity="0.8"/><circle cx="221" cy="68" r="6" fill="#5FD69B" opacity="0.8"/>
+  <text x="250" y="73" font-family="monospace" font-size="12" fill="#A8B2C1">virtualbox.org — Downloads</text>
+  <rect x="220" y="150" width="360" height="52" rx="8" fill="#141A21" stroke="#9FB0EE" stroke-width="2"/>
+  <text x="250" y="182" font-family="monospace" font-size="13" fill="#C3C9F2">Windows hosts — amd64 ⬇</text>
+  <rect x="220" y="220" width="360" height="40" rx="8" fill="#161E29" stroke="#3A4757" stroke-width="1.5"/>
+  <text x="250" y="246" font-family="monospace" font-size="12" fill="#A8B2C1">macOS / Linux hosts…</text>
+  <rect x="220" y="290" width="360" height="44" rx="8" fill="#2F7D52"/>
   <text x="330" y="318" font-family="monospace" font-size="14" fill="#fff">Download ⬇</text>
-  <text x="220" y="390" font-family="monospace" font-size="11" fill="#d79198" opacity="0.7">VirtualBox-7.x-Win.exe · ~110 MB</text>
+  <text x="220" y="390" font-family="monospace" font-size="11" fill="#9FB0EE" opacity="0.7">VirtualBox-7.x-Win.exe · ~110 MB</text>
 </svg>

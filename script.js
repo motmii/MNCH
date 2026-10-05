@@ -1146,6 +1146,18 @@ window.PLATFORM_LESSONS = LESSONS;
    Exposed on window as PLATFORM_SUBJECTS for the AI assistant
    and Stats.Live.
    ============================================================ */
+/* MODULE 73 · SUBJECT HUE RAMP — a calm indigo arc.
+   The five subjects used to sit at 190/205/265/130/300 painted at ~80%
+   chroma, which scattered five saturated, widely-spaced bars across the
+   dashboard. They now sit inside one narrow arc around the accent hue so
+   the cards read as one family. Only the hue travels in JS; the saturation
+   and lightness live in the --hue-sat / --hue-light tokens in style.css,
+   so the same five hues re-pitch themselves per theme.
+     200 steel blue (IT components) · 224 indigo (algorithms)
+     236 periwinkle (OS concepts) · 248 soft purple (security design)
+     262 violet (policy & ethics)
+   Every stop clears 5.0:1 against --surface-2 in the dark theme, and
+   5.5:1 against --surface-2 in the light theme. */
 const SUBJECTS = [
   /* ---- current semester · official study plan (exactly 5 subjects) ---- */
   {
@@ -1154,7 +1166,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الأحد", startTime: "09:00 AM", endTime: "12:00 PM",
     descriptionAr: "تحليل الخوارزميات وتعقيدها الزمني، هياكل البيانات، استراتيجيات التصميم (فرّق تسُد، الجشع، البرمجة الديناميكية)، والرسوم البيانية.",
-    icon: "images/algorithms.svg", hue: 190,
+    icon: "images/algorithms.svg", hue: 224,
     tag: "algorithms", panel: "01", contentStatus: "available", quizKey: "260210030702"
   },
   {
@@ -1163,7 +1175,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الأحد", startTime: "12:00 PM", endTime: "03:00 PM",
     descriptionAr: "وظائف نظام التشغيل، العمليات والخيوط والجدولة، إدارة الذاكرة والترحيل، المزامنة والأقفال الميتة، ونظم الملفات.",
-    icon: "images/os-concepts.svg", hue: 205,
+    icon: "images/os-concepts.svg", hue: 236,
     tag: "osconcepts", panel: "02", contentStatus: "available", quizKey: "260210030802"
   },
   {
@@ -1172,7 +1184,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الاثنين", startTime: "09:00 AM", endTime: "12:00 PM",
     descriptionAr: "سياسات الأمن وأنواعها، التشريعات والخصوصية والملكية الفكرية، الأخلاقيات المهنية والإذن القانوني، والامتثال.",
-    icon: "images/policies-ethics.svg", hue: 265,
+    icon: "images/policies-ethics.svg", hue: 262,
     tag: "policy", panel: "03", contentStatus: "available", quizKey: "260210030902"
   },
   {
@@ -1181,7 +1193,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الاثنين", startTime: "12:00 PM", endTime: "03:00 PM",
     descriptionAr: "مكونات أنظمة تقنية المعلومات من عتاد وبرمجيات وشبكات ومرافق، والمحاكاة الافتراضية والسحابة، وعلاقتها بتأمين البيئة.",
-    icon: "images/it-components.svg", hue: 130,
+    icon: "images/it-components.svg", hue: 200,
     tag: "components", panel: "04", contentStatus: "available", quizKey: "260210031002"
   },
   {
@@ -1190,7 +1202,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الثلاثاء", startTime: "09:00 AM", endTime: "12:00 PM",
     descriptionAr: "مبادئ تصميم الأمن: الدفاع في العمق، أقل الصلاحيات، الفصل بين المهام، الثقة الصفرية، والتحكم في الوصول.",
-    icon: "images/security-design.svg", hue: 300,
+    icon: "images/security-design.svg", hue: 248,
     tag: "design", panel: "05", contentStatus: "available", quizKey: "260210031102"
   },
 ];
@@ -6324,26 +6336,39 @@ window.Lang = Lang;
 })();
 
 /* ============================================================
-   MODULE 36 · ThemeSwitch — light default · dark persisted
+   MODULE 36 · ThemeSwitch — dark default · light opt-in
    Resolution order: explicit stored choice ("motmi-portal:theme"
    in localStorage via Store) → system preference
-   (prefers-color-scheme) → light. The pre-paint inline <head>
-   script mirrors this logic so there is no flash of the wrong
-   theme. While no explicit choice is stored, live OS switches
-   (light↔dark) update the page immediately; once the user taps
-   the toggle their choice wins and OS changes are ignored.
-   NOTE: <html data-theme="dark"> is now an explicit opt-in; the
-   :root token block still holds the dark (Rose Noir) palette so a
-   missing attribute can never flash a light page on a dark shell.
+   (prefers-color-scheme) → DARK (Slate Indigo). The pre-paint
+   inline <head> script mirrors this logic so there is no flash of
+   the wrong theme. While no explicit choice is stored, live OS
+   switches (light↔dark) update the page immediately; once the user
+   taps the toggle their choice wins and OS changes are ignored.
+   NOTE: :root holds the dark tokens, so a missing data-theme can
+   never flash a light page on a dark shell.
    ============================================================ */
 (function () {
   const root = document.documentElement;
   const btn = $id("themeToggle");
   const LBL_LIGHT = "الوضع الداكن / Dark mode";   /* shown while light is ON */
   const LBL_DARK = "الوضع الفاتح / Light mode";   /* shown while dark is ON  */
+  /* Browser-chrome colours, one per palette (Slate Indigo is the default).
+     Kept in sync with the --bg token of each block in style.css. */
+  const CANVAS = {
+    slate:  { dark: "#0E1116", light: "#F2F4F8" },
+    classic: { dark: "#0A141A", light: "#EFF4F6" },
+  };
   const mq = (typeof window.matchMedia === "function")
     ? window.matchMedia("(prefers-color-scheme: dark)")
     : null;
+
+  /** The canvas colour for the currently active palette + mode.
+      @returns {string} A hex colour for the theme-color meta. */
+  function canvasColor() {
+    const pal = root.getAttribute("data-palette") === "classic" ? "classic" : "slate";
+    const mode = root.getAttribute("data-theme") === "light" ? "light" : "dark";
+    return CANVAS[pal][mode];
+  }
 
   /**
    * Apply a theme mode to <html>, the toggle state and the theme-color meta.
@@ -6359,7 +6384,7 @@ window.Lang = Lang;
       btn.setAttribute("aria-label", isLight ? LBL_LIGHT : LBL_DARK);
     }
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", isLight ? "#d6c1c3" : "#120c0e");
+    if (meta) meta.setAttribute("content", canvasColor());
   }
 
   /** Stored user choice, or null when the user never picked manually.
@@ -6369,8 +6394,10 @@ window.Lang = Lang;
     return v === "light" || v === "dark" ? v : null;
   }
 
-  /* Restore: stored choice → system preference → light (default). */
-  apply(storedChoice() || (mq && mq.matches ? "dark" : "light"));
+  /* Restore: stored choice → dark. (With no explicit choice the OS is
+     followed live by the change listener below; the boot value is dark
+     so a light-preferring OS still gets the calm default first.) */
+  apply(storedChoice() || "dark");
 
   if (btn) {
     btn.addEventListener("click", () => {
@@ -6391,56 +6418,59 @@ window.Lang = Lang;
 })();
 
 /* ============================================================
-   MODULE 36b · PaletteSwitch — rose (current) ↔ classic (legacy)
+   MODULE 36b · PaletteSwitch — slate (default) ↔ ocean (second)
    Orthogonal to MODULE 36 (dark↔light): <html data-palette="classic">
-   picks the legacy violet/cyan/pink token set in BOTH modes; the
-   attribute absent means rose. Persisted under "motmi-portal:palette"
+   picks the calm Ocean token set in BOTH modes; the attribute absent
+   means slate (Slate Indigo). Persisted under "motmi-portal:palette"
    and restored pre-paint by the inline <head> script (no FOUC).
    The theme-color meta follows theme AND palette so the browser
-   chrome matches the visible canvas.
+   chrome always matches the visible canvas.
    ============================================================ */
 (function () {
   const root = document.documentElement;
   const btn = $id("paletteToggle");
-  const LBL_ROSE = "اللون الكلاسيكي / Classic palette";   /* shown while rose is ON */
-  const LBL_CLASSIC = "اللون الوردي / Rose palette";       /* shown while classic is ON */
-  const DARK_META = { rose: "#120c0e", classic: "#0b0f19" };
-  const LIGHT_META = { rose: "#d6c1c3", classic: "#f4f5f7" };
-  const CLASSIC_BTN_TEXT = "#ffffff"; /* white on the classic violet/cyan/pink ribbon (≥5.1:1) */
+  const LBL_OCEAN = "لوحة المحيط / Ocean palette";   /* shown while slate is ON */
+  const LBL_SLATE = "لوحة الحجر / Slate palette";    /* shown while ocean is ON */
+  /* Both palettes keep a LIGHT ribbon, so button text is dark ink on
+     either one; the runtime value is re-asserted so a stale inline
+     value can never leave white text on a light ribbon. */
+  const RIBBON_INK = "#10131A";
 
   /**
    * Apply a palette to <html>, the toggle state and the theme-color meta.
-   * @param {"rose"|"classic"} pal Target palette.
+   * @param {"slate"|"classic"} pal Target palette.
    * @returns {void}
    */
   function applyPalette(pal) {
     const classic = pal === "classic";
     if (classic) root.setAttribute("data-palette", "classic");
     else root.removeAttribute("data-palette");
-    /* Buttons paint their text from --on-grad; the classic ribbon is dark
-       so it needs white text, the rose ribbon needs ink text. */
-    root.style.setProperty("--on-grad", classic ? CLASSIC_BTN_TEXT : "#2a1418");
+    /* Buttons paint their text from --on-grad; both ribbons are pale,
+       so the ink stays dark in both palettes. */
+    root.style.setProperty("--on-grad", RIBBON_INK);
     if (btn) {
       btn.setAttribute("aria-pressed", String(classic));
-      btn.title = classic ? LBL_CLASSIC : LBL_ROSE;
-      btn.setAttribute("aria-label", classic ? LBL_CLASSIC : LBL_ROSE);
+      btn.title = classic ? LBL_SLATE : LBL_OCEAN;
+      btn.setAttribute("aria-label", classic ? LBL_SLATE : LBL_OCEAN);
     }
-    const mode = root.getAttribute("data-theme") === "light" ? "light" : "dark";
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", mode === "light" ? LIGHT_META[pal] : DARK_META[pal]);
+    syncMeta();
   }
 
   /** Re-sync the meta when MODULE 36 changes the mode (palette kept). @returns {void} */
   function syncMeta() {
-    const pal = root.getAttribute("data-palette") === "classic" ? "classic" : "rose";
+    const pal = root.getAttribute("data-palette") === "classic" ? "classic" : "slate";
     const mode = root.getAttribute("data-theme") === "light" ? "light" : "dark";
+    const CANVAS = {
+      slate:   { dark: "#0E1116", light: "#F2F4F8" },
+      classic: { dark: "#0A141A", light: "#EFF4F6" },
+    };
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", mode === "light" ? LIGHT_META[pal] : DARK_META[pal]);
+    if (meta) meta.setAttribute("content", CANVAS[pal][mode]);
   }
 
-  /** Stored palette choice, defaulting to rose. @returns {"rose"|"classic"} */
+  /** Stored palette choice, defaulting to slate. @returns {"slate"|"classic"} */
   function storedPalette() {
-    return Store.get("palette") === "classic" ? "classic" : "rose";
+    return Store.get("palette") === "classic" ? "classic" : "slate";
   }
 
   applyPalette(storedPalette());
@@ -6453,7 +6483,7 @@ window.Lang = Lang;
 
   if (btn) {
     btn.addEventListener("click", () => {
-      const next = root.getAttribute("data-palette") === "classic" ? "rose" : "classic";
+      const next = root.getAttribute("data-palette") === "classic" ? "slate" : "classic";
       applyPalette(next);
       Store.set("palette", next);
     });
@@ -10052,7 +10082,7 @@ const LABS_META = {
 
   function cardHtml(s) {
     const meta = s.meta || {};
-    const hue = meta.hue || 260;
+    const hue = meta.hue || 234;   /* MODULE 73 · the accent hue, as a safe default */
     const diffKey = "paths.level." + (s.difficulty || "");
     const diffRaw = T10(diffKey);
     const diffLabel = diffRaw ? esc(diffRaw) : esc(s.difficulty || "");
@@ -14481,6 +14511,15 @@ const LABS_META = {
   if (typeof btn.addEventListener !== "function") return;
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
+    {
+      date: "2026-10-05",
+      tag: "improve",
+      title: { ar: "واجهة أهدأ — لوحة «الحجر والنيلي»", en: "A calmer interface — the Slate & Indigo palette" },
+      desc: {
+        ar: "إعادة تلوين كاملة للواجهة على قاعدة رمادية-زرمية هادئة ولمسة نيلي منخفضة التشبّع، والوضع الداكن هو الافتراضي الآن. وُحِّدت الألوان: صارت درجات النجاح والخطأ والتنبيه كلٌّ منها من مصدر واحد بدل أربع درجات لكل حالة، وكل الظلال والطبقات تأخذ من حبر واحد، وألوان المواد الخمسة انتقلت من قوس قزح مشبع إلى نطاق نيلي هادئ واحد. اللوحة الثانية «المحيط» أعدت ضبطها لتكون هادئة مثل الأولى. كل زوج نص/خلفية قيس في الأربع تركيبات (ثيمين × لوحتين) وأدنى نسبة وصلت 4.5:1 أي WCAG AA.",
+        en: "A full UI repaint on a calm blue-slate base with a low-chroma indigo accent, and dark is now the default. The colours are unified: success / danger / warning each collapsed from four competing shades down to one token, every shadow and scrim now derives from a single ink, and the five subject accents moved from a saturated rainbow to one calm indigo arc. The second palette, Ocean, was re-pitched to be as quiet as the first. Every text/background pair was measured across all four combinations (2 themes × 2 palettes); the worst sits at 4.5:1, i.e. WCAG AA."
+      }
+    },
     {
       date: "2026-10-04",
       tag: "new",

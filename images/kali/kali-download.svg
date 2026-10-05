@@ -1,18 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
   <defs>
-    <linearGradient id="bgK2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e1420"/><stop offset="1" stop-color="#131a26"/></linearGradient>
+    <linearGradient id="bgK2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
   </defs>
   <rect width="800" height="500" fill="url(#bgK2)"/>
-  <rect x="150" y="50" width="500" height="400" rx="10" fill="#0f1622" stroke="#2e4257" stroke-width="2"/>
-  <rect x="150" y="50" width="500" height="36" rx="10" fill="#1b2940"/>
-  <circle cx="175" cy="68" r="6" fill="#ef4444" opacity="0.8"/><circle cx="198" cy="68" r="6" fill="#f59e0b" opacity="0.8"/><circle cx="221" cy="68" r="6" fill="#22c55e" opacity="0.8"/>
-  <text x="250" y="73" font-family="monospace" font-size="12" fill="#9fb6cf">kali.org — Get Kali</text>
-  <text x="190" y="130" font-family="monospace" font-size="15" fill="#7dd3fc">☁ Installer Images</text>
-  <rect x="190" y="155" width="300" height="46" rx="8" fill="#16233a" stroke="#7dd3fc" stroke-width="2"/>
-  <text x="215" y="184" font-family="monospace" font-size="12" fill="#e2eefb">64-bit Installer ⬇ ~3.9 GB</text>
-  <rect x="190" y="215" width="300" height="46" rx="8" fill="#101a2c" stroke="#3b5878" stroke-width="1.5"/>
-  <text x="215" y="244" font-family="monospace" font-size="12" fill="#9fb6cf">Virtual Machines ⬇ .7z</text>
-  <rect x="190" y="285" width="420" height="60" rx="8" fill="#101a2c" stroke="#3b5878" stroke-width="1.5"/>
-  <text x="210" y="309" font-family="monospace" font-size="11" fill="#9fb6cf">SHA256: 9f4c…a21b ✓ match</text>
-  <text x="210" y="330" font-family="monospace" font-size="11" fill="#5eead4">checksums verified</text>
+  <rect x="150" y="50" width="500" height="400" rx="10" fill="#0E1116" stroke="#2B3644" stroke-width="2"/>
+  <rect x="150" y="50" width="500" height="36" rx="10" fill="#1F2733"/>
+  <circle cx="175" cy="68" r="6" fill="#F08A8A" opacity="0.8"/><circle cx="198" cy="68" r="6" fill="#E9C46A" opacity="0.8"/><circle cx="221" cy="68" r="6" fill="#5FD69B" opacity="0.8"/>
+  <text x="250" y="73" font-family="monospace" font-size="12" fill="#A8B2C1">kali.org — Get Kali</text>
+  <text x="190" y="130" font-family="monospace" font-size="15" fill="#A9C6F5">☁ Installer Images</text>
+  <rect x="190" y="155" width="300" height="46" rx="8" fill="#1F2733" stroke="#A9C6F5" stroke-width="2"/>
+  <text x="215" y="184" font-family="monospace" font-size="12" fill="#E6EAF2">64-bit Installer ⬇ ~3.9 GB</text>
+  <rect x="190" y="215" width="300" height="46" rx="8" fill="#10161D" stroke="#3A4757" stroke-width="1.5"/>
+  <text x="215" y="244" font-family="monospace" font-size="12" fill="#A8B2C1">Virtual Machines ⬇ .7z</text>
+  <rect x="190" y="285" width="420" height="60" rx="8" fill="#10161D" stroke="#3A4757" stroke-width="1.5"/>
+  <text x="210" y="309" font-family="monospace" font-size="11" fill="#A8B2C1">SHA256: 9f4c…a21b ✓ match</text>
+  <text x="210" y="330" font-family="monospace" font-size="11" fill="#8FE3B8">checksums verified</text>
 </svg>

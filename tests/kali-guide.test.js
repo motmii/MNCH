@@ -98,9 +98,13 @@ check("external links hardened", (function () {
 console.log("— release —");
 check("all 6 figures exist on disk", FIGS.every((f) => fs.existsSync(path.join(root, f))));
 check("all 6 figures precached in sw.js", FIGS.every((f) => sw.includes("./" + f)));
-check("cache version is v1.25.0", /CACHE_VERSION = "v1\.25\.0"/.test(sw));
-check("package version matches", pkg.version === "1.25.0");
-check("index.html css?v matches", html.includes("style.css?v=1.25.0"));
+/* Release consistency: derive the expected version from package.json rather
+   than pinning a literal, so bumping the release never has to edit this file
+   (every other suite in tests/ uses the same version-agnostic pattern). */
+const REL = pkg.version;
+check("cache version matches the release", sw.includes('CACHE_VERSION = "v' + REL + '"'));
+check("package version is a sane semver", /^\d+\.\d+\.\d+$/.test(REL));
+check("index.html css?v matches", html.includes("style.css?v=" + REL));
 check("MODULE 72 layer closed", css.includes("END MODULE 72"));
 check("phone rule stacks steps", /@media \(max-width: 900px\)[\s\S]*\.kali-step \{ grid-template-columns: 1fr/.test(css));
 

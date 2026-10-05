@@ -1,28 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
   <defs>
-    <linearGradient id="bgDES" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#120c0e"/><stop offset="1" stop-color="#1a1214"/></linearGradient>
+    <linearGradient id="bgDES" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
     <filter id="gD1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
   <rect width="800" height="600" fill="url(#bgDES)"/>
-  <rect x="120" y="70" width="560" height="470" rx="10" fill="#150e10" stroke="#2a1c1f" stroke-width="2"/>
-  <rect x="120" y="70" width="560" height="36" rx="10" fill="#2a1c1f"/>
-  <circle cx="145" cy="88" r="6" fill="#ef4444" opacity="0.8"/>
-  <circle cx="168" cy="88" r="6" fill="#f59e0b" opacity="0.8"/>
-  <circle cx="191" cy="88" r="6" fill="#22c55e" opacity="0.8"/>
-  <text x="220" y="93" font-family="monospace" font-size="12" fill="#c9a2c4">design-principles — defense in depth</text>
-  <path d="M400 390 m-95-30 a95 95 0 1 1 190 0" fill="none" stroke="#dcafb3" stroke-width="2.5" filter="url(#gD1)"/>
-  <path d="M400 390 m-70-22 a70 70 0 1 1 140 0" fill="none" stroke="#c9a2c4" stroke-width="2.5"/>
-  <path d="M400 390 m-45-14 a45 45 0 1 1 90 0" fill="none" stroke="#d79198" stroke-width="2.5"/>
-  <path d="M400 390 m-22-7 a22 22 0 1 1 44 0" fill="none" stroke="#dcafb3" stroke-width="2.5"/>
-  <circle cx="400" cy="390" r="5" fill="#dcafb3"/>
-  <text x="268" y="336" font-family="monospace" font-size="10" fill="#dcafb3" text-anchor="middle">البيانات</text>
-  <text x="268" y="352" font-family="monospace" font-size="10" fill="#c9a2c4" text-anchor="middle">التطبيق</text>
-  <text x="268" y="368" font-family="monospace" font-size="10" fill="#d79198" text-anchor="middle">الشبكة</text>
-  <text x="268" y="384" font-family="monospace" font-size="10" fill="#dcafb3" text-anchor="middle">المحيط</text>
-  <text x="520" y="352" font-family="monospace" font-size="10" fill="#c9a2c4" text-anchor="middle">أقل صلاحية</text>
-  <text x="520" y="368" font-family="monospace" font-size="10" fill="#c9a2c4" text-anchor="middle">تقسيم وفصل</text>
-  <text x="520" y="384" font-family="monospace" font-size="10" fill="#c9a2c4" text-anchor="middle">مراجعة دورية</text>
-  <g font-family="monospace" font-size="9" fill="#dcafb3" opacity="0.16">
+  <rect x="120" y="70" width="560" height="470" rx="10" fill="#10161D" stroke="#1F2733" stroke-width="2"/>
+  <rect x="120" y="70" width="560" height="36" rx="10" fill="#1F2733"/>
+  <circle cx="145" cy="88" r="6" fill="#F08A8A" opacity="0.8"/>
+  <circle cx="168" cy="88" r="6" fill="#E9C46A" opacity="0.8"/>
+  <circle cx="191" cy="88" r="6" fill="#5FD69B" opacity="0.8"/>
+  <text x="220" y="93" font-family="monospace" font-size="12" fill="#B49FE0">design-principles — defense in depth</text>
+  <path d="M400 390 m-95-30 a95 95 0 1 1 190 0" fill="none" stroke="#C3C9F2" stroke-width="2.5" filter="url(#gD1)"/>
+  <path d="M400 390 m-70-22 a70 70 0 1 1 140 0" fill="none" stroke="#B49FE0" stroke-width="2.5"/>
+  <path d="M400 390 m-45-14 a45 45 0 1 1 90 0" fill="none" stroke="#9FB0EE" stroke-width="2.5"/>
+  <path d="M400 390 m-22-7 a22 22 0 1 1 44 0" fill="none" stroke="#C3C9F2" stroke-width="2.5"/>
+  <circle cx="400" cy="390" r="5" fill="#C3C9F2"/>
+  <text x="268" y="336" font-family="monospace" font-size="10" fill="#C3C9F2" text-anchor="middle">البيانات</text>
+  <text x="268" y="352" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">التطبيق</text>
+  <text x="268" y="368" font-family="monospace" font-size="10" fill="#9FB0EE" text-anchor="middle">الشبكة</text>
+  <text x="268" y="384" font-family="monospace" font-size="10" fill="#C3C9F2" text-anchor="middle">المحيط</text>
+  <text x="520" y="352" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">أقل صلاحية</text>
+  <text x="520" y="368" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">تقسيم وفصل</text>
+  <text x="520" y="384" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">مراجعة دورية</text>
+  <g font-family="monospace" font-size="9" fill="#C3C9F2" opacity="0.16">
     <text x="150" y="480">SECURITY BY DESIGN — الخصوصية والأمان من التصميم</text>
     <text x="330" y="505">PRINCIPLE: LEAST PRIVILEGE · ZERO TRUST · DEFENSE IN DEPTH</text>
   </g>

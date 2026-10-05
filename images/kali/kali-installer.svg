@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
-  <rect width="800" height="500" fill="#0b1020"/>
-  <rect x="100" y="60" width="600" height="380" rx="8" fill="#101828" stroke="#3b5878" stroke-width="2"/>
-  <rect x="100" y="60" width="600" height="34" rx="8" fill="#1b2940"/>
-  <text x="130" y="83" font-family="monospace" font-size="12" fill="#9fb6cf">Kali GNU/Linux — Graphical install</text>
-  <rect x="130" y="120" width="300" height="34" rx="6" fill="#16233a" stroke="#7dd3fc" stroke-width="2"/>
-  <text x="145" y="142" font-family="monospace" font-size="12" fill="#e2eefb">▸ Graphical install ◂</text>
-  <text x="145" y="175" font-family="monospace" font-size="11" fill="#5b7290">Install · Advanced · Rescue</text>
-  <rect x="450" y="120" width="220" height="120" rx="8" fill="#0f1622" stroke="#3b5878"/>
-  <text x="465" y="148" font-family="monospace" font-size="11" fill="#7dd3fc">Guided — entire disk</text>
-  <text x="465" y="172" font-family="monospace" font-size="11" fill="#9fb6cf">user: kali / host: kali</text>
-  <text x="465" y="196" font-family="monospace" font-size="11" fill="#9fb6cf">GRUB → /dev/sda ✓</text>
-  <text x="465" y="220" font-family="monospace" font-size="11" fill="#5eead4">████████ 72%</text>
-  <text x="130" y="280" font-family="monospace" font-size="11" fill="#5b7290">Language → العربية/English · Location · Keyboard</text>
-  <text x="130" y="310" font-family="monospace" font-size="11" fill="#f59e0b">⚠ only inside the VM — never touch your real disk</text>
-  <text x="130" y="360" font-family="monospace" font-size="12" fill="#e2eefb">Installing the base system… please wait</text>
-  <rect x="130" y="380" width="540" height="14" rx="7" fill="#16233a"/>
-  <rect x="130" y="380" width="390" height="14" rx="7" fill="#3673c7"/>
+  <rect width="800" height="500" fill="#0C1220"/>
+  <rect x="100" y="60" width="600" height="380" rx="8" fill="#10161D" stroke="#3A4757" stroke-width="2"/>
+  <rect x="100" y="60" width="600" height="34" rx="8" fill="#1F2733"/>
+  <text x="130" y="83" font-family="monospace" font-size="12" fill="#A8B2C1">Kali GNU/Linux — Graphical install</text>
+  <rect x="130" y="120" width="300" height="34" rx="6" fill="#1F2733" stroke="#A9C6F5" stroke-width="2"/>
+  <text x="145" y="142" font-family="monospace" font-size="12" fill="#E6EAF2">▸ Graphical install ◂</text>
+  <text x="145" y="175" font-family="monospace" font-size="11" fill="#5A6878">Install · Advanced · Rescue</text>
+  <rect x="450" y="120" width="220" height="120" rx="8" fill="#0E1116" stroke="#3A4757"/>
+  <text x="465" y="148" font-family="monospace" font-size="11" fill="#A9C6F5">Guided — entire disk</text>
+  <text x="465" y="172" font-family="monospace" font-size="11" fill="#A8B2C1">user: kali / host: kali</text>
+  <text x="465" y="196" font-family="monospace" font-size="11" fill="#A8B2C1">GRUB → /dev/sda ✓</text>
+  <text x="465" y="220" font-family="monospace" font-size="11" fill="#8FE3B8">████████ 72%</text>
+  <text x="130" y="280" font-family="monospace" font-size="11" fill="#5A6878">Language → العربية/English · Location · Keyboard</text>
+  <text x="130" y="310" font-family="monospace" font-size="11" fill="#E9C46A">⚠ only inside the VM — never touch your real disk</text>
+  <text x="130" y="360" font-family="monospace" font-size="12" fill="#E6EAF2">Installing the base system… please wait</text>
+  <rect x="130" y="380" width="540" height="14" rx="7" fill="#1F2733"/>
+  <rect x="130" y="380" width="390" height="14" rx="7" fill="#3F4FA8"/>
 </svg>
