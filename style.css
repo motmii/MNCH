@@ -6976,6 +6976,183 @@ body.search-open { overflow: hidden; }
   border-radius: var(--radius);
   background: var(--surface-2);
 }
+
+/* ============================================================
+   MODULE 34 · Timed flashcard review (T02) — engine UI
+   Scoped: every selector is prefixed .ft- or .flashcards-timed-
+   so the review engine never leaks into the platform. The page
+   <html dir> already flows RTL; term prompts are isolated LTR
+   (Latin acronyms) inside the RTL flow.
+   ============================================================ */
+.flash-timed-cta { margin-top: 0.75rem; }
+.flashcards-timed-meta { color: var(--muted); font-size: 0.95rem; margin: 0 0 1rem; }
+.flashcards-timed-empty { color: var(--muted); text-align: center; }
+
+.ft-top { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap; }
+.ft-count { color: var(--muted); font-size: 0.92rem; font-weight: 600; }
+.ft-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--accent);
+}
+.ft-timer.is-low { color: var(--bad); }
+.ft-timerbar { height: 8px; border-radius: 999px; background: rgb(var(--wash-hi-rgb) / 0.08); overflow: hidden; }
+.ft-timerfill { height: 100%; border-radius: inherit; background: var(--grad); transition: width 0.25s linear; }
+.ft-prompt { margin: 0.6rem 0 0.2rem; color: var(--muted); font-size: 0.95rem; }
+.ft-term {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  margin: 0;
+  color: var(--text);
+  direction: ltr;
+  text-align: start;
+  unicode-bidi: isolate;
+  overflow-wrap: anywhere;
+}
+.ft-topic {
+  display: inline-block;
+  margin-top: 0.45rem;
+  color: var(--accent-2);
+  font-size: 0.85rem;
+  background: rgb(var(--accent-2-rgb) / 0.1);
+  border: 1px solid rgb(var(--accent-2-rgb) / 0.35);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+}
+.ft-choices { display: grid; gap: 0.7rem; margin-top: 1rem; }
+.ft-choice {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  text-align: start;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text);
+  background: rgb(var(--wash-hi-rgb) / 0.03);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.ft-choice:hover:not(:disabled) { border-color: var(--accent-2); background: rgb(var(--accent-2-rgb) / 0.06); }
+.ft-choice:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ft-choice:disabled { cursor: default; }
+.ft-choice.is-correct { border-color: var(--ok); background: rgb(var(--ok-rgb) / 0.14); color: var(--ok-txt); }
+.ft-choice.is-wrong { border-color: var(--bad); background: rgb(var(--bad-rgb) / 0.12); color: var(--bad-txt); }
+.ft-choice-key {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: rgb(var(--wash-hi-rgb) / 0.08);
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.ft-feedback { min-height: 1.5em; margin: 1rem 0 0.3rem; font-weight: 700; font-size: 1rem; }
+.ft-feedback.is-good { color: var(--ok); }
+.ft-feedback.is-bad { color: var(--bad); }
+.ft-reveal {
+  background: rgb(var(--accent-rgb) / 0.07);
+  border: 1px solid rgb(var(--accent-rgb) / 0.35);
+  border-radius: 14px;
+  padding: 0.9rem 1.1rem;
+  margin-top: 0.6rem;
+}
+.ft-reveal-label { margin: 0 0 0.3rem; font-size: 0.82rem; font-weight: 700; color: var(--accent); }
+.ft-reveal-def { margin: 0; color: var(--text); line-height: 1.8; font-size: 0.97rem; }
+.ft-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; }
+.ft-autonext { color: var(--muted); font-size: 0.88rem; animation: ft-pulse 1.2s ease-in-out infinite; }
+@keyframes ft-pulse { 50% { opacity: 0.45; } }
+.ft-start, .ft-done {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: center;
+  text-align: center;
+  padding: 1.4rem 0 0.6rem;
+}
+.ft-done h3 { font-family: var(--font-display); font-size: 1.5rem; margin: 0; }
+.ft-score { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin: 0; }
+@media (max-width: 520px) {
+  .ft-choice { font-size: 0.9rem; padding: 0.75rem 0.85rem; }
+  .ft-top { gap: 0.5rem; }
+  .ft-timerbar { height: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ft-timerfill { transition: none; }
+  .ft-choice { transition: none; }
+  .ft-autonext { animation: none; }
+}
+/* T03 · result panel: %, elapsed, best (flash), needs-review subset */
+.ft-pct {
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+  color: var(--accent);
+}
+.ft-elapsed, .ft-best { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.ft-newbest { margin: 0; font-weight: 800; color: var(--ok); }
+.ft-review {
+  width: 100%;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: stretch;
+  text-align: start;
+  margin-top: 0.9rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+}
+.ft-review-title { margin: 0; font-weight: 800; font-size: 0.95rem; color: var(--bad); }
+.ft-review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
+.ft-review-item {
+  display: grid;
+  gap: 0.15rem;
+  padding-inline-start: 0.7rem;
+  border-inline-start: 3px solid var(--bad);
+}
+.ft-review-term { font-weight: 800; color: var(--text); font-size: 0.95rem; }
+.ft-review-def { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+.ft-review-hint, .ft-review-empty { margin: 0; color: var(--muted); font-size: 0.85rem; }
+@media (max-width: 520px) {
+  .ft-pct { font-size: 1.9rem; }
+  .ft-review { padding: 0.75rem 0.8rem; }
+}
+/* T05 · RTL + keyboard + accessibility */
+/* The card and its options state the platform's RTL flow explicitly
+   (the page is <html dir="rtl">; Latin terms keep their isolated LTR
+   run inside it — see .ft-term above). */
+.ft-top, .ft-prompt, .ft-choices, .ft-choice, .ft-actions,
+.ft-reveal, .ft-review, .ft-start, .ft-done { direction: rtl; }
+/* Narrow screens: flex/grid children may shrink and every text
+   surface breaks long tokens, so nothing ever widens the page. */
+.flashcards-timed-mount, .ft-top, .ft-choices, .ft-choice, .ft-choice-text,
+.ft-actions, .ft-reveal-def, .ft-review-def, .ft-prompt { min-width: 0; }
+.ft-prompt, .ft-count, .ft-choice-text, .ft-reveal-def,
+.ft-review-def, .ft-review-term { overflow-wrap: anywhere; }
+/* Focus follows the state machine (term → next → result): show the
+   ring for keyboard users only (:focus-visible). */
+.ft-term:focus-visible,
+.ft-done h3:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+/* T06 · long-content guard: the mount caps at its column and passes
+   overflow-wrap down to every text node (the property is inherited),
+   so a definition with no break opportunity can never widen the
+   page/card on a narrow screen. */
+.flashcards-timed-mount { max-width: 100%; overflow-wrap: anywhere; }
+/* END MODULE 34 */
 .timer-time {
   margin: 0;
   font-size: 2.1rem;

@@ -52,7 +52,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.26.0" />
+  <link rel="stylesheet" href="style.css?v=1.30.1" />
   <link rel="manifest" href="manifest.json" />
   <script>
     /* MODULE 36 · pre-paint theme + palette restore — runs before first paint
@@ -132,6 +132,7 @@
           <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
           <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
           <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
+          <li><a href="#flashcards/timed" data-i18n="nav.flashcardsTimed">المراجعة الموقوتة</a></li>
           <li class="nav-more">
             <details class="nav-more-details" id="navMoreDetails">
               <summary data-i18n="nav.more">المزيد</summary>
@@ -213,6 +214,7 @@
       <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
       <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
       <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
+      <li><a href="#flashcards/timed" data-i18n="nav.flashcardsTimed">المراجعة الموقوتة</a></li>
       <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
       <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
       <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
@@ -916,6 +918,7 @@
         <p class="eyebrow" data-i18n="flash.eyebrow">البطاقات التعليمية</p>
         <h2 class="section-title" data-i18n-html="flash.title">راجع المصطلحات <em class="grad">بالبطاقات</em></h2>
         <p class="section-sub" data-i18n="flash.sub">اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.</p>
+        <a class="btn btn-sm btn-ghost flash-timed-cta" href="#flashcards/timed" data-i18n="nav.flashcardsTimed">المراجعة الموقوتة</a>
       </div>
       <!-- Collapsible hub: the full card grid expands on demand to keep the page light. -->
       <details class="collapsible reveal" open>
@@ -1503,6 +1506,25 @@
         </form>
       </div>
     </section>
+
+    <!-- ============================================================
+         FLASHCARD TIMED REVIEW (view path #flashcards/timed)
+         Routed by MODULE 33 ViewSwitcher; the discovery shell and
+         the review engine render into #flashcards-timed-mount.
+         ============================================================ -->
+    <section class="section flashcards-timed" id="flashcards/timed" aria-labelledby="flashcardsTimedTitle">
+      <div class="section-head reveal">
+        <p class="eyebrow">المراجعة الموقوتة — إعادة مراجعة تعليمية</p>
+        <h2 class="section-title" id="flashcardsTimedTitle"><em class="grad">المراجعة الموقوتة</em></h2>
+        <p class="section-sub">مصطلح أمني + أربعة تعريفات: اختر التعريف المطابق، أو «لم أعرف» ليُكشف التعريف فورًا. البطاقات من قاعدة بيانات المصطلحات (FLASHCARDS).</p>
+      </div>
+      <div id="flashcards-timed-mount" class="flashcards-timed-mount"></div>
+      <!-- T05 · persistent screen-reader live region: sits OUTSIDE the
+           painted mount, so announcements (term → definition → score)
+           always land in a node that already exists in the DOM. -->
+      <div class="sr-only" id="ftLive" role="status" aria-live="polite" aria-atomic="true"></div>
+      <p class="flashcards-timed-empty" id="flashcards-timed-empty" data-i18n="flash.empty" hidden>قائمة المصطلحات فارغة.</p>
+    </section>
   </main>
 
   <footer class="footer">
@@ -1518,6 +1540,7 @@
         <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
         <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
         <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
+        <li><a href="#flashcards/timed" data-i18n="nav.flashcardsTimed">المراجعة الموقوتة</a></li>
         <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
         <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
         <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
@@ -1609,6 +1632,7 @@
     </div>
   </div>
 
+  <script src="data/flashcards.js" defer></script>
   <script src="current-semester.js" defer></script>
   <script src="script.js" defer></script>
   <script src="assistant.js" defer></script>

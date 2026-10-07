@@ -243,7 +243,11 @@ check("Next label is module-owned (Finish on the last step)", /id="tourNext"[^>]
 check("panel uses the existing .onboarding-panel", html.includes('class="onboarding-panel tour-panel"'));
 check("replay control added to the Start-Here strip", html.includes("data-tour-reopen"));
 check("MODULE 38 markup untouched (4 wizard steps)", count(html, 'data-os-step="') === 4 && html.includes("data-onboarding-reopen"));
-check("no new script/dependency was added", count(html, "<script src=") === 3);
+/* T01 shipped the card bank as a first-party data file — one more script
+   tag than when this guard was written, still zero external dependencies. */
+const scriptSrcs = html.match(/<script src="[^"]*"/g) || [];
+check("no new script/dependency was added",
+  scriptSrcs.length === 4 && !/<script src="https?:/.test(html));
 
 /* ============================================================
    style.css — coach panel + highlight ring

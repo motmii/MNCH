@@ -23,6 +23,30 @@ Use these terms exactly as defined here. Don't drift to synonyms the glossary av
 | **View / ViewSwitcher** | Router-driven screen that switches by view path, mapping modules to screens. |
 | **Progress hub** | Aggregated local progress (IndexedDB + one-time localStorage migration). |
 
+
+## Flashcard review mode
+
+**Flashcard card bank**:
+The embedded dataset of term/definition pairs for the timed review feature. Bundled with the app so the mode is 100% offline and needs no network. _Avoid_: question bank, term bank.
+
+**Match mode**:
+The term → definition matching task: a definition is shown and the user selects the matching term. The default mode for this feature. _Avoid_: recall, cue, quiz.
+
+**Per-question countdown**:
+A time limit per card (base ~10s). When it expires, the card auto-advances, is marked wrong, and its definition is revealed. _Avoid_: total timer, session clock.
+
+**Flashcard**:
+A single review card in the timed review mode, showing one term and its definition. _Avoid_: quiz question, flashcard grid (which is the separate non-timed review list).
+
+**Needs-review subset**:
+The set of missed cards persisted after a session; the timed review mode prioritizes it on the next pass. _Avoid_: mistake bank, revision queue.
+
+**Flashcard session result**:
+One timed run's output: score (% correct), elapsed time, and the listed missed cards. _Avoid_: quiz attempt, scoreboard.
+
+**Best score (flash)**:
+The highest % correct across local flashcard runs, stored under the `infosec:flash:timed` namespace. _Avoid_: best score (the quiz-time concept).
+
 ## Notes
 
 - Terms are added and updated by the `/domain-modeling` skill as concepts get resolved.
