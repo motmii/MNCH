@@ -3433,6 +3433,7 @@ const Lang = (() => {
       "nav.skills": "شجرة المهارات", "nav.student": "أدوات الطالب",
       "nav.quiz": "الاختبارات", "nav.tools": "الأدوات", "nav.labs": "المعامل",
       "nav.flashcards": "البطاقات", "nav.progress": "تقدمك", "nav.about": "حول المنصة", "nav.contact": "التواصل",
+      "nav.flashcardsTimed": "المراجعة الموقوتة",
       "nav.games": "تحديات CTF", "nav.redteam": "المختبر الهجومي", "nav.ir": "الاستجابة للحوادث", "nav.cryptolab": "مختبر التشفير",
       "nav.cta": "ابدأ التعلم",
       "hero.eyebrow": "✦ منصة تعليمية وتدريبية عملية — دبلوم أمن المعلومات (تجسير مهني)",
@@ -3580,6 +3581,36 @@ const Lang = (() => {
       "flash.sub": "اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.",
       "flash.shuffle": "خلط البطاقات", "flash.tap": "اضغط للقلب",
       "flash.speak": "🔊 اقرأ البطاقة",
+      /* ---------- T02 · timed review engine (MODULE 34) ---------- */
+      "flash.start": "ابدأ المراجعة",
+      "flash.count": "{n} مصطلحًا في هذه الجلسة",
+      "flash.prompt": "ما التعريف الصحيح لهذا المصطلح؟",
+      "flash.qnum": "البطاقة {i} من {n}",
+      "flash.timeLeft": "الوقت المتبقي: {n} ثانية",
+      "flash.dontKnow": "لم أعرف",
+      "flash.correct": "✓ إجابة صحيحة",
+      "flash.wrong": "✗ إجابة خاطئة",
+      "flash.timeUp": "⏳ انتهى الوقت!",
+      "flash.revealLabel": "التعريف الصحيح",
+      "flash.next": "البطاقة التالية",
+      "flash.autoNext": "انتقال تلقائي إلى البطاقة التالية…",
+      "flash.finished": "اكتملت الجلسة",
+      "flash.score": "النتيجة: {correct} من {total}",
+      "flash.again": "مراجعة مرة أخرى",
+      /* ---------- T03 · result + persistence (MODULE 34) ---------- */
+      "flash.pct": "{n}٪",
+      "flash.elapsed": "الوقت: {t}",
+      "flash.best": "أفضل نتيجة: {n}٪",
+      "flash.noBest": "لا توجد أفضل نتيجة بعد",
+      "flash.newBest": "🏆 رقم قياسي جديد!",
+      "flash.reviewTitle": "أخطاء تحتاج إلى مراجعة",
+      "flash.reviewHint": "ستسبق هذه البطاقات في الجلسة القادمة",
+      "flash.reviewEmpty": "لا أخطاء في هذه الجلسة — أحسنت!",
+      /* ---------- T06 · empty bank (MODULE 34) ---------- */
+      "flash.empty": "قائمة المصطلحات فارغة.",
+      /* ---------- T05 · keyboard + SR live region (MODULE 34) ---------- */
+      "flash.srTerm": "البطاقة {i} من {n} — المصطلح: {term}",
+      "flash.srReveal": "التعريف الصحيح لـ {term}: {def}",
       "collapsible.showQuizzes": "عرض بنوك الأسئلة", "collapsible.showCards": "عرض كل البطاقات (18)",
       "games.eyebrow": "مختبر الحوادث + التحدي (CTF)",
       "games.title": "قائد <em class=\"grad\">الاستجابة للحوادث</em>",
@@ -4190,6 +4221,7 @@ const Lang = (() => {
       "nav.skills": "Skill Tree", "nav.student": "Student Tools",
       "nav.quiz": "Quizzes", "nav.tools": "Tools", "nav.labs": "Labs",
       "nav.flashcards": "Flashcards", "nav.progress": "Your Progress", "nav.about": "About", "nav.contact": "Contact",
+      "nav.flashcardsTimed": "Timed Review",
       "nav.games": "CTF Lab", "nav.redteam": "Red Team Lab", "nav.ir": "Incident Response", "nav.cryptolab": "Crypto Lab",
       "nav.cta": "Start learning",
       "hero.eyebrow": "✦ An educational & practical training platform — Infosec Diploma (Professional Bridging)",
@@ -4336,6 +4368,36 @@ const Lang = (() => {
       "flash.title": "Review Terms with <em class=\"grad\">Flashcards</em>",
       "flash.sub": "Tap any card to flip it — a security term in English with its Arabic meaning and a short explanation.",
       "flash.shuffle": "Shuffle cards", "flash.speak": "🔊 Read the card", "flash.tap": "Tap to flip",
+      /* ---------- T02 · timed review engine (MODULE 34) ---------- */
+      "flash.start": "Start review",
+      "flash.count": "{n} terms in this session",
+      "flash.prompt": "What is the correct definition of this term?",
+      "flash.qnum": "Card {i} of {n}",
+      "flash.timeLeft": "Time left: {n}s",
+      "flash.dontKnow": "I don't know",
+      "flash.correct": "✓ Correct",
+      "flash.wrong": "✗ Wrong",
+      "flash.timeUp": "⏳ Time's up!",
+      "flash.revealLabel": "The correct definition",
+      "flash.next": "Next card",
+      "flash.autoNext": "Auto-advancing to the next card…",
+      "flash.finished": "Session complete",
+      "flash.score": "Score: {correct} of {total}",
+      "flash.again": "Review again",
+      /* ---------- T03 · result + persistence (MODULE 34) ---------- */
+      "flash.pct": "{n}%",
+      "flash.elapsed": "Time: {t}",
+      "flash.best": "Best score: {n}%",
+      "flash.noBest": "No best score yet",
+      "flash.newBest": "🏆 New personal best!",
+      "flash.reviewTitle": "Mistakes to review",
+      "flash.reviewHint": "These cards come first in the next session",
+      "flash.reviewEmpty": "No mistakes this session — well done!",
+      /* ---------- T06 · empty bank (MODULE 34) ---------- */
+      "flash.empty": "The term list is empty.",
+      /* ---------- T05 · keyboard + SR live region (MODULE 34) ---------- */
+      "flash.srTerm": "Card {i} of {n} — term: {term}",
+      "flash.srReveal": "The correct definition of {term}: {def}",
       "collapsible.showQuizzes": "Show question banks", "collapsible.showCards": "Show all cards (18)",
       "games.eyebrow": "Incident Lab + CTF",
       "games.title": "Incident <em class=\"grad\">Response</em> Commander",
@@ -6123,7 +6185,7 @@ window.Lang = Lang;
   /** All switchable views: hero header + section elements. @type {HTMLElement[]} */
   const VIEWS = [
     $id("hero"), $id("semester"), $id("guide"), $id("paths"), $id("skills"), $id("student"), $id("path"), $id("subjects"), $id("tools"),
-    $id("labs"), $id("flash"), $id("quiz"), $id("kali"), $id("progress"),
+    $id("labs"), $id("flash"), $id("flashcards/timed"), $id("quiz"), $id("kali"), $id("progress"),
     $id("games"), $id("redteam"), $id("ir"), $id("cryptolab"),
     $id("depth"),
     $id("about"), $id("contact"), $id("lesson"),
@@ -6334,6 +6396,623 @@ window.Lang = Lang;
      programmatically and read the current view. Additive, no behavior change. */
   window.NovaViews = { activate, resolveViewId, current: () => activeView };
 })();
+
+/* @@FLASH_TIMED_START@@ */
+/* ============================================================
+   MODULE 34 · Flashcards timed review — view shell (T04) +
+   review engine with per-question countdown (T02) +
+   result panel + isolated persistence (T03) +
+   RTL keyboard nav, screen-reader live region and focus (T05)
+   The #flashcards/timed view is a plain member of the ViewSwitcher
+   VIEWS list, so back/forward, focus and aria-current behave like
+   every other view with no extra code (T04). This module owns
+   #flashcards-timed-mount end-to-end: the start screen, one card
+   at a time with a visible ~10s countdown, the reveal rules, and
+   the end-of-run result panel — score, %, elapsed time, best
+   score (flash) and the needs-review subset — persisted under
+   the dedicated infosec:flash:timed key, never the quiz's own
+   storage.
+   Spec direction: match mode = term → definition — the TERM is
+   the prompt and the four choices are definitions (the inverse
+   recall/cue mode is explicitly deferred/out of scope).
+   On expiry the card is marked wrong, the definition is revealed
+   automatically, then the engine auto-advances after a short
+   hold; correct / "I don't know" reveal but never auto-advance.
+   nova:view-changed is dispatched on `document` (non-bubbling —
+   see activate()), the same contract as ProgressHub/MODULE 58, so
+   the listener must live on `document`, not `window`.
+   viewHtml() is a PURE renderer over the state object, so the
+   timing tests drive this very source with a fake clock — the
+   window.FlashTimed seam below is the documented entry point.
+    T05: the persistent #ftLive node (index.html) carries the SR
+    announcements, and paint() steers focus (term → next → result)
+    whenever the student was already interacting inside the mount.
+   ============================================================ */
+(function () {
+  const VIEW_ID = "flashcards/timed";
+  const BASE_SECONDS = 10;      /* spec: per-question base ~10s */
+  const TICK_MS = 250;          /* countdown cadence */
+  const REVEAL_HOLD_MS = 1600;  /* time-up reveal hold before auto-advance */
+  const CHOICES = 4;            /* definition choices per card */
+  const STORE_KEY = "infosec:flash:timed"; /* T03: isolated namespace — never the quiz keys */
+
+  const $mount = $id("flashcards-timed-mount");
+  const $empty = $id("flashcards-timed-empty");
+  const $live = $id("ftLive"); /* T05 · persistent SR live region (index.html) */
+
+  /* Engine state — one session at a time.
+     phase: idle → question → revealed → (next question | done) */
+  const state = {
+    phase: "idle",
+    deck: [],        /* shuffled term indexes for this session */
+    idx: 0,          /* current deck position */
+    choices: [],     /* 4 definition strings for the current card */
+    correctIdx: -1,  /* index of the correct definition in choices */
+    pickedIdx: -1,   /* chosen index (-1 = nobody / time-up) */
+    outcome: null,   /* "correct" | "wrong" | "timeout" */
+    score: 0,
+    missed: [],      /* deck positions answered wrong (T03 persists) */
+    remainingMs: BASE_SECONDS * 1000,
+    endsAt: 0,       /* Date.now() deadline while the timer runs */
+    autoNext: false, /* time-up reveal holding for auto-advance */
+    /* T03 · result panel + persistence */
+    startedAt: 0,    /* Date.now() when the session began */
+    finishedAt: 0,   /* Date.now() when the deck was exhausted */
+    pct: 0,          /* round(correct / total * 100) at finish */
+    newBest: false   /* strictly beat the stored best this run */
+  };
+  let tickId = null;
+  let holdId = null;
+
+  /* @returns {Array} Flat, validated term list from the T01 card bank. */
+  function terms() {
+    const list = window.FLASHCARDS_TERMS;
+    return Array.isArray(list) ? list : [];
+  }
+
+  /* ---------- T03 · isolated persistence (infosec:flash:timed) ---------- */
+
+  /**
+   * Read the flash namespace only — the quiz's own keys and the portal
+   * counters live elsewhere and are never opened by this module.
+   * @returns {Object} Stored data ({} when absent or unreadable).
+   */
+  function readStore() {
+    try {
+      const raw = window.localStorage ? window.localStorage.getItem(STORE_KEY) : null;
+      const data = raw ? JSON.parse(raw) : null;
+      return data && typeof data === "object" ? data : {};
+    } catch (e) { return {}; } /* private mode, quota, bad JSON */
+  }
+
+  /**
+   * Merge a patch into the flash namespace. Best-effort: a throwing
+   * localStorage must never break the run itself.
+   * @param {Object} patch @returns {Object} The merged store.
+   */
+  function writeStore(patch) {
+    const data = Object.assign(readStore(), patch || {});
+    try {
+      if (window.localStorage) window.localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    } catch (e) { /* best effort — results stay in-memory */ }
+    return data;
+  }
+
+  /** Locale-neutral m:ss formatter for the elapsed-time line. @param {number} ms @returns {string} */
+  function fmtDur(ms) {
+    const total = Math.max(0, Math.round(ms / 1000));
+    const s = total % 60;
+    return Math.floor(total / 60) + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  /* ---------- T05 · pure keyboard helpers (DOM-free, seam-tested) ---- */
+
+  /**
+   * Map an arrow key to a focus step in the current writing direction:
+   * vertical arrows are direction-neutral, horizontal arrows follow the
+   * text direction so «forward» is always the reading order (RTL flips
+   * Left/Right).
+   * @param {string} key @param {boolean} rtl @returns {number} -1 | 0 | 1
+   */
+  function arrowStep(key, rtl) {
+    if (key === "ArrowDown") return 1;
+    if (key === "ArrowUp") return -1;
+    if (key === "ArrowRight") return rtl ? -1 : 1;
+    if (key === "ArrowLeft") return rtl ? 1 : -1;
+    return 0;
+  }
+
+  /**
+   * Wrap an index around a list of `n` options (cyclic arrow navigation).
+   * @param {number} i @param {number} step @param {number} n @returns {number}
+   */
+  function cycleIdx(i, step, n) {
+    if (!(n > 0)) return -1;
+    return (((i + step) % n) + n) % n;
+  }
+
+  /**
+   * Digit hotkey: "1".."4" → choice index (spec: arrows, Enter, 1-4),
+   * anything else → -1.
+   * @param {string} key @returns {number}
+   */
+  function hotIdx(key) {
+    if (typeof key !== "string" || key.length !== 1) return -1;
+    const n = "123456789".indexOf(key);
+    return n >= 0 && n < CHOICES ? n : -1;
+  }
+
+  /**
+   * T05 · writing direction of the options, computed from the DOM and
+   * defaulting to RTL (Arabic-first platform) when unavailable.
+   * @returns {boolean}
+   */
+  function dirRtl() {
+    try {
+      const el = $mount ? $mount.querySelector(".ft-choices") : null;
+      if (el && window.getComputedStyle) return window.getComputedStyle(el).direction !== "ltr";
+    } catch (e) { /* fall through to the platform default */ }
+    return true;
+  }
+
+  /** Fisher–Yates shuffle (a fresh order every session). @param {Array} arr @returns {Array} */
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  /** Stop the countdown + any pending auto-advance hold. @returns {void} */
+  function stopTimers() {
+    if (tickId !== null) { clearInterval(tickId); tickId = null; }
+    if (holdId !== null) { clearTimeout(holdId); holdId = null; }
+  }
+
+  /** Repaint the countdown chrome in place (never rebuilds the card DOM). @returns {void} */
+  function paintTimer() {
+    if (!$mount) return;
+    const secs = Math.max(0, Math.ceil(state.remainingMs / 1000));
+    const num = $mount.querySelector("#ftTimerNum");
+    if (num) num.textContent = String(secs);
+    const fill = $mount.querySelector("#ftTimerBar");
+    if (fill) fill.style.width = ((state.remainingMs / (BASE_SECONDS * 1000)) * 100).toFixed(1) + "%";
+    const wrap = $mount.querySelector(".ft-timer");
+    if (wrap) {
+      wrap.classList.toggle("is-low", state.remainingMs <= 3000);
+      wrap.setAttribute("aria-label", Lang.t("flash.timeLeft", { n: secs }));
+    }
+  }
+
+  /** Countdown step: recompute from the deadline, then expire at 0. @returns {void} */
+  function onTick() {
+    if (state.phase !== "question") { stopTimers(); return; }
+    state.remainingMs = Math.max(0, state.endsAt - Date.now());
+    paintTimer();
+    if (state.remainingMs <= 0) timeUp();
+  }
+
+  /** Start the per-question countdown from the current remainingMs. @returns {void} */
+  function startTick() {
+    stopTimers();
+    state.endsAt = Date.now() + state.remainingMs;
+    tickId = setInterval(onTick, TICK_MS);
+  }
+
+  /** Record a missed card once per session position. @returns {void} */
+  function markMissed() {
+    if (state.missed.indexOf(state.idx) === -1) state.missed.push(state.idx);
+  }
+
+  /**
+   * Pure renderer: the full engine view for the CURRENT state as a
+   * string. Tests assert on this directly; paint() just installs it.
+   * @returns {string} HTML for #flashcards-timed-mount.
+   */
+  function viewHtml() {
+    const list = terms();
+    if (!list.length) return "";
+
+    if (state.phase === "idle") {
+      return (
+        '<p class="flashcards-timed-meta">' + esc(Lang.t("flash.count", { n: list.length })) + "</p>" +
+        '<div class="ft-start">' +
+        '<button type="button" class="btn btn-primary" data-ft="start">' + esc(Lang.t("flash.start")) + "</button>" +
+        "</div>"
+      );
+    }
+    if (state.phase === "done") {
+      /* T03 · result panel: correct/total, %, elapsed, best (flash),
+         the needs-review subset with definitions, then «review again». */
+      const store = readStore();
+      const best = typeof store.best === "number" ? store.best : null;
+      const elapsed = fmtDur(Math.max(0, state.finishedAt - state.startedAt));
+      const missedCards = state.missed
+        .map((pos) => list[state.deck[pos]])
+        .filter((card) => !!card);
+      let done =
+        '<div class="ft-done" role="status">' +
+        '<h3 tabindex="-1">' + esc(Lang.t("flash.finished")) + "</h3>" +
+        '<p class="ft-score">' + esc(Lang.t("flash.score", { correct: state.score, total: state.deck.length })) + "</p>" +
+        '<p class="ft-pct">' + esc(Lang.t("flash.pct", { n: state.pct })) + "</p>" +
+        '<p class="ft-elapsed">' + esc(Lang.t("flash.elapsed", { t: elapsed })) + "</p>" +
+        '<p class="ft-best">' + esc(best === null
+          ? Lang.t("flash.noBest")
+          : Lang.t("flash.best", { n: best })) + "</p>" +
+        (state.newBest ? '<p class="ft-newbest">' + esc(Lang.t("flash.newBest")) + "</p>" : "") +
+        '<div class="ft-review">' +
+        '<p class="ft-review-title">' + esc(Lang.t("flash.reviewTitle")) + "</p>";
+      if (missedCards.length) {
+        done += '<ul class="ft-review-list">';
+        missedCards.forEach((card) => {
+          done += '<li class="ft-review-item">' +
+            '<span class="ft-review-term">' + esc(card.term) + "</span>" +
+            '<span class="ft-review-def">' + esc(card.definition) + "</span></li>";
+        });
+        done += "</ul>" +
+          '<p class="ft-review-hint">' + esc(Lang.t("flash.reviewHint")) + "</p>";
+      } else {
+        done += '<p class="ft-review-empty">' + esc(Lang.t("flash.reviewEmpty")) + "</p>";
+      }
+      done += "</div>" +
+        '<button type="button" class="btn btn-primary" data-ft="start">' + esc(Lang.t("flash.again")) + "</button>" +
+        "</div>";
+      return done;
+    }
+
+    /* question | revealed — exactly ONE card on screen. */
+    const card = list[state.deck[state.idx]];
+    if (!card) return "";
+    const revealed = state.phase === "revealed";
+    const secs = Math.max(0, Math.ceil(state.remainingMs / 1000));
+    const low = state.remainingMs <= 3000;
+    const pct = (state.remainingMs / (BASE_SECONDS * 1000)) * 100;
+
+    let html = '<div class="ft-top">' +
+      '<span class="ft-count">' + esc(Lang.t("flash.qnum", { i: state.idx + 1, total: state.deck.length })) + "</span>" +
+      (revealed ? "" :
+        '<span class="ft-timer' + (low ? " is-low" : "") + '" role="timer" aria-label="' + esc(Lang.t("flash.timeLeft", { n: secs })) + '">⏱ <span id="ftTimerNum">' + secs + "</span></span>") +
+      "</div>";
+    if (!revealed) {
+      html += '<div class="ft-timerbar"><div class="ft-timerfill" id="ftTimerBar" style="width:' + pct.toFixed(1) + '%"></div></div>';
+    }
+    html += '<p class="ft-prompt">' + esc(Lang.t("flash.prompt")) + "</p>" +
+      '<p class="ft-term" id="ftTerm" tabindex="-1">' + esc(card.term) + "</p>" +
+      (card.topic ? '<p class="ft-topic">' + esc(card.topic) + "</p>" : "") +
+      '<div class="ft-choices" role="group" aria-labelledby="ftTerm">';
+
+    state.choices.forEach((def, i) => {
+      let cls = "ft-choice";
+      if (revealed) {
+        if (i === state.correctIdx) cls += " is-correct";
+        if (i === state.pickedIdx && i !== state.correctIdx) cls += " is-wrong";
+      }
+      html += '<button type="button" class="' + cls + '" data-ft-choice="' + i + '"' + (revealed ? " disabled" : "") + ">" +
+        '<span class="ft-choice-key" aria-hidden="true">' + (i + 1) + "</span>" +
+        '<span class="ft-choice-text">' + esc(def) + "</span></button>";
+    });
+    html += "</div>";
+
+    if (revealed) {
+      const good = state.outcome === "correct";
+      html += '<p class="ft-feedback ' + (good ? "is-good" : "is-bad") + '" role="status">' +
+        esc(Lang.t(good ? "flash.correct" : state.outcome === "timeout" ? "flash.timeUp" : "flash.wrong")) + "</p>" +
+        '<div class="ft-reveal"><p class="ft-reveal-label">' + esc(Lang.t("flash.revealLabel")) + "</p>" +
+        '<p class="ft-reveal-def">' + esc(card.definition) + "</p></div>" +
+        '<div class="ft-actions">' +
+        '<button type="button" class="btn btn-primary" data-ft="next">' + esc(Lang.t("flash.next")) + "</button>" +
+        (state.autoNext ? '<span class="ft-autonext">' + esc(Lang.t("flash.autoNext")) + "</span>" : "") +
+        "</div>";
+    } else {
+      html += '<div class="ft-actions">' +
+        '<button type="button" class="btn btn-ghost" data-ft="dontknow">' + esc(Lang.t("flash.dontKnow")) + "</button>" +
+        "</div>";
+    }
+    return html;
+  }
+
+  /**
+   * T05 · screen-reader announcements through the PERSISTENT #ftLive
+   * node (it sits outside the painted innerHTML, so the region exists
+   * before its text changes). The definition is announced only AFTER
+   * the reveal — never on the question, which would spoil the answer.
+   * @returns {void}
+   */
+  function announce() {
+    if (!$live) return;
+    const list = terms();
+    const card = list[state.deck[state.idx]];
+    let msg = "";
+    if (state.phase === "question" && card) {
+      msg = Lang.t("flash.srTerm", { i: state.idx + 1, n: state.deck.length, term: card.term });
+    } else if (state.phase === "revealed" && card) {
+      msg = Lang.t("flash.srReveal", { term: card.term, def: card.definition });
+    } else if (state.phase === "done") {
+      msg = Lang.t("flash.score", { correct: state.score, total: state.deck.length });
+    }
+    if ($live.textContent !== msg) $live.textContent = msg;
+  }
+
+  /**
+   * T05 · focus follows the state machine: term → next → result. Only
+   * called when the student was already inside the mount (Start pressed,
+   * card focused), so route entry and locale switches never steal focus
+   * from wherever the platform put it (ViewSwitcher targets the heading).
+   * @returns {void}
+   */
+  function moveFocus() {
+    if (!$mount) return;
+    const sel = state.phase === "question" ? "#ftTerm"
+      : state.phase === "revealed" ? '[data-ft="next"]'
+      : state.phase === "done" ? ".ft-done h3"
+      : null;
+    const target = sel ? $mount.querySelector(sel) : null;
+    if (!target || typeof target.focus !== "function") return;
+    try { target.focus({ preventScroll: true }); }
+    catch (e) { target.focus(); }
+  }
+
+  /** Install viewHtml() into the mount + keep the empty-state honest.
+      T05: every repaint also drives the live region and the focus
+      state machine (see announce / moveFocus above). @returns {void} */
+  function paint() {
+    const hasCards = terms().length > 0;
+    if ($empty) $empty.hidden = hasCards;
+    if (!$mount) return;
+    /* Capture BEFORE the swap — the old node is detached afterwards. */
+    const hadFocusIn = !!(document.activeElement && $mount.contains(document.activeElement));
+    $mount.innerHTML = viewHtml();
+    announce();
+    if (hadFocusIn) moveFocus();
+  }
+
+  /* One delegated listener for every engine control (start / choice /
+     don't-know / next) — it survives every repaint because it lives
+     on the mount, never on the buttons themselves. */
+  if ($mount) {
+    $mount.addEventListener("click", (event) => {
+      const el = event.target && event.target.closest
+        ? event.target.closest("[data-ft],[data-ft-choice]")
+        : null;
+      if (!el) return;
+      const choice = el.getAttribute("data-ft-choice");
+      if (choice !== null) { answer(parseInt(choice, 10)); return; }
+      const action = el.getAttribute("data-ft");
+      if (action === "start") startSession();
+      else if (action === "next") advance();
+      else if (action === "dontknow") dontKnow();
+    });
+  }
+
+  /* T05 · keyboard: direction-aware arrows cycle the definition choices,
+     digits 1-4 answer directly (spec user story 10). Enter and Space
+     stay native — every choice is a real <button>. Delegated on the
+     mount, so it survives every repaint like the click handler above. */
+  if ($mount) {
+    $mount.addEventListener("keydown", (event) => {
+      if (state.phase !== "question") return;
+      const tgt = event.target;
+      if (tgt && /^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName || "")) return;
+      const buttons = $mount.querySelectorAll("[data-ft-choice]");
+      if (!buttons.length) return;
+      const el = tgt && tgt.closest ? tgt.closest("[data-ft-choice]") : null;
+      const step = arrowStep(event.key, dirRtl());
+      if (step) {
+        /* Arrows from a choice cycle; from the term they enter the list
+           (forward → first, back → last). */
+        const cur = el
+          ? parseInt(el.getAttribute("data-ft-choice"), 10)
+          : (step > 0 ? -1 : buttons.length);
+        const next = buttons[cycleIdx(cur, step, buttons.length)];
+        if (next && typeof next.focus === "function") {
+          try { next.focus({ preventScroll: true }); }
+          catch (e) { next.focus(); }
+        }
+        event.preventDefault();
+        return;
+      }
+      const hot = hotIdx(event.key);
+      if (hot >= 0) {
+        if (event.preventDefault) event.preventDefault();
+        answer(hot);
+      }
+    });
+  }
+
+  /* Re-render on locale switch — interface chrome is bilingual. */
+  Lang.onSwitch(paint);
+
+  /* ---------- engine transitions ---------- */
+
+  /** Begin a fresh session: shuffle every term into a deck. @returns {void} */
+  function startSession() {
+    const list = terms();
+    if (!list.length) { state.phase = "idle"; paint(); return; }
+    stopTimers();
+    /* T03 · needs-review subset comes FIRST (shuffled among
+       themselves), the rest of the bank follows, shuffled. */
+    const review = readStore().review;
+    const hot = [];
+    const rest = [];
+    list.forEach((t, i) => {
+      if (Array.isArray(review) && review.indexOf(t.term) > -1) hot.push(i);
+      else rest.push(i);
+    });
+    state.deck = shuffle(hot).concat(shuffle(rest));
+    state.idx = 0;
+    state.score = 0;
+    state.missed = [];
+    state.autoNext = false;
+    state.startedAt = Date.now();
+    state.finishedAt = 0;
+    state.pct = 0;
+    state.newBest = false;
+    showQuestion();
+  }
+
+  /** Show deck[state.idx]: build the choices, paint, start the countdown. @returns {void} */
+  function showQuestion() {
+    stopTimers();
+    const list = terms();
+    const card = list[state.deck[state.idx]];
+    if (!card) { finishSession(); return; }
+    /* Distractors: same-category siblings first, then the rest of
+       the bank — never this card's own definition, always unique. */
+    const pool = list
+      .map((x, i) => ({ x: x, i: i }))
+      .filter((e) => e.i !== state.deck[state.idx] && e.x.definition !== card.definition);
+    const sameCat = shuffle(pool.filter((e) => e.x.category === card.category));
+    const rest = shuffle(pool.filter((e) => e.x.category !== card.category));
+    const distractors = sameCat.concat(rest).slice(0, CHOICES - 1).map((e) => e.x.definition);
+    state.choices = shuffle([card.definition].concat(distractors));
+    state.correctIdx = state.choices.indexOf(card.definition);
+    state.pickedIdx = -1;
+    state.outcome = null;
+    state.autoNext = false;
+    state.phase = "question";
+    state.remainingMs = BASE_SECONDS * 1000;
+    paint();
+    startTick();
+  }
+
+  /**
+   * Answer the current card. A correct (or wrong) answer reveals the
+   * definition but NEVER auto-advances — the student paces via Next.
+   * @param {number} i Chosen index into state.choices.
+   * @returns {boolean} True when the pick was correct.
+   */
+  function answer(i) {
+    if (state.phase !== "question" || i < 0 || i >= state.choices.length) return false;
+    stopTimers();
+    state.pickedIdx = i;
+    const correct = i === state.correctIdx;
+    state.outcome = correct ? "correct" : "wrong";
+    if (correct) state.score++;
+    else markMissed();
+    state.phase = "revealed";
+    state.autoNext = false;
+    paint();
+    return correct;
+  }
+
+  /** «لم أعرف» — reveal the definition + count as wrong (student-paced). @returns {void} */
+  function dontKnow() {
+    if (state.phase !== "question") return;
+    stopTimers();
+    state.pickedIdx = -1;
+    state.outcome = "wrong";
+    markMissed();
+    state.phase = "revealed";
+    state.autoNext = false;
+    paint();
+  }
+
+  /** Time expired: mark wrong, reveal automatically, auto-advance after the hold. @returns {void} */
+  function timeUp() {
+    if (state.phase !== "question") return;
+    stopTimers();
+    state.remainingMs = 0;
+    state.pickedIdx = -1;
+    state.outcome = "timeout";
+    markMissed();
+    state.phase = "revealed";
+    state.autoNext = true;
+    paint();
+    holdId = setTimeout(() => { holdId = null; advance(); }, REVEAL_HOLD_MS);
+  }
+
+  /** Next card (manual button, or the time-up hold firing). @returns {void} */
+  function advance() {
+    if (state.phase !== "revealed") return;
+    stopTimers(); /* cancels a pending hold if the student beat it */
+    state.autoNext = false;
+    state.idx++;
+    if (state.idx >= state.deck.length) { finishSession(); return; }
+    showQuestion();
+  }
+
+  /**
+   * T03 · Reach the result screen exactly once: freeze the clock,
+   * compute the %, then persist under infosec:flash:timed — the best
+   * score only ever moves up (strictly better runs only), and the
+   * needs-review subset keeps every still-missed term until it is
+   * answered correctly. Writes are best-effort (see writeStore).
+   * @returns {void}
+   */
+  function finishSession() {
+    if (state.phase === "done") return;
+    const list = terms();
+    state.finishedAt = Date.now();
+    state.pct = state.deck.length
+      ? Math.round((state.score / state.deck.length) * 100)
+      : 0;
+    state.phase = "done";
+
+    const store = readStore();
+    const prevBest = typeof store.best === "number" ? store.best : null;
+    /* Strictly better only — a tie or a miss never moves the best. */
+    state.newBest = prevBest !== null && state.pct > prevBest;
+    const best = prevBest === null || state.pct > prevBest ? state.pct : prevBest;
+
+    /* Needs-review subset: (previous review ∪ this run's misses),
+       minus every card answered correctly just now; terms that left
+       the bank drop out instead of lingering forever. */
+    const inBank = {};
+    list.forEach((t) => { inBank[t.term] = true; });
+    const missedTerms = {};
+    state.missed.forEach((pos) => {
+      const card = list[state.deck[pos]];
+      if (card) missedTerms[card.term] = true;
+    });
+    const keep = {};
+    Object.keys(missedTerms).forEach((t) => { keep[t] = true; });
+    (Array.isArray(store.review) ? store.review : []).forEach((t) => { keep[t] = true; });
+    state.deck.forEach((pos) => {
+      const card = list[pos];
+      if (card && !missedTerms[card.term]) delete keep[card.term];
+    });
+    const nextReview = Object.keys(keep).filter((t) => inBank[t]);
+
+    const last = {
+      correct: state.score,
+      total: state.deck.length,
+      pct: state.pct,
+      ms: Math.max(0, state.finishedAt - state.startedAt),
+      at: state.finishedAt
+    };
+    writeStore({
+      best: best,
+      last: last,
+      history: (Array.isArray(store.history) ? store.history : []).concat([last]).slice(-10),
+      review: nextReview
+    });
+    paint();
+  }
+
+  /* Test + reuse seam: drive the real state machine with a fake clock. */
+  window.FlashTimed = {
+    BASE_SECONDS, REVEAL_HOLD_MS, CHOICES, STORE_KEY,
+    state, start: startSession, answer, dontKnow, advance,
+    tick: onTick, viewHtml, paint, fmtDur,
+    /* T05 · pure keyboard helpers — DOM-free, driven by the tests */
+    keyNav: { arrowStep, cycleIdx, hotIdx }
+  };
+
+  /* Paint whenever the ViewSwitcher activates this view (nav click,
+     deep link, Back/Forward). */
+  document.addEventListener("nova:view-changed", (event) => {
+    if (event && event.detail && event.detail.viewId === VIEW_ID) paint();
+  });
+
+  /* Boot: script.js is deferred (HTML parsed, card bank loaded), but
+     MODULE 33 activates the hash view BEFORE this module registers its
+     listener — so re-check the current route right here. */
+  if (location.hash === "#" + VIEW_ID) paint();
+})();
+/* @@FLASH_TIMED_END@@ */
+
 
 /* ============================================================
    MODULE 36 · ThemeSwitch — dark default · light opt-in
