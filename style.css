@@ -7984,7 +7984,10 @@ body.search-open { overflow: hidden; }
   padding: 1.1rem 1.15rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgb(var(--wash-hi-rgb) / 0.03);
+  /* Frosted glass — same recipe as MODULE 76/77 (wash-accent2 + blur). */
+  background: var(--wash-accent2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: border-color 0.25s, background 0.25s, transform 0.2s, box-shadow 0.25s;
@@ -7995,6 +7998,36 @@ body.search-open { overflow: hidden; }
   background: linear-gradient(165deg, rgb(var(--accent-2-rgb) / 0.14), rgb(var(--accent-rgb) / 0.08));
   transform: translateY(-3px);
   box-shadow: 0 16px 32px -22px rgb(var(--accent-2-rgb) / 0.75);
+}
+.theatre-card:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+/* Completed scenario — a calmer, settled tint plus a visible text marker
+   (never colour-only: the ✓ chip always carries a label). */
+.theatre-card.is-done {
+  border-color: color-mix(in srgb, var(--ok) 45%, transparent);
+  background: rgb(var(--ok-rgb) / 0.10);
+}
+.theatre-card-done {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  color: var(--ok-txt);
+  background: rgb(var(--ok-rgb) / 0.16);
+  border: 1px solid color-mix(in srgb, var(--ok) 40%, transparent);
+}
+/* Completion summary line above the grid — a quiet stat readout. */
+.theatre-progress {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--wash-accent2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .theatre-card-topic {
   font-size: 0.72rem;
@@ -8032,7 +8065,11 @@ body.search-open { overflow: hidden; }
   padding: 1.4rem 1.5rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface);
+  /* Frosted glass — layered over the section, same as MODULE 76/77 so the
+     stage reads as a raised, translucent panel rather than a flat card. */
+  background: var(--wash-accent2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: var(--shadow-md);
 }
 .theatre-play-head {
@@ -8142,7 +8179,28 @@ body.search-open { overflow: hidden; }
   background: rgb(var(--wash-hi-rgb) / 0.03);
 }
 .theatre-outcome-done { margin-top: 1rem; color: var(--muted); font-size: 0.95rem; }
+/* "+N XP" confirmation shown on first completion of a scenario — mirrors the
+   reward surfaced elsewhere in the platform, token-tinted so it reads as a
+   positive, settled note rather than a loud banner. */
+.theatre-outcome-xp {
+  display: inline-block;
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+  background: var(--wash-accent2);
+}
 .theatre-outcome-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.2rem; }
+
+/* Fluid padding on narrow screens so the glass panels never crowd the edge. */
+@media (max-width: 560px) {
+  .theatre-play,
+  .theatre-outcome { padding: 1.1rem 1rem; }
+  .theatre-progress { font-size: 0.82rem; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .theatre-card,
