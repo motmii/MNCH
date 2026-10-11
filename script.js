@@ -323,7 +323,7 @@ function sanitizeQuizPayload(raw) {
  * The bridge is optional and idempotent — awarding the same real action
  * twice never grants duplicate XP. Failures are swallowed so learning
  * features never break when storage is unavailable.
- * @param {"lesson"|"quiz"|"flash"|"lab"} kind Action kind.
+ * @param {"lesson"|"quiz"|"flash"|"lab"|"theatre"} kind Action kind.
  * @param {string|number} id Stable action id.
  * @returns {void}
  */
@@ -3903,6 +3903,7 @@ const Lang = (() => {
       "progress.attempts": "محاولات الاختبار",
       "progress.reviewWrong": "راجع أخطاءك",
       "progress.overall": "التقدم الكلي",
+      "progress.theatre": "سيناريوهات مكتملة",
       "semester.eyebrow": "دليل الترم الحالي",
       "semester.title": "لوحة <em class=\"grad\">الترم الحالي</em>",
       "semester.sub": "خطة الترم الحالي كاملة في مكان واحد: المواد الرسمية، الجدول الأسبوعي، الساعات المعتمدة، وحلقات الوصول إلى الاختبارات والأدوات والمعامل.",
@@ -4181,7 +4182,10 @@ const Lang = (() => {
       "theatre.outcomeRisky": "قرار محفوف بالمخاطر",
       "theatre.outcomeBad": "قرار خطير",
       "theatre.scenarioDone": "أكملتَ السيناريو. راجع التفسيرات أعلاه لتثبيت الدرس.",
-      "theatre.pure": "عرض تعليمي بحت — لا يتم تنفيذ أي إجراء حقيقي أو الوصول إلى أي شبكة."
+      "theatre.pure": "عرض تعليمي بحت — لا يتم تنفيذ أي إجراء حقيقي أو الوصول إلى أي شبكة.",
+      "theatre.completed": "✓ مكتمل",
+      "theatre.xp": "أُضيفت {n} نقطة خبرة إلى رصيدك.",
+      "theatre.progress": "أنجزت {done} من {total} سيناريو."
     },
     en: {
       "meta.title": "Information Security Platform — Current Semester",
@@ -4706,6 +4710,7 @@ const Lang = (() => {
       "progress.attempts": "Quiz attempts",
       "progress.reviewWrong": "Review incorrect answers",
       "progress.overall": "Overall progress",
+      "progress.theatre": "Scenarios completed",
       /* ---------- MODULE 48 · GlobalSearch (Phase 6) ---------- */
       "search.title": "Search the platform",
       "search.placeholder": "Search: lesson, path, tool, quiz, term…",
@@ -4936,7 +4941,10 @@ const Lang = (() => {
       "theatre.outcomeRisky": "Risky decision",
       "theatre.outcomeBad": "Dangerous decision",
       "theatre.scenarioDone": "You completed the scenario. Review the explanations above to cement the lesson.",
-      "theatre.pure": "Purely educational — nothing real runs and no network is ever touched."
+      "theatre.pure": "Purely educational — nothing real runs and no network is ever touched.",
+      "theatre.completed": "✓ Completed",
+      "theatre.xp": "{n} XP was added to your balance.",
+      "theatre.progress": "You've completed {done} of {total} scenarios."
     },
   };
 
@@ -8706,12 +8714,14 @@ function rxMatch(node, s, i) {
     const lessons = readStored("lessons");
     const flash = readStored("flash");
     const labs = readStored("labs");
+    const theatre = readStored("theatre");
     const store = readStore();
     const results = store.results || {};
     const quizAttempts = Object.keys(results).filter((k) => QUIZZES[k]).length;
     const lessonsDone = lessons.done && typeof lessons.done === "object" ? countMap(lessons.done) : 0;
     const flashDone = flash.reviewed && typeof flash.reviewed === "object" ? countMap(flash.reviewed) : 0;
     const labsDone = labs.done && typeof labs.done === "object" ? countMap(labs.done) : 0;
+    const theatreDone = theatre.done && typeof theatre.done === "object" ? countMap(theatre.done) : 0;
 
     /* Overall = average of the latest quiz results across subjects. */
     const pctVals = Object.keys(results).filter((k) => QUIZZES[k]).map((k) => {
@@ -8743,6 +8753,7 @@ function rxMatch(node, s, i) {
       '<span class="progress-stat"><b>' + lessonsDone + '</b><span>' + escP(Lang.t("progress.lessons")) + '</span></span>',
       '<span class="progress-stat"><b>' + labsDone + '</b><span>' + escP(Lang.t("progress.labs")) + '</span></span>',
       '<span class="progress-stat"><b>' + flashDone + '</b><span>' + escP(Lang.t("progress.flashcards")) + '</span></span>',
+      '<span class="progress-stat"><b>' + theatreDone + '</b><span>' + escP(Lang.t("progress.theatre")) + '</span></span>',
       (pathPct !== null
         ? '<span class="progress-stat"><b>' + pathPct + '%</b><span>' + escP(Lang.t("progress.paths")) + '</span></span>'
         : ''),
@@ -11772,7 +11783,7 @@ const LABS_META = {
   var STORE_KEY = "motivation";
   var VERSION = 1;
   var LEVEL_STEP = 100;
-  var XP_VALUES = { lesson: 25, quiz: 40, flash: 5, lab: 60 };
+  var XP_VALUES = { lesson: 25, quiz: 40, flash: 5, lab: 60, theatre: 30 };
   var DAILY_GOAL = 40;
   var WEEKLY_GOAL = 200;
   var SEMESTER_CODES = ["260210030702", "260210030802", "260210030902", "260210031002", "260210031102"];
@@ -15229,6 +15240,15 @@ const LABS_META = {
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
     {
+      date: "2026-10-11",
+      tag: "new",
+      title: { ar: "مسرح التهديدات — سيناريوهات قرار تفاعلية", en: "Threat Theatre — interactive decision scenarios" },
+      desc: {
+        ar: "قسم جديد (#theatre): سيناريوهات أمنية واقعية تُروى خطوة بخطوة، تختار فيها قرارك وترى فورًا نتيجته (سليم / محفوف بالمخاطر / خطير) مع تفسير تعليمي. اكتمال أي سيناريو يُحدّث إحصاءات التعلّم: يُضاف إلى عدّاد «سيناريوهات مكتملة» في لوحة التقدّم ويمنح نقاط خبرة تُحتسب في مستواك وسلسلة أيامك. كل شيء محلي في متصفحك — لا شبكة ولا تخزين لأي سر.",
+        en: "A new #theatre section: realistic security scenarios walked step by step — pick your decision and instantly see the outcome (sound / risky / dangerous) with an educational explanation. Completing any scenario updates your learning statistics: it's added to the «Scenarios completed» counter on the Progress board and grants XP that counts toward your level and streak. All local to your browser — no network, no stored secrets."
+      }
+    },
+    {
       date: "2026-10-05",
       tag: "improve",
       title: { ar: "واجهة أهدأ — لوحة «الحجر والنيلي»", en: "A calmer interface — the Slate & Indigo palette" },
@@ -17626,8 +17646,51 @@ const LABS_META = {
   }
 
   var state = { sc: null, nodeId: null, path: [] };
+  var summaryEl = null;   /* picker progress line — created once, reused */
 
-/* TT_MODULE_CONTINUE */
+  /* ---- learning statistics (motmi-portal:theatre) --------------------
+     Reuses the exact contract every other tracker uses: a namespaced
+     Store object with a `done` map of scenario-id → true. Completing a
+     scenario is a genuine, idempotent action — replaying it never
+     re-awards XP and never inflates the counter. The progress hub
+     refreshes via "nova:progress-changed", same as lessons/flashcards. */
+  function readStats() {
+    try {
+      var raw = Store.get("theatre", null);
+      return (raw && typeof raw === "object" && raw.done && typeof raw.done === "object")
+        ? raw : { v: 1, done: {} };
+    } catch (e) { return { v: 1, done: {} }; }
+  }
+  function isDone(id) {
+    return !!readStats().done[id];
+  }
+  function completedCount() {
+    var st = readStats();
+    var n = 0;
+    Object.keys(st.done).forEach(function (k) { if (st.done[k]) n++; });
+    return n;
+  }
+  /* Mark one scenario complete, award XP once, and notify the hub. */
+  function recordCompletion(id) {
+    if (!id) return false;
+    var st = readStats();
+    if (st.done[id]) return false;          /* already counted — never re-award */
+    st.done[id] = true;
+    try { Store.set("theatre", st); } catch (e) { /* private mode: still award below */ }
+    awardMotivation("theatre", id);          /* idempotent bridge to MODULE 50 */
+    try {
+      if (typeof CustomEvent === "function") {
+        document.dispatchEvent(new CustomEvent("nova:progress-changed"));
+      }
+    } catch (e2) { /* notifying other modules is optional */ }
+    return true;
+  }
+  function theatreXp() {
+    try {
+      var api = window.PlatformMotivation;
+      return (api && api.XP_VALUES && api.XP_VALUES.theatre) ? api.XP_VALUES.theatre : 30;
+    } catch (e) { return 30; }
+  }
 
   /* ---- picker: the grid of scenario cards ---- */
   function renderPicker() {
@@ -17638,6 +17701,22 @@ const LABS_META = {
     if (emptyNote) emptyNote.hidden = list.length > 0;
     mount.hidden = true;
     mount.textContent = "";
+
+    /* Summary line — surfaces the stored learning statistic up front.
+       Created once and reused so locale switches never stack duplicates. */
+    if (list.length) {
+      if (!summaryEl) {
+        summaryEl = el("p", "theatre-progress");
+        summaryEl.setAttribute("aria-live", "polite");
+        if (grid.parentNode) grid.parentNode.insertBefore(summaryEl, grid);
+      }
+      summaryEl.textContent = T("theatre.progress", {
+        done: completedCount(), total: list.length
+      });
+      summaryEl.hidden = false;
+    } else if (summaryEl) {
+      summaryEl.hidden = true;
+    }
 
     list.forEach(function (sc) {
       var card = el("button", "theatre-card reveal");
@@ -17652,6 +17731,14 @@ const LABS_META = {
       card.appendChild(topic);
       card.appendChild(title);
       card.appendChild(intro);
+
+      /* Completed scenarios carry a visible, non-colour-only marker so the
+         learner can see their progress at a glance. */
+      if (isDone(sc.id)) {
+        card.classList.add("is-done");
+        card.appendChild(el("span", "theatre-card-done", T("theatre.completed")));
+        go.textContent = T("theatre.again");
+      }
       card.appendChild(go);
       card.addEventListener("click", function () { startScenario(sc.id); });
       grid.appendChild(card);
@@ -17672,6 +17759,7 @@ const LABS_META = {
     state.sc = sc;
     state.nodeId = sc.start;
     grid.textContent = "";
+    if (summaryEl) summaryEl.hidden = true;   /* picker stat line not shown on stage */
     mount.hidden = false;
     renderNode();
   }
@@ -17739,6 +17827,11 @@ const LABS_META = {
       wrap.appendChild(cont);
     } else {
       wrap.appendChild(el("p", "theatre-outcome-done", T("theatre.scenarioDone")));
+      /* Terminal node reached — this is a scenario completion. Update the
+         learning statistics (store + XP + progress hub) exactly once. */
+      if (recordCompletion(sc.id)) {
+        wrap.appendChild(el("p", "theatre-outcome-xp", T("theatre.xp", { n: theatreXp() })));
+      }
       var row = el("div", "theatre-outcome-actions");
       var again = el("button", "btn btn-ghost btn-sm", T("theatre.again"));
       again.type = "button";
@@ -17778,7 +17871,16 @@ const LABS_META = {
 
   /* ---- boot ---- */
   renderPicker();
-  try { window.PlatformThreatTheatre = { scenarios: scenarios, start: startScenario, home: renderHome }; } catch (e3) {}
+  try {
+    window.PlatformThreatTheatre = {
+      scenarios: scenarios,
+      start: startScenario,
+      home: renderHome,
+      completedCount: completedCount,
+      isDone: isDone,
+      recordCompletion: recordCompletion
+    };
+  } catch (e3) {}
 })();
 /* @@THREAT_THEATRE_END@@ */
 
