@@ -7544,3 +7544,613 @@ body.search-open { overflow: hidden; }
 }
 /* END MODULE 72 · KaliGuide */
 
+/* ============================================================
+   MODULE 73 · NavPills — active + hover pills & a unified icon row
+   Three additive refinements to the top bar. All token-driven and
+   RTL-safe (logical properties only), layered LAST so nothing in the
+   earlier nav layers is removed:
+
+   1 · Active view — the scrollspy already flags the current section
+     with aria-current="true" (MODULE 32). Instead of only an underline,
+     the active link now reads as a soft accent pill (--tint-accent wash
+     + --accent-2 ink) so the current page is obvious at a glance.
+   2 · Hover — every link gains the same pill affordance (--wash-accent2),
+     turning the whole row into comfortable, clearly-targeted chips.
+   3 · Icon row — the two square toggles (search · updates) adopt the
+     exact 42px circle, wash and accent ring of the language/theme/
+     palette buttons, so the trailing controls read as one set.
+
+   Width stays budget-neutral: each pill's horizontal padding is matched
+   by an equal negative margin, so the single-line bar never grows and the
+   ≤1180px burger hand-off is untouched. Reduced motion is honoured.
+   ============================================================ */
+
+/* Links become centred flex chips so the vertical padding forms a true
+   pill — an inline <a> would ignore block padding for its background. */
+.nav-links { align-items: center; }
+.nav-links a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.3rem;
+  margin-inline: -0.3rem;   /* cancels the inline padding in layout width */
+  border-radius: 999px;
+  transition: color var(--nav-dur) var(--nav-ease),
+              background-color var(--nav-dur) var(--nav-ease);
+}
+/* Hover — a soft accent chip. The pill is the feedback, so the old
+   underline stays hidden to avoid two competing indicators. */
+.nav-links a:hover { color: var(--text); background: var(--wash-accent2); }
+/* Active view — a firmer tinted pill in the accent ink. */
+.nav-links a[aria-current="true"] { color: var(--accent-2); background: var(--tint-accent); }
+.nav-links a:hover::after,
+.nav-links a[aria-current="true"]::after { transform: scaleX(0); }
+
+/* «المزيد» shares the same chip so the row stays one visual set. */
+.nav-more-details > summary {
+  padding: 0.5rem 0.3rem;
+  margin-inline: -0.3rem;
+  border-radius: 999px;
+}
+.nav-more-details > summary:hover,
+.nav-more-details[open] > summary { background: var(--wash-accent2); }
+
+/* One density step down: tighter chips, still width-neutral. */
+@media (max-width: 1320px) {
+  .nav-links a,
+  .nav-more-details > summary { padding-inline: 0.22rem; margin-inline: -0.22rem; }
+}
+
+/* Unified trailing icon row — search & updates match the round trio. */
+.search-toggle,
+.updates-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--accent-2);
+  background: var(--wash-accent2);
+  border: 1px solid var(--line);
+}
+.search-toggle:hover,
+.updates-toggle:hover {
+  border-color: var(--accent-2);
+  background: var(--wash-accent2-hover);
+  color: var(--accent-2);
+}
+
+/* Reduced motion: the bar's link transition stays off, as everywhere else. */
+@media (prefers-reduced-motion: reduce) {
+  .nav-links a { transition: none; }
+}
+/* END MODULE 73 · NavPills */
+
+/* ============================================================
+   MODULE 74 · NavProgress — a reading-progress bar on the top bar
+   A 3px gradient line on the navbar's bottom edge that fills as the
+   current view scrolls, so the bar always shows how far through a
+   section you are. Additive layer — nothing in the earlier nav
+   layers is touched.
+
+   Pure CSS, no JavaScript (same contract as MODULE 71): the fill is
+   driven by the ROOT scroll timeline — `scroll()`, not `view()`.
+   `view()` runs while ONE element crosses the scrollport; a progress
+   bar must instead track the whole document's scroll range, which is
+   exactly what `scroll(root block)` measures. Same API family as the
+   parallax layer, correct frame of reference (see the note above
+   MODULE 71).
+
+   Opt-in twice, so it degrades cleanly:
+     · @supports — browsers without `animation-timeline` keep the bar
+       hidden at scaleX(0); a half-drawn line never appears.
+     · prefers-reduced-motion — visitors who ask for less motion get
+       no animated bar at all.
+   transform-only (scaleX) → no layout, and the width change is painted
+   on a 3px strip so the cost is negligible. RTL-safe: the bar fills
+   from the inline-start edge via transform-origin.
+   ============================================================ */
+.nav::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--grad);
+  transform: scaleX(0);
+  transform-origin: right;      /* RTL: fills from the right edge */
+  pointer-events: none;
+  z-index: 1;                   /* above the frosted fill, below content */
+}
+/* The documented trap (mirrors MODULE 71): the `animation` shorthand
+   resets animation-timeline to `auto`, so the timeline MUST be declared
+   after it or the bar never moves. linear — it is scroll-linked, never
+   eased. */
+@supports (animation-timeline: scroll(root block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .nav::after {
+      will-change: transform;
+      animation: navProgress linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+@keyframes navProgress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+/* LTR mirrors the fill direction so the bar always grows with reading. */
+[dir="ltr"] .nav::after { transform-origin: left; }
+/* END MODULE 74 · NavProgress */
+
+/* ============================================================
+   MODULE 75 · NavPolish — logo halo, CTA arrow + sheen, accent «المزيد»
+   Three small, additive touches that lift the top bar. Pure CSS,
+   layered LAST; nothing in the earlier nav layers is removed.
+
+   ⚠ i18n-safety: MODULE 22 rewrites every [data-i18n] node with
+   `el.textContent = …` (script.js), which would wipe any inline SVG
+   placed inside the CTA. So the CTA's arrow and sheen are drawn as
+   ::after / ::before pseudo-elements — pseudo content is invisible to
+   textContent, so it survives every language switch untouched.
+
+   transform / filter only → no layout. RTL-safe (logical properties +
+   a direction-aware arrow). Reduced motion is honoured.
+   ============================================================ */
+
+/* 1 · Logo halo — a soft accent glow + a hair of scale on hover. The
+      mark is decorative (the link already carries an aria-label), so
+      filter/transform here never moves layout. */
+.logo-mark {
+  transition: transform var(--nav-dur) var(--nav-ease),
+              filter var(--nav-dur) var(--nav-ease);
+}
+.logo:hover .logo-mark,
+.logo:focus-visible .logo-mark {
+  transform: scale(1.07);
+  filter: drop-shadow(0 0 9px rgb(var(--accent-2-rgb) / 0.5));
+}
+
+/* 2 · CTA arrow — a chevron drawn as a rotated border, direction-aware
+      via logical borders so it mirrors with [dir]. */
+.nav-cta::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.42em;
+  height: 0.42em;
+  border-inline-start: 2.2px solid currentColor;
+  border-block-end: 2.2px solid currentColor;
+  transform: rotate(45deg);   /* chevron pointing inline-forward */
+  margin-inline-start: 0;
+  transition: margin-inline-start var(--nav-dur) var(--nav-ease);
+}
+/* Nudge the arrow forward on hover — margin-inline-start is logical, so
+   it grows toward the reading direction in BOTH rtl and ltr. */
+.nav-cta:hover::after { margin-inline-start: 0.4rem; }
+
+/* 2b · Sheen — a light sweep across the pill on hover. The bar is
+      already `overflow:hidden`-safe here because the pseudo is clipped
+      by the button's own rounded box (no overflow set needed: the
+      sheen sits inside via inset). */
+.nav-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgb(var(--wash-media-rgb) / 0.28) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.nav-cta { position: relative; overflow: hidden; }
+.nav-cta:hover::before {
+  transform: translateX(120%);
+  transition: transform 0.7s var(--nav-ease);
+}
+
+/* 3 · «المزيد» dropdown items pick up the accent family, matching the
+      active/hover pills on the main row. */
+.nav-more-menu a:hover,
+.nav-more-menu a:focus-visible {
+  color: var(--accent-2);
+  background: var(--wash-accent2);
+}
+
+/* Reduced motion: keep the arrow, drop the animated halo/sheen/nudge. */
+@media (prefers-reduced-motion: reduce) {
+  .logo-mark,
+  .nav-cta::after { transition: none; }
+  .logo:hover .logo-mark,
+  .logo:focus-visible .logo-mark { transform: none; filter: none; }
+  .nav-cta:hover::after { margin-inline-start: 0; }
+  .nav-cta::before { display: none; }
+}
+/* END MODULE 75 · NavPolish */
+
+/* ============================================================
+   MODULE 76 · NavCluster — the trailing icon toggles in one capsule
+   The four trailing controls (search · language · theme · palette)
+   used to sit as four loose 42px circles. They now share one frosted
+   capsule, so the bar's right edge reads as a single control group
+   instead of scattered buttons — a calmer, more deliberate bar.
+
+   Additive layer. The burger is intentionally OUTSIDE the capsule
+   (it only appears ≤1180px, where the capsule is a tighter fit).
+
+   NOTE — transition ownership: MODULE 60 targets `.nav-actions >
+   button` for the shared bar timing. Wrapping the buttons in
+   .nav-cluster makes them no longer direct children, so the shared
+   duration/curve are re-applied here to keep the feel identical.
+   ============================================================ */
+.nav-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.15rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--wash-accent2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+/* The shared bar timing, re-scoped to the wrapped buttons. */
+.nav-cluster button {
+  transition-duration: var(--nav-dur);
+  transition-timing-function: var(--nav-ease);
+}
+/* Inside the capsule the per-button frosted wash is redundant — the
+   capsule already provides it — so each toggle goes transparent and
+   the hover lift is replaced by a tone change (no lift inside a fixed
+   bar, matching the CTA rule in MODULE 60). */
+.nav-cluster .search-toggle,
+.nav-cluster .lang-toggle,
+.nav-cluster .theme-toggle,
+.nav-cluster .palette-toggle {
+  background: transparent;
+  border-color: transparent;
+}
+.nav-cluster .search-toggle:hover,
+.nav-cluster .lang-toggle:hover,
+.nav-cluster .theme-toggle:hover,
+.nav-cluster .palette-toggle:hover,
+.nav-cluster .search-toggle:focus-visible,
+.nav-cluster .lang-toggle:focus-visible,
+.nav-cluster .theme-toggle:focus-visible,
+.nav-cluster .palette-toggle:focus-visible {
+  transform: none;
+  background: var(--wash-accent2-hover);
+  border-color: color-mix(in srgb, var(--accent-2) 45%, transparent);
+}
+/* A hair of separation between neighbouring toggles, except after the
+   last one — logical border so it mirrors under RTL/LTR. */
+.nav-cluster button + button { border-inline-start: 1px solid var(--line); }
+
+/* Reduced motion keeps the capsule look; only the lift is already off. */
+@media (prefers-reduced-motion: reduce) {
+  .nav-cluster button { transition: none; }
+}
+/* END MODULE 76 · NavCluster */
+
+/* ============================================================
+   MODULE 77 · QuizPolish — a calmer, softer quiz experience
+   Pure-CSS refinements layered over the EXISTING quiz classes
+   (`.q-pick`, `.q-top-bar`, `.q-progress`, `.q-option`,
+   `.q-mode-badge`, …). The quiz engine (script.js) and the markup
+   are untouched — every rule here only re-styles classes the engine
+   already emits, so no behaviour, ARIA wiring or test contract moves.
+
+   Goals: a friendlier subject picker, a brighter progress bar, a
+   glass top bar, a readable mode badge (which had no styling at
+   all), a clearer timed-mode chip, and a softer option surface.
+   All token-driven → both themes. RTL-safe (logical properties).
+   Reduced motion is honoured.
+   ============================================================ */
+
+/* 1 · Subject picker — the pill becomes a soft card with a gradient
+      lift on hover, so the entry point feels inviting. */
+.q-pick {
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.25s, background 0.25s, color 0.25s,
+              transform 0.2s, box-shadow 0.25s;
+}
+.q-pick:hover,
+.q-pick:focus-visible {
+  border-color: var(--accent-2);
+  background: linear-gradient(
+    165deg,
+    rgb(var(--accent-2-rgb) / 0.16),
+    rgb(var(--accent-rgb) / 0.10)
+  );
+  color: var(--accent-2);
+  box-shadow: 0 12px 26px -16px rgb(var(--accent-2-rgb) / 0.7);
+}
+/* The active subject keeps its chosen look even when the pointer
+   leaves it. */
+.q-pick[aria-pressed="true"],
+.q-pick.is-active {
+  border-color: var(--accent-2);
+  background: var(--wash-accent2);
+  color: var(--accent-2);
+}
+
+/* 2 · Top bar — a single frosted card so subject / mode / count /
+      score read as one header instead of loose inline spans. */
+.q-top-bar {
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--wash-accent2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 3 · Mode badge — the engine emits `.q-mode-badge` with
+      `.is-practice` / `.is-exam`, but it shipped with NO styling;
+      give each state a calm, legible chip (never colour-only — the
+      text label is always present). */
+.q-mode-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.q-mode-badge.is-practice {
+  color: var(--accent-2);
+  background: var(--wash-accent2);
+  border-color: color-mix(in srgb, var(--accent-2) 40%, transparent);
+}
+.q-mode-badge.is-exam {
+  color: var(--warn-txt);
+  background: rgb(var(--warn-rgb) / 0.14);
+  border-color: color-mix(in srgb, var(--warn) 45%, transparent);
+}
+
+/* 4 · Exam countdown chip (`.q-exam-timer`) — a tabular, calm clock. */
+.q-exam-timer {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* 5 · Progress bar — a touch taller with a soft sheen, so forward
+      motion is legible at a glance. */
+.q-progress { height: 8px; }
+.q-progress-fill {
+  background:
+    linear-gradient(90deg, rgb(var(--wash-media-rgb) / 0.28), transparent 60%),
+    var(--grad);
+  box-shadow: 0 0 12px rgb(var(--accent-2-rgb) / 0.45);
+}
+
+/* 6 · Options — a softer resting surface and a clearer selected feel;
+      the existing correct/wrong states (is-correct / is-wrong) are
+      left untouched so the answer semantics never change. */
+.q-option {
+  box-shadow: var(--shadow-sm);
+}
+.q-option:hover:not(:disabled) {
+  box-shadow: 0 10px 24px -18px rgb(var(--accent-2-rgb) / 0.8);
+}
+.q-option:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+/* 7 · The resume banner (`.q-note`) gets a quiet card so it doesn't
+      read as a stray line of coloured text. */
+.q-note {
+  padding: 0.55rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--accent-2) 35%, transparent);
+  border-radius: 12px;
+  background: var(--wash-accent2);
+}
+
+/* Reduced motion: keep the calmer surfaces, drop the transforms/sheen
+   transitions only (the progress width transition is already covered
+   by the engine's own reduced-motion handling). */
+@media (prefers-reduced-motion: reduce) {
+  .q-pick,
+  .q-pick:hover,
+  .q-pick:focus-visible,
+  .q-option { transition: none; }
+  .q-pick:hover,
+  .q-pick:focus-visible { transform: none; }
+}
+/* END MODULE 77 · QuizPolish */
+
+/* ============================================================
+   MODULE 78 · ThreatTheatre — branching scenario picker + stage
+   Layered over the section added in index.html (#theatre). The DOM
+   is built by JS (createElement/textContent); these rules only style
+   the classes it emits. Token-driven → both themes. RTL-safe (logical
+   properties). Outcome is NEVER colour-only: each result carries a
+   text badge (sound / risky / dangerous). Reduced motion honoured.
+   ============================================================ */
+.theatre-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+.theatre-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  text-align: start;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgb(var(--wash-hi-rgb) / 0.03);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: border-color 0.25s, background 0.25s, transform 0.2s, box-shadow 0.25s;
+}
+.theatre-card:hover,
+.theatre-card:focus-visible {
+  border-color: var(--accent-2);
+  background: linear-gradient(165deg, rgb(var(--accent-2-rgb) / 0.14), rgb(var(--accent-rgb) / 0.08));
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -22px rgb(var(--accent-2-rgb) / 0.75);
+}
+.theatre-card-topic {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent-2);
+}
+.theatre-card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.theatre-card-intro {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.theatre-card-go {
+  margin-top: auto;
+  padding-top: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-2);
+}
+.theatre-empty { text-align: center; color: var(--muted); margin-top: 1rem; }
+
+/* ---- stage ---- */
+.theatre-stage { margin-top: 1.5rem; }
+.theatre-play,
+.theatre-outcome {
+  max-width: 760px;
+  margin-inline: auto;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.theatre-play-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.theatre-play-topic {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-2);
+}
+.theatre-play-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--text);
+  flex: 1 1 100%;
+}
+.theatre-play-step {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--wash-accent2);
+}
+.theatre-situation {
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--text);
+  margin-bottom: 1.2rem;
+}
+.theatre-choices { display: grid; gap: 0.7rem; }
+.theatre-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-align: start;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgb(var(--wash-hi-rgb) / 0.03);
+  color: var(--text);
+  font-size: 0.98rem;
+  line-height: 1.6;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+/* A neutral leading dot keeps every choice visually parallel; the
+   outcome colour only appears AFTER a choice is made (on the stage),
+   so the learner is not colour-cued before deciding. */
+.theatre-choice::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+}
+.theatre-choice:hover,
+.theatre-choice:focus-visible {
+  border-color: var(--accent-2);
+  background: rgb(var(--accent-2-rgb) / 0.06);
+  transform: translateX(4px);
+}
+.theatre-choice:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.theatre-back { margin-top: 1.2rem; }
+
+/* ---- outcome ---- */
+.theatre-outcome-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  margin-bottom: 0.8rem;
+}
+.theatre-outcome.is-good .theatre-outcome-badge { color: var(--ok-txt); background: rgb(var(--ok-rgb) / 0.16); border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent); }
+.theatre-outcome.is-risky .theatre-outcome-badge { color: var(--warn-txt); background: rgb(var(--warn-rgb) / 0.16); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); }
+.theatre-outcome.is-bad .theatre-outcome-badge { color: var(--bad-txt); background: rgb(var(--bad-rgb) / 0.16); border: 1px solid color-mix(in srgb, var(--bad) 45%, transparent); }
+.theatre-outcome-choice {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+.theatre-outcome-why-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  margin-bottom: 0.3rem;
+}
+.theatre-outcome-why {
+  font-size: 1rem;
+  line-height: 1.9;
+  color: var(--muted);
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgb(var(--wash-hi-rgb) / 0.03);
+}
+.theatre-outcome-done { margin-top: 1rem; color: var(--muted); font-size: 0.95rem; }
+.theatre-outcome-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.2rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .theatre-card,
+  .theatre-choice { transition: none; }
+  .theatre-card:hover,
+  .theatre-card:focus-visible,
+  .theatre-choice:hover,
+  .theatre-choice:focus-visible { transform: none; }
+}
+/* END MODULE 78 · ThreatTheatre */
+

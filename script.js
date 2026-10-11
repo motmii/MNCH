@@ -4162,7 +4162,26 @@ const Lang = (() => {
       "px.front": "البيانات والهوية",
       "px.frontNote": "التحقق متعدد العوامل، التشفير، والنسخ الاحتياطي — آخر خط دفاع وأهمّه لأنه يحمي القيمة نفسها.",
       "px.note": "تأثير بصري تعليمي فقط: عند تفعيل «تقليل الحركة» في نظامك تتوقف الطبقات تمامًا ويعمل القسم بتمرير عادي.",
-      "px.still": "الحركة متوقفة الآن — تفضيلك «تقليل الحركة» مُحترم."
+      "px.still": "الحركة متوقفة الآن — تفضيلك «تقليل الحركة» مُحترم.",
+
+      "nav.theatre": "مسرح التهديدات",
+      "theatre.eyebrow": "مسرح التهديدات",
+      "theatre.title": "قرارات <em class=\"grad\">أمنية</em> تفاعلية",
+      "theatre.sub": "عش سيناريوهات واقعية خطوة بخطوة، وشاهد نتيجة كل قرار مع تفسير تعليمي فوري — كل شيء محلي في متصفحك.",
+      "theatre.empty": "لا توجد سيناريوهات متاحة حاليًا.",
+      "theatre.start": "ابدأ السيناريو",
+      "theatre.restart": "سيناريو آخر",
+      "theatre.again": "أعد المحاولة",
+      "theatre.step": "الخطوة {i}",
+      "theatre.yourChoice": "اختيارك",
+      "theatre.why": "لماذا؟",
+      "theatre.continue": "متابعة",
+      "theatre.finish": "أنهِ السيناريو",
+      "theatre.outcomeGood": "قرار سليم",
+      "theatre.outcomeRisky": "قرار محفوف بالمخاطر",
+      "theatre.outcomeBad": "قرار خطير",
+      "theatre.scenarioDone": "أكملتَ السيناريو. راجع التفسيرات أعلاه لتثبيت الدرس.",
+      "theatre.pure": "عرض تعليمي بحت — لا يتم تنفيذ أي إجراء حقيقي أو الوصول إلى أي شبكة."
     },
     en: {
       "meta.title": "Information Security Platform — Current Semester",
@@ -4898,7 +4917,26 @@ const Lang = (() => {
       "px.front": "Data & identity",
       "px.frontNote": "Multi-factor authentication, encryption and backups — the last line, and the one that protects the value itself.",
       "px.note": "Educational visual only: with \"reduce motion\" enabled the layers stop entirely and the section falls back to ordinary scrolling.",
-      "px.still": "Motion is paused right now — your \"reduce motion\" preference is respected."
+      "px.still": "Motion is paused right now — your \"reduce motion\" preference is respected.",
+
+      "nav.theatre": "Threat Theatre",
+      "theatre.eyebrow": "Threat Theatre",
+      "theatre.title": "Interactive <em class=\"grad\">security</em> decisions",
+      "theatre.sub": "Walk realistic scenarios step by step and see the outcome of each choice with an instant educational explanation — all local, in your browser.",
+      "theatre.empty": "No scenarios are available right now.",
+      "theatre.start": "Start scenario",
+      "theatre.restart": "Another scenario",
+      "theatre.again": "Try again",
+      "theatre.step": "Step {i}",
+      "theatre.yourChoice": "Your choice",
+      "theatre.why": "Why?",
+      "theatre.continue": "Continue",
+      "theatre.finish": "End scenario",
+      "theatre.outcomeGood": "Sound decision",
+      "theatre.outcomeRisky": "Risky decision",
+      "theatre.outcomeBad": "Dangerous decision",
+      "theatre.scenarioDone": "You completed the scenario. Review the explanations above to cement the lesson.",
+      "theatre.pure": "Purely educational — nothing real runs and no network is ever touched."
     },
   };
 
@@ -6187,7 +6225,7 @@ window.Lang = Lang;
     $id("hero"), $id("semester"), $id("guide"), $id("paths"), $id("skills"), $id("student"), $id("path"), $id("subjects"), $id("tools"),
     $id("labs"), $id("flash"), $id("flashcards/timed"), $id("quiz"), $id("kali"), $id("progress"),
     $id("games"), $id("redteam"), $id("ir"), $id("cryptolab"),
-    $id("depth"),
+    $id("depth"), $id("theatre"),
     $id("about"), $id("contact"), $id("lesson"),
   ].filter(Boolean);
 
@@ -17505,6 +17543,244 @@ const LABS_META = {
   } catch (e) { /* read-only window */ }
 })();
 /* @@TIMER_END@@ */
+
+
+/* ============================================================
+   MODULE 78 · ThreatTheatre — interactive branching scenarios
+   Consumes window.THREAT_SCENARIOS (data/threat-theatre.js) and walks
+   the learner through a decision tree, node by node. Every choice
+   shows an immediate bilingual outcome (good / risky / bad) plus an
+   educational explanation. Purely didactic — nothing acts, no network,
+   no stored secrets.
+
+   Contract (mirrors the platform's conventions):
+     · DOM built with createElement/textContent only — never raw HTML
+       strings, so bilingual data can never inject markup;
+     · re-renders on locale switch (Lang.onSwitch) and on view change;
+     · defensive boot for a missing mount or empty data;
+     · exposed on window.PlatformThreatTheatre for tests.
+   ============================================================ */
+(function initThreatTheatre() {
+  "use strict";
+
+  var mount = document.getElementById("theatreStage");
+  var grid = document.getElementById("theatreGrid");
+  var emptyNote = document.getElementById("theatreEmpty");
+  if (!mount || !grid) return;
+
+  /* ---- helpers ---- */
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) {}
+    return null;
+  }
+  var L10N = resolveLang();
+  function T(key, params) {
+    var s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? key : s;
+  }
+  function lang() {
+    try { return (L10N && L10N.current) || (document.documentElement.lang || "ar"); } catch (e) { return "ar"; }
+  }
+  function pick(pair) {
+    return (pair && (pair[lang()] || pair.ar || pair.en)) || "";
+  }
+
+  /* ---- scenario validation: drop broken nodes/choices, never ship them ---- */
+  function validate(list) {
+    var out = [];
+    if (!Array.isArray(list)) return out;
+    list.forEach(function (sc) {
+      if (!sc || typeof sc.id !== "string" || !sc.nodes || typeof sc.nodes !== "object") return;
+      if (!sc.nodes[sc.start]) return;
+      var nodes = {};
+      var ok = true;
+      Object.keys(sc.nodes).forEach(function (nid) {
+        var n = sc.nodes[nid];
+        if (!n || !n.text || !Array.isArray(n.choices) || !n.choices.length) { ok = false; return; }
+        var choices = [];
+        n.choices.forEach(function (c) {
+          if (!c || !c.label || !c.why || !c.outcome) { ok = false; return; }
+          if (c.outcome !== "good" && c.outcome !== "risky" && c.outcome !== "bad") { ok = false; return; }
+          if (c.next != null && !sc.nodes[c.next]) { ok = false; return; }
+          choices.push(c);
+        });
+        if (!choices.length) { ok = false; return; }
+        nodes[nid] = { text: n.text, choices: choices };
+      });
+      if (!ok) return;
+      out.push({ id: sc.id, topic: sc.topic || {}, title: sc.title || {}, intro: sc.intro || {}, start: sc.start, nodes: nodes });
+    });
+    return out;
+  }
+
+  function scenarios() {
+    try { return validate(window.THREAT_SCENARIOS); } catch (e) { return []; }
+  }
+
+  var state = { sc: null, nodeId: null, path: [] };
+
+/* TT_MODULE_CONTINUE */
+
+  /* ---- picker: the grid of scenario cards ---- */
+  function renderPicker() {
+    state.sc = null;
+    state.nodeId = null;
+    grid.textContent = "";
+    var list = scenarios();
+    if (emptyNote) emptyNote.hidden = list.length > 0;
+    mount.hidden = true;
+    mount.textContent = "";
+
+    list.forEach(function (sc) {
+      var card = el("button", "theatre-card reveal");
+      card.type = "button";
+      card.setAttribute("data-sc", sc.id);
+
+      var topic = el("span", "theatre-card-topic", pick(sc.topic));
+      var title = el("span", "theatre-card-title", pick(sc.title));
+      var intro = el("span", "theatre-card-intro", pick(sc.intro));
+      var go = el("span", "theatre-card-go", T("theatre.start"));
+
+      card.appendChild(topic);
+      card.appendChild(title);
+      card.appendChild(intro);
+      card.appendChild(go);
+      card.addEventListener("click", function () { startScenario(sc.id); });
+      grid.appendChild(card);
+    });
+  }
+
+  function outcomeLabel(kind) {
+    return kind === "good" ? T("theatre.outcomeGood")
+      : kind === "risky" ? T("theatre.outcomeRisky")
+      : T("theatre.outcomeBad");
+  }
+
+  /* ---- stage: play one scenario ---- */
+  function startScenario(id) {
+    var sc = null;
+    scenarios().forEach(function (s) { if (s.id === id) sc = s; });
+    if (!sc) { renderPicker(); return; }
+    state.sc = sc;
+    state.nodeId = sc.start;
+    grid.textContent = "";
+    mount.hidden = false;
+    renderNode();
+  }
+
+  function renderNode() {
+    var sc = state.sc;
+    if (!sc) return;
+    var node = sc.nodes[state.nodeId];
+    if (!node) { renderHome(); return; }
+    mount.textContent = "";
+
+    var wrap = el("div", "theatre-play");
+
+    /* header: title + step + topic */
+    var head = el("div", "theatre-play-head");
+    head.appendChild(el("span", "theatre-play-topic", pick(sc.topic)));
+    head.appendChild(el("h3", "theatre-play-title", pick(sc.title)));
+    /* step index = position in the walked path so far (1-based) */
+    var stepIdx = (state.path ? state.path.length : 0) + 1;
+    head.appendChild(el("span", "theatre-play-step", T("theatre.step", { i: stepIdx })));
+    wrap.appendChild(head);
+
+    /* the situation */
+    wrap.appendChild(el("p", "theatre-situation", pick(node.text)));
+
+    /* choices */
+    var opts = el("div", "theatre-choices");
+    opts.setAttribute("role", "group");
+    node.choices.forEach(function (c) {
+      var b = el("button", "theatre-choice is-" + c.outcome);
+      b.type = "button";
+      b.appendChild(el("span", "theatre-choice-label", pick(c.label)));
+      b.addEventListener("click", function () { choose(c); });
+      opts.appendChild(b);
+    });
+    wrap.appendChild(opts);
+
+    /* back to menu */
+    var back = el("button", "btn btn-ghost btn-sm theatre-back", T("theatre.restart"));
+    back.type = "button";
+    back.addEventListener("click", renderHome);
+    wrap.appendChild(back);
+
+    mount.appendChild(wrap);
+  }
+
+  function choose(c) {
+    var sc = state.sc;
+    if (!sc) return;
+    if (!state.path) state.path = [];
+    state.path.push(c.id);
+    mount.textContent = "";
+
+    var wrap = el("div", "theatre-outcome is-" + c.outcome);
+
+    wrap.appendChild(el("span", "theatre-outcome-badge", outcomeLabel(c.outcome)));
+    wrap.appendChild(el("p", "theatre-outcome-choice", pick(c.label)));
+    wrap.appendChild(el("p", "theatre-outcome-why-label", T("theatre.why")));
+    wrap.appendChild(el("p", "theatre-outcome-why", pick(c.why)));
+
+    if (c.next) {
+      var cont = el("button", "btn btn-primary btn-sm", T("theatre.continue"));
+      cont.type = "button";
+      cont.addEventListener("click", function () { state.nodeId = c.next; renderNode(); });
+      wrap.appendChild(cont);
+    } else {
+      wrap.appendChild(el("p", "theatre-outcome-done", T("theatre.scenarioDone")));
+      var row = el("div", "theatre-outcome-actions");
+      var again = el("button", "btn btn-ghost btn-sm", T("theatre.again"));
+      again.type = "button";
+      again.addEventListener("click", function () { state.path = []; state.nodeId = sc.start; renderNode(); });
+      var home = el("button", "btn btn-primary btn-sm", T("theatre.restart"));
+      home.type = "button";
+      home.addEventListener("click", renderHome);
+      row.appendChild(again);
+      row.appendChild(home);
+      wrap.appendChild(row);
+    }
+    mount.appendChild(wrap);
+  }
+
+  function renderHome() {
+    state.sc = null;
+    state.nodeId = null;
+    state.path = [];
+    renderPicker();
+  }
+
+  /* ---- wiring: rebuild on locale switch; reset when leaving the view ---- */
+  function refresh() {
+    if (state.sc) {
+      renderNode();
+    } else {
+      renderPicker();
+    }
+  }
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(refresh); } catch (e) {}
+  try {
+    document.addEventListener("nova:view-changed", function (ev) {
+      var id = ev && ev.detail && ev.detail.viewId;
+      if (id !== "theatre") { if (state.sc) renderHome(); }
+    });
+  } catch (e2) {}
+
+  /* ---- boot ---- */
+  renderPicker();
+  try { window.PlatformThreatTheatre = { scenarios: scenarios, start: startScenario, home: renderHome }; } catch (e3) {}
+})();
+/* @@THREAT_THEATRE_END@@ */
 
 
 
