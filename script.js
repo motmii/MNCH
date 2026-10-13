@@ -3508,6 +3508,18 @@ const Lang = (() => {
       "now.chipTomorrow": "غدًا",
       "now.chipInDays": "بعد {n} أيام",
       "now.noSchedule": "لا يوجد جدول دراسي متاح الآن.",
+      /* MODULE 74 · AnnouncementsBar */
+      "announce.title": "تنبيهات المواد",
+      "announce.chipLive": "الآن",
+      "announce.chipToday": "اليوم",
+      "announce.chipInDays": "بعد {n} أيام",
+      "announce.duration": "{n} دقيقة",
+      "announce.ics": "أضف للتقويم",
+      "announce.review": "راجع المادة",
+      "announce.dismiss": "إخفاء التنبيه",
+      "announce.icsQuestions": "عدد الأسئلة: {n}",
+      "announce.heroQuiz": "اختبار {name}",
+      "announce.heroQuizStarts": "{day} الساعة {time}",
       "next.title": "خطوتك التالية",
       "next.dismiss": "إخفاء",
       "next.resumeMeta": "أكملت {i} من {total} أسئلة في {sub}",
@@ -4319,6 +4331,18 @@ const Lang = (() => {
       "now.chipTomorrow": "Tomorrow",
       "now.chipInDays": "In {n} days",
       "now.noSchedule": "No scheduled classes at this moment.",
+      /* MODULE 74 · AnnouncementsBar */
+      "announce.title": "Course announcements",
+      "announce.chipLive": "Now",
+      "announce.chipToday": "Today",
+      "announce.chipInDays": "In {n} days",
+      "announce.duration": "{n} min",
+      "announce.ics": "Add to calendar",
+      "announce.review": "Review subject",
+      "announce.dismiss": "Dismiss reminder",
+      "announce.icsQuestions": "Questions: {n}",
+      "announce.heroQuiz": "{name} quiz",
+      "announce.heroQuizStarts": "{day} at {time}",
       "next.title": "Your Next Step",
       "next.dismiss": "Dismiss",
       "next.resumeMeta": "Completed {i} of {total} questions in {sub}",
@@ -14776,6 +14800,8 @@ const LABS_META = {
   const strip = document.getElementById("heroNow");
   const textEl = document.getElementById("heroNowText");
   const chipEl = document.getElementById("heroNowChip");
+  /* MODULE 74 · contextual quiz reminder chip (hidden by default). */
+  const quizEl = document.getElementById("heroNowQuiz");
   /* MODULE 61 · contextual "how do I join" link (hidden by default). */
   const guideEl = document.getElementById("heroNowGuide");
   if (!strip || !textEl) return;
@@ -14868,6 +14894,40 @@ const LABS_META = {
     return candidates.length ? { item: candidates[0].item, status: "upcoming", daysAway: candidates[0].daysAway } : null;
   }
 
+  /* MODULE 74 · nearest dated quiz/notice from announcements.js, if it is
+     live/today/within the lead window. Pure clock math, no network. Returns
+     { item, status, daysAway } or null. Defensive: missing registry → null. */
+  function findUrgentQuiz(now) {
+    let data = null;
+    try { data = (typeof window !== "undefined" && window.PLATFORM_ANNOUNCEMENTS) || null; } catch (e) { data = null; }
+    if (!data || !Array.isArray(data.items)) return null;
+    const lead = (typeof data.leadDays === "number" && data.leadDays >= 0) ? data.leadDays : 7;
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const curMin = now.getHours() * 60 + now.getMinutes();
+    let best = null;
+    data.items.forEach((a) => {
+      if (!a || typeof a.date !== "string") return;
+      const m = a.date.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return;
+      const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      if (isNaN(d.getTime())) return;
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const daysAway = Math.round((dayStart.getTime() - today.getTime()) / 86400000);
+      if (daysAway < 0 || daysAway > lead) return;
+      let status = "soon";
+      if (daysAway === 0) {
+        const sMin = parseTimeMinutes(a.startTime);
+        const eMin = parseTimeMinutes(a.endTime);
+        status = (sMin != null && eMin != null && curMin >= sMin && curMin <= eMin) ? "live" : "today";
+      }
+      const rank = status === "live" ? 0 : status === "today" ? 1 : 2;
+      if (!best || rank < best.rank || (rank === best.rank && daysAway < best.daysAway)) {
+        best = { item: a, status: status, daysAway: daysAway, rank: rank };
+      }
+    });
+    return best ? { item: best.item, status: best.status, daysAway: best.daysAway } : null;
+  }
+
   function render() {
     const now = new Date();
     const h = now.getHours();
@@ -14875,6 +14935,35 @@ const LABS_META = {
     if (h >= 5 && h < 12) greeting = T("now.greetMorning");
     else if (h >= 12 && h < 17) greeting = T("now.greetEvening");
     else if (h >= 17 || h < 5) greeting = T("now.greetNight");
+
+    /* MODULE 74 · quiz reminder chip — painted independently of the class
+       ribbon so a near/live/today exam is always surfaced. */
+    const quiz = findUrgentQuiz(now);
+    if (quizEl) {
+      if (quiz) {
+        const s = quiz.item;
+        const sName = (s.name && (s.name[curLocale()] || s.name.ar || s.name.en)) || s.title || s.id;
+        const subjName = (function () {
+          try {
+            const cs = (typeof window !== "undefined" && window.PLATFORM_CURRENT_SEMESTER) || {};
+            const subs = Array.isArray(cs.subjects) ? cs.subjects : [];
+            const hit = subs.find((x) => x && String(x.code || x.id) === String(s.subjectKey));
+            if (hit && hit.name) return hit.name[curLocale()] || hit.name.ar || hit.name.en;
+          } catch (e) {}
+          return "";
+        })();
+        const label = T("announce.heroQuiz", { name: subjName || sName });
+        let chipText = label || (subjName || sName);
+        if (quiz.status === "live") chipText = "⏰ " + (T("announce.chipLive") || "الآن") + " · " + chipText;
+        else if (quiz.status === "today") chipText = "⏰ " + (T("announce.chipToday") || "اليوم") + " · " + chipText;
+        else chipText = "⏰ " + (T("announce.chipInDays") || "بعد {n} أيام").replace("{n}", String(quiz.daysAway)) + " · " + chipText;
+        quizEl.textContent = chipText;
+        quizEl.className = "hero-now-quiz is-" + quiz.status;
+        quizEl.hidden = false;
+      } else {
+        quizEl.hidden = true;
+      }
+    }
 
     const found = findNextClass(now);
     if (!found) {
@@ -14920,7 +15009,7 @@ const LABS_META = {
   try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) {}
   setInterval(render, 60000);
 
-  window.PlatformHeroNow = { findNextClass: findNextClass, parseTimeMinutes: parseTimeMinutes };
+  window.PlatformHeroNow = { findNextClass: findNextClass, parseTimeMinutes: parseTimeMinutes, findUrgentQuiz: findUrgentQuiz };
 })();
 
 
@@ -17886,4 +17975,381 @@ const LABS_META = {
 
 
 
+
+/* ============================================================
+   MODULE 74 · AnnouncementsBar — شريط تنبيهات المواد (اختبار/موعد)
+   ------------------------------------------------------------
+   Renders dated student reminders from the single source of
+   truth `announcements.js` (window.PLATFORM_ANNOUNCEMENTS) into
+   the #announceBar banner mounted once, OUTSIDE every #hero /
+   .section view, so it stays visible on every route.
+
+   Honesty & safety contract (mirrors MODULE 53/58/69):
+   - Zero network, zero accounts, no Notification/Push APIs.
+   - All timing is computed from the visitor's own clock; a
+     reminder shows from `leadDays` before its date to the end of
+     its day, then the banner hides itself (day-granular, no
+     per-second timers).
+   - DOM built with createElement/textContent only (no raw HTML strings).
+   - Dismiss is local-only (Store key "announcements-dismissed"):
+     it never blocks a live/today exam, only the advance notice.
+   - "أضف للتقويم" hands a floating-local-time .ics to the
+     device calendar (the same RFC 5545 shape as MODULE 69),
+     because a static site cannot push real notifications.
+   - Defensive boot: any missing node/method is a silent no-op.
+   ============================================================ */
+(function initAnnouncementsBar() {
+  "use strict";
+
+  const bar = document.getElementById("announceBar");
+  const data = (typeof window !== "undefined" && window.PLATFORM_ANNOUNCEMENTS) || null;
+  /* Defensive boot: no banner mount or no data → nothing to do. */
+  if (!bar || !data || !Array.isArray(data.items)) return;
+  if (typeof document.createElement !== "function") return;
+
+  /* ---------- locale + DOM helpers (same pattern as MODULE 55/58) ---------- */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function locale() { try { return (L10N && L10N.current) || "ar"; } catch (e) { return "ar"; } }
+  function T(key, params) {
+    let s = "";
+    try { s = L10N ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    return (!s || s === key) ? "" : s;
+  }
+  function bi(v) {
+    if (v == null) return "";
+    if (typeof v !== "object") return String(v);
+    const cur = locale();
+    const s = (v[cur] != null) ? v[cur] : (v.ar != null ? v.ar : v.en);
+    return s == null ? "" : String(s);
+  }
+  function el(tag, className, text) {
+    const n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text != null) n.textContent = String(text);
+    return n;
+  }
+  function clear(node) { while (node && node.firstChild) node.removeChild(node.firstChild); }
+
+  /* ---------- local store bridge (same contract as MODULE 58) ---------- */
+  function storeGet(key) {
+    try { const S = window.PLATFORM_STORE; if (S && typeof S.get === "function") return S.get(key, null); } catch (e) {}
+    try { const raw = localStorage.getItem("motmi-portal:" + key); return raw ? JSON.parse(raw) : null; } catch (e2) { return null; }
+  }
+  function storeSet(key, value) {
+    try { const S = window.PLATFORM_STORE; if (S && typeof S.set === "function") { S.set(key, value); return; } } catch (e) {}
+    try { localStorage.setItem("motmi-portal:" + key, JSON.stringify(value)); } catch (e2) {}
+  }
+
+
+  /* ---------- pure date/time helpers ---------- */
+  function parseDate(str) {
+    if (!str || typeof str !== "string") return null;
+    const m = str.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return null;
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function parseTimeMinutes(str) {
+    if (!str || typeof str !== "string") return null;
+    const m = str.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (!m) return null;
+    let h = parseInt(m[1], 10);
+    const min = parseInt(m[2], 10);
+    const ampm = m[3] ? m[3].toUpperCase() : null;
+    if (ampm === "PM" && h < 12) h += 12;
+    if (ampm === "AM" && h === 12) h = 0;
+    return h * 60 + min;
+  }
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function daysBetween(a, b) {
+    return Math.round((startOfDay(b).getTime() - startOfDay(a).getTime()) / 86400000);
+  }
+  function pad(n, w) { return String(n).padStart(w, "0"); }
+  function fmtLongDate(iso) {
+    const d = parseDate(iso);
+    if (!d) return String(iso || "");
+    try {
+      const loc = locale() === "en" ? "en-GB" : "ar-EG";
+      return new Intl.DateTimeFormat(loc, { year: "numeric", month: "long", day: "numeric", weekday: "long" }).format(d);
+    } catch (e) { return String(iso || ""); }
+  }
+  function clockText(a) {
+    const s = a.startTime ? String(a.startTime) : "";
+    const e = a.endTime ? String(a.endTime) : "";
+    return e ? (s + " – " + e) : s;
+  }
+
+  /**
+   * Timing state for one reminder, computed purely from the clock.
+   * status: "live" (now, inside the window) | "today" (later today)
+   *        | "soon" (within leadDays) | "past" (ended → hidden)
+   * @param {Object} a Announcement item.
+   * @param {Date} now Current time.
+   * @returns {Object|null} { status, daysAway } or null when unknown date.
+   */
+  function timing(a, now) {
+    const d = parseDate(a.date);
+    if (!d) return null;
+    const daysAway = daysBetween(now, d);
+    const lead = (typeof data.leadDays === "number" && data.leadDays >= 0) ? data.leadDays : 7;
+    const startMin = parseTimeMinutes(a.startTime);
+    const endMin = parseTimeMinutes(a.endTime);
+    const curMin = now.getHours() * 60 + now.getMinutes();
+    if (daysAway < 0) return { status: "past", daysAway: daysAway };
+    if (daysAway === 0) {
+      if (startMin != null && endMin != null && curMin >= startMin && curMin <= endMin) {
+        return { status: "live", daysAway: daysAway };
+      }
+      return { status: "today", daysAway: daysAway };
+    }
+    if (daysAway <= lead) return { status: "soon", daysAway: daysAway };
+    return { status: "past", daysAway: daysAway };
+  }
+
+
+  /* ---------- .ics authoring (pure, RFC 5545, floating local time) ---------- */
+  function escapeText(v) {
+    return String(v == null ? "" : v)
+      .replace(/\\/g, "\\\\")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,")
+      .replace(/\r\n|\r|\n/g, "\\n");
+  }
+  function utf8Len(s) {
+    let n = 0;
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      if (c < 0x80) n += 1;
+      else if (c < 0x800) n += 2;
+      else if (c >= 0xD800 && c <= 0xDBFF && i + 1 < s.length) { n += 4; i++; }
+      else n += 3;
+    }
+    return n;
+  }
+  function foldLine(line) {
+    const MAX = 75;
+    const parts = [];
+    let cur = "", bytes = 0;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line.charAt(i);
+      const b = utf8Len(ch);
+      if (bytes + b > MAX) { parts.push(cur); cur = " " + ch; bytes = 1 + b; }
+      else { cur += ch; bytes += b; }
+    }
+    parts.push(cur);
+    return parts.join("\r\n");
+  }
+  function localStamp(d, min) {
+    const h = Math.floor(min / 60), m = min % 60;
+    return pad(d.getFullYear(), 4) + pad(d.getMonth() + 1, 2) + pad(d.getDate(), 2) +
+      "T" + pad(h, 2) + pad(m, 2) + "00";
+  }
+  function utcStamp(d) {
+    return pad(d.getUTCFullYear(), 4) + pad(d.getUTCMonth() + 1, 2) + pad(d.getUTCDate(), 2) +
+      "T" + pad(d.getUTCHours(), 2) + pad(d.getUTCMinutes(), 2) + pad(d.getUTCSeconds(), 2) + "Z";
+  }
+  /**
+   * One VEVENT for a single reminder — a one-off date, never repeated.
+   * @param {Object} a Announcement item.
+   * @param {Date} stamp Reference time for DTSTAMP.
+   * @returns {string} The .ics document (CRLF endings).
+   */
+  function buildIcs(a, stamp) {
+    const d = parseDate(a.date);
+    const startMin = parseTimeMinutes(a.startTime);
+    const endMin = parseTimeMinutes(a.endTime) || (startMin != null ? startMin + (a.durationMin || 0) : null);
+    const lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//MNCH//Information Security Platform//AR",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "X-WR-CALNAME:" + escapeText(bi(a.title) || (T("announce.title") || "MNCH"))
+    ];
+    if (!d || startMin == null || endMin == null) { lines.push("END:VCALENDAR"); return lines.map(foldLine).join("\r\n") + "\r\n"; }
+    const subj = subjectName(a);
+    const summary = subj ? (bi(a.title) + " — " + subj) : bi(a.title);
+    const descParts = [];
+    if (bi(a.notes)) descParts.push(bi(a.notes));
+    if (bi(a.weight)) descParts.push(bi(a.weight));
+    if (a.questions) descParts.push((T("announce.icsQuestions") || "Questions: {n}").replace("{n}", String(a.questions)) + (bi(a.questionType) ? " · " + bi(a.questionType) : ""));
+    lines.push("BEGIN:VEVENT");
+    lines.push("UID:" + escapeText(String(a.id || "announce") + "@mnch.local"));
+    lines.push("DTSTAMP:" + utcStamp(stamp || new Date()));
+    lines.push("DTSTART:" + localStamp(d, startMin));
+    lines.push("DTEND:" + localStamp(d, endMin));
+    lines.push("SUMMARY:" + escapeText(summary));
+    if (descParts.length) lines.push("DESCRIPTION:" + escapeText(descParts.join(" \n ")));
+    lines.push("END:VEVENT");
+    lines.push("END:VCALENDAR");
+    return lines.map(foldLine).join("\r\n") + "\r\n";
+  }
+  function icsFileName(a) { return "mnch-" + String(a.id || "announcement") + ".ics"; }
+  function downloadIcs(a) {
+    try {
+      if (typeof Blob !== "function" || !window.URL || typeof window.URL.createObjectURL !== "function") return false;
+      const blob = new Blob([buildIcs(a, new Date())], { type: "text/calendar;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = icsFileName(a);
+      link.rel = "noopener";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(function () { try { window.URL.revokeObjectURL(url); } catch (e) {} }, 1000);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- subject name lookup (official plan, no invention) ---------- */
+  function subjectName(a) {
+    try {
+      const cs = window.PLATFORM_CURRENT_SEMESTER || {};
+      const subs = Array.isArray(cs.subjects) ? cs.subjects : [];
+      const hit = subs.find((s) => s && String(s.code || s.id) === String(a.subjectKey));
+      if (hit && hit.name) return bi(hit.name);
+    } catch (e) {}
+    return "";
+  }
+
+  /* ---------- chip label for the countdown ---------- */
+  function chipFor(t) {
+    if (t.status === "live") return T("announce.chipLive") || "الآن";
+    if (t.status === "today") return T("announce.chipToday") || "اليوم";
+    if (t.status === "soon") return (T("announce.chipInDays") || "بعد {n} أيام").replace("{n}", String(t.daysAway));
+    return "";
+  }
+
+
+  /* ---------- dismiss bookkeeping (local only) ---------- */
+  function dismissed() {
+    const v = storeGet("announcements-dismissed");
+    return (v && typeof v === "object") ? v : {};
+  }
+  function dismiss(id) {
+    const map = dismissed();
+    map[id] = true;
+    storeSet("announcements-dismissed", map);
+  }
+
+  /** The single most urgent visible reminder right now. @param {Date} now @returns {Object|null} */
+  function pickUrgent(now) {
+    const map = dismissed();
+    let chosen = null, chosenTiming = null;
+    data.items.forEach((a) => {
+      if (!a || map[a.id]) return;
+      const t = timing(a, now);
+      if (!t || t.status === "past") return;
+      if (!chosen || t.daysAway < chosenTiming.daysAway ||
+         (t.daysAway === chosenTiming.daysAway && t.status === "live")) {
+        chosen = a; chosenTiming = t;
+      }
+    });
+    return chosen ? { item: chosen, timing: chosenTiming } : null;
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    const now = new Date();
+    clear(bar);
+    const picked = pickUrgent(now);
+    if (!picked) { bar.hidden = true; bar.setAttribute("aria-hidden", "true"); return; }
+    const chosen = picked.item, chosenTiming = picked.timing;
+    bar.hidden = false;
+    bar.setAttribute("aria-hidden", "false");
+    bar.setAttribute("data-status", chosenTiming.status);
+
+    const kind = chosen.kind === "quiz" ? "quiz" : "notice";
+    const row = el("div", "announce-row");
+
+    const ico = el("span", "announce-ico");
+    ico.setAttribute("aria-hidden", "true");
+    ico.textContent = kind === "quiz" ? "📣" : "🔔";
+    row.appendChild(ico);
+
+    const body = el("div", "announce-body");
+
+    const head = el("div", "announce-head");
+    const chip = el("span", "announce-chip announce-chip--" + chosenTiming.status, chipFor(chosenTiming));
+    head.appendChild(chip);
+    head.appendChild(el("strong", "announce-title", bi(chosen.title)));
+    body.appendChild(head);
+
+    const meta = el("p", "announce-meta");
+    const metaBits = [];
+    const subj = subjectName(chosen);
+    if (subj) metaBits.push(subj);
+    metaBits.push(fmtLongDate(chosen.date));
+    const ct = clockText(chosen);
+    if (ct) metaBits.push(ct);
+    if (chosen.durationMin) metaBits.push((T("announce.duration") || "{n} دقيقة").replace("{n}", String(chosen.durationMin)));
+    meta.textContent = metaBits.join(" · ");
+    body.appendChild(meta);
+
+    body.appendChild(el("p", "announce-notes", bi(chosen.notes)));
+
+    const actions = el("div", "announce-actions");
+
+    const icsBtn = el("button", "announce-btn announce-btn--ics", T("announce.ics") || "أضف للتقويم");
+    icsBtn.type = "button";
+    icsBtn.setAttribute("data-announce-ics", "");
+    actions.appendChild(icsBtn);
+
+    if (chosen.link) {
+      const link = el("a", "announce-btn announce-btn--link", bi(chosen.linkLabel) || (T("announce.review") || "راجع المادة"));
+      link.href = chosen.link;
+      link.setAttribute("data-announce-link", "");
+      actions.appendChild(link);
+    }
+
+    /* Dismiss only hides the advance notice; a live/today exam stays visible. */
+    if (chosenTiming.status !== "live" && chosenTiming.status !== "today") {
+      const dismissBtn = el("button", "announce-dismiss", "✕");
+      dismissBtn.type = "button";
+      dismissBtn.setAttribute("aria-label", T("announce.dismiss") || "إخفاء التنبيه");
+      dismissBtn.setAttribute("title", T("announce.dismiss") || "إخفاء التنبيه");
+      dismissBtn.setAttribute("data-announce-dismiss", "");
+      actions.appendChild(dismissBtn);
+    }
+
+    body.appendChild(actions);
+    row.appendChild(body);
+    bar.appendChild(row);
+  }
+
+  /* ---------- events (one delegated listener set, bound once) ---------- */
+  if (!bar.__announceBound && typeof bar.addEventListener === "function") {
+    bar.__announceBound = true;
+    bar.addEventListener("click", function (e) {
+      const t = e.target && e.target.closest ? e.target.closest("[data-announce-ics],[data-announce-dismiss]") : null;
+      if (!t) return;
+      const picked = pickUrgent(new Date());
+      if (!picked) return;
+      if (t.hasAttribute("data-announce-dismiss")) { dismiss(picked.item.id); render(); }
+      else if (t.hasAttribute("data-announce-ics")) { downloadIcs(picked.item); }
+    });
+  }
+
+  render();
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(render); } catch (e) {}
+
+  /* Public surface for tests and diagnostics. */
+  try {
+    window.PlatformAnnouncements = {
+      items: data.items,
+      timing: timing,
+      chipFor: chipFor,
+      buildIcs: buildIcs,
+      parseTimeMinutes: parseTimeMinutes,
+      render: render
+    };
+  } catch (e) { /* read-only window */ }
+})();
+/* @@ANNOUNCE_END@@ */
 
