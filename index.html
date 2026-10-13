@@ -52,7 +52,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..800&family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=1.30.8" />
+  <link rel="stylesheet" href="style.css?v=1.31.0" />
   <link rel="manifest" href="manifest.json" />
   <script>
     /* MODULE 36 · pre-paint theme + palette restore — runs before first paint
@@ -327,6 +327,13 @@
   </div>
 
   <main>
+  <!-- MODULE 74 · AnnouncementsBar — dated student reminders (quiz/deadline).
+       Rendered by script.js from announcements.js (single source of truth).
+       Lives OUTSIDE #hero and every .section so it stays visible on all
+       routes; hidden until a real reminder is active. aria-live=polite
+       announces a newly-surfaced exam politely. -->
+  <div class="announce-bar" id="announceBar" role="status" aria-live="polite" aria-label="تنبيهات المواد / Course announcements" hidden></div>
+
   <header class="hero is-active" id="hero">
       <!-- Animated hero background (MODULE 59). Two layers, cheapest first:
            1. .hero-bg — the still hero photo, gently drifting via CSS
@@ -361,6 +368,10 @@
           <!-- MODULE 61 contextual entry point: shown by MODULE 55 only when a
                class is live or starts today/tomorrow — one tap to the access guide. -->
           <a class="hero-now-guide" id="heroNowGuide" href="#guide" data-i18n="guide.nowCta" hidden>كيف أصل للمحاضرة؟</a>
+          <!-- MODULE 74 · contextual quiz reminder chip (hidden by default).
+               Painted by MODULE 55 only when a dated quiz in announcements.js
+               is live, today, or within the reminder window. -->
+          <a class="hero-now-quiz" id="heroNowQuiz" href="#quiz" hidden></a>
         </div>
 
         <!-- Platform identity — clear name in Arabic & English + short description -->
@@ -1662,6 +1673,7 @@
   <script src="data/flashcards.js" defer></script>
   <script src="data/threat-theatre.js" defer></script>
   <script src="current-semester.js" defer></script>
+  <script src="announcements.js" defer></script>
   <script src="script.js" defer></script>
   <script src="assistant.js" defer></script>
   <!-- SW registration must happen after script.js so navigator.serviceWorker is available.

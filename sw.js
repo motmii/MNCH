@@ -17,7 +17,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.30.8";
+const CACHE_VERSION = "v1.31.0";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
@@ -31,6 +31,7 @@ const PRECACHE_ASSETS = [
   "./script.js",
   "./assistant.js",
   "./current-semester.js",
+  "./announcements.js",
   "./manifest.json",
   "./data/quizzes.json",
   "./data/flashcards.js",
