@@ -114,8 +114,9 @@ Main IIFE ("use strict")
 ├── M40  Lessons          #lesson/<subject>/<key> — beginner lesson view
 │    │                     (explanation, key concepts, practical example,
 │    │                     common mistakes, AR/EN terminology). Embedded
-│    │                     LESSONS data (6 lessons); topics without an
-│    │                     authored lesson render an honest placeholder.
+│    │                     LESSONS data (currently empty — no authored
+│    │                     lessons yet); topics without an authored lesson
+│    │                     render an honest placeholder.
 │    ├── nextLessonLink()  Suggested next lesson from LEARNING_PATHS order
 │    ├── lessonResChips() Related quiz/tool/flash chips (topic's own res)
 │    └── initLessons()    #lesson/… hash routing (strict guard — non-lesson

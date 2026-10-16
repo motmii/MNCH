@@ -1,5 +1,5 @@
 "use strict";
-/* Palette switch — MODULE 36b (rose <-> classic). */
+/* Palette switch — MODULE 36b (slate default <-> ocean, stored as data-palette="classic"). */
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
@@ -75,11 +75,11 @@ try {
     + "var Store = { get: function(k){ try { return JSON.parse(localStorage.getItem(\"motmi-portal:\" + k)); } catch (e) { return null; } },"
     + " set: function(k, v){ try { localStorage.setItem(\"motmi-portal:\" + k, JSON.stringify(v)); } catch (e) {} } };\n";
   vm.runInContext(prelude + src, sb, { filename: "module-36b.js" });
-  check("default rose", rootEl.getAttribute("data-palette") === null);
+  check("default slate (no data-palette attribute)", rootEl.getAttribute("data-palette") === null);
   btnEl.click();
-  check("click to classic", rootEl.getAttribute("data-palette") === "classic");
+  check("click to ocean (data-palette=classic)", rootEl.getAttribute("data-palette") === "classic");
   btnEl.click();
-  check("click back to rose", rootEl.getAttribute("data-palette") === null);
+  check("click back to slate (attribute removed)", rootEl.getAttribute("data-palette") === null);
 } catch (e) { threw = e; }
 check("runs without throwing", !threw);
 if (threw) console.error("  -> " + threw.message);

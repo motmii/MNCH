@@ -1,6 +1,6 @@
 # منصة أمن المعلومات — الترم الحالي
 
-A responsive cybersecurity education platform for Information Security diploma students (دبلوم أمن المعلومات — تجسير مهني, current semester), themed in the platform's Rose palette — light-first (Rose Blush) with a dark Rose Noir option. Built as a single-page application with zero dependencies — pure HTML, CSS, and vanilla JavaScript.
+A responsive cybersecurity education platform for Information Security diploma students (دبلوم أمن المعلومات — تجسير مهني, current semester), themed in the platform's low-chroma Slate Indigo palette — dark-first (Slate Indigo is the default, following the OS preference until an explicit choice is stored) with a light Mist option, plus an orthogonal Ocean second palette. Built as a single-page application with zero dependencies — pure HTML, CSS, and vanilla JavaScript.
 
 ## ✨ Features
 
@@ -96,7 +96,7 @@ A responsive cybersecurity education platform for Information Security diploma s
 - Topic pages at `#lesson/<subject>/<lesson>`: beginner-friendly explanation, key concepts, a practical example, common mistakes, and **AR/EN terminology pairs**
 - Related practice questions, tools and labs reuse the topic's existing platform links — content is never duplicated
 - **Suggested next lesson** follows the learning-path order; topics without authored lessons show a clean, honest placeholder
-- 6 authored lessons ship today (networks ×2, crypto ×2, secure coding, ethics); the view is data-driven — add one entry to the embedded `LESSONS` object to publish more
+- No lessons are authored yet (`LESSONS` is currently empty), so every topic page shows the honest Arabic placeholder — no fabricated content; the view is data-driven, so adding one entry to the embedded `LESSONS` object publishes a lesson
 
 ### Interactive Labs (معامل المحاكاة)
 Fully in-browser, zero-dependency simulation labs (all client-side, GDPR-friendly):
