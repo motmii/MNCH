@@ -1,8 +1,12 @@
 "use strict";
-/* Palette switch — MODULE 36b (slate default <-> ocean, stored as data-palette="classic"). */
+/* v2.0.0 — ONE identity. The theme switch (MODULE 36) and the second
+   palette (MODULE 36b) were removed in the V0 OBSIDIAN overhaul: the
+   platform now always renders the obsidian dark identity, so this suite
+   guards that the switchers are gone AND that the replacement identity
+   layer (ambient CyberField canvas + GitHub CTA + frosted chrome) is
+   actually wired up. */
 const fs = require("fs");
 const path = require("path");
-const vm = require("vm");
 const root = path.join(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const css = fs.readFileSync(path.join(root, "style.css"), "utf8");
@@ -13,79 +17,45 @@ function check(name, cond) {
   if (cond) console.log("  PASS " + name);
   else { failures++; console.error("  FAIL: " + name); }
 }
-check("mounts #paletteToggle", html.includes('id="paletteToggle"'));
-check("pre-paint restores palette", html.includes("motmi-portal:palette"));
-check("classic dark tokens", css.includes('[data-palette="classic"]'));
-check("classic light tokens", css.includes('[data-palette="classic"][data-theme="light"]'));
-check("toggle styled", css.includes(".palette-toggle"));
-check("module marker", js.includes("36b"));
-check("persists palette", js.includes("palette"));
-check("runtime flips ribbon text", js.includes("on-grad"));
 
-console.log("live behaviour");
-function makeEl(id) {
-  const el = { id: id, _a: {}, _l: {},
-    setAttribute: function (k, v) { this._a[k] = String(v); },
-    getAttribute: function (k) { return (k in this._a) ? this._a[k] : null; },
-    removeAttribute: function (k) { delete this._a[k]; },
-    addEventListener: function (t, fn) { (this._l[t] = this._l[t] || []).push(fn); },
-    click: function () { (this._l.click || []).forEach(function (fn) { fn(); }); },
-    title: "",
-    style: { _p: {}, setProperty: function (k, v) { this._p[k] = v; } } };
-  return el;
-}
-const rootEl = makeEl("html");
-const btnEl = makeEl("paletteToggle");
-const metaEl = makeEl("meta");
-const store = {};
-const sb = {
-  console: console,
-  document: {
-    documentElement: rootEl,
-    getElementById: function (id) { return id === "paletteToggle" ? btnEl : null; },
-    querySelector: function (s) { return s === 'meta[name="theme-color"]' ? metaEl : null; },
-    querySelectorAll: function () { return []; },
-    addEventListener: function () {}
-  },
-  localStorage: {
-    getItem: function (k) { return (k in store) ? store[k] : null; },
-    setItem: function (k, v) { store[k] = String(v); },
-    removeItem: function (k) { delete store[k]; }
-  },
-  matchMedia: function () { return { matches: false, addEventListener: function () {} }; },
-  MutationObserver: function () { return { observe: function () {} }; },
-  setTimeout: setTimeout, clearTimeout: clearTimeout
-};
-sb.window = sb;
-sb.globalThis = sb;
-vm.createContext(sb);
-let threw = null;
-try {
-  /* Extract the MODULE 36b IIFE from the shipped script.js and run it against
-     the stub DOM. $id + Store are provided by earlier modules, so define the
-     same minimal shims the real page has at that point (Store reads/writes
-     localStorage JSON under the "motmi-portal:" prefix). */
-  const start = js.indexOf("MODULE 36b");
-  if (start === -1) throw new Error("MODULE 36b marker missing");
-  const fnStart = js.indexOf("(function () {", start);
-  const fnEnd = js.indexOf("})();", start);
-  if (fnStart === -1 || fnEnd === -1) throw new Error("MODULE 36b body not found");
-  const src = js.slice(fnStart, fnEnd + ")();".length);
-  const prelude = "function $id(id){ return document.getElementById(id); }\n"
-    + "var Store = { get: function(k){ try { return JSON.parse(localStorage.getItem(\"motmi-portal:\" + k)); } catch (e) { return null; } },"
-    + " set: function(k, v){ try { localStorage.setItem(\"motmi-portal:\" + k, JSON.stringify(v)); } catch (e) {} } };\n";
-  vm.runInContext(prelude + src, sb, { filename: "module-36b.js" });
-  check("default slate (no data-palette attribute)", rootEl.getAttribute("data-palette") === null);
-  btnEl.click();
-  check("click to ocean (data-palette=classic)", rootEl.getAttribute("data-palette") === "classic");
-  btnEl.click();
-  check("click back to slate (attribute removed)", rootEl.getAttribute("data-palette") === null);
-} catch (e) { threw = e; }
-check("runs without throwing", !threw);
-if (threw) console.error("  -> " + threw.message);
+console.log("— switchers fully removed —");
+check("no #themeToggle mount", !html.includes('id="themeToggle"'));
+check("no #paletteToggle mount", !html.includes('id="paletteToggle"'));
+check("no pre-paint theme restore", !html.includes("motmi-portal:theme"));
+check("no pre-paint palette restore", !html.includes("motmi-portal:palette"));
+check("no theme CSS anywhere", !css.includes("data-theme"));
+check("no palette CSS anywhere", !css.includes("data-palette"));
+check("toggle chrome CSS removed", !css.includes(".theme-toggle") && !css.includes(".palette-toggle"));
+check("theme module gone from script.js", !js.includes("ThemeSwitch") && !js.includes("36b"));
+check("no runtime toggle lookups", !js.includes("themeToggle") && !js.includes("paletteToggle"));
+
+console.log("— single identity is pinned —");
+check("html ships data-theme=\"dark\"", /<html[^>]*data-theme="dark"/.test(html));
+check("obsidian base token declared", css.includes("--bg: #09090B;"));
+check("neon accent family declared", css.includes("--accent: #3DF5A5;") && css.includes("--accent-2: #6EE7FF;"));
+check("glass tokens declared", css.includes("--glass: rgba(255, 255, 255, 0.03);") && css.includes("--glass-blur:"));
+check("Inter + JetBrains Mono self-hosted", css.includes('font-family: "Inter";') && css.includes('font-family: "JetBrains Mono";'));
+
+console.log("— CyberField canvas layer —");
+check("canvas mounted above the fold (first body element)", /<body[^>]*>[\s\S]{0,240}?<canvas id="cyberCanvas"/.test(html));
+check("canvas is aria-hidden and inert", /id="cyberCanvas"[^>]*aria-hidden="true"/.test(html));
+check("canvas CSS plane declared", css.includes(".cyber-canvas {") && /\.cyber-canvas\s*\{[\s\S]{0,200}z-index: -1;/.test(css));
+check("body is transparent so the canvas reads through", /body \{\s*background-color: transparent;\s*background-image: none;\s*\}/.test(css));
+check("CyberField module shipped", js.includes("MODULE 80 · CyberField") && js.includes("window.PlatformCyberField"));
+check("canvas module guards for reduced motion", /prefers-reduced-motion/.test(js.slice(js.indexOf("MODULE 80 · CyberField"))));
+check("canvas module pauses when hidden", /visibilitychange/.test(js.slice(js.indexOf("MODULE 80 · CyberField"))));
+check("canvas module caps DPR (perf guard)", /Math\.min\(window\.devicePixelRatio \|\| 1, 2\)/.test(js));
+check("accent colours read from the live tokens", /--accent-rgb/.test(js.slice(js.indexOf("MODULE 80 · CyberField"))));
+
+console.log("— View on GitHub CTA —");
+check("GitHub CTA mounted in the navbar", html.includes('class="btn btn-ghost btn-sm nav-gh"'));
+check("CTA targets the repository", html.includes('href="https://github.com/motmii/MNCH"'));
+check("external link is safely attributed", html.includes('rel="noopener noreferrer"'));
+check("CTA styled per chrome state", css.includes(".nav:not(.is-scrolled) .nav-gh") && css.includes(".nav.is-scrolled .nav-gh"));
 
 const m = /CACHE_VERSION\s*=\s*"v(\d+)\.(\d+)\.(\d+)"/.exec(sw);
-check("cache bumped", !!m && (+m[1] > 1 || (+m[1] === 1 && (+m[2] > 22 || (+m[2] === 22 && +m[3] >= 24)))));
+check("cache bumped to >= v2.0.0", !!m && +m[1] >= 2);
+check("new typefaces precached",
+  sw.includes('"./fonts/inter-latin.woff2"') && sw.includes('"./fonts/jetbrains-mono-latin.woff2"'));
 console.log(failures ? "FAIL " + failures : "ALL PASS");
 process.exit(failures ? 1 : 0);
-

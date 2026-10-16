@@ -1,29 +1,70 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
-    <linearGradient id="bgDES" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
-    <filter id="gD1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="sd-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B0E13"/><stop offset="1" stop-color="#101828"/></linearGradient>
+    <radialGradient id="sd-amb" cx="0.5" cy="0.42" r="0.62"><stop offset="0" stop-color="#9FB0EE" stop-opacity="0.09"/><stop offset="1" stop-color="#9FB0EE" stop-opacity="0"/></radialGradient>
+    <radialGradient id="sd-amb2" cx="0.14" cy="0.85" r="0.5"><stop offset="0" stop-color="#4DD8E8" stop-opacity="0.05"/><stop offset="1" stop-color="#4DD8E8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="sd-vig" cx="0.5" cy="0.44" r="0.82"><stop offset="0.58" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.55"/></radialGradient>
+    <linearGradient id="sd-pcb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0D1B33"/><stop offset="0.55" stop-color="#081120"/><stop offset="1" stop-color="#060D18"/></linearGradient>
+    <linearGradient id="sd-chip" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B2637"/><stop offset="1" stop-color="#0B1220"/></linearGradient>
+    <linearGradient id="sd-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D3D9E0"/><stop offset="1" stop-color="#7E8791"/></linearGradient>
+    <linearGradient id="sd-lock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A9B8F5"/><stop offset="1" stop-color="#5A6DC8"/></linearGradient>
+    <linearGradient id="sd-cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E353E"/><stop offset="1" stop-color="#161B21"/></linearGradient>
+    <filter id="sd-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="sd-b2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="sd-noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
   </defs>
-  <rect width="800" height="600" fill="url(#bgDES)"/>
-  <rect x="120" y="70" width="560" height="470" rx="10" fill="#10161D" stroke="#1F2733" stroke-width="2"/>
-  <rect x="120" y="70" width="560" height="36" rx="10" fill="#1F2733"/>
-  <circle cx="145" cy="88" r="6" fill="#F08A8A" opacity="0.8"/>
-  <circle cx="168" cy="88" r="6" fill="#E9C46A" opacity="0.8"/>
-  <circle cx="191" cy="88" r="6" fill="#5FD69B" opacity="0.8"/>
-  <text x="220" y="93" font-family="monospace" font-size="12" fill="#B49FE0">design-principles — defense in depth</text>
-  <path d="M400 390 m-95-30 a95 95 0 1 1 190 0" fill="none" stroke="#C3C9F2" stroke-width="2.5" filter="url(#gD1)"/>
-  <path d="M400 390 m-70-22 a70 70 0 1 1 140 0" fill="none" stroke="#B49FE0" stroke-width="2.5"/>
-  <path d="M400 390 m-45-14 a45 45 0 1 1 90 0" fill="none" stroke="#9FB0EE" stroke-width="2.5"/>
-  <path d="M400 390 m-22-7 a22 22 0 1 1 44 0" fill="none" stroke="#C3C9F2" stroke-width="2.5"/>
-  <circle cx="400" cy="390" r="5" fill="#C3C9F2"/>
-  <text x="268" y="336" font-family="monospace" font-size="10" fill="#C3C9F2" text-anchor="middle">البيانات</text>
-  <text x="268" y="352" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">التطبيق</text>
-  <text x="268" y="368" font-family="monospace" font-size="10" fill="#9FB0EE" text-anchor="middle">الشبكة</text>
-  <text x="268" y="384" font-family="monospace" font-size="10" fill="#C3C9F2" text-anchor="middle">المحيط</text>
-  <text x="520" y="352" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">أقل صلاحية</text>
-  <text x="520" y="368" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">تقسيم وفصل</text>
-  <text x="520" y="384" font-family="monospace" font-size="10" fill="#B49FE0" text-anchor="middle">مراجعة دورية</text>
-  <g font-family="monospace" font-size="9" fill="#C3C9F2" opacity="0.16">
-    <text x="150" y="480">SECURITY BY DESIGN — الخصوصية والأمان من التصميم</text>
-    <text x="330" y="505">PRINCIPLE: LEAST PRIVILEGE · ZERO TRUST · DEFENSE IN DEPTH</text>
+  <rect width="800" height="600" fill="url(#sd-bg)"/>
+  <rect width="800" height="600" fill="url(#sd-amb)"/>
+  <rect width="800" height="600" fill="url(#sd-amb2)"/>
+  <polygon points="0,0 190,0 60,600 0,600" fill="#C3C9F2" opacity="0.035"/>
+  <polygon points="230,0 400,0 260,600 120,600" fill="#C3C9F2" opacity="0.02"/>
+  <g transform="rotate(-2 400 360)">
+    <rect x="84" y="184" width="660" height="380" rx="18" fill="#04060A" opacity="0.6" filter="url(#sd-b1)"/>
+    <rect x="70" y="170" width="660" height="380" rx="18" fill="url(#sd-pcb)" stroke="#1E3050" stroke-width="1.5"/>
+    <g stroke="#C9A96A" stroke-width="1.2" fill="none" opacity="0.35" stroke-linejoin="round">
+      <path d="M140 210 H240 L270 240 H330"/><path d="M660 500 H560 L530 470 H470"/><path d="M150 500 H250 L280 470 H330"/><path d="M640 220 H560 L520 250 H460"/><path d="M120 350 H200"/><path d="M680 380 H600 L570 350 H520"/>
+    </g>
+    <g fill="#060C18" stroke="#C9A96A" stroke-width="1" opacity="0.65"><circle cx="240" cy="210" r="2.4"/><circle cx="270" cy="240" r="2.4"/><circle cx="560" cy="500" r="2.4"/><circle cx="530" cy="470" r="2.4"/><circle cx="250" cy="500" r="2.4"/><circle cx="560" cy="220" r="2.4"/><circle cx="200" cy="350" r="2.4"/><circle cx="600" cy="380" r="2.4"/></g>
+    <g stroke="#9FB0EE" stroke-width="1.4" fill="none" opacity="0.38" stroke-dasharray="6 7">
+      <path d="M130 480 C240 450 280 400 348 356"/><path d="M140 210 C250 240 290 280 350 306"/><path d="M670 460 C560 440 510 400 452 360"/><path d="M660 220 C550 250 500 290 452 310"/>
+    </g>
+    <g fill="#9FB0EE" opacity="0.5"><circle cx="248" cy="412" r="1.8"/><circle cx="255" cy="258" r="1.8"/><circle cx="562" cy="416" r="1.8"/><circle cx="548" cy="262" r="1.8"/></g>
+    <circle cx="400" cy="330" r="200" fill="none" stroke="#56607A" stroke-width="1.5" opacity="0.35"/>
+    <circle cx="400" cy="330" r="160" fill="none" stroke="#8E79D6" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="400" cy="330" r="118" fill="none" stroke="#9FB0EE" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="400" cy="330" r="78" fill="none" stroke="#5FD69B" stroke-width="6" opacity="0.15" filter="url(#sd-b2)"/>
+    <circle cx="400" cy="330" r="78" fill="none" stroke="#5FD69B" stroke-width="1.5" opacity="0.55"/>
+    <rect x="320" y="250" width="160" height="160" rx="18" fill="#5FD69B" opacity="0.13" filter="url(#sd-b2)"/>
+    <rect x="336" y="266" width="128" height="128" rx="14" fill="url(#sd-chip)" stroke="#33507A" stroke-width="1.5"/>
+    <g fill="#C9A96A" opacity="0.8"><rect x="330" y="286" width="6" height="10" rx="2"/><rect x="330" y="302" width="6" height="10" rx="2"/><rect x="330" y="318" width="6" height="10" rx="2"/><rect x="330" y="334" width="6" height="10" rx="2"/><rect x="330" y="350" width="6" height="10" rx="2"/><rect x="330" y="366" width="6" height="10" rx="2"/><rect x="330" y="382" width="6" height="10" rx="2"/><rect x="464" y="286" width="6" height="10" rx="2"/><rect x="464" y="302" width="6" height="10" rx="2"/><rect x="464" y="318" width="6" height="10" rx="2"/><rect x="464" y="334" width="6" height="10" rx="2"/><rect x="464" y="350" width="6" height="10" rx="2"/><rect x="464" y="366" width="6" height="10" rx="2"/><rect x="464" y="382" width="6" height="10" rx="2"/><rect x="352" y="260" width="10" height="5" rx="2"/><rect x="368" y="260" width="10" height="5" rx="2"/><rect x="384" y="260" width="10" height="5" rx="2"/><rect x="400" y="260" width="10" height="5" rx="2"/><rect x="416" y="260" width="10" height="5" rx="2"/><rect x="432" y="260" width="10" height="5" rx="2"/><rect x="352" y="395" width="10" height="5" rx="2"/><rect x="368" y="395" width="10" height="5" rx="2"/><rect x="384" y="395" width="10" height="5" rx="2"/><rect x="400" y="395" width="10" height="5" rx="2"/><rect x="416" y="395" width="10" height="5" rx="2"/><rect x="432" y="395" width="10" height="5" rx="2"/></g>
+    <path d="M382 316 v-12 a18 18 0 0 1 36 0 v12" fill="none" stroke="url(#sd-metal)" stroke-width="7" stroke-linecap="round"/>
+    <rect x="374" y="314" width="52" height="42" rx="7" fill="url(#sd-lock)"/>
+    <rect x="378" y="318" width="44" height="3" rx="1.5" fill="#FFFFFF" opacity="0.3"/>
+    <circle cx="400" cy="330" r="5" fill="#0B1220"/>
+    <rect x="397" y="333" width="6" height="11" rx="3" fill="#0B1220"/>
+    <text x="400" y="232" font-size="9" letter-spacing="3" fill="#6E7FD8" opacity="0.8" text-anchor="middle">SECURITY CORE</text>
+    <text x="400" y="246" font-size="6.5" letter-spacing="2" fill="#56607A" text-anchor="middle">DEFENSE IN DEPTH</text>
+    <rect x="378" y="400" width="64" height="16" rx="3" fill="#0A1220" stroke="#5FD69B" stroke-width="1" opacity="0.85"/>
+    <text x="410" y="411" font-size="6.5" letter-spacing="1.2" fill="#5FD69B" text-anchor="middle">DATA</text>
+    <rect x="358" y="440" width="64" height="16" rx="3" fill="#0A1220" stroke="#9FB0EE" stroke-width="1" opacity="0.85"/>
+    <text x="390" y="451" font-size="6.5" letter-spacing="1.2" fill="#9FB0EE" text-anchor="middle">HOST</text>
+    <rect x="378" y="480" width="64" height="16" rx="3" fill="#0A1220" stroke="#8E79D6" stroke-width="1" opacity="0.85"/>
+    <text x="410" y="491" font-size="6.5" letter-spacing="1.2" fill="#8E79D6" text-anchor="middle">NETWORK</text>
+    <rect x="358" y="520" width="64" height="16" rx="3" fill="#0A1220" stroke="#56607A" stroke-width="1" opacity="0.85"/>
+    <text x="390" y="531" font-size="6.5" letter-spacing="1.2" fill="#7A86A0" text-anchor="middle">PERIMETER</text>
+    <rect x="150" y="240" width="46" height="30" rx="4" fill="#10192B" stroke="#23375A" stroke-width="1"/>
+    <g fill="#23375A"><rect x="156" y="270" width="5" height="6"/><rect x="166" y="270" width="5" height="6"/><rect x="176" y="270" width="5" height="6"/><rect x="186" y="270" width="5" height="6"/></g>
+    <text x="173" y="259" font-size="7" fill="#7A8BB0" text-anchor="middle">FW</text>
+    <rect x="610" y="470" width="46" height="30" rx="4" fill="#10192B" stroke="#23375A" stroke-width="1"/>
+    <g fill="#23375A"><rect x="616" y="500" width="5" height="6"/><rect x="626" y="500" width="5" height="6"/><rect x="636" y="500" width="5" height="6"/><rect x="646" y="500" width="5" height="6"/></g>
+    <text x="633" y="489" font-size="7" fill="#7A8BB0" text-anchor="middle">IDS</text>
+    <g><rect x="206" y="424" width="9" height="14" rx="2" fill="url(#sd-cap)"/><ellipse cx="210.5" cy="424" rx="4.5" ry="2.1" fill="#C9CFD6"/><rect x="220" y="424" width="9" height="14" rx="2" fill="url(#sd-cap)"/><ellipse cx="224.5" cy="424" rx="4.5" ry="2.1" fill="#C9CFD6"/></g>
+    <g><rect x="596" y="294" width="9" height="14" rx="2" fill="url(#sd-cap)"/><ellipse cx="600.5" cy="294" rx="4.5" ry="2.1" fill="#C9CFD6"/><rect x="610" y="294" width="9" height="14" rx="2" fill="url(#sd-cap)"/><ellipse cx="614.5" cy="294" rx="4.5" ry="2.1" fill="#C9CFD6"/></g>
+    <g><rect x="296" y="494" width="9" height="14" rx="2" fill="url(#sd-cap)"/><ellipse cx="300.5" cy="494" rx="4.5" ry="2.1" fill="#C9CFD6"/></g>
+    <circle cx="180" cy="200" r="9" fill="#4DD8E8" opacity="0.25" filter="url(#sd-b2)"/><circle cx="180" cy="200" r="2.6" fill="#4DD8E8"/>
+    <circle cx="620" cy="240" r="9" fill="#FFB86B" opacity="0.25" filter="url(#sd-b2)"/><circle cx="620" cy="240" r="2.6" fill="#FFB86B"/>
+    <circle cx="520" cy="520" r="8" fill="#F08A8A" opacity="0.25" filter="url(#sd-b2)"/><circle cx="520" cy="520" r="2.2" fill="#F08A8A"/>
   </g>
+  <rect width="800" height="600" filter="url(#sd-noise)" opacity="0.05"/>
+  <rect width="800" height="600" fill="url(#sd-vig)"/>
 </svg>

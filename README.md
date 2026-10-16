@@ -1,6 +1,6 @@
 # منصة أمن المعلومات — الترم الحالي
 
-A responsive cybersecurity education platform for Information Security diploma students (دبلوم أمن المعلومات — تجسير مهني, current semester), themed in the platform's low-chroma Slate Indigo palette — dark-first (Slate Indigo is the default, following the OS preference until an explicit choice is stored) with a light Mist option, plus an orthogonal Ocean second palette. Built as a single-page application with zero dependencies — pure HTML, CSS, and vanilla JavaScript.
+A responsive cybersecurity education platform for Information Security diploma students (دبلوم أمن المعلومات — تجسير مهني, current semester), themed in the platform's **V0 Obsidian** identity — a dark-only `#09090b` canvas with one neon instrument accent family (neon green · cyber cyan · glow purple), hairline structure, frosted-glass chrome, and an interactive particle-network background (MODULE 80 · CyberField). Built as a single-page application with zero dependencies — pure HTML, CSS, and vanilla JavaScript.
 
 ## ✨ Features
 
@@ -140,8 +140,8 @@ python -m http.server 8080
 ```
 nova-studio/
 ├── index.html          # Main page (RTL Arabic) — includes Learning Paths, Labs hub, IR center, Progress & About
-├── style.css           # Full stylesheet (dark + light themes, RTL)
-├── script.js           # All application logic (modular IIFE) incl. MODULE 36/37/39/40 (theme, paths/progress, structured paths, lessons + quiz upgrades) + Red Team · IR · Crypto labs
+├── style.css           # Full stylesheet (V0 Obsidian identity · RTL · glass & neon layers · MODULE 80)
+├── script.js           # All application logic (modular IIFE) incl. MODULE 80 CyberField canvas, learning paths (39) & lessons (40) + Red Team · IR · Crypto labs
 ├── current-semester.js # Official current-semester curriculum data (window.PLATFORM_CURRENT_SEMESTER) — consumed by the #semester dashboard (MODULE 43)
 ├── assistant.js        # AI assistant — MODULE 33 (local engine + widget UI)
 ├── worker.js           # Web Worker (entropy/hash off the main thread)
@@ -190,50 +190,66 @@ Released under the [MIT License](LICENSE) — free to use, study, modify and sha
 
 ## 🎨 Design System
 
-Both palettes are built on a **single low-chroma slate-indigo family** — the
-canvas is a desaturated blue-slate and the accents are three closely-spaced
-indigo/violet tones. Low chroma is the whole point: nothing on the page is
-allowed to shout, and the cards lift only ~4% in lightness off the canvas so
-the page reads as one surface rather than a stack of boxes.
+The identity is **V0 Obsidian** (v2.0.0) — a near-black `#09090b` canvas with
+one neon instrument accent family (neon green · cyber cyan · glow purple),
+hairline `rgba(255,255,255,0.1)` structure, and true frosted glass on the
+navbar, overlays and foreground cards. It is **dark-only by design**: the
+former light theme (Parchment) and the second palette (Ocean) were removed
+in v2.0.0, so the platform ships one carefully built identity — `:root`
+holds it, `<html data-theme="dark">` pins it, and there is no pre-paint
+theme script at all (nothing to flash).
 
-Every text/background pair was measured against WCAG AA (text ≥ 4.5:1,
-non-text ≥ 3:1) in all four combinations (2 themes × 2 palettes); the worst
-pair in the set sits at **4.5:1**. Semantic states (ok / bad / warn) stay
-outside the accent hue so meaning survives the repaint, and the primary
-ribbon (`--grad`) stays light in *both* themes so it always carries dark
-ink at 6.9–9.4:1.
+Every text/background pair was measured against WCAG AA on the obsidian
+surfaces; the worst text pair in the set sits at **5.7:1** (`--dim` on
+`--surface`). Semantic states (ok / bad / warn) stay outside the accent hue
+so meaning never rides the neon, and the primary ribbon (`--grad`) stays
+light in the single theme so it always carries dark ink (`--on-grad`).
 
-| Token | Light · Mist | Dark · Slate Indigo (default) | Usage |
-|-------|--------------|-------------------------------|-------|
-| `--bg` | `#F2F4F8` | `#0E1116` | Page background |
-| `--surface` / `--surface-2` | `#FFFFFF` / `#F5F7FA` | `#171D26` / `#1F2733` | Cards & alt fills |
-| `--text` / `--muted` | `#141922` / `#4A5568` | `#E6EAF2` / `#A8B2C1` | Body & secondary text |
-| `--accent` | `#3F4FA8` (7.3:1) | `#9FB0EE` (8.0:1) | Primary accent |
-| `--accent-2` | `#2E3A8C` (10.0:1) | `#C3C9F2` (10.5:1) | Secondary accent |
-| `--accent-3` | `#5B3F9E` (7.9:1) | `#B49FE0` (7.2:1) | Tertiary accent (soft violet) |
-| `--grad` | `linear-gradient(100deg, #A9B6F2, #97A5EE 52%, #8B9AE6)` — identical in both themes, carries **ink** text (`--on-grad`, 6.9–9.4:1) | | Primary buttons / brand ribbon |
-| `--accent-rgb` | `63 79 168` | `159 176 238` | Feeds `rgb(var(--accent-rgb) / α)` washes so translucent tints follow the theme |
-| `--ok` / `--bad` / `--warn` | `#157F4B` / `#B32424` / `#8A5A00` | `#5FD69B` / `#F08A8A` / `#E9C46A` | Semantic states — intentionally **not** indigo |
-| `--on-media` / `--on-media-2` | `#F1F4F9` / `#C2CCDB` (same in both) | | Ink over the hero photo, which always carries a dark scrim |
-| `--hue-sat` / `--hue-light` | `46%` / `40%` | `34%` / `72%` | The five per-subject accent hues are declared in `script.js`; only the hue travels in JS, so the same ramp re-pitches itself per theme |
-| `--shadow-rgb` | `20 30 48` | `4 7 12` | Every shadow and dark scrim composes its alpha from this one ink |
-| `--font-display` | Space Grotesk / Tajawal | | Headings |
-| `--font-body` | Inter / Tajawal | | Body text |
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--bg` | `#09090B` | Page background (html paints it; body stays transparent) |
+| `--surface` / `--surface-2` | `#101014` / `#17171C` | Cards & alt fills |
+| `--text` / `--muted` / `--dim` | `#FAFAFA` / `#A1A1AA` / `#8B8B95` | Body, secondary & tertiary text (17.9:1 · 7.2:1 · 5.7:1) |
+| `--accent` | `#3DF5A5` (12.7:1) | Primary accent — neon green (actions, focus, data) |
+| `--accent-2` | `#6EE7FF` (12.3:1) | Cyber cyan — eyebrow/heading text & secondary marks |
+| `--accent-3` | `#B79CFF` (7.6:1) | Glow purple — tertiary marks |
+| `--grad` | `linear-gradient(135deg, #3DF5A5, #2BD98F 55%, #17BF7C)` — carries **ink** text (`--on-grad` `#04150D`) | Primary buttons / brand ribbon |
+| `--glass` / `--glass-blur` | `rgba(255,255,255,0.03)` / `blur(14px) saturate(1.35)` | Glassmorphism (navbar, cluster, overlays, command centre) |
+| `--ok` / `--bad` / `--warn` | `#4ADE80` / `#F87171` / `#FBBF24` | Semantic states — intentionally **not** the accent |
+| `--on-media` / `--on-media-2` | `#F4F4F5` / `#A1A1AA` | Ink over the hero photo, which always carries a dark scrim |
+| `--hue-sat` / `--hue-light` | `68%` / `64%` | Five per-subject accent hues declared in `script.js`; only the hue travels in JS, so the ramp follows the identity for free |
+| `--shadow-rgb` | `0 0 0` | Every shadow and dark scrim composes its alpha from this one ink |
+| `--font-display` / `--font-body` | `"Inter"` with `"IBM Plex Sans Arabic"` for Arabic glyphs (both self-hosted) | Headings & body — Inter ships no Arabic, so the pair is seamless |
+| `--font-mono` | `"JetBrains Mono"` (self-hosted, variable) | Data, codes, micro-labels |
 
-Slate Indigo + Mist themes · Glassmorphism · RTL layout · Custom cursor · Particle canvas
+**Ambient CyberField canvas (MODULE 80)**: a fixed `<canvas id="cyberCanvas">`
+sits at `z-index: -1` behind every section — a slow particle constellation
+(40–96 nodes by viewport area, device-pixel-ratio capped at 2) that links
+nearby nodes and leans toward the pointer. It reads its colours from the
+live tokens (`--accent-rgb` / `--accent-2-rgb`), pauses on a hidden tab,
+draws a single static frame under `prefers-reduced-motion`, and is fully
+pointer-inert (`pointer-events: none`, `aria-hidden="true"`). The `html`
+element paints the obsidian wash + engineering grid while `body` stays
+transparent, so the field reads through every glass surface above it
+without ever sitting above content.
 
-**Navbar & brand (MODULE 60)**: the top bar is one fixed, frosted surface with
-three groups — logo lockup · links (`المزيد` dropdown + updates trigger) ·
-actions (search · language · theme · burger). The logo is the **same shield
-mark the favicon & PWA icon use**, inlined and theme-tinted (no extra asset),
-beside a gradient wordmark; Arabic text keeps `letter-spacing: 0` because
-tracking would break the letter joins. One **primary CTA** (`nav.cta` → `#paths`)
-closes the bar: outlined over the hero photo, filled once the bar frosts, and
-hidden ≤1180px where the mobile menu already carries it.
+**Navbar & brand (MODULE 60 + MODULE 80)**: the top bar is one fixed,
+frosted surface with three groups — logo lockup · links (`المزيد` dropdown
++ updates trigger) · actions (search · language · burger) — plus a
+**View on GitHub** ghost CTA (`nav-gh` → `https://github.com/motmii/MNCH`)
+that sits beside the primary CTA and collapses to an icon-only circle on
+narrow bars. The logo is the **same shield mark the favicon & PWA icon
+use**, inlined and token-tinted (no extra asset), beside a gradient
+wordmark; Arabic text keeps `letter-spacing: 0` because tracking would
+break the letter joins. One **primary CTA** (`nav.cta` → `#paths`) closes
+the bar: outlined over the hero photo, filled once the bar frosts, and
+hidden ≤1180px where the mobile menu already carries it. The scrolled bar,
+the `.nav-cluster` capsule, the `.nav-more-menu` dropdown and the mobile
+drawer are all true glass (`backdrop-filter: var(--glass-blur)`), and the
+hero media loop is dimmed to a faint texture behind the neon typography
+while keeping the MODULE 59 media contract intact.
 
-**Theme switcher**: a navbar toggle flips between the dark **Slate Indigo** theme (the default) and the light **Mist** theme. The choice is persisted and an explicit stored choice always wins; with no stored choice the page boots dark and then follows the OS `prefers-color-scheme` live (a pre-paint script resolves the theme before the first paint, so there is never a flash of the wrong theme). Because `:root` itself holds the dark tokens, a missing `data-theme` can never flash a light page on a dark shell.
-
-**Palette switcher (MODULE 36b)**: a second navbar toggle (🎨 لوحة الألوان) flips between the default **Slate** palette and the **Ocean** palette (a calm deep-teal set). It is orthogonal to the theme switcher — the Ocean token set applies in both dark and light modes — persists under `motmi-portal:palette`, and restores pre-paint. Both palettes keep a light primary ribbon, so `--on-grad` stays dark ink and contrast holds at AA in either one.
+V0 Obsidian single identity · CyberField particle canvas · Frosted glass chrome · RTL layout · Custom cursor · GitHub CTA
 
 ## ♿ Accessibility
 

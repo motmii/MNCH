@@ -1,22 +1,85 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
-    <linearGradient id="bgK4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
+    <linearGradient id="vs-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0D12"/><stop offset="1" stop-color="#12161D"/></linearGradient>
+    <radialGradient id="vs-amb" cx="0.5" cy="0.3" r="0.65"><stop offset="0" stop-color="#6FA8F5" stop-opacity="0.06"/><stop offset="1" stop-color="#6FA8F5" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vs-vig" cx="0.5" cy="0.45" r="0.8"><stop offset="0.62" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.5"/></radialGradient>
+    <linearGradient id="vs-title" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2F3F5"/><stop offset="1" stop-color="#DFE2E6"/></linearGradient>
+    <filter id="vs-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="vs-b2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4"/></filter>
   </defs>
-  <rect width="800" height="500" fill="url(#bgK4)"/>
-  <rect x="100" y="60" width="250" height="380" rx="8" fill="#10161D" stroke="#2B3644" stroke-width="2"/>
-  <text x="120" y="95" font-family="monospace" font-size="12" fill="#9FB0EE">Kali-Linux</text>
-  <text x="120" y="125" font-family="monospace" font-size="11" fill="#A9C6F5">⚙ Settings</text>
-  <text x="120" y="150" font-family="monospace" font-size="11" fill="#A8B2C1">▸ System</text>
-  <text x="120" y="175" font-family="monospace" font-size="11" fill="#C3C9F2">▸ Storage ◂</text>
-  <text x="120" y="200" font-family="monospace" font-size="11" fill="#A8B2C1">▸ Network (NAT)</text>
-  <rect x="370" y="60" width="330" height="380" rx="8" fill="#141A21" stroke="#9FB0EE" stroke-width="2"/>
-  <text x="395" y="100" font-family="monospace" font-size="12" fill="#C3C9F2">Controller: IDE</text>
-  <rect x="395" y="120" width="280" height="60" rx="8" fill="#161E29" stroke="#A9C6F5" stroke-width="2"/>
-  <text x="410" y="145" font-family="monospace" font-size="11" fill="#A9C6F5">💿 kali-linux.iso ✓</text>
-  <text x="410" y="165" font-family="monospace" font-size="10" fill="#A8B2C1">Choose a disk file…</text>
-  <rect x="395" y="200" width="280" height="50" rx="8" fill="#161E29" stroke="#3A4757"/>
-  <text x="410" y="222" font-family="monospace" font-size="11" fill="#A8B2C1">Kali.vdi — 60 GB NVMe</text>
-  <text x="410" y="242" font-family="monospace" font-size="10" fill="#8FE3B8">✓ Optical drive selected</text>
-  <rect x="395" y="290" width="120" height="36" rx="8" fill="#2F7D52"/>
-  <text x="425" y="313" font-family="monospace" font-size="12" fill="#fff">OK</text>
+  <rect width="800" height="500" fill="url(#vs-bg)"/>
+  <rect width="800" height="500" fill="url(#vs-amb)"/>
+  <rect x="74" y="53" width="680" height="430" rx="10" fill="#05070C" opacity="0.6" filter="url(#vs-b1)"/>
+  <rect x="60" y="35" width="680" height="430" rx="8" fill="#E7E9EC" stroke="#A9AEB6" stroke-width="1"/>
+  <path d="M60 43 a8 8 0 0 1 8-8 h664 a8 8 0 0 1 8 8 v26 H60 z" fill="url(#vs-title)"/>
+  <line x1="60" y1="69" x2="740" y2="69" stroke="#C9CDD4" stroke-width="1"/>
+  <text x="400" y="56" font-size="11.5" fill="#2A2F36" text-anchor="middle">Settings - Kali-Linux</text>
+  <path d="M694 56 h10" stroke="#5A616B" stroke-width="1.5"/>
+  <rect x="714" y="51" width="9" height="9" rx="1.5" fill="none" stroke="#5A616B" stroke-width="1.5"/>
+  <path d="M732 51 l9 9 M741 51 l-9 9" stroke="#5A616B" stroke-width="1.5"/>
+  <rect x="60" y="69" width="180" height="361" fill="#F3F4F6"/>
+  <line x1="240" y1="69" x2="240" y2="430" stroke="#D8DBDF" stroke-width="1"/>
+  <rect x="60" y="172" width="180" height="26" fill="#D9E6F8"/>
+  <rect x="60" y="172" width="3" height="26" fill="#367BF0"/>
+  <g fill="none" stroke="#6A7280" stroke-width="1.2" opacity="0.55"><rect x="76" y="87" width="10" height="10" rx="2"/><rect x="76" y="117" width="10" height="10" rx="2"/><rect x="76" y="147" width="10" height="10" rx="2"/><rect x="76" y="177" width="10" height="10" rx="2"/><rect x="76" y="207" width="10" height="10" rx="2"/><rect x="76" y="237" width="10" height="10" rx="2"/><rect x="76" y="267" width="10" height="10" rx="2"/><rect x="76" y="297" width="10" height="10" rx="2"/><rect x="76" y="327" width="10" height="10" rx="2"/><rect x="76" y="357" width="10" height="10" rx="2"/></g>
+  <g font-size="10.5" fill="#303641"><text x="96" y="96">General</text><text x="96" y="126">System</text><text x="96" y="156">Display</text><text x="96" y="186" fill="#1F4E9C" font-weight="700">Storage</text><text x="96" y="216">Audio</text><text x="96" y="246">Network</text><text x="96" y="276">Serial Ports</text><text x="96" y="306">USB</text><text x="96" y="336">Shared Folders</text><text x="96" y="366">User Interface</text></g>
+  <rect x="240" y="69" width="500" height="361" fill="#FBFBFC"/>
+  <text x="264" y="96" font-size="13" font-weight="700" fill="#20242C">Storage</text>
+  <text x="264" y="114" font-size="10" fill="#6A7280">Storage Devices</text>
+  <rect x="264" y="126" width="296" height="174" rx="4" fill="#FFFFFF" stroke="#D8DBDF" stroke-width="1"/>
+  <path d="M276 148 l5 5 l5 -5" fill="none" stroke="#4A5260" stroke-width="1.5"/>
+  <rect x="292" y="142" width="11" height="11" rx="2" fill="#C9CED8"/>
+  <text x="310" y="153" font-size="10.5" fill="#303641">Controller: IDE</text>
+  <rect x="268" y="162" width="288" height="24" rx="3" fill="#D6E4F7"/>
+  <circle cx="284" cy="174" r="6" fill="#FFFFFF" stroke="#367BF0" stroke-width="1.4"/>
+  <circle cx="284" cy="174" r="2" fill="#367BF0"/>
+  <text x="298" y="178" font-size="9.5" fill="#1F4E9C">kali-linux-2024.4-installer-amd64.iso</text>
+  <text x="552" y="178" font-size="8" fill="#8A929E" text-anchor="end">3.9 GB</text>
+  <path d="M276 205 l5 5 l5 -5" fill="none" stroke="#4A5260" stroke-width="1.5"/>
+  <rect x="292" y="199" width="11" height="11" rx="2" fill="#C9CED8"/>
+  <text x="310" y="210" font-size="10.5" fill="#303641">Controller: SATA</text>
+  <rect x="278" y="222" width="14" height="10" rx="2" fill="#C9CED8"/>
+  <text x="298" y="232" font-size="9.5" fill="#303641">Kali.vdi</text>
+  <text x="552" y="232" font-size="8" fill="#8A929E" text-anchor="end">60.00 GB</text>
+  <rect x="264" y="310" width="296" height="96" rx="4" fill="#FFFFFF" stroke="#D8DBDF" stroke-width="1"/>
+  <text x="276" y="328" font-size="10" font-weight="700" fill="#4A5260">Attributes</text>
+  <text x="276" y="346" font-size="9.5" fill="#303641">Optical Drive: IDE Secondary Device 0</text>
+  <rect x="276" y="356" width="13" height="13" rx="2" fill="#FFFFFF" stroke="#B9BEC6" stroke-width="1"/>
+  <text x="294" y="366" font-size="9.5" fill="#303641">Live CD/DVD</text>
+  <rect x="276" y="378" width="150" height="22" rx="4" fill="#EDEEF0" stroke="#B9BEC6" stroke-width="1"/>
+  <text x="351" y="392" font-size="9" fill="#303641" text-anchor="middle">Choose a disk file...</text>
+  <rect x="572" y="126" width="144" height="150" rx="4" fill="#F3F5F8" stroke="#DDE0E5" stroke-width="1"/>
+  <text x="586" y="146" font-size="10" font-weight="700" fill="#4A5260">Information</text>
+  <g font-size="9" fill="#303641"><text x="586" y="168">Type: IDE</text><text x="586" y="184">Size: 3.9 GB</text><text x="586" y="200">Location:</text></g>
+  <text x="586" y="214" font-size="8" fill="#6A7280" font-family="Consolas, monospace">C:\VMs\ISO\</text>
+  <rect x="586" y="230" width="116" height="24" rx="4" fill="#EAF1FB" stroke="#B9D2F2" stroke-width="1"/>
+  <path d="M596 242 l3 3.5 l6 -7" fill="none" stroke="#2A6FD6" stroke-width="2"/>
+  <text x="610" y="246" font-size="9" fill="#2A6FD6">Attached</text>
+  <path d="M60 430 h680 v27 a8 8 0 0 1 -8 8 h-664 a8 8 0 0 1 -8 -8 z" fill="#F3F4F6"/>
+  <line x1="60" y1="430" x2="740" y2="430" stroke="#D8DBDF" stroke-width="1"/>
+  <rect x="76" y="437" width="64" height="26" rx="4" fill="#FBFBFC" stroke="#B9BEC6" stroke-width="1"/>
+  <text x="108" y="453" font-size="10" fill="#303641" text-anchor="middle">Help</text>
+  <rect x="586" y="437" width="70" height="26" rx="4" fill="#E4E6EA" stroke="#367BF0" stroke-width="1.5"/>
+  <text x="621" y="453" font-size="10.5" fill="#1F3E7A" text-anchor="middle">OK</text>
+  <rect x="664" y="437" width="66" height="26" rx="4" fill="#E4E6EA" stroke="#B9BEC6" stroke-width="1"/>
+  <text x="697" y="453" font-size="10.5" fill="#303641" text-anchor="middle">Cancel</text>
+  <g>
+    <rect x="464" y="298" width="278" height="138" rx="10" fill="#05070C" opacity="0.5" filter="url(#vs-b2)"/>
+    <rect x="460" y="292" width="278" height="138" rx="8" fill="#E7E9EC" stroke="#A9AEB6" stroke-width="1"/>
+    <path d="M460 300 a8 8 0 0 1 8-8 h262 a8 8 0 0 1 8 8 v20 H460 z" fill="url(#vs-title)"/>
+    <line x1="460" y1="320" x2="738" y2="320" stroke="#C9CDD4" stroke-width="1"/>
+    <text x="599" y="311" font-size="9.5" fill="#2A2F36" text-anchor="middle">Kali-Linux - Network</text>
+    <path d="M718 302 l8 8 M726 302 l-8 8" stroke="#5A616B" stroke-width="1.4"/>
+    <text x="476" y="338" font-size="9.5" font-weight="700" fill="#303641">Adapter 1</text>
+    <circle cx="480" cy="352" r="6" fill="#FFFFFF" stroke="#367BF0" stroke-width="1.5"/>
+    <circle cx="480" cy="352" r="3" fill="#367BF0"/>
+    <text x="492" y="356" font-size="10" fill="#303641">NAT</text>
+    <circle cx="480" cy="372" r="6" fill="#FFFFFF" stroke="#B9BEC6" stroke-width="1.5"/>
+    <text x="492" y="376" font-size="10" fill="#8A929E">Bridged Adapter</text>
+    <text x="476" y="396" font-size="8.5" fill="#6A7280" font-family="Consolas, monospace">Intel PRO/1000 MT Desktop</text>
+    <text x="476" y="416" font-size="9" fill="#2A6FD6">Advanced</text>
+    <path d="M530 411 l4 4 l4 -4" fill="none" stroke="#2A6FD6" stroke-width="1.4"/>
+  </g>
+  <rect x="60" y="35" width="680" height="430" rx="8" fill="none" stroke="#9299A2" stroke-width="1"/>
+  <rect width="800" height="500" fill="url(#vs-vig)"/>
 </svg>

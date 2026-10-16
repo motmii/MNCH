@@ -133,7 +133,7 @@ const CURRENT_SEMESTER = {
       meta: {
         creditHours: 3,
         icon: "images/algorithms.svg",
-        hue: 190,
+        hue: 210,
         tag: "algorithms",
         schedule: {
           day: { ar: "الأحد", en: "Sunday" },
@@ -239,7 +239,7 @@ const CURRENT_SEMESTER = {
       meta: {
         creditHours: 3,
         icon: "images/os-concepts.svg",
-        hue: 205,
+        hue: 42,
         tag: "osconcepts",
         schedule: {
           day: { ar: "الأحد", en: "Sunday" },
@@ -335,7 +335,7 @@ const CURRENT_SEMESTER = {
       meta: {
         creditHours: 3,
         icon: "images/policies-ethics.svg",
-        hue: 265,
+        hue: 288,
         tag: "policy",
         schedule: {
           day: { ar: "الاثنين", en: "Monday" },
@@ -426,7 +426,7 @@ const CURRENT_SEMESTER = {
       meta: {
         creditHours: 3,
         icon: "images/it-components.svg",
-        hue: 130,
+        hue: 168,
         tag: "components",
         schedule: {
           day: { ar: "الاثنين", en: "Monday" },
@@ -532,7 +532,7 @@ const CURRENT_SEMESTER = {
              meta: {
         creditHours: 3,
         icon: "images/security-design.svg",
-        hue: 300,
+        hue: 20,
         tag: "design",
         schedule: {
           day: { ar: "الثلاثاء", en: "Tuesday" },

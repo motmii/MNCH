@@ -1,27 +1,74 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
-    <linearGradient id="bgPOL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
-    <filter id="gP1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="pe-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B0E13"/><stop offset="1" stop-color="#141220"/></linearGradient>
+    <radialGradient id="pe-amb" cx="0.24" cy="0.18" r="0.62"><stop offset="0" stop-color="#B49FE0" stop-opacity="0.12"/><stop offset="1" stop-color="#B49FE0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pe-amb2" cx="0.87" cy="0.78" r="0.55"><stop offset="0" stop-color="#8FA8F0" stop-opacity="0.06"/><stop offset="1" stop-color="#8FA8F0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pe-warm" cx="0.5" cy="0.86" r="0.55"><stop offset="0" stop-color="#E9C46A" stop-opacity="0.09"/><stop offset="1" stop-color="#E9C46A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pe-vig" cx="0.5" cy="0.44" r="0.82"><stop offset="0.58" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.55"/></radialGradient>
+    <linearGradient id="pe-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F1E9"/><stop offset="1" stop-color="#E4E0D4"/></linearGradient>
+    <linearGradient id="pe-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D3D9E0"/><stop offset="1" stop-color="#7E8791"/></linearGradient>
+    <linearGradient id="pe-lock" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3E4854"/><stop offset="1" stop-color="#141A21"/></linearGradient>
+    <linearGradient id="pe-pen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C343F"/><stop offset="1" stop-color="#0F141A"/></linearGradient>
+    <linearGradient id="pe-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D8B878"/><stop offset="1" stop-color="#8A7440"/></linearGradient>
+    <filter id="pe-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="pe-b2" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="pe-noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
   </defs>
-  <rect width="800" height="600" fill="url(#bgPOL)"/>
-  <rect x="120" y="70" width="560" height="460" rx="10" fill="#10161D" stroke="#1F2733" stroke-width="2"/>
-  <rect x="120" y="70" width="560" height="36" rx="10" fill="#1F2733"/>
-  <circle cx="145" cy="88" r="6" fill="#F08A8A" opacity="0.8"/>
-  <circle cx="168" cy="88" r="6" fill="#E9C46A" opacity="0.8"/>
-  <circle cx="191" cy="88" r="6" fill="#5FD69B" opacity="0.8"/>
-  <text x="220" y="93" font-family="monospace" font-size="12" fill="#B49FE0">gov-info-policy.md — مراجعة الالتزام</text>
-  <rect x="160" y="130" width="480" height="120" rx="6" fill="#141A21" stroke="#B49FE0" stroke-width="1.5"/>
-  <text x="185" y="158" font-family="monospace" font-size="12" fill="#9FB0EE" filter="url(#gP1)">§ السياسات واللوائح التنظيمية</text>
-  <text x="185" y="182" font-family="monospace" font-size="11" fill="#B49FE0">✓ الامتثال للمعايير والإلزام بها</text>
-  <text x="185" y="204" font-family="monospace" font-size="11" fill="#B49FE0">✓ مسؤولية الإفصاح عن الحوادث</text>
-  <text x="185" y="226" font-family="monospace" font-size="11" fill="#B49FE0">✓ أخلاقيات المهنة وحماية الخصوصية</text>
-  <rect x="160" y="270" width="480" height="120" rx="6" fill="#141A21" stroke="#9FB0EE" stroke-width="1.5"/>
-  <text x="185" y="298" font-family="monospace" font-size="12" fill="#C3C9F2">§ الإطار القانوني لأمن المعلومات</text>
-  <text x="185" y="322" font-family="monospace" font-size="11" fill="#B49FE0">✓ الحقوق والصلاحيات والمسؤوليات</text>
-  <text x="185" y="344" font-family="monospace" font-size="11" fill="#B49FE0">✓ التوثيق والسجلات والتدقيق</text>
-  <text x="185" y="366" font-family="monospace" font-size="11" fill="#B49FE0">✓ آليات التبليغ والتعامل مع المخالفات</text>
-  <g font-family="monospace" font-size="9" fill="#B49FE0" opacity="0.16">
-    <text x="150" y="470">COMPLIANCE REVIEW — الشفافية والمساءلة والأخلاقيات المهنية</text>
-    <text x="330" y="495">التاريخ: الفصل الحالي • الحالة: قيد المراجعة</text>
+  <rect width="800" height="600" fill="url(#pe-bg)"/>
+  <rect width="800" height="600" fill="url(#pe-amb)"/>
+  <rect width="800" height="600" fill="url(#pe-amb2)"/>
+  <rect width="800" height="600" fill="url(#pe-warm)"/>
+  <ellipse cx="400" cy="556" rx="250" ry="22" fill="#04060A" opacity="0.5" filter="url(#pe-b1)"/>
+  <g transform="rotate(-9 400 340)">
+    <rect x="266" y="124" width="350" height="434" rx="5" fill="#04060A" opacity="0.4" filter="url(#pe-b2)"/>
+    <rect x="262" y="118" width="350" height="434" rx="5" fill="#A8A294"/>
   </g>
+  <g transform="rotate(-5.5 400 340)">
+    <rect x="262" y="121" width="352" height="436" rx="5" fill="#04060A" opacity="0.35" filter="url(#pe-b2)"/>
+    <rect x="258" y="115" width="352" height="436" rx="5" fill="#C7C2B5"/>
+  </g>
+  <g transform="rotate(-2 400 340)">
+    <rect x="258" y="118" width="352" height="436" rx="5" fill="#04060A" opacity="0.35" filter="url(#pe-b2)"/>
+    <rect x="254" y="112" width="352" height="436" rx="5" fill="url(#pe-paper)" stroke="#CFCABA" stroke-width="0.8"/>
+    <rect x="288" y="146" width="34" height="5" rx="2.5" fill="#7A6BC0"/>
+    <text x="288" y="186" font-size="17" font-weight="700" fill="#262B34">Information Security Policy</text>
+    <text x="288" y="204" font-size="7.5" letter-spacing="2" fill="#8A8F9B">NOVA STUDIO - POLICY v3.1</text>
+    <line x1="288" y1="218" x2="578" y2="218" stroke="#CFCABA" stroke-width="1"/>
+    <g fill="#B9B4A8"><rect x="288" y="242" width="288" height="5" rx="2.5"/><rect x="288" y="258" width="286" height="5" rx="2.5"/><rect x="288" y="274" width="262" height="5" rx="2.5"/><rect x="288" y="290" width="288" height="5" rx="2.5"/><rect x="288" y="306" width="214" height="5" rx="2.5"/></g>
+    <text x="288" y="338" font-size="10.5" font-weight="700" fill="#3A4150">1. Access Control</text>
+    <g fill="#B9B4A8"><rect x="288" y="354" width="288" height="5" rx="2.5"/><rect x="288" y="370" width="270" height="5" rx="2.5"/><rect x="288" y="386" width="240" height="5" rx="2.5"/></g>
+    <g><rect x="288" y="403" width="13" height="13" rx="2" fill="#FBF9F3" stroke="#8F8A7E" stroke-width="1.2"/><path d="M291.5 409.5 l2.8 3 l5.5 -6.5" fill="none" stroke="#3E9B6C" stroke-width="2"/><rect x="310" y="406" width="220" height="5" rx="2.5" fill="#B9B4A8"/></g>
+    <g><rect x="288" y="427" width="13" height="13" rx="2" fill="#FBF9F3" stroke="#8F8A7E" stroke-width="1.2"/><path d="M291.5 433.5 l2.8 3 l5.5 -6.5" fill="none" stroke="#3E9B6C" stroke-width="2"/><rect x="310" y="430" width="190" height="5" rx="2.5" fill="#B9B4A8"/></g>
+    <g><rect x="288" y="451" width="13" height="13" rx="2" fill="#FBF9F3" stroke="#8F8A7E" stroke-width="1.2"/><path d="M291.5 457.5 l2.8 3 l5.5 -6.5" fill="none" stroke="#3E9B6C" stroke-width="2"/><rect x="310" y="454" width="204" height="5" rx="2.5" fill="#B9B4A8"/></g>
+    <ellipse cx="444" cy="266" rx="58" ry="13" fill="none" stroke="#A33B3B" stroke-width="1.6" opacity="0.6"/>
+    <path d="M452 468 c30 -3 60 2 92 -1" fill="none" stroke="#3A4E8C" stroke-width="1.2" opacity="0.8"/>
+    <path d="M452 480 c26 2 56 -2 84 1" fill="none" stroke="#3A4E8C" stroke-width="1.2" opacity="0.8"/>
+    <path d="M288 500 c12 -14 24 8 38 -4 c12 -10 22 6 34 -2 c10 -7 20 5 30 -3" fill="none" stroke="#2E3844" stroke-width="1.6"/>
+    <rect x="288" y="512" width="150" height="1" fill="#A8A294"/>
+    <text x="288" y="526" font-size="7" fill="#6A6F7A">Training Lead - Information Security</text>
+    <g transform="rotate(-14 495 412)">
+      <rect x="420" y="380" width="150" height="64" rx="6" fill="none" stroke="#2E4E9E" stroke-width="2.5" opacity="0.5"/>
+      <rect x="427" y="387" width="136" height="50" rx="4" fill="none" stroke="#2E4E9E" stroke-width="1" opacity="0.45"/>
+      <text x="495" y="412" font-size="15" font-weight="700" letter-spacing="6" fill="#2E4E9E" opacity="0.55" text-anchor="middle">APPROVED</text>
+      <text x="495" y="430" font-size="6.5" letter-spacing="2" fill="#2E4E9E" opacity="0.5" text-anchor="middle">ISO/IEC 27001 - A.5.1</text>
+    </g>
+  </g>
+  <ellipse cx="610" cy="514" rx="64" ry="10" fill="#04060A" opacity="0.5" filter="url(#pe-b2)"/>
+  <path d="M584 444 v-18 a26 26 0 0 1 52 0 v18" fill="none" stroke="url(#pe-metal)" stroke-width="11" stroke-linecap="round"/>
+  <path d="M588 444 v-16 a22 22 0 0 1 44 0 v16" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity="0.18"/>
+  <rect x="566" y="440" width="88" height="66" rx="10" fill="url(#pe-lock)" stroke="#0A0D12" stroke-width="1"/>
+  <rect x="570" y="444" width="80" height="6" rx="3" fill="#59636E" opacity="0.45"/>
+  <circle cx="610" cy="466" r="7" fill="#0A0D12"/>
+  <rect x="606" y="468" width="8" height="17" rx="3.5" fill="#0A0D12"/>
+  <circle cx="607" cy="463" r="2.2" fill="#FFFFFF" opacity="0.3"/>
+  <g transform="rotate(-24 240 490)">
+    <rect x="150" y="482" width="170" height="15" rx="7" fill="url(#pe-pen)"/>
+    <g fill="#3A4350" opacity="0.8"><rect x="158" y="483" width="3" height="13"/><rect x="166" y="483" width="3" height="13"/><rect x="174" y="483" width="3" height="13"/><rect x="182" y="483" width="3" height="13"/></g>
+    <polygon points="150,482 124,489.5 150,497" fill="url(#pe-gold)"/>
+    <line x1="126" y1="489.5" x2="142" y2="489.5" stroke="#6A5A30" stroke-width="1"/>
+    <rect x="288" y="477" width="36" height="4" rx="2" fill="#9AA4B2" opacity="0.75"/>
+    <circle cx="318" cy="489.5" r="8" fill="#20262E" stroke="#39424C" stroke-width="1"/>
+  </g>
+  <rect width="800" height="600" filter="url(#pe-noise)" opacity="0.045"/>
+  <rect width="800" height="600" fill="url(#pe-vig)"/>
 </svg>

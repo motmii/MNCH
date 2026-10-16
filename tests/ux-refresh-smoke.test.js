@@ -156,9 +156,9 @@ check("wordmark keeps Arabic letter-spacing at 0",
   /\.logo-word\s*\{[\s\S]{0,320}letter-spacing: 0;/.test(css));
 check("wordmark clips the shared text gradient",
   /\.logo-word\s*\{[\s\S]{0,520}background: var\(--grad-text\);/.test(css));
-check("light theme re-paints both logo gradient stops",
-  css.includes('[data-theme="light"] .logo-mark .logo-stop-a') &&
-  css.includes('[data-theme="light"] .logo-mark .logo-stop-b'));
+check("logo gradient stops stay token-painted (single identity, v2.0.0)",
+  css.includes(".logo-mark .logo-stop-a { stop-color: var(--accent); }") &&
+  css.includes(".logo-mark .logo-stop-b { stop-color: var(--accent-2); }"));
 check("CTA outlined while the bar is transparent (contrast over the photo)",
   /\.nav:not\(\.is-scrolled\) \.nav-cta\s*\{[\s\S]{0,220}border-color: rgba\(255, 255, 255, 0\.42\);/.test(css));
 

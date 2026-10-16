@@ -73,13 +73,11 @@ Main IIFE ("use strict")
 ├── M31  Nav.ToTop        Back-to-top button (appears after 600px)
 ├── M32  Nav.ScrollSpy    Highlights the section in view via aria-current
 ├── M33  ViewSwitcher     Instantly switches views while keeping one page
-├── M36  ThemeSwitch      Dark (Slate Indigo) default · light (Mist) opt-in,
-│                         explicit choice wins, else OS prefers-color-scheme;
-│                         pre-paint restore in index.html prevents theme-flash
-├── M36b PaletteSwitch    Slate (default) ↔ Ocean (calm deep-teal),
-│                         orthogonal to M36 — applies in BOTH dark and light
-│                         modes (explicit palette wins, else slate; persisted
-│                         under "motmi-portal:palette", pre-paint restored)
+├── M36  ThemeSwitch      REMOVED in v2.0.0 — the platform ships ONE
+│                         identity (V0 Obsidian, dark-only). No pre-paint
+│                         theme script, no data-theme/data-palette CSS,
+│                         no runtime toggle lookups remain.
+├── M36b PaletteSwitch    REMOVED in v2.0.0 — see M36.
 ├── M37  ProgressHub      #progress — "تابع من حيث توقفت" resume card + best-score
 │                         cards, built from the quiz engine's localStorage store.
 │                         Phase 5 adds a stats strip (completed lessons, quiz
@@ -248,7 +246,7 @@ Main IIFE ("use strict")
                           only — never raw HTML, never a network call — and the
                           whole view re-renders on locale switch. Covered by
                           tests/lecture-guide.test.js.
-└── M72  KaliGuide        #kali — «تثبت كالي»: an illustrated 8-step guide to
+├── M72  KaliGuide        #kali — «تثبت كالي»: an illustrated 8-step guide to
                           installing Kali Linux inside VirtualBox. Static
                           markup translated by MODULE 22 (Lang); every string
                           has a data-i18n key in BOTH dicts (ar + en). Four
@@ -262,8 +260,25 @@ Main IIFE ("use strict")
                           registered in the ViewSwitcher; link sits in the
                           desktop nav, mobile menu and footer. Layer closed in
                           style.css (MODULE 72) with a ≤900px stack rule,
-                          reduced-motion and print rules. Covered by
-                          tests/kali-guide.test.js.
+                           reduced-motion and print rules. Covered by
+                           tests/kali-guide.test.js.
+└── M80  CyberField       The v2.0.0 identity layer. script.js ships an
+                           interactive particle-network canvas
+                           (<canvas id="cyberCanvas">, fixed at z-index: -1,
+                           pointer-inert) — 40–96 nodes by viewport area,
+                           DPR capped at 2, colours read from the live
+                           --accent-rgb/--accent-2-rgb tokens, paused on a
+                           hidden tab, one static frame under
+                           prefers-reduced-motion, clean no-op without a
+                           canvas/context. style.css re-declares the
+                           platform tokens (V0 Obsidian), moves the ambient
+                           wash + engineering grid onto html (body stays
+                           transparent so the field reads through), frosts
+                           the navbar/cluster/overlays, styles the GitHub
+                           CTA (nav-gh), dims the hero media behind the
+                           neon typography, and self-hosts Inter +
+                           JetBrains Mono. The theme switch (M36) and the
+                           second palette (M36b) are gone: one identity.
 ```
 
 `M33 · AI.Assistant` lives in its own file, `assistant.js` (loaded after
@@ -317,7 +332,7 @@ CSS rules are scoped under `html[data-cursor-active="true"]`.
 ```js
 // Embedded in script.js — LEARNING_PATHS (append a path = no other changes)
 {
-  id: "crypto", ico: "🔐",
+  id: "crypto", ico: ICON.key,
   level: "beginner" | "intermediate" | "advanced",
   status: "live" | "soon",          // "soon" → honest coming-soon placeholder
   recommended: true,                // optional — the beginner starting path
@@ -386,24 +401,35 @@ CSS rules are scoped under `html[data-cursor-active="true"]`.
   shared `#path` view and `activate()` preserves the full hash; unknown ids and
   bare `#path` render honest empty states).
 
-### Navbar & Brand Layer (MODULE 60 · `index.html` + `style.css`)
-The top bar is one fixed, frosted surface (`.nav` → `.nav.is-scrolled`) grouped
-into `.nav-main` (logo lockup · links · “المزيد” · updates trigger · primary CTA)
-and `.nav-actions` (search · language · theme · burger), separated by a logical
+### Navbar & Brand Layer (MODULE 60 · MODULE 80 · `index.html` + `style.css`)
+The top bar is one fixed, frosted surface (`.nav` → `.nav.is-scrolled` grouped
+with `backdrop-filter: var(--glass-blur)`) split into `.nav-main` (logo lockup
+· links · “المزيد” · updates trigger · primary CTA · GitHub CTA) and
+`.nav-actions` (search · language · burger), separated by a logical
 inline-start divider.
 
 - **Logo lockup** — `.logo` holds a decorative `.logo-mark` (the same shield
   path `images/icon.svg` is built from, inlined so it needs no extra asset and
   no precache entry) plus a `.logo-word` gradient wordmark. The mark's colours
-  are theme tokens (`.logo-disc` = `var(--bg)`, `.logo-glyph` = `var(--text)`)
-  and its gradient stops are re-painted for the light theme, so the PWA icon
-  keeps its fixed palette while the navbar mark follows the theme.
+  are live tokens (`.logo-disc` = `var(--bg)`, `.logo-glyph` = `var(--text)`,
+  stops = `var(--accent)` / `var(--accent-2)`), so the navbar mark follows the
+  V0 Obsidian palette while the PWA icon keeps its fixed stops.
 - **Arabic rule** — a wordmark (or any Arabic text) must keep
   `letter-spacing: 0`; tracking breaks the joins between letters.
 - **Primary CTA** — `.nav-cta` reuses the existing `nav.cta` i18n key and the
   `#paths` target. It renders outlined while the bar is transparent (contrast
   over the hero photo) and becomes the filled gradient primary once the bar
   frosts; it is hidden ≤1180px, where the mobile menu already carries it.
+- **GitHub CTA (MODULE 80)** — `.nav-gh` is a ghost pill linking to
+  `https://github.com/motmii/MNCH` (`target="_blank"` + `rel="noopener
+  noreferrer"`, bilingual `aria-label`). It keeps media-chrome contrast while
+  the bar floats, gains the cyan hover halo once scrolled, and collapses to
+  an icon-only circle ≤860px.
+- **Glass layer (MODULE 80)** — `.nav-cluster`, `.nav-more-menu` and
+  `.mobile-menu` share the same frosted treatment, and the hero media loop is
+  dimmed to `opacity: 0.26` behind an obsidian scrim while keeping the
+  MODULE 59 contract strings (`.hero-media.is-playing { opacity: 1; }`, etc.)
+  untouched for the tests.
 - The layer is **additive**: no pre-existing selector (`.logo`, `.logo-dot`,
   `.nav-main`, `.nav-actions`) is overridden beyond the intended additions.
 

@@ -1,6 +1,107 @@
 /* ============================================================
    منصة أمن المعلومات — الترم الحالي | stylesheet
+   ------------------------------------------------------------
+   Identity "V0 OBSIDIAN" (v2.0.0) — a near-black #09090b canvas
+   with one neon instrument accent family (neon green · cyber cyan
+   · glow purple), hairline rgba-white structure, frosted glass
+   chrome, and an interactive CyberField particle canvas behind
+   everything. One identity ships; the light theme and the second
+   palette were removed (see MODULE 80).
    ============================================================ */
+
+/* ---------- Self-hosted typefaces (offline-first, no CDN) ----------
+   IBM Plex Sans Arabic carries BOTH scripts: its latin subset is
+   IBM Plex Sans, so Arabic and English share one voice. IBM Plex
+   Mono handles code, ciphers, terminals and data. Both are
+   SIL-OFL licensed (fonts/NOTICE.txt). */
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/plex-arabic-arabic-400.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC7, U+10EC9-10EEE, U+10EF0-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/plex-arabic-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/plex-arabic-arabic-500.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC7, U+10EC9-10EEE, U+10EF0-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/plex-arabic-latin-500.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/plex-arabic-arabic-600.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC7, U+10EC9-10EEE, U+10EF0-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/plex-arabic-latin-600.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/plex-arabic-arabic-700.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC7, U+10EC9-10EEE, U+10EF0-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/plex-arabic-latin-700.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/plex-mono-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/plex-mono-latin-500.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/plex-mono-latin-600.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 /* ============================================================
    SEMESTER DASHBOARD · calm overview redesign
@@ -99,241 +200,158 @@
 
 :root {
   /* ============================================================
-     MODULE 36 · SLATE INDIGO — the calm palette, and the platform
-     DEFAULT (dark). Measured with WCAG 2.1 relative luminance.
+     MODULE 80 · V0 OBSIDIAN — the single platform identity.
+     A v0/Vercel-grade near-black canvas (#09090b) with one neon
+     instrument accent family (neon green · cyber cyan · glow
+     purple), hairline rgba-white borders, and true glassmorphism.
+     Dark-only by design: the pre-paint theme script, the light
+     theme and the second palette were removed in v2.0.0.
 
-     Canvas is a desaturated blue-slate near-black; the cards lift
-     only ~4% in lightness, so the page reads as ONE surface rather
-     than a stack of boxes. Accents are a single low-chroma indigo
-     family — nothing on the page is allowed to shout.
-
-     Measured against --surface / --surface-2:
-       text 14.0:1 · muted 7.9:1 · dim 5.5:1 · accent 8.0:1
-       accent-2 10.5:1 · accent-3 7.2:1 · ok 9.3:1 · bad 7.0:1 · warn 10.1:1
-     (against --bg: 15.7 / 8.8 / 6.2 / 8.9 / 11.7 / 8.1 / 10.4 / 7.8 / 11.3)
+     Measured against --surface / --surface-2 (WCAG 2.1):
+       text 17.9:1 · muted 7.2:1 · dim 5.7:1 · accent 12.7:1
+       accent-2 12.3:1 · accent-3 7.6:1 · ok 8.6:1 · bad 6.5:1 · warn 9.7:1
 
      NOTE (Arabic-first): no letter-spacing is introduced on Arabic
-     text — tracking breaks cursive glyph joining.
+     text — tracking breaks cursive glyph joining. Mono micro-labels
+     only ever carry latin/digits and are tracked explicitly.
      ============================================================ */
 
   /* -- Canvas stack -- */
-  --bg: #0E1116;              /* main background — deep slate */
-  --bg-soft: #141A21;
-  --surface: #171D26;         /* cards & panels */
-  --surface-2: #1F2733;       /* alt fills / hovers */
+  --bg: #09090B;              /* page — v0 obsidian */
+  --bg-soft: #0C0C0F;
+  --surface: #101014;         /* cards & panels */
+  --surface-2: #17171C;       /* alt fills / hovers */
 
-  /* -- Structure: hairlines only. --line-strong is for focus/active. -- */
-  --line: rgba(199, 210, 226, 0.12);
-  --line-strong: rgba(199, 210, 226, 0.24);
+  /* -- Structure: hairlines only (v0's rgba(255,255,255,.1)). -- */
+  --line: rgba(255, 255, 255, 0.10);
+  --line-strong: rgba(255, 255, 255, 0.22);
 
-  /* -- Ink -- */
-  --text: #E6EAF2;
-  --muted: #A8B2C1;
-  --dim: #8A94A4;
+  /* -- Ink (zinc scale — never pure white for body copy) -- */
+  --text: #FAFAFA;
+  --muted: #A1A1AA;
+  --dim: #8B8B95;
 
-  /* -- Accents: one indigo family, deliberately low chroma.
-        --accent is the interactive colour, --accent-2 the lighter tint
-        for eyebrow/heading text, --accent-3 a muted violet for tertiary
-        highlights. The *-rgb triplets feed rgb(var(--x-rgb) / α) so every
-        washed tint below follows the active theme. -- */
-  --accent: #9FB0EE;
-  --accent-2: #C3C9F2;
-  --accent-3: #B49FE0;
-  --accent-rgb: 159 176 238;    /* = --accent */
-  --accent-2-rgb: 195 201 242;  /* = --accent-2 */
-  --accent-3-rgb: 180 159 224;  /* = --accent-3 */
+  /* -- Accents: one cyber family. --accent is the interactive
+        neon green, --accent-2 the cyber cyan for eyebrow/heading
+        text, --accent-3 a glow purple for tertiary marks. The *-rgb
+        triplets feed rgb(var(--x-rgb) / α). -- */
+  --accent: #3DF5A5;
+  --accent-2: #6EE7FF;
+  --accent-3: #B79CFF;
+  --accent-rgb: 61 245 165;     /* = --accent */
+  --accent-2-rgb: 110 231 255;  /* = --accent-2 */
+  --accent-3-rgb: 183 156 255;  /* = --accent-3 */
 
-  /* -- Subject accents (the --hue ramp). Five low-chroma steps around the
-        indigo arc, mapped per subject in script.js; each clears 5.0:1 on
-        --surface-2. Saturation/lightness live here, NOT inline at the call
-        site, so the same ramp re-tunes per theme. -- */
-  --hue-sat: 34%;
-  --hue-light: 72%;
-  /* The thumbnail sits on an image, so its wash is tuned separately from the
-        card accent: a soft glow on the dark canvas, a pale lift on white. */
+  /* -- Subject accents (the --hue ramp). Five neon-adjacent hues —
+        mapped per subject in script.js; each clears 6.3:1 on
+        --surface-2. Saturation and lightness live here, never
+        inline at the call site. -- */
+  --hue-sat: 68%;
+  --hue-light: 64%;
   --thumb-light: 60%;
   --thumb-alpha: 0.35;
-/* -- Gradients: one slow ramp. The ribbon stays LIGHT in both themes,
-        so it always carries the dark ink (--on-grad, 6.9–9.4:1). -- */
-  --grad: linear-gradient(100deg, #A9B6F2 0%, #97A5EE 52%, #8B9AE6 100%);        /* buttons */
-  --grad-text: linear-gradient(100deg, #C3C9F2 0%, #9FB0EE 50%, #B49FE0 100%);  /* clipped headings */
-  --on-grad: #10131A;
-  --on-accent: #10131A;       /* ink text on the pastel solid accent chips */
-  --sel-text: #10131A;        /* selection text on the pastel accent */
+
+  /* -- Gradients: one neon ribbon. It stays LIGHT in the single
+        theme, so it always carries the dark ink (--on-grad). -- */
+  --grad: linear-gradient(135deg, #3DF5A5 0%, #2BD98F 55%, #17BF7C 100%);        /* buttons */
+  --grad-text: linear-gradient(100deg, #8CFFD0 0%, #3DF5A5 55%, #6EE7FF 100%);   /* clipped headings */
+  --on-grad: #04150D;
+  --on-accent: #04150D;       /* ink text on solid accent chips */
+  --sel-text: #04150D;        /* selection text on the accent      */
 
   /* -- Over media. The hero always paints a dark scrim over its photo,
-        so these stay LIGHT in both themes by design. -- */
-  --on-media: #F1F4F9;        /* hero body text over the photo (13.2:1 on the scrim) */
-  --on-media-2: #C2CCDB;      /* hero secondary text (8.4:1 on the scrim) */
-  --wash-media-rgb: 255 255 255;   /* white outlines/fills over the photo */
+        so these stay light. -- */
+  --on-media: #F4F4F5;
+  --on-media-2: #A1A1AA;
+  --wash-media-rgb: 255 255 255;
 
   /* -- Chrome -- */
-  --nav-bg: rgba(14, 17, 22, 0.86);   /* frosted navbar when scrolled */
-  --code-bg: #10161D;                  /* inset tool output wells */
-  --panel-wash: #141A21;               /* panel headers */
-  --track: #46535F;                    /* switch track */
-  --knob: #FFFFFF;                /* switch knob — white on either track */
+  --nav-bg: rgba(9, 9, 11, 0.72);      /* frosted navbar when scrolled */
+  --code-bg: #0B0B0E;                  /* inset tool output wells */
+  --panel-wash: #0E0E11;               /* panel headers */
+  --track: #3F3F46;                    /* switch track */
+  --knob: #FAFAFA;                     /* switch knob */
 
-  /* -- Depth. Shadows and dark scrims share one ink so the whole page
-        layers consistently; --shadow-rgb feeds rgb(var(--shadow-rgb) / α). -- */
-  --shadow-rgb: 4 7 12;
-  --shadow-sm: 0 1px 2px rgb(var(--shadow-rgb) / 0.5), 0 10px 28px -20px rgb(var(--shadow-rgb) / 0.55);
-  --shadow-md: 0 2px 4px rgb(var(--shadow-rgb) / 0.45), 0 24px 48px -28px rgb(var(--shadow-rgb) / 0.7);
-  --shadow-lg: 0 40px 80px -40px rgb(var(--shadow-rgb) / 0.85);
+  /* -- Glass. Surfaces, nav and overlays are real glass: a whisper
+        of white over the obsidian canvas plus a backdrop blur so
+        the CyberField canvas reads through. -- */
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-strong: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(14px) saturate(1.35);
+
+  /* -- Depth. Shadows and dark scrims share one pure-black ink. -- */
+  --shadow-rgb: 0 0 0;
+  --shadow-sm: 0 1px 2px rgb(var(--shadow-rgb) / 0.6), 0 10px 28px -20px rgb(var(--shadow-rgb) / 0.7);
+  --shadow-md: 0 2px 4px rgb(var(--shadow-rgb) / 0.5), 0 24px 48px -28px rgb(var(--shadow-rgb) / 0.8);
+  --shadow-lg: 0 40px 80px -40px rgb(var(--shadow-rgb) / 0.9);
   --glass-hi: inset 0 1px 0 rgb(var(--wash-hi-rgb) / 0.06);
-  --well-shadow: inset 0 2px 12px rgb(var(--shadow-rgb) / 0.4);
+  --well-shadow: inset 0 1px 0 rgb(var(--wash-hi-rgb) / 0.04);
 
-  /* -- Status. Distinct hues, but muted so they never compete with --accent. -- */
-  --ok: #5FD69B;
-  --bad: #F08A8A;
-  --warn: #E9C46A;
-  --ok-txt: #8FE3B8;
-  --bad-txt: #F5AFAF;
-  --warn-txt: #F0D391;
-  --ok-rgb: 95 214 155;
-  --bad-rgb: 240 138 138;
-  --warn-rgb: 233 196 106;
+  /* -- Status. Distinct hues, never competing with --accent. -- */
+  --ok: #4ADE80;
+  --bad: #F87171;
+  --warn: #FBBF24;
+  --ok-txt: #86EFAC;
+  --bad-txt: #FCA5A5;
+  --warn-txt: #FDE68A;
+  --ok-rgb: 74 222 128;
+  --bad-rgb: 248 113 113;
+  --warn-rgb: 251 191 36;
   /* Ink ON a solid status chip: this block paints light chips, so dark ink. */
   --on-ok: #052E16;
   --on-bad: #2A0A0A;
-/* -- Washed tints. Every translucent fill routes through one of these
-        so a surface wash can never be baked to a raw alpha. -- */
-  --wash-neutral: rgba(199, 210, 226, 0.07);
-  --wash-accent2: rgba(195, 201, 242, 0.10);
-  --wash-accent2-hover: rgba(195, 201, 242, 0.18);
-  --tint-accent: rgba(159, 176, 238, 0.13);
-  --tint-accent3: rgba(180, 159, 224, 0.11);
-  /* Subtle surface wash (card hovers, table rows, code chips). White here
-        because these sit on the dark canvas; light theme re-points it. */
+  /* -- Washed tints. Every translucent fill routes through one of
+        these so a surface wash can never be baked to a raw alpha. -- */
+  --wash-neutral: rgba(255, 255, 255, 0.05);
+  --wash-accent2: rgba(110, 231, 255, 0.10);
+  --wash-accent2-hover: rgba(110, 231, 255, 0.16);
+  --tint-accent: rgba(61, 245, 165, 0.12);
+  --tint-accent3: rgba(183, 156, 255, 0.12);
   --wash-hi-rgb: 255 255 255;
 
-  /* -- Halo / focus — a quiet ring, not a neon treatment. -- */
-  --glow: rgba(159, 176, 238, 0.24);
-  --glow-cyan: rgba(159, 176, 238, 0.26);
-  --glow-green: rgba(95, 214, 155, 0.20);
-  --ring: 0 0 0 3px rgba(159, 176, 238, 0.24);
-  --text-glow: drop-shadow(0 0 22px rgba(159, 176, 238, 0.18));
-  --grad-cyber: linear-gradient(100deg, #A9B6F2 0%, #C3C9F2 100%); /* decorative only */
+  /* -- Halo / focus — a quiet neon ring, not a neon treatment. -- */
+  --glow: rgba(61, 245, 165, 0.30);
+  --glow-cyan: rgba(110, 231, 255, 0.30);
+  --glow-green: rgba(74, 222, 128, 0.25);
+  --ring: 0 0 0 3px rgba(61, 245, 165, 0.30);
+  --text-glow: drop-shadow(0 0 24px rgba(61, 245, 165, 0.18));
+  --grad-cyber: linear-gradient(100deg, #3DF5A5 0%, #6EE7FF 100%); /* decorative only */
 
   /* -- Ambient canvas: two barely-there washes + a faint engineering grid. -- */
-  --aurora-1: radial-gradient(52rem 32rem at 12% -6%, rgba(159, 176, 238, 0.07), transparent 62%);
-  --aurora-2: radial-gradient(46rem 30rem at 88% 108%, rgba(143, 154, 230, 0.09), transparent 60%);
-  --grid-line: rgba(199, 210, 226, 0.04);
+  --aurora-1: radial-gradient(52rem 32rem at 12% -6%, rgba(61, 245, 165, 0.07), transparent 62%);
+  --aurora-2: radial-gradient(46rem 30rem at 88% 108%, rgba(110, 231, 255, 0.06), transparent 60%);
+  --grid-line: rgba(255, 255, 255, 0.05);
 
-  /* -- Motion (theme-agnostic) -- */
+  /* -- Motion (identity-agnostic). One rhythm for the whole product. -- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 0.16s;
+  --dur: 0.24s;
+  --dur-slow: 0.42s;
 
-  /* -- Legacy aliases: MODULE 52/53/61/65 were authored against a token set
-        that never existed (--brand / --card / --txt / --text-2). Mapping them
-        to the live palette makes those panels follow the active theme. -- */
+  /* -- Legacy aliases: later modules were authored against a token set
+        that never existed (--brand / --card / --txt / --text-2). Mapping
+        them to the live palette makes those panels follow the identity. -- */
   --brand: var(--accent);
   --card: var(--surface);
   --txt: var(--text);
   --text-2: var(--muted);
 
-  /* -- Bilingual type stack: Latin → Inter/Space Grotesk, Arabic glyphs
-        fall through to Tajawal (per index.html). -- */
-  --font-display: "Space Grotesk", "Tajawal", system-ui, sans-serif;
-  --font-body: "Inter", "Tajawal", system-ui, sans-serif;
-  --font-mono: ui-monospace, "Space Grotesk", SFMono-Regular, Consolas, monospace;
+  /* -- Bilingual type stack: Inter for latin, IBM Plex Sans Arabic for
+        Arabic (Inter ships no Arabic glyphs), JetBrains Mono for data. -- */
+  --font-display: "Inter", "IBM Plex Sans Arabic", "Tajawal", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-body: "Inter", "IBM Plex Sans Arabic", "Tajawal", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
 
-  --radius: 18px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
   --maxw: 1240px;
-  --nav-h: 76px;
+  --nav-h: 72px;
 }
-/* Light theme — applied via <html data-theme="light"> (navbar toggle,
-   persisted under "motmi-portal:theme"; restored pre-paint in <head>).
-   MIST: paper-white cards on a soft grey-blue canvas, ink-navy accents.
-   Measured against --surface / --surface-2:
-     text 17.6:1 · muted 7.5:1 · dim 5.7:1 · accent 7.3:1
-     accent-2 10.0:1 · accent-3 7.9:1 · ok 5.0:1 · bad 6.6:1 · warn 5.9:1 */
-[data-theme="light"] {
-  --bg: #F2F4F8;
-  --bg-soft: #EAEEF4;
-  --surface: #FFFFFF;
-  --surface-2: #F5F7FA;
 
-  --line: rgba(20, 25, 34, 0.12);
-  --line-strong: rgba(20, 25, 34, 0.26);
-
-  --text: #141922;
-  --muted: #4A5568;
-  --dim: #5C6779;
-
-  --accent: #3F4FA8;
-  --accent-2: #2E3A8C;
-  --accent-3: #5B3F9E;
-  --accent-rgb: 63 79 168;
-  --accent-2-rgb: 46 58 140;
-  --accent-3-rgb: 91 63 158;
-
-  /* Same five subjects, re-pitched for a white canvas. Lowest stop is
-     4.67:1 on --surface-2, so the whole ramp clears WCAG AA. */
-  --hue-sat: 46%;
-  --hue-light: 40%;
-  --thumb-light: 88%;
-  --thumb-alpha: 0.9;
-
-  /* --grad stays the LIGHT ribbon so --on-grad keeps its contrast; only
-        the clipped heading gradient swaps per theme. -- */
-  --grad-text: linear-gradient(100deg, #3F4FA8 0%, #4A3FA0 50%, #5B3F9E 100%);
-
-  --on-grad: #10131A;
-  --on-accent: #FFFFFF;
-  --sel-text: #FFFFFF;
-
-  /* The hero keeps its dark scrim, so media ink stays light. */
-  --on-media: #F1F4F9;
-  --on-media-2: #C2CCDB;
-  --wash-media-rgb: 255 255 255;
-/* -- Chrome -- */
-  --nav-bg: rgba(242, 244, 248, 0.9);
-  --code-bg: #EDF1F6;
-  --panel-wash: #F5F7FA;
-  --track: #B7C0CF;
---knob: #FFFFFF;                /* switch knob — white on either track */
-
-  /* -- Depth: shadows follow the ink, never a hue of their own. -- */
-  --shadow-rgb: 20 30 48;
-  --shadow-sm: 0 1px 2px rgb(var(--shadow-rgb) / 0.06), 0 10px 28px -22px rgb(var(--shadow-rgb) / 0.24);
-  --shadow-md: 0 2px 4px rgb(var(--shadow-rgb) / 0.06), 0 24px 48px -30px rgb(var(--shadow-rgb) / 0.28);
-  --shadow-lg: 0 40px 80px -44px rgb(var(--shadow-rgb) / 0.38);
-  --glass-hi: inset 0 1px 0 rgb(var(--wash-hi-rgb) / 0.6);
-  --well-shadow: inset 0 2px 8px rgb(var(--shadow-rgb) / 0.1);
-
-  --ok: #157F4B;
-  --bad: #B32424;
-  --warn: #8A5A00;
-  --ok-txt: #157F4B;
-  --bad-txt: #B32424;
-  --warn-txt: #8A5A00;
-  --ok-rgb: 21 127 75;
-  --bad-rgb: 179 36 36;
-  --warn-rgb: 138 90 0;
-  /* Ink ON a solid status chip: this block paints dark chips. */
-  --on-ok: #FFFFFF;
-  --on-bad: #FFFFFF;
-
-  --wash-neutral: rgba(20, 25, 34, 0.04);
-  --wash-accent2: rgba(46, 58, 140, 0.07);
-  --wash-accent2-hover: rgba(46, 58, 140, 0.14);
-  --tint-accent: rgba(63, 79, 168, 0.07);
-  --tint-accent3: rgba(91, 63, 158, 0.06);
-  /* Surface washes invert: white-on-white is invisible, so they go dark. */
-  --wash-hi-rgb: 20 25 34;
-
-  --glow: rgba(63, 79, 168, 0.18);
-  --glow-cyan: rgba(63, 79, 168, 0.16);
-  --glow-green: rgba(21, 127, 75, 0.16);
-  --ring: 0 0 0 3px rgba(63, 79, 168, 0.2);
-  --text-glow: none;
-  --grad-cyber: linear-gradient(100deg, #3F4FA8 0%, #2E3A8C 100%);
-
-  --aurora-1: radial-gradient(52rem 32rem at 12% -6%, rgba(63, 79, 168, 0.07), transparent 62%);
-  --aurora-2: radial-gradient(46rem 30rem at 88% 108%, rgba(91, 63, 158, 0.07), transparent 60%);
-  --grid-line: rgba(20, 25, 34, 0.04);
-}
+/* Light theme and the second palette were removed in v2.0.0 — the
+   platform ships ONE identity (see MODULE 80 notes above). */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -397,6 +415,9 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+  /* Inherited text-shadows would paint OVER the gradient-clipped fill
+     and muddy it; gradient text gets its lift from drop-shadow filters. */
+  text-shadow: none;
 }
 
 /* ---------- Reveal animation ---------- */
@@ -639,7 +660,7 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
 }
 .hero-glow-a {
   width: 520px; height: 520px;
-  background: rgb(var(--accent-rgb) / 0.20);
+  background: rgb(var(--accent-rgb) / 0.14);
   top: -10%;
   inset-inline-start: -8%;
   filter: blur(60px);
@@ -647,7 +668,7 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
 }
 .hero-glow-b {
   width: 460px; height: 460px;
-  background: rgb(var(--accent-2-rgb) / 0.16);
+  background: rgb(var(--accent-3-rgb) / 0.12);
   bottom: -12%;
   inset-inline-end: -6%;
   filter: blur(60px);
@@ -1395,9 +1416,6 @@ html[dir="rtl"] .work-search input { background-position: right 1rem center; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
   opacity: 0.9;
-}
-[data-theme="light"] .tool-out.is-fallback::before {
-  color: var(--warn-txt);
 }
 .tool-input {
   direction: ltr;
@@ -2236,7 +2254,7 @@ details.q-explain {
 .q-chip.is-bad { border-color: rgba(248, 113, 113, 0.4); }
 .q-chip.is-bad::before { content: "✕"; color: var(--bad); }
 .q-chip.is-timeout { border-color: rgba(251, 191, 36, 0.4); }
-.q-chip.is-timeout::before { content: "⏱"; color: var(--warn); }
+.q-chip.is-timeout::before { content: "◔"; color: var(--warn); }
 .q-chip.is-unknown { border-style: dashed; }
 .q-chip.is-unknown::before { content: "?"; color: var(--dim); }
 
@@ -2787,16 +2805,6 @@ details.q-explain p { color: var(--muted); }
   --games-amber: var(--warn);
   --games-dim: var(--dim);
 }
-[data-theme="light"] .games-app {
-  --games-slate: var(--text);
-  --games-panel: rgb(var(--wash-hi-rgb) / 0.9);
-  --games-line: rgb(var(--accent-rgb) / 0.22);
-  --games-cyan: var(--accent-2);
-  --games-green: var(--ok);
-  --games-red: var(--bad);
-  --games-amber: var(--warn);
-  --games-dim: var(--muted);
-}
 .games-intro { color: var(--games-dim); }
 .games-sc { background: var(--surface); border-color: var(--line); color: var(--text); }
 .games-sc:hover { border-color: rgb(var(--accent-2-rgb) / 0.5); box-shadow: 0 10px 26px -18px rgb(var(--shadow-rgb) / 0.55); }
@@ -2927,66 +2935,7 @@ html[lang="en"] .lesson-example { border-right: none; border-left: 3px solid var
   .lesson-next:hover { background: var(--tint-accent); }
 }
 
-/* ============================================================
-   MODULE 36 · Theme switcher — dark default / light persisted
-   Minimalist round toggle in the navbar (next to lang-toggle).
-   State: <html data-theme="light"> + "motmi-portal:theme" in
-   localStorage. Sun icon shows in dark (click → light), moon in light.
-   ============================================================ */
- .theme-toggle, .palette-toggle {
-  width: 42px; height: 42px;
-  display: grid; place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  color: var(--accent-2);
-  background: var(--wash-accent2);
-  cursor: pointer;
-  transition: border-color 0.25s, transform 0.2s, background 0.25s;
-}
-.theme-toggle:hover, .palette-toggle:hover { border-color: var(--accent-2); transform: translateY(-2px); background: var(--wash-accent2-hover); }
-.theme-toggle:focus-visible, .palette-toggle:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
-.theme-toggle:active, .palette-toggle:active { transform: scale(0.94); }
-.theme-ico { width: 20px; height: 20px; display: grid; place-items: center; }
-.theme-ico svg {
-  grid-area: 1 / 1;
-  width: 18px; height: 18px;
-  fill: none; stroke: currentColor;
-  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-  transition: opacity 0.25s, transform 0.35s;
-}
-.theme-ico .ico-moon { opacity: 0; transform: rotate(-90deg) scale(0.6); }
-[data-theme="light"] .theme-ico .ico-moon { opacity: 1; transform: none; }
-[data-theme="light"] .theme-ico .ico-sun { opacity: 0; transform: rotate(90deg) scale(0.6); }
-/* Adaptive halo + playful icon micro-interactions (transform-only → no layout shift).
-   Declared after the [data-theme] rules so hover wins the equal-specificity tie. */
-.theme-toggle:hover,
-.theme-toggle:focus-visible { box-shadow: 0 0 0 4px var(--glow); }
-.palette-toggle:hover, .palette-toggle:focus-visible { box-shadow: 0 0 0 4px var(--glow); }
-.theme-toggle:hover .ico-sun { transform: rotate(40deg) scale(1.08); }
-.theme-toggle:hover .ico-moon { transform: rotate(-14deg) scale(1.08); }
-/* MODULE 36b */
-.palette-toggle { color: var(--accent); }
-.nav:not(.is-scrolled) .palette-toggle { color: var(--on-media); border-color: rgb(var(--wash-media-rgb) / 0.4); background: rgb(var(--wash-media-rgb) / 0.12); }
-.nav:not(.is-scrolled) .palette-toggle:hover { border-color: rgb(var(--wash-media-rgb) / 0.7); background: rgb(var(--wash-media-rgb) / 0.2); }
-.palette-ico { width:20px; height:20px; display:block; }
-.palette-ico svg { display:block; width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; transition: transform .35s; }
-.palette-toggle:hover .palette-ico svg { transform: rotate(28deg) scale(1.08); }
-@media (prefers-reduced-motion: reduce) {
-  .theme-ico svg { transition: none; }
-  .theme-toggle:hover .ico-sun,
-  .theme-toggle:hover .ico-moon { transform: none; }
-  .palette-toggle:hover .palette-ico svg { transform: none; }
-}
-@media (max-width: 700px) { .theme-toggle, .palette-toggle { display: grid; } }
-/* Transparent nav floats over the dark hero photo (both themes) — bright chrome there */
-.nav:not(.is-scrolled) .theme-toggle { color: var(--on-media); border-color: rgb(var(--wash-media-rgb) / 0.4); background: rgb(var(--wash-media-rgb) / 0.12); }
-.nav:not(.is-scrolled) .theme-toggle:hover { border-color: rgb(var(--wash-media-rgb) / 0.7); background: rgb(var(--wash-media-rgb) / 0.2); }
 
-/* --- Light-theme specificity fixes (original dark base rules that outrank
-   the MODULE 35 overrides): quiz hover badge + switch track contrast --- */
-[data-theme="light"] .q-option:hover:not(:disabled)::before { color: var(--on-accent); background: var(--accent); }
-[data-theme="light"] .q-switch .track { background: var(--track); }
-[data-theme="light"] .q-switch .track::after { border: 1px solid rgba(85, 41, 47, 0.25); }
 
 /* ============================================================
    MODULES 45-48 · Red Team labs · IR · Crypto · new tools
@@ -4406,7 +4355,6 @@ html[dir="ltr"] .sem-details[open] > summary::before { transform: rotate(-90deg)
 .btn-primary { background: var(--grad); color: var(--on-grad); box-shadow: 0 10px 30px -10px rgb(var(--accent-rgb) / 0.65); }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 36px -12px rgb(var(--accent-2-rgb) / 0.55); }
 .btn-primary:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
-[data-theme="light"] .btn-primary { box-shadow: 0 12px 28px -12px rgb(var(--accent-rgb) / 0.5); }
 
 /* ---------- Hero — simplified, brand, tagline, compact stats ---------- */
 .hero-brand {
@@ -4527,6 +4475,11 @@ html[dir="ltr"] .sem-details[open] > summary::before { transform: rotate(-90deg)
   border-radius: var(--radius);
   text-align: start;
 }
+/* The strip pair (#heroStartHere / #heroNextAction) is toggled with the
+   `hidden` attribute by MODULE 57; without this guard the author
+   display:flex above beats the UA [hidden] rule and the unused strip
+   (empty "next step" placeholder) renders anyway. */
+.hero-start[hidden] { display: none; }
 .hero-start-ico { font-size: 1.5rem; flex: 0 0 auto; }
 .hero-start-text { display: grid; gap: 0.1rem; flex: 1 1 auto; min-width: 0; }
 .hero-start-text strong { font-family: var(--font-display); font-size: 0.98rem; color: var(--text); }
@@ -5879,7 +5832,7 @@ body.search-open { overflow: hidden; }
 
 
 /* ============================================================
-   MODULE 58 · WhatsNew — زر التعجب (👍) في الشريط العلوي
+   MODULE 58 · WhatsNew — زر التحديثات في الشريط العلوي
    The trigger sits in the navbar slot after the links (the red
    box). The panel opens under it: RTL-safe logical properties,
    design tokens, reduced-motion guard, mobile sheet.
@@ -6107,8 +6060,6 @@ body.search-open { overflow: hidden; }
 .hero.is-media-playing .hero-bg { animation-play-state: paused; }
 /* A touch more contrast under the loop so hero text keeps its AA ratio. */
 .hero.is-media-playing::before { background: rgb(var(--shadow-rgb) / 0.58); }
-/* Light theme: the photo/loop is dark, so deepen the scrim slightly. */
-[data-theme="light"] .hero.is-media-playing::before { background: rgb(var(--shadow-rgb) / 0.64); }
 
 /* Small screens: shorter travel + a slower cycle keeps the drift calm
    and the compositor cheap on phones. */
@@ -6121,11 +6072,12 @@ body.search-open { overflow: hidden; }
   .hero-bg { animation: none; transform: none; inset: 0; will-change: auto; }
   .hero-media { display: none; transition: none; }
 }
-/* Rose duotone on the hero media itself: the blue/teal photo and the
-   pre-rendered loop are nudged toward the brand hue instead of fighting it
-   (the loop is a baked video, so a CSS filter is the only way to retint it). */
+/* Graphite & Brass grade on the hero media: the blue/teal photo and the
+   pre-rendered loop are desaturated toward neutral graphite so the brass
+   accents carry the warmth instead of the backdrop (the loop is a baked
+   video, so a CSS filter is the only way to retint it). */
 .hero-bg,
-.hero-media { filter: saturate(0.72) hue-rotate(-10deg) brightness(1.02); }
+.hero-media { filter: saturate(0.45) sepia(0.08) brightness(0.94) contrast(1.05); }
 
 /* END MODULE 59 · HeroMedia */
 
@@ -6156,6 +6108,14 @@ body.search-open { overflow: hidden; }
 }
 .nav-main { gap: var(--nav-rhythm-lg); }
 .nav-links { gap: var(--nav-rhythm-md); }
+/* Width budget: the bar now carries nine links, the What's-new chip, the
+   primary CTA and the View-on-GitHub button inside the same inner cap, so
+   the groups share a tighter base rhythm. The ≤1320px step below still
+   layers its own compression on the same tokens. */
+.nav {
+  --nav-rhythm-md: 1rem;
+  --nav-rhythm-lg: 1rem;
+}
 .nav-actions { gap: var(--nav-rhythm-xs); padding-inline-start: var(--nav-rhythm-xs); }
 /* One duration, one curve, for every interactive element in the bar. */
 .nav-links a,
@@ -6180,15 +6140,13 @@ body.search-open { overflow: hidden; }
   display: block;
 }
 .logo-mark svg { display: block; width: 100%; height: 100%; }
-/* The shield gradient is painted from CSS so each theme picks its own
-   stops (images/icon.svg keeps its fixed ones for the favicon/PWA). */
+/* The shield gradient is painted from CSS so the mark picks up the
+   live palette (images/icon.svg keeps its fixed stops for the favicon/PWA). */
 .logo-mark .logo-stop-a { stop-color: var(--accent); }
 .logo-mark .logo-stop-b { stop-color: var(--accent-2); }
-[data-theme="light"] .logo-mark .logo-stop-a { stop-color: var(--accent); }
-[data-theme="light"] .logo-mark .logo-stop-b { stop-color: var(--accent-2); }
 .logo-mark .logo-shield { fill: url(#navLogoGrad); }
 .logo-mark .logo-disc { fill: var(--bg); }      /* punches the inner disc out */
-.logo-mark .logo-glyph { fill: var(--text); }   /* 15.5:1 dark · ≈12:1 light */
+.logo-mark .logo-glyph { fill: var(--text); }   /* 17.9:1 on --surface */
 .logo-word {
   font-family: var(--font-display);
   font-weight: 800;
@@ -6305,7 +6263,23 @@ body.search-open { overflow: hidden; }
   border-radius: var(--radius);
   background: linear-gradient(180deg, var(--tint-accent), transparent 72%), var(--surface);
 }
-.sem-guide-ico { font-size: 1.6rem; line-height: 1; flex: 0 0 auto; }
+.sem-guide-ico {
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+.sem-guide-ico::before {
+  content: "";
+  width: 1em;
+  height: 1em;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10 12 5 2 10l10 5 10-5z'/%3E%3Cpath d='M6 12v4c0 1.66 2.69 3 6 3s6-1.34 6-3v-4'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 10 12 5 2 10l10 5 10-5z'/%3E%3Cpath d='M6 12v4c0 1.66 2.69 3 6 3s6-1.34 6-3v-4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 .sem-guide-text { display: grid; gap: 0.2rem; flex: 1 1 22rem; min-width: 0; }
 .sem-guide-text strong { font-size: 1.02rem; }
 .sem-guide-text span { color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
@@ -6485,141 +6459,6 @@ body.search-open { overflow: hidden; }
   .hero-now-guide,
   .guide-faq summary::after { transition: none; }
 }
-/* MODULE 36b · Palette switch — slate (default) ↔ ocean (second).
-   Orthogonal to data-theme: [data-palette="classic"] overrides the token
-   set in BOTH dark and light modes. Default (attribute absent) is slate.
-   OCEAN was the old "classic" violet/cyan/pink neon set. It is re-pitched
-   here to the same low-chroma, calm discipline as the default palette — a
-   deep teal canvas with a soft aqua accent — so switching palettes no
-   longer changes how loud the page feels.
-   Measured on dark (surface / surface-2): text 14.6 / 13.0 · muted 8.0 / 7.2
-   · dim 5.8 / 5.2 · accent 9.2 / 8.3 · accent-2 11.9 / 10.7 · ok 9.6 / 8.6. */
-:root[data-palette="classic"] {
-  --bg: #0A141A;
-  --bg-soft: #0F1C24;
-  --surface: #0F1C24;
-  --surface-2: #16262F;
-  --line: rgba(214, 231, 236, 0.12);
-  --line-strong: rgba(214, 231, 236, 0.24);
-  --text: #E2EDF2;
-  --muted: #9DB4BF;
-  --dim: #7E99A6;
-  --accent: #7FC8D9;
-  --accent-2: #B4DDE6;
-  --accent-3: #8FBFAE;
-  --accent-rgb: 127 200 217;
-  --accent-2-rgb: 180 221 230;
-  --accent-3-rgb: 143 191 174;
-  --hue-sat: 34%;
-  --hue-light: 72%;
-  --thumb-light: 60%;
-  --thumb-alpha: 0.35;
-  /* Light ribbon in both modes, so --on-grad keeps its contrast. */
-  --grad: linear-gradient(100deg, #9BD4E1 0%, #86C6D9 52%, #7BB9CE 100%);
-  --grad-text: linear-gradient(100deg, #B4DDE6 0%, #7FC8D9 50%, #8FBFAE 100%);
-  --sel-text: #0A141A;
-  --on-accent: #0A141A;
-  /* --on-grad is also re-asserted inline at boot by MODULE 36b
-     (see script.js applyPalette) so the ribbon text never fights CSS. */
-  --on-grad: #0A141A;
-  --nav-bg: rgba(10, 20, 26, 0.86);
-  --code-bg: #08151A;
-  --panel-wash: #0F1C24;
-  --knob: #FFFFFF;                /* switch knob — white on either track */
-  --track: #3F5560;
-  --shadow-rgb: 2 10 14;
-  --shadow-sm: 0 1px 2px rgb(var(--shadow-rgb) / 0.5), 0 10px 28px -20px rgb(var(--shadow-rgb) / 0.55);
-  --shadow-md: 0 2px 4px rgb(var(--shadow-rgb) / 0.45), 0 24px 48px -28px rgb(var(--shadow-rgb) / 0.7);
-  --shadow-lg: 0 40px 80px -40px rgb(var(--shadow-rgb) / 0.85);
-  --well-shadow: inset 0 2px 12px rgb(var(--shadow-rgb) / 0.4);
-  --wash-neutral: rgba(214, 231, 236, 0.07);
-  --wash-accent2: rgba(180, 221, 230, 0.10);
-  --wash-accent2-hover: rgba(180, 221, 230, 0.18);
-  --tint-accent: rgba(127, 200, 217, 0.13);
-  --tint-accent3: rgba(143, 191, 174, 0.11);
-  --ok: #5FD69B;
-  --bad: #F08A8A;
-  --warn: #E9C46A;
-  --ok-txt: #8FE3B8;
-  --bad-txt: #F5AFAF;
-  --warn-txt: #F0D391;
-  --ok-rgb: 95 214 155;
-  --bad-rgb: 240 138 138;
-  --warn-rgb: 233 196 106;
-  --on-ok: #052E16;
-  --on-bad: #2A0A0A;
-  --wash-hi-rgb: 255 255 255;
-  --glow: rgba(127, 200, 217, 0.24);
-  --glow-cyan: rgba(127, 200, 217, 0.26);
-  --glow-green: rgba(95, 214, 155, 0.20);
-  --ring: 0 0 0 3px rgba(127, 200, 217, 0.24);
-  --text-glow: drop-shadow(0 0 22px rgba(127, 200, 217, 0.18));
-  --grad-cyber: linear-gradient(100deg, #9BD4E1 0%, #B4DDE6 100%);
-  --aurora-1: radial-gradient(52rem 32rem at 12% -6%, rgba(127, 200, 217, 0.07), transparent 62%);
-  --aurora-2: radial-gradient(46rem 30rem at 88% 108%, rgba(143, 191, 174, 0.08), transparent 60%);
-  --grid-line: rgba(214, 231, 236, 0.04);
-}
-:root[data-palette="classic"][data-theme="light"] {
-  --bg: #EFF4F6;
-  --bg-soft: #E6EDEF;
-  --surface: #FFFFFF;
-  --surface-2: #F4F8F9;
-  --line: rgba(14, 26, 31, 0.12);
-  --line-strong: rgba(14, 26, 31, 0.26);
-  --text: #0E1A1F;
-  --muted: #43555D;
-  --dim: #55676F;
-  --accent: #1F6274;
-  --accent-2: #194F5E;
-  --accent-3: #2C5E52;
-  --accent-rgb: 31 98 116;
-  --accent-2-rgb: 25 79 94;
-  --accent-3-rgb: 44 94 82;
-  --hue-sat: 46%;
-  --hue-light: 40%;
-  --thumb-light: 88%;
-  --thumb-alpha: 0.9;
-  --grad-text: linear-gradient(100deg, #1F6274 0%, #25566B 50%, #2C5E52 100%);
-  --sel-text: #FFFFFF;
-  --on-accent: #FFFFFF;
-  --on-grad: #0A141A;
-  --nav-bg: rgba(239, 244, 246, 0.9);
-  --code-bg: #EAF1F3;
-  --knob: #FFFFFF;                /* switch knob — white on either track */
-  --panel-wash: #F4F8F9;
-  --track: #B3C2C7;
-  --shadow-rgb: 18 44 54;
-  --shadow-sm: 0 1px 2px rgb(var(--shadow-rgb) / 0.06), 0 10px 28px -22px rgb(var(--shadow-rgb) / 0.24);
-  --shadow-md: 0 2px 4px rgb(var(--shadow-rgb) / 0.06), 0 24px 48px -30px rgb(var(--shadow-rgb) / 0.28);
-  --shadow-lg: 0 40px 80px -44px rgb(var(--shadow-rgb) / 0.38);
-  --well-shadow: inset 0 2px 8px rgb(var(--shadow-rgb) / 0.1);
-  --wash-neutral: rgba(14, 26, 31, 0.04);
-  --wash-accent2: rgba(25, 79, 94, 0.07);
-  --wash-accent2-hover: rgba(25, 79, 94, 0.14);
-  --tint-accent: rgba(31, 98, 116, 0.07);
-  --tint-accent3: rgba(44, 94, 82, 0.06);
-  --ok: #157F4B;
-  --bad: #B32424;
-  --warn: #8A5A00;
-  --ok-txt: #157F4B;
-  --bad-txt: #B32424;
-  --warn-txt: #8A5A00;
-  --ok-rgb: 21 127 75;
-  --bad-rgb: 179 36 36;
-  --warn-rgb: 138 90 0;
-  --on-ok: #FFFFFF;
-  --on-bad: #FFFFFF;
-  --wash-hi-rgb: 14 26 31;
-  --glow: rgba(31, 98, 116, 0.18);
-  --glow-cyan: rgba(31, 98, 116, 0.16);
-  --glow-green: rgba(21, 127, 75, 0.16);
-  --ring: 0 0 0 3px rgba(31, 98, 116, 0.2);
-  --text-glow: none;
-  --grad-cyber: linear-gradient(100deg, #1F6274 0%, #194F5E 100%);
-  --aurora-1: radial-gradient(52rem 32rem at 12% -6%, rgba(31, 98, 116, 0.07), transparent 62%);
-  --aurora-2: radial-gradient(46rem 30rem at 88% 108%, rgba(44, 94, 82, 0.07), transparent 60%);
-  --grid-line: rgba(14, 26, 31, 0.04);
-}
 /* ============================================================
    MODULE 62/63/64 · Srs · Backup · MockExam
    ------------------------------------------------------------
@@ -6789,11 +6628,6 @@ body.search-open { overflow: hidden; }
 }
 /* END MODULE 67 */
 
-/* Shield logo stops follow the palette too (both themes). */
-:root[data-palette="classic"] .logo-mark .logo-stop-a { stop-color: var(--accent); }
-:root[data-palette="classic"] .logo-mark .logo-stop-b { stop-color: var(--accent-2); }
-:root[data-palette="classic"][data-theme="light"] .logo-mark .logo-stop-a { stop-color: var(--accent); }
-:root[data-palette="classic"][data-theme="light"] .logo-mark .logo-stop-b { stop-color: var(--accent-2); }
 /* END MODULE 61 · LectureGuide */
 
 
@@ -7803,20 +7637,14 @@ body.search-open { overflow: hidden; }
    the hover lift is replaced by a tone change (no lift inside a fixed
    bar, matching the CTA rule in MODULE 60). */
 .nav-cluster .search-toggle,
-.nav-cluster .lang-toggle,
-.nav-cluster .theme-toggle,
-.nav-cluster .palette-toggle {
+.nav-cluster .lang-toggle {
   background: transparent;
   border-color: transparent;
 }
 .nav-cluster .search-toggle:hover,
 .nav-cluster .lang-toggle:hover,
-.nav-cluster .theme-toggle:hover,
-.nav-cluster .palette-toggle:hover,
 .nav-cluster .search-toggle:focus-visible,
-.nav-cluster .lang-toggle:focus-visible,
-.nav-cluster .theme-toggle:focus-visible,
-.nav-cluster .palette-toggle:focus-visible {
+.nav-cluster .lang-toggle:focus-visible {
   transform: none;
   background: var(--wash-accent2-hover);
   border-color: color-mix(in srgb, var(--accent-2) 45%, transparent);
@@ -8215,13 +8043,13 @@ body.search-open { overflow: hidden; }
 /* ============================================================
    MODULE 74 · AnnouncementsBar — dated quiz/notice reminder banner
    Rendered by script.js from announcements.js. Sits ABOVE the hero,
-   OUTSIDE every view, so it stays visible on all routes. Theme-aware
-   via the existing status tokens (--warn / --bad / --ok) so it reads
-   correctly in dark, light and both palettes.
+   OUTSIDE every view, so it stays visible on all routes. Offset by
+   the fixed navbar height so the row never hides under the bar.
+   Uses the existing status tokens (--warn / --bad / --ok).
    ============================================================ */
 .announce-bar {
   width: min(100%, 1080px);
-  margin: 0.9rem auto 0;
+  margin: calc(var(--nav-h) + 0.9rem) auto 0;
   padding: 0 1rem;
 }
 .announce-bar[hidden] { display: none; }
@@ -8243,7 +8071,29 @@ body.search-open { overflow: hidden; }
   border-color: rgb(var(--bad-rgb) / 0.4);
   background: linear-gradient(135deg, rgb(var(--bad-rgb) / 0.12), rgb(var(--warn-rgb) / 0.08));
 }
-.announce-ico { font-size: 1.5rem; flex: 0 0 auto; line-height: 1.4; }
+.announce-ico {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--warn);
+}
+.announce-bar[data-status="live"] .announce-ico,
+.announce-bar[data-status="today"] .announce-ico { color: var(--bad); }
+.announce-ico::before {
+  content: "";
+  width: 1.25rem;
+  height: 1.25rem;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 11 18-5v12L3 14v-3z'/%3E%3Cpath d='M11.6 16.8a3 3 0 1 1-5.8-1.6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 11 18-5v12L3 14v-3z'/%3E%3Cpath d='M11.6 16.8a3 3 0 1 1-5.8-1.6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.announce-ico[data-kind="notice"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9'/%3E%3Cpath d='M13.73 21a2 2 0 0 1-3.46 0'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9'/%3E%3Cpath d='M13.73 21a2 2 0 0 1-3.46 0'/%3E%3C/svg%3E");
+}
 .announce-body { flex: 1 1 auto; min-width: 0; display: grid; gap: 0.35rem; }
 .announce-head { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
 .announce-chip {
@@ -8317,6 +8167,18 @@ body.search-open { overflow: hidden; }
   color: var(--warn);
   border: 1px solid rgb(var(--warn-rgb) / 0.4);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.hero-now-quiz::before {
+  content: "";
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 .hero-now-quiz:hover { background: rgb(var(--warn-rgb) / 0.24); }
 .hero-now-quiz.is-live,
@@ -8329,7 +8191,7 @@ body.search-open { overflow: hidden; }
 
 /* ---------- Mobile ---------- */
 @media (max-width: 560px) {
-  .announce-bar { padding: 0 0.6rem; margin-top: 0.7rem; }
+  .announce-bar { padding: 0 0.6rem; margin-top: calc(var(--nav-h) + 0.7rem); }
   .announce-row { flex-wrap: wrap; padding: 0.8rem 0.9rem; gap: 0.6rem; }
   .announce-title { font-size: 0.95rem; }
   .announce-actions { width: 100%; }
@@ -8342,3 +8204,1076 @@ body.search-open { overflow: hidden; }
 }
 /* END MODULE 74 */
 
+
+/* ============================================================
+   MODULE 79 · IDENTITY LAYER (appended) — see .scratch/skin/
+   ============================================================ */
+
+/* ============================================================
+   MODULE 79 · IDENTITY — "Graphite & Brass" surface pass
+   ------------------------------------------------------------
+   One consolidated layer that re-skins the product to the new
+   field-manual language: squared instrument geometry, brass
+   accents, patina secondary, mono data readouts, hairline
+   structure, no decorative glass. Every selector below targets
+   class names the application already renders — no markup
+   contract is renamed, no behaviour is folded in here.
+   ============================================================ */
+
+/* ---------- Base typography rhythm ---------- */
+body {
+  line-height: 1.75;
+  font-feature-settings: "kern" 1;
+}
+
+.section-title {
+  font-size: clamp(1.85rem, 3.8vw, 2.85rem);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.section-sub {
+  margin-top: 0.85rem;
+  max-width: 58ch;
+}
+
+/* Eyebrow = editorial index mark: a brass tick + label. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--accent-2);
+  margin-bottom: 0.9rem;
+}
+.eyebrow::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 22px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ---------- Buttons — squared instrument controls ---------- */
+.btn {
+  gap: 0.55rem;
+  font-weight: 600;
+  font-size: 0.93rem;
+  padding: 0.82rem 1.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur) var(--ease-out),
+              background var(--dur) var(--ease-out),
+              color var(--dur) var(--ease-out),
+              border-color var(--dur) var(--ease-out);
+}
+.btn-primary {
+  background: var(--grad);
+  color: var(--on-grad);
+  border-color: rgb(var(--accent-rgb) / 0.45);
+  box-shadow: 0 10px 24px -14px rgb(var(--shadow-rgb) / 0.75), inset 0 1px 0 rgb(var(--wash-hi-rgb) / 0.35);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -14px rgb(var(--shadow-rgb) / 0.8), 0 0 0 3px var(--glow);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-ghost {
+  border-color: var(--line-strong);
+  color: var(--text);
+  background: transparent;
+}
+.btn-ghost:hover {
+  border-color: rgb(var(--accent-rgb) / 0.55);
+  background: var(--wash-neutral);
+  transform: translateY(-2px);
+}
+.btn-sm { padding: 0.5rem 1rem; font-size: 0.84rem; border-radius: 8px; }
+.btn-lg { padding: 1rem 1.9rem; font-size: 1.02rem; }
+.btn-block { display: flex; width: 100%; justify-content: center; }
+.btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* ---------- Chips, tags & small controls — one geometry ---------- */
+.q-pick,
+.card-link,
+.tag-chip,
+.path-chip,
+.sem-chip,
+.q-chip,
+.skill-chip,
+.path-badge,
+.path-level,
+.path-next-chip,
+.skill-badge,
+.lab-done-badge,
+.updates-tag,
+.team-badge,
+.flash-timed-cta,
+.scroll-hint,
+.hero-now-chip {
+  border-radius: 8px;
+}
+
+.q-pick {
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: transparent;
+  transition: border-color var(--dur) var(--ease-out), background var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+.q-pick:hover { transform: none; border-color: rgb(var(--accent-rgb) / 0.6); background: var(--tint-accent); }
+.q-pick.is-active,
+.q-pick[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--tint-accent);
+  color: var(--text);
+}
+
+.card-link {
+  border-radius: 8px;
+  background: transparent;
+  border-color: rgb(var(--accent-2-rgb) / 0.35);
+  font-weight: 500;
+}
+.card-link:hover { background: var(--tint-accent); border-color: rgb(var(--accent-rgb) / 0.6); }
+
+.thumb-label {
+  border-radius: 7px;
+  background: rgb(var(--shadow-rgb) / 0.62);
+  border-color: rgb(var(--wash-media-rgb) / 0.16);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ---------- Nav — one calm chrome bar ---------- */
+.nav.is-scrolled {
+  background: var(--nav-bg);
+  border-color: var(--line);
+  box-shadow: 0 12px 32px -26px rgb(var(--shadow-rgb) / 0.9);
+}
+.nav-links a {
+  padding: 0.35rem 0.15rem;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+.nav-links a:hover,
+.nav-links a[aria-current="true"],
+.nav-links a.is-active {
+  background: transparent;
+  color: var(--text);
+}
+.nav-links a[aria-current="true"]::after,
+.nav-links a.is-active::after { transform: scaleX(1); }
+.nav-cluster {
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgb(var(--shadow-rgb) / 0.35);
+}
+.nav-more-menu {
+  border-radius: 12px;
+  border-color: var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+.nav-more-menu a { border-radius: 8px; }
+.nav-burger span { border-radius: 2px; background: var(--text); }
+.mobile-menu { background: rgb(var(--shadow-rgb) / 0.97); }
+.mobile-menu ul a { font-weight: 600; }
+
+/* ---------- Hero — dossier cover ---------- */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to left, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(120% 92% at 50% 12%, #000 26%, transparent 78%);
+  mask-image: radial-gradient(120% 92% at 50% 12%, #000 26%, transparent 78%);
+}
+.hero-title {
+  font-size: clamp(2.2rem, 6vw, 4.4rem);
+  line-height: 1.2;
+  gap: 0.25rem;
+}
+.hero-tagline {
+  max-width: 60ch;
+  margin-inline: auto;
+  color: var(--on-media-2);
+  font-size: 1.02rem;
+  line-height: 1.75;
+}
+.hero-brand-ar { font-weight: 700; font-size: 1.05rem; }
+.hero-brand-en {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--on-media-2);
+}
+.hero-brand-sep { color: var(--accent-2); }
+.hero-sub { color: var(--on-media-2); font-size: 1.05rem; }
+
+.hero-credit {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+/* Now-strip: an ink instrument line, not a glass capsule. */
+.hero-now {
+  background: rgb(var(--shadow-rgb) / 0.55);
+  border: 1px solid rgb(var(--wash-media-rgb) / 0.14);
+  border-radius: 10px;
+  color: var(--on-media);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.hero-now-text { color: var(--on-media); }
+.hero-now-chip { border-radius: 6px; }
+
+/* Start-here strip: a framed briefing card. */
+.hero-start {
+  background: rgb(var(--shadow-rgb) / 0.6);
+  border: 1px solid rgb(var(--wash-media-rgb) / 0.16);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: 12px;
+  color: var(--on-media);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.hero-start-ico { color: var(--accent-2); }
+.hero-start-text strong { color: var(--on-media); }
+.hero-start-text span { color: var(--on-media-2); }
+
+
+/* Command center: solid dossier panel. */
+.hero-dash {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+.hero-command::before { height: 3px; border-radius: 3px 3px 0 0; }
+.hero-dash-kicker,
+.motivation-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--accent-2);
+}
+.hero-dash-title { font-weight: 700; }
+.hero-dash-overall {
+  background: var(--wash-neutral);
+  border-radius: 12px;
+}
+.hero-dash-label { font-size: 0.76rem; letter-spacing: 0; }
+.hero-dash-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 1.7rem;
+}
+.hero-dash-value.is-text {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.hero-dash-bar { height: 6px; border-radius: 3px; background: var(--surface-2); }
+.hero-dash-bar > i { border-radius: 3px; }
+.hero-dash-panel { background: transparent; border-radius: 12px; }
+.hero-dash-panel.is-continue { background: var(--tint-accent); }
+.hero-dash-empty { border-radius: 12px; background: var(--wash-neutral); }
+.hero-dash-link { font-weight: 600; }
+
+/* Tabs → underline index (RTL/LTR safe, no pills). */
+.hero-tabs { gap: 0.25rem; border-bottom: 1px solid var(--line); padding-bottom: 0; }
+.hero-tab {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 0.55rem 0.85rem;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.88rem;
+  transition: color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+}
+.hero-tab:hover { background: transparent; color: var(--text); }
+.hero-tab.is-active,
+.hero-tab[aria-selected="true"] {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+  border-bottom-color: var(--accent);
+  color: var(--text);
+}
+.hero-tab:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+
+.motivation-level,
+.motivation-goal { background: var(--wash-neutral); border-radius: 12px; }
+.motivation-goal-value { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+.motivation-badge { border-radius: 12px; }
+
+/* ---------- Subject cards (homepage grid) ---------- */
+.work-card-inner:hover { transform: translateY(-4px); }
+.work-info h3 { font-weight: 700; }
+.work-thumb { border-radius: var(--radius); }
+
+/* ---------- Global search — command palette ---------- */
+.search-overlay { background: rgb(var(--shadow-rgb) / 0.78); }
+.search-panel {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+}
+.search-option { border-radius: 10px; }
+.search-option-sub { font-size: 0.78rem; }
+.search-foot { color: var(--dim); }
+.search-foot kbd,
+.k {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  padding: 0.1rem 0.4rem;
+  background: var(--bg-soft);
+}
+.search-empty-msg { color: var(--muted); }
+
+/* ---------- Dialogs & drawers — solid, framed ---------- */
+.updates-panel {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.updates-toggle { border-radius: 10px; }
+.updates-item { border-radius: 10px; }
+.updates-sub, .updates-date { font-family: var(--font-mono); font-size: 0.72rem; }
+
+.mat-viewer-panel {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+}
+.mat-viewer-frame { border-radius: 10px; border: 1px solid var(--line); background: var(--bg-soft); }
+
+.tour-panel { border-radius: 16px; }
+.tour-foot .btn { border-radius: 8px; }
+
+/* ---------- Toasts & system notes ---------- */
+.lab-toast, .sw-update {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+}
+.sw-update-btn { border-radius: 8px; }
+
+/* ---------- Footer — a colophon ---------- */
+.footer {
+  border-top: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+.footer-links a { color: var(--muted); transition: color var(--dur) var(--ease-out); }
+.footer-links a:hover { color: var(--text); }
+.footer-bottom { border-top: 1px solid var(--line); color: var(--dim); font-size: 0.8rem; }
+.footer-local { font-family: var(--font-mono); font-size: 0.74rem; color: var(--dim); }
+
+/* ---------- Shared empty states ---------- */
+.empty-state,
+.progress-empty,
+.sem-empty,
+.rev-empty,
+.srs-empty,
+.mk-empty,
+.theatre-empty,
+.skill-empty-state,
+.path-detail-empty,
+.flashcards-timed-empty,
+.ft-review-empty {
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  background: var(--wash-neutral);
+  color: var(--muted);
+}
+.progress-empty-ico { color: var(--accent-2); }
+
+/* ---------- Back-to-top + misc controls ---------- */
+.to-top {
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+.to-top:hover { border-color: var(--accent); color: var(--accent-2); }
+.copy-btn { border-radius: 8px; }
+
+
+/* ============================================================
+   MODULE 79 · IDENTITY (cont.) — view families
+   Semester · Paths · Skills · Quiz/Exam · Flashcards · Tools
+   Labs · Student · Progress · Assistant · Guides
+   ============================================================ */
+
+/* ---------- Semester dashboard ---------- */
+.sem-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.sem-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+}
+.sem-code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--accent-2);
+}
+.sem-stat dd, .sem-stat dt { font-variant-numeric: tabular-nums; }
+.sem-progress-fill { border-radius: inherit; }
+.sem-chip { background: var(--wash-neutral); border-color: var(--line); color: var(--muted); }
+.sem-guide-cta:hover { transform: translateY(-2px); }
+
+/* ---------- Paths (guarded classes: keep `transition: none` intact) - */
+.path-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.path-card:hover {
+  border-color: rgb(var(--accent-rgb) / 0.5);
+  box-shadow: var(--shadow-md);
+}
+.path-card-cta, .path-back, .path-next {
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+}
+.path-card-cta:hover, .path-next:hover {
+  border-color: var(--accent);
+  background: var(--tint-accent);
+}
+.path-topic {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+}
+.path-topic:hover { border-color: var(--line-strong); background: var(--wash-neutral); }
+.path-topic-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  border-radius: 6px;
+  background: var(--wash-neutral);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.path-card-progress, .path-detail-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.path-card-progress > i, .path-detail-bar > i { border-radius: 3px; }
+.path-badge, .path-level {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  border-radius: 6px;
+  background: var(--wash-neutral);
+  border: 1px solid var(--line);
+  color: var(--accent-2);
+}
+.path-soon-box {
+  border: 1px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--wash-neutral);
+}
+.path-detail-head { border-bottom: 1px solid var(--line); }
+
+/* ---------- Skill tree ---------- */
+.skill-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.skill-card:hover { border-color: rgb(var(--accent-2-rgb) / 0.55); }
+.skill-card:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.skill-ico {
+  border-radius: 10px;
+  background: var(--wash-neutral);
+  border: 1px solid var(--line);
+}
+.skill-next:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.skill-connector { background: var(--line); }
+.skill-badge { font-family: var(--font-mono); border-radius: 6px; }
+
+/* ---------- Quiz experience ---------- */
+.quiz-shell {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.q-dashboard { border-bottom: 1px solid var(--line); }
+.q-mode-selector {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+.q-mode-btn { border-radius: 0; background: transparent; border: 0; font-weight: 600; }
+.q-mode-btn.is-active { background: var(--tint-accent); color: var(--text); }
+.q-mode-badge {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+.q-pick { background: transparent; }
+
+.q-option { border-radius: 10px; background: transparent; }
+.q-option::before { border-radius: 8px; }
+.q-option:hover:not(:disabled) { transform: none; background: var(--wash-neutral); border-color: var(--line-strong); }
+.q-option.is-correct,
+.q-option.is-wrong { box-shadow: none; }
+
+.q-feedback { border-inline-start: 3px solid var(--line-strong); border-radius: 10px; background: var(--wash-neutral); }
+.q-feedback.is-correct { border-inline-start-color: var(--ok); background: rgb(var(--ok-rgb) / 0.08); }
+.q-feedback.is-wrong { border-inline-start-color: var(--bad); background: rgb(var(--bad-rgb) / 0.08); }
+
+.q-review-item { border: 1px solid var(--line); border-radius: 10px; background: transparent; }
+.q-review-item:hover { border-color: var(--line-strong); }
+.q-result-score { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+.q-result-stat, .q-result-stats > * { border: 1px solid var(--line); border-radius: 10px; background: var(--wash-neutral); }
+.q-subject-card { border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-sm); }
+.q-subject-card:hover { border-color: rgb(var(--accent-rgb) / 0.5); }
+.q-timer, .q-timer-text { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.q-progress { height: 6px; border-radius: 3px; box-shadow: none; background: var(--surface-2); }
+.q-progress-fill { border-radius: 3px; box-shadow: none; }
+
+/* ---------- Exam prep ---------- */
+.exam-shell {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.exam-bar {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.exam-countdown, .exam-meta, .exam-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.exam-opt { border-radius: 10px; border: 1px solid var(--line); background: transparent; }
+.exam-opt:hover:not(:disabled) { border-color: var(--line-strong); background: var(--wash-neutral); }
+.exam-opt.is-correct { border-color: rgb(var(--ok-rgb) / 0.7); background: rgb(var(--ok-rgb) / 0.08); }
+.exam-opt.is-wrong { border-color: rgb(var(--bad-rgb) / 0.7); background: rgb(var(--bad-rgb) / 0.08); }
+.exam-rec { border-radius: 10px; border: 1px solid var(--line); background: var(--wash-neutral); }
+.exam-date-input, .exam-select { border-radius: 8px; border: 1px solid var(--line-strong); background: var(--bg-soft); color: var(--text); }
+
+/* ---------- Flashcards (generic flip deck) ---------- */
+.flash-deck { perspective: 1200px; }
+.flash-card { border-radius: 16px; }
+.flash-face {
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.flash-face.is-back { background: var(--surface-2); }
+.flash-term { font-weight: 700; }
+.flash-term-en {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--accent-2);
+}
+.flash-timed-cta { border: 1px solid var(--line-strong); background: transparent; }
+.flash-timed-cta:hover { border-color: var(--accent); background: var(--tint-accent); }
+
+/* ---------- Tools ---------- */
+.tool-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.tool-card:hover { border-color: var(--line-strong); }
+.tool-out {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--code-bg);
+  color: var(--text);
+}
+.tool-input, .tool-select, .tool-textarea {
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-soft);
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+.tool-input:focus-visible, .tool-select:focus-visible, .tool-textarea:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+.tool-label { color: var(--muted); font-size: 0.82rem; }
+.tool-edu {
+  border-inline-start: 3px solid var(--accent-2);
+  border-radius: 10px;
+  background: var(--wash-neutral);
+  padding-inline-start: 0.85rem;
+}
+
+/* ---------- Labs ---------- */
+.lab-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.lab-card:hover { border-color: rgb(var(--accent-2-rgb) / 0.5); }
+.lab-responsible {
+  border-inline-start: 3px solid var(--warn);
+  border-radius: 10px;
+  background: rgb(var(--warn-rgb) / 0.08);
+  padding-inline-start: 0.85rem;
+}
+.lab-hint { border: 1px solid var(--line); border-radius: 8px; background: var(--wash-neutral); font-size: 0.82rem; }
+.lab-link { border-radius: 8px; }
+.lab-done-badge { font-family: var(--font-mono); font-size: 0.68rem; }
+
+/* ---------- Student tools ---------- */
+.student-shell {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.gpa-row, .ics-table tr { border-bottom: 1px solid var(--line); }
+.ics-table { font-variant-numeric: tabular-nums; }
+.timer-time { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+.student-input {
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-soft);
+  color: var(--text);
+}
+.student-input:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+
+/* ---------- Progress hub ---------- */
+.progress-stats { gap: 0.75rem; }
+.progress-stat {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--wash-neutral);
+}
+.progress-stat strong, .progress-pct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.progress-bar { height: 6px; border-radius: 3px; background: var(--surface-2); }
+.progress-bar-fill { border-radius: 3px; }
+.progress-review { border-top: 1px solid var(--line); }
+.progress-review-row { border-bottom: 1px solid var(--line); }
+.progress-review-row:last-child { border-bottom: 0; }
+
+/* ---------- Revision & lesson practice ---------- */
+.rev-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.rev-opt { border-radius: 10px; border: 1px solid var(--line); background: transparent; }
+.rev-opt:hover { border-color: var(--line-strong); background: var(--wash-neutral); }
+.lesson-meta-chip { border-radius: 8px; font-size: 0.78rem; }
+.lesson-check-opt { border-radius: 10px; border: 1px solid var(--line); background: transparent; }
+.srs-card { border: 1px solid var(--line); background: var(--surface); }
+
+/* ---------- Assistant ---------- */
+.assistant-panel {
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.assistant-head { border-bottom: 1px solid var(--line); }
+.assistant-fab {
+  background: var(--grad);
+  color: var(--on-grad);
+  border: 1px solid rgb(var(--accent-rgb) / 0.5);
+  box-shadow: 0 14px 30px -16px rgb(var(--shadow-rgb) / 0.8);
+}
+.assistant-fab:hover { transform: translateY(-2px); }
+.a-msg {
+  border-radius: 14px;
+  border-start-start-radius: 4px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  line-height: 1.7;
+}
+.a-msg.is-user {
+  border-start-start-radius: 14px;
+  border-start-end-radius: 4px;
+  background: var(--tint-accent);
+  border-color: rgb(var(--accent-rgb) / 0.35);
+}
+.a-code {
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--code-bg);
+  direction: ltr;
+  text-align: left;
+}
+.a-chip {
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.a-chip:hover { border-color: var(--accent); color: var(--text); background: var(--tint-accent); }
+.assistant-input, .a-input {
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-soft);
+  color: var(--text);
+}
+
+/* ---------- Guides (lecture / kali) ---------- */
+.kali-step { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.kali-step-num, .kali-num, .guide-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-2);
+}
+.guide-shell, .lecture-guide-shell { border: 1px solid var(--line); background: var(--surface); border-radius: 14px; }
+
+/* ---------- Depths, games & simulations — container level only ---------- */
+.games-panel, .games-card, .ir-panel, .ir-card, .rt-card, .crypto-card, .depth-hud, .depth-panel {
+  border-color: var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- Onboarding ---------- */
+.onboarding-overlay { background: rgb(var(--shadow-rgb) / 0.82); }
+.onboarding-panel {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+}
+.onboarding-dots li { border-radius: 3px; }
+
+/* ---------- Motion discipline for everything this layer warms up ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .work-card-inner,
+  .hero-tab,
+  .q-option,
+  .q-pick,
+  .card-link,
+  .sem-card,
+  .sem-guide-cta,
+  .skill-card,
+  .student-card,
+  .tool-card,
+  .lab-card,
+  .assistant-fab,
+  .flash-timed-cta,
+  .to-top,
+  .hero-dash-link {
+    transition: none;
+  }
+  .btn:hover,
+  .work-card-inner:hover,
+  .sem-guide-cta:hover,
+  .assistant-fab:hover {
+    transform: none;
+  }
+}
+
+/* ---------- Hero scrim — obsidian ink ----------
+   The hero photo/loop band is always dark, so its scrim is pure
+   obsidian; the neon accents are what carry the energy. */
+.hero::before { background: rgb(12 11 10 / 0.5); }
+.hero.is-media-playing::before { background: rgb(10 10 10 / 0.62); }
+
+/* Hero actions sit on the always-dark media band — ink-on-media so
+   the ghost CTA never disappears over the photo. */
+.hero .btn-ghost {
+  color: var(--on-media);
+  border-color: rgb(var(--wash-media-rgb) / 0.35);
+  background: rgb(var(--wash-media-rgb) / 0.08);
+}
+.hero .btn-ghost:hover {
+  color: var(--on-media);
+  border-color: rgb(var(--wash-media-rgb) / 0.6);
+  background: rgb(var(--wash-media-rgb) / 0.16);
+}
+
+/* ============================================================
+   MODULE 80 · V0 OBSIDIAN — identity layer
+   ------------------------------------------------------------
+   Applies the v2.0.0 identity on top of the token system: the
+   self-hosted Inter/JetBrains Mono typefaces, the ambient
+   CyberField canvas plane, the frosted navbar with the GitHub
+   CTA, translucent foreground cards, and the dimmed obsidian
+   hero band. Every rule below is additive — nothing here
+   renames a class, removes a behaviour, or touches application
+   logic. All colours arrive through the tokens re-declared in
+   this module's block at the top of the file.
+   ============================================================ */
+
+/* ---------- Self-hosted variable typefaces (Inter · JetBrains Mono) ----------
+   Inter carries latin/digits (its latin subset is self-hosted); IBM Plex
+   Sans Arabic keeps every Arabic glyph — Inter ships none. JetBrains Mono
+   backs --font-mono for code, ciphers, terminals and data micro-labels.
+   Both are SIL-OFL; provenance lives in fonts/NOTICE.txt. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/inter-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("fonts/jetbrains-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- Ambient CyberField canvas + obsidian backdrop ----------
+   The canvas (MODULE 80 · script.js) sits at z-index -1 as a fixed
+   plane: the html element paints the obsidian wash + engineering
+   grid, the body stays transparent so the particle network reads
+   through every glass surface above it. */
+html {
+  background-color: var(--bg);
+  background-image: var(--aurora-1), var(--aurora-2);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+@media (min-width: 1024px) {
+  html {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+      var(--aurora-1),
+      var(--aurora-2);
+    background-size: 64px 64px, 64px 64px, auto, auto;
+  }
+}
+body {
+  background-color: transparent;
+  background-image: none;
+}
+.cyber-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- Navbar — frosted obsidian glass ---------- */
+.nav.is-scrolled {
+  background: var(--nav-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-color: var(--line);
+  box-shadow: 0 14px 40px -28px rgb(var(--shadow-rgb) / 1), inset 0 -1px 0 rgb(var(--wash-hi-rgb) / 0.04);
+}
+.nav-cluster {
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.nav:not(.is-scrolled) .nav-cluster {
+  background: rgb(var(--wash-media-rgb) / 0.10);
+  border-color: rgb(var(--wash-media-rgb) / 0.18);
+}
+.nav-more-menu {
+  background: rgb(16 16 20 / 0.88);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.mobile-menu {
+  background: rgb(9 9 11 / 0.90);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* ---------- View on GitHub — nav CTA (MODULE 80 · markup) ---------- */
+.nav-gh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 999px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nav-gh-ico { flex: 0 0 auto; }
+/* No lift inside a fixed bar — the colour change is the feedback. */
+.nav-gh, .nav-gh:hover { transform: none; }
+.nav:not(.is-scrolled) .nav-gh {
+  color: var(--text);
+  border-color: rgb(var(--wash-media-rgb) / 0.42);
+  background: transparent;
+}
+.nav:not(.is-scrolled) .nav-gh:hover {
+  color: var(--on-media);
+  border-color: rgb(var(--wash-hi-rgb) / 0.72);
+  background: rgb(var(--wash-hi-rgb) / 0.12);
+}
+.nav.is-scrolled .nav-gh {
+  border-color: var(--line-strong);
+  background: var(--glass);
+}
+.nav.is-scrolled .nav-gh:hover {
+  border-color: rgb(var(--accent-2-rgb) / 0.55);
+  background: var(--wash-accent2);
+  box-shadow: 0 0 0 3px var(--glow-cyan);
+}
+/* Chips hug their text: the pill padding no longer cancels out 1:1, so
+   the nine link chips shed a few pixels each from the width budget.
+   Placed last so the NavPills rules cannot win this back. */
+.nav-links a,
+.nav-more-details > summary { padding-inline: 0.18rem; margin-inline: -0.3rem; }
+/* Wide bars keep the labelled repo pill: trim the gaps + the pill's own
+   padding so brand + links + chip + CTA + repo + icon row fit one line. */
+@media (min-width: 1521px) {
+  .nav { --nav-rhythm-md: 0.8125rem; --nav-rhythm-lg: 0.75rem; }
+  .nav-gh { padding-inline: 0.75rem; }
+  .nav-links a,
+  .nav-more-details > summary { font-size: 0.9rem; }
+}
+/* The ≤1320px density step exists earlier in the sheet; re-assert it at the
+   end so later NavPills rules cannot swallow it, one notch tighter still. */
+@media (max-width: 1320px) {
+  .nav { --nav-rhythm-md: 0.625rem; }
+  .nav-links a,
+  .nav-more-details > summary { font-size: 0.8rem; }
+}
+/* Narrow bars keep the button as an icon-only circle. */
+@media (max-width: 1520px) {
+  .nav-gh span { display: none; }
+  .nav-gh { width: 42px; height: 42px; justify-content: center; padding: 0; }
+}
+
+/* ---------- Accent CTAs — neon halo ---------- */
+.btn-primary {
+  box-shadow: 0 12px 30px -14px rgb(var(--accent-rgb) / 0.5), inset 0 1px 0 rgb(var(--wash-hi-rgb) / 0.22);
+}
+.btn-primary:hover {
+  box-shadow: 0 16px 40px -16px rgb(var(--accent-rgb) / 0.68), 0 0 0 3px var(--glow);
+}
+.nav.is-scrolled .nav-cta {
+  box-shadow: 0 12px 30px -14px rgb(var(--accent-rgb) / 0.55);
+}
+.nav.is-scrolled .nav-cta:hover {
+  box-shadow: 0 14px 34px -14px rgb(var(--accent-rgb) / 0.72), 0 0 0 3px var(--glow);
+}
+
+/* ---------- Hero — obsidian band with a dimmed media backdrop ----------
+   The photo/loop stays in the markup (MODULE 59 keeps its contracts)
+   but drops to a faint texture behind the neon typography. */
+.hero::before { background: rgb(9 9 11 / 0.60); }
+.hero.is-media-playing::before { background: rgb(9 9 11 / 0.74); }
+.hero .hero-media.is-playing {
+  opacity: 0.26;
+  filter: grayscale(0.55) brightness(0.82) contrast(1.06);
+}
+
+/* ---------- Foreground cards — translucent obsidian glass ----------
+   Grid cards get the glass tint without backdrop blur (they scroll;
+   blur there would tax the compositor for no visible gain). Floating
+   surfaces that really overlap content DO get the blur. */
+.tool-card,
+.lab-card,
+.path-card,
+.srs-card,
+.work-card-inner .work-thumb {
+  background-color: rgb(16 16 20 / 0.72);
+}
+.hero-dash {
+  background: rgb(16 16 20 / 0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.updates-panel,
+.assistant-panel,
+.mat-viewer-panel,
+.flash-face,
+.onboarding-panel {
+  background: rgb(16 16 20 / 0.82);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.flash-face.is-back { background: rgb(23 23 28 / 0.86); }
+
+/* ---------- Bento rhythm for the home card boards ----------
+   Tight packing, hairline seams, and one featured tile leading the
+   subjects grid — the v0 board feel without touching the markup. */
+@media (min-width: 1100px) {
+  .paths-grid { gap: 1.15rem; }
+  .path-card:first-of-type { border-color: rgb(var(--accent-rgb) / 0.35); }
+  .work-grid { gap: 1.6rem; }
+  .work-grid > :first-child { grid-column: span 2; }
+  .work-grid > :first-child .work-thumb { aspect-ratio: 16 / 9; }
+}
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .nav-gh { transition: none; }
+}
+
+/* ---------- Inline icon system (ui-ico) ----------
+   Monochrome 24×24 stroke icons emitted by script.js (ICON map) and
+   static index.html slots. Sized in `em` so every existing
+   font-size-based icon container scales them; color inherits. */
+.ui-ico {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.125em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}

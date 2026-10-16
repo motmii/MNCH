@@ -1,18 +1,70 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
-    <linearGradient id="bgK2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
+    <linearGradient id="kd-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0D12"/><stop offset="1" stop-color="#12161D"/></linearGradient>
+    <radialGradient id="kd-amb" cx="0.5" cy="0.3" r="0.65"><stop offset="0" stop-color="#2777FF" stop-opacity="0.08"/><stop offset="1" stop-color="#2777FF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="kd-vig" cx="0.5" cy="0.45" r="0.8"><stop offset="0.62" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.5"/></radialGradient>
+    <linearGradient id="kd-btn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A90E2"/><stop offset="1" stop-color="#2777FF"/></linearGradient>
+    <filter id="kd-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="kd-b2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>
   </defs>
-  <rect width="800" height="500" fill="url(#bgK2)"/>
-  <rect x="150" y="50" width="500" height="400" rx="10" fill="#0E1116" stroke="#2B3644" stroke-width="2"/>
-  <rect x="150" y="50" width="500" height="36" rx="10" fill="#1F2733"/>
-  <circle cx="175" cy="68" r="6" fill="#F08A8A" opacity="0.8"/><circle cx="198" cy="68" r="6" fill="#E9C46A" opacity="0.8"/><circle cx="221" cy="68" r="6" fill="#5FD69B" opacity="0.8"/>
-  <text x="250" y="73" font-family="monospace" font-size="12" fill="#A8B2C1">kali.org — Get Kali</text>
-  <text x="190" y="130" font-family="monospace" font-size="15" fill="#A9C6F5">☁ Installer Images</text>
-  <rect x="190" y="155" width="300" height="46" rx="8" fill="#1F2733" stroke="#A9C6F5" stroke-width="2"/>
-  <text x="215" y="184" font-family="monospace" font-size="12" fill="#E6EAF2">64-bit Installer ⬇ ~3.9 GB</text>
-  <rect x="190" y="215" width="300" height="46" rx="8" fill="#10161D" stroke="#3A4757" stroke-width="1.5"/>
-  <text x="215" y="244" font-family="monospace" font-size="12" fill="#A8B2C1">Virtual Machines ⬇ .7z</text>
-  <rect x="190" y="285" width="420" height="60" rx="8" fill="#10161D" stroke="#3A4757" stroke-width="1.5"/>
-  <text x="210" y="309" font-family="monospace" font-size="11" fill="#A8B2C1">SHA256: 9f4c…a21b ✓ match</text>
-  <text x="210" y="330" font-family="monospace" font-size="11" fill="#8FE3B8">checksums verified</text>
+  <rect width="800" height="500" fill="url(#kd-bg)"/>
+  <rect width="800" height="500" fill="url(#kd-amb)"/>
+  <rect x="84" y="58" width="660" height="420" rx="12" fill="#05070C" opacity="0.6" filter="url(#kd-b1)"/>
+  <rect x="70" y="40" width="660" height="420" rx="10" fill="#14181F"/>
+  <path d="M70 50 a10 10 0 0 1 10-10 h640 a10 10 0 0 1 10 10 v26 H70 z" fill="#0F1319"/>
+  <path d="M88 52 a6 6 0 0 1 6-6 h150 a6 6 0 0 1 6 6 v24 H88 z" fill="#1C222B"/>
+  <rect x="98" y="51" width="11" height="11" rx="3" fill="#2777FF"/>
+  <text x="117" y="61" font-size="10.5" fill="#C6CDD8">Get Kali | Kali Linux</text>
+  <path d="M420 57 h10 M425 52 v10" stroke="#5A6878" stroke-width="1.6"/>
+  <path d="M676 55 h10" stroke="#5A6878" stroke-width="1.5"/>
+  <rect x="696" y="50" width="10" height="10" rx="1.5" fill="none" stroke="#5A6878" stroke-width="1.5"/>
+  <path d="M712 51 l9 9 M721 51 l-9 9" stroke="#5A6878" stroke-width="1.5"/>
+  <rect x="70" y="76" width="660" height="34" fill="#1A1F27"/>
+  <g stroke="#5A6878" stroke-width="1.6" fill="none"><path d="M104 87 l-7 6 l7 6"/><path d="M124 87 l7 6 l-7 6"/><path d="M144 86 a7 7 0 1 1 -2 11"/><path d="M142 86 h4 v4"/></g>
+  <rect x="168" y="82" width="392" height="24" rx="12" fill="#10141A" stroke="#262E39" stroke-width="1"/>
+  <rect x="184" y="90" width="7" height="6" rx="1.5" fill="none" stroke="#8FE3B8" stroke-width="1.2"/>
+  <path d="M185.5 90 v-2.5 a3 3 0 0 1 6 0 V90" fill="none" stroke="#8FE3B8" stroke-width="1.2"/>
+  <text x="200" y="98" font-size="10.5" fill="#9AA4B2">kali.org/get-kali</text>
+  <rect x="70" y="110" width="660" height="350" fill="#0F1319"/>
+  <rect x="70" y="110" width="660" height="48" fill="#151A22"/>
+  <line x1="70" y1="158" x2="730" y2="158" stroke="#232B36" stroke-width="1"/>
+  <circle cx="124" cy="134" r="12" fill="#2777FF"/>
+  <text x="124" y="139" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="middle">K</text>
+  <text x="146" y="138" font-size="12" font-weight="700" letter-spacing="2" fill="#F2F4F8">KALI LINUX</text>
+  <text x="598" y="138" font-size="9.5" fill="#2777FF">Get Kali</text>
+  <text x="654" y="138" font-size="9.5" fill="#7A8494">Docs</text>
+  <text x="690" y="138" font-size="9.5" fill="#7A8494">Tools</text>
+  <text x="100" y="182" font-size="8.5" fill="#7A8494">Get Kali  /  Installer Images</text>
+  <text x="100" y="212" font-size="17" font-weight="700" fill="#F2F4F8">Get Kali</text>
+  <text x="100" y="230" font-size="9.5" fill="#7A8494">Official images - always download from kali.org.</text>
+  <rect x="100" y="250" width="3" height="14" fill="#2777FF"/>
+  <text x="112" y="262" font-size="12" font-weight="700" fill="#E6EAF2">Installer Images</text>
+  <rect x="104" y="286" width="280" height="120" rx="8" fill="#04060A" opacity="0.5" filter="url(#kd-b2)"/>
+  <rect x="100" y="280" width="280" height="120" rx="8" fill="#151B25" stroke="#2777FF" stroke-width="1.5"/>
+  <rect x="116" y="296" width="54" height="16" rx="8" fill="#1E2836"/>
+  <text x="143" y="307" font-size="8" fill="#8FB4FF" text-anchor="middle">64-bit</text>
+  <text x="116" y="332" font-size="11.5" font-weight="700" fill="#F2F4F8">Installer - ~3.9 GB</text>
+  <text x="116" y="350" font-size="8" fill="#7A8494" font-family="Consolas, monospace">kali-linux-2024.4-installer-amd64.iso</text>
+  <rect x="116" y="364" width="92" height="26" rx="5" fill="url(#kd-btn)"/>
+  <text x="162" y="381" font-size="10" fill="#FFFFFF" text-anchor="middle">Download</text>
+  <text x="220" y="381" font-size="7.5" fill="#6A7583">GPG + SHA256</text>
+  <path d="M198 370 v14 l3.6 -3.6 2.6 5.2 3 -1.5 -2.6 -5.2 5 0 z" fill="#FFFFFF" stroke="#0B0E13" stroke-width="0.8"/>
+  <rect x="408" y="286" width="280" height="120" rx="8" fill="#04060A" opacity="0.5" filter="url(#kd-b2)"/>
+  <rect x="404" y="280" width="280" height="120" rx="8" fill="#151B25" stroke="#2A3341" stroke-width="1"/>
+  <rect x="420" y="296" width="72" height="16" rx="8" fill="#1E2836"/>
+  <text x="456" y="307" font-size="8" fill="#8FB4FF" text-anchor="middle">VirtualBox</text>
+  <text x="420" y="332" font-size="11.5" font-weight="700" fill="#F2F4F8">Virtual Machines</text>
+  <text x="420" y="350" font-size="8" fill="#7A8494" font-family="Consolas, monospace">kali-linux-2024.4-virtualbox-amd64.7z</text>
+  <rect x="420" y="364" width="110" height="26" rx="5" fill="#14203A" stroke="#2777FF" stroke-width="1.2"/>
+  <text x="475" y="381" font-size="9.5" fill="#8FB4FF" text-anchor="middle">Pre-built .7z</text>
+  <rect x="100" y="420" width="584" height="54" rx="8" fill="#0D1219" stroke="#232B36" stroke-width="1"/>
+  <text x="116" y="440" font-size="8" letter-spacing="1.5" fill="#7A8494">SHA256</text>
+  <text x="116" y="458" font-size="9" fill="#9AA4B2" font-family="Consolas, monospace">9f4c 81ab 2d7e 44c1 08a9 ... a21b</text>
+  <circle cx="650" cy="447" r="9" fill="#123528" stroke="#2E9E6B" stroke-width="1.2"/>
+  <path d="M645 447 l3.5 4 l7 -8" fill="none" stroke="#5FD69B" stroke-width="2"/>
+  <text x="650" y="470" font-size="7.5" fill="#5FD69B" text-anchor="middle">verified</text>
+  <rect x="722" y="114" width="5" height="300" rx="2.5" fill="#1A212C"/>
+  <rect x="722" y="140" width="5" height="70" rx="2.5" fill="#2E3947"/>
+  <rect x="70" y="40" width="660" height="420" rx="10" fill="none" stroke="#2B3644" stroke-width="1"/>
+  <rect width="800" height="500" fill="url(#kd-vig)"/>
 </svg>

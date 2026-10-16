@@ -1,40 +1,78 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
-    <linearGradient id="bgITC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
-    <filter id="gI1"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="it-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0C0E12"/><stop offset="1" stop-color="#151009"/></linearGradient>
+    <radialGradient id="it-amb" cx="0.8" cy="0.14" r="0.6"><stop offset="0" stop-color="#E9A46A" stop-opacity="0.13"/><stop offset="1" stop-color="#E9A46A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="it-amb2" cx="0.14" cy="0.9" r="0.58"><stop offset="0" stop-color="#E9C46A" stop-opacity="0.07"/><stop offset="1" stop-color="#E9C46A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="it-vig" cx="0.5" cy="0.44" r="0.82"><stop offset="0.58" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.55"/></radialGradient>
+    <linearGradient id="it-pcb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17402F"/><stop offset="0.55" stop-color="#0E2A1E"/><stop offset="1" stop-color="#081B13"/></linearGradient>
+    <linearGradient id="it-cpu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D2D9E0"/><stop offset="0.5" stop-color="#8B95A0"/><stop offset="1" stop-color="#6C7681"/></linearGradient>
+    <linearGradient id="it-cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E353E"/><stop offset="1" stop-color="#161B21"/></linearGradient>
+    <linearGradient id="it-ram" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A2027"/><stop offset="1" stop-color="#10151B"/></linearGradient>
+    <linearGradient id="it-sink" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262E37"/><stop offset="1" stop-color="#10161C"/></linearGradient>
+    <linearGradient id="it-atx" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DDE1E5"/><stop offset="1" stop-color="#B9C0C7"/></linearGradient>
+    <filter id="it-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="15"/></filter>
+    <filter id="it-b2" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="it-noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
   </defs>
-  <rect width="800" height="600" fill="url(#bgITC)"/>
-  <rect x="120" y="70" width="560" height="470" rx="10" fill="#10161D" stroke="#10281F" stroke-width="2"/>
-  <rect x="120" y="70" width="560" height="36" rx="10" fill="#1F2733"/>
-  <circle cx="145" cy="88" r="6" fill="#F08A8A" opacity="0.8"/>
-  <circle cx="168" cy="88" r="6" fill="#E9C46A" opacity="0.8"/>
-  <circle cx="191" cy="88" r="6" fill="#5FD69B" opacity="0.8"/>
-  <text x="220" y="93" font-family="monospace" font-size="12" fill="#3E7D63">it-architecture — مكونات النظام</text>
-  <rect x="160" y="130" width="150" height="96" rx="6" fill="#171D26" stroke="#5FD69B" stroke-width="1.5"/>
-  <text x="180" y="158" font-family="monospace" font-size="11" fill="#8FE3B8" filter="url(#gI1)">CPU / Processor</text>
-  <text x="180" y="182" font-family="monospace" font-size="10" fill="#B49FE0">وحدة المعالجة</text>
-  <text x="180" y="206" font-family="monospace" font-size="10" fill="#B49FE0">12 vCPU / 3.5 GHz</text>
-  <rect x="330" y="130" width="150" height="96" rx="6" fill="#171D26" stroke="#5FD69B" stroke-width="1.5"/>
-  <text x="350" y="158" font-family="monospace" font-size="11" fill="#8FE3B8">RAM 32 GB</text>
-  <text x="350" y="182" font-family="monospace" font-size="10" fill="#B49FE0">الذاكرة الرئيسية</text>
-  <text x="350" y="206" font-family="monospace" font-size="10" fill="#B49FE0">DDR4 · ECC</text>
-  <rect x="500" y="130" width="150" height="96" rx="6" fill="#171D26" stroke="#5FD69B" stroke-width="1.5"/>
-  <text x="520" y="158" font-family="monospace" font-size="11" fill="#8FE3B8">Storage</text>
-  <text x="520" y="182" font-family="monospace" font-size="10" fill="#B49FE0">التخزين الثانوي</text>
-  <text x="520" y="206" font-family="monospace" font-size="10" fill="#B49FE0">NVMe RAID 1</text>
-  <rect x="160" y="250" width="240" height="96" rx="6" fill="#171D26" stroke="#9FB0EE" stroke-width="1.5"/>
-  <text x="180" y="278" font-family="monospace" font-size="11" fill="#C3C9F2">Network / الشبكة</text>
-  <text x="180" y="302" font-family="monospace" font-size="10" fill="#B49FE0">بطاقة شبكة + مفاتيح</text>
-  <text x="180" y="326" font-family="monospace" font-size="10" fill="#B49FE0">Gigabit · VLAN</text>
-  <rect x="420" y="250" width="230" height="96" rx="6" fill="#171D26" stroke="#9FB0EE" stroke-width="1.5"/>
-  <text x="440" y="278" font-family="monospace" font-size="11" fill="#C3C9F2">Software / البرمجيات</text>
-  <text x="440" y="302" font-family="monospace" font-size="10" fill="#B49FE0">نظام تشغيل · تطبيقات</text>
-  <text x="440" y="326" font-family="monospace" font-size="10" fill="#B49FE0">قواعد بيانات · خدمات</text>
-  <path d="M235 226 v24 h85 v-24 h-85" fill="none" stroke="#C3C9F2" stroke-width="1.2"/>
-  <path d="M405 226 v24 h95 v-24 h-95" fill="none" stroke="#C3C9F2" stroke-width="1.2"/>
-  <path d="M280 346 v24 h85 v-24 h-85" fill="none" stroke="#C3C9F2" stroke-width="1.2"/>
-  <g font-family="monospace" font-size="9" fill="#5FD69B" opacity="0.15">
-    <text x="150" y="480">أجهزة  •  برمجيات  •  بيانات  •  شبكات  •  أفراد وإجراءات</text>
-    <text x="330" y="505">IT SYSTEMS COMPONENTS — مكونات أنظمة تقنية المعلومات</text>
+  <rect width="800" height="600" fill="url(#it-bg)"/>
+  <rect width="800" height="600" fill="url(#it-amb)"/>
+  <rect width="800" height="600" fill="url(#it-amb2)"/>
+  <g transform="rotate(-3 400 300)">
+    <rect x="124" y="106" width="580" height="420" rx="16" fill="#04060A" opacity="0.6" filter="url(#it-b1)"/>
+    <rect x="110" y="90" width="580" height="420" rx="16" fill="url(#it-pcb)" stroke="#1E3A2C" stroke-width="1.5"/>
+    <line x1="126" y1="95" x2="674" y2="95" stroke="#2E5A44" stroke-width="1" opacity="0.55"/>
+    <g stroke="#C9A96A" stroke-width="1.2" fill="none" opacity="0.4" stroke-linejoin="round" stroke-linecap="round">
+      <path d="M150 160 H250 L280 190 H400"/><path d="M150 182 H242 L272 212 H400"/><path d="M640 462 H520 L490 432 H360"/><path d="M660 430 H540 L510 400 H420"/><path d="M200 470 H300 L330 440 H430"/><path d="M620 158 H560 L530 188 H470"/><path d="M140 300 H200 L230 330 H300"/>
+    </g>
+    <g fill="#07130D" stroke="#C9A96A" stroke-width="1" opacity="0.7"><circle cx="250" cy="160" r="2.4"/><circle cx="280" cy="190" r="2.4"/><circle cx="520" cy="462" r="2.4"/><circle cx="540" cy="430" r="2.4"/><circle cx="300" cy="470" r="2.4"/><circle cx="560" cy="158" r="2.4"/><circle cx="230" cy="330" r="2.4"/></g>
+    <rect x="300" y="205" width="118" height="118" rx="8" fill="#0C1A13" stroke="#24402F" stroke-width="2"/>
+    <rect x="308" y="213" width="102" height="102" fill="#0A1410"/>
+    <rect x="312" y="217" width="94" height="94" rx="7" fill="url(#it-cpu)" stroke="#5F6A75" stroke-width="0.6"/>
+    <polygon points="318,223 380,223 348,305 318,305" fill="#FFFFFF" opacity="0.12"/>
+    <polygon points="396,223 406,223 396,233" fill="#6C7681" opacity="0.7"/>
+    <text x="359" y="262" font-size="12" letter-spacing="2" fill="#4A5560" text-anchor="middle">CPU</text>
+    <text x="359" y="279" font-size="6.5" fill="#5A6673" text-anchor="middle">nova x64</text>
+    <g><rect x="235" y="246" width="10" height="15" rx="2" fill="url(#it-cap)"/><ellipse cx="240" cy="246" rx="5" ry="2.3" fill="#C9CFD6"/><path d="M237 246 h6" stroke="#8A939E" stroke-width="0.8"/></g>
+    <g><rect x="253" y="246" width="10" height="15" rx="2" fill="url(#it-cap)"/><ellipse cx="258" cy="246" rx="5" ry="2.3" fill="#C9CFD6"/><path d="M255 246 h6" stroke="#8A939E" stroke-width="0.8"/></g>
+    <g><rect x="271" y="246" width="10" height="15" rx="2" fill="url(#it-cap)"/><ellipse cx="276" cy="246" rx="5" ry="2.3" fill="#C9CFD6"/><path d="M273 246 h6" stroke="#8A939E" stroke-width="0.8"/></g>
+    <g><rect x="243" y="326" width="10" height="15" rx="2" fill="url(#it-cap)"/><ellipse cx="248" cy="326" rx="5" ry="2.3" fill="#C9CFD6"/></g>
+    <g><rect x="261" y="326" width="10" height="15" rx="2" fill="url(#it-cap)"/><ellipse cx="266" cy="326" rx="5" ry="2.3" fill="#C9CFD6"/></g>
+    <rect x="240" y="285" width="16" height="14" rx="3" fill="#232A32" stroke="#39424C" stroke-width="1"/>
+    <rect x="262" y="285" width="16" height="14" rx="3" fill="#232A32" stroke="#39424C" stroke-width="1"/>
+    <rect x="500" y="146" width="160" height="14" rx="4" fill="#0C1210" stroke="#22302A" stroke-width="1.2"/>
+    <rect x="498" y="142" width="8" height="20" rx="2" fill="#39424C"/><rect x="654" y="142" width="8" height="20" rx="2" fill="#39424C"/>
+    <rect x="502" y="118" width="156" height="24" rx="4" fill="url(#it-ram)" stroke="#232A32" stroke-width="1"/>
+    <rect x="504" y="136" width="152" height="3" fill="#9AA4B2" opacity="0.6"/>
+    <rect x="512" y="124" width="44" height="12" rx="2" fill="#3A4550"/>
+    <text x="534" y="133" font-size="6.5" fill="#DDE3FA" text-anchor="middle">DDR4</text>
+    <rect x="500" y="176" width="160" height="14" rx="4" fill="#0C1210" stroke="#22302A" stroke-width="1.2"/>
+    <rect x="498" y="172" width="8" height="20" rx="2" fill="#39424C"/><rect x="654" y="172" width="8" height="20" rx="2" fill="#39424C"/>
+    <rect x="560" y="320" width="100" height="80" rx="8" fill="url(#it-sink)" stroke="#1A2128" stroke-width="1"/>
+    <g stroke="#3A434E" stroke-width="2.5" opacity="0.8"><line x1="574" y1="328" x2="574" y2="392"/><line x1="592" y1="328" x2="592" y2="392"/><line x1="610" y1="328" x2="610" y2="392"/><line x1="628" y1="328" x2="628" y2="392"/><line x1="646" y1="328" x2="646" y2="392"/></g>
+    <rect x="564" y="324" width="92" height="3" fill="#59636E" opacity="0.4"/>
+    <circle cx="568" cy="328" r="2" fill="#0B0E13"/><circle cx="652" cy="392" r="2" fill="#0B0E13"/>
+    <rect x="170" y="430" width="190" height="24" rx="3" fill="#0F2A1D" stroke="#1C4430" stroke-width="1"/>
+    <rect x="180" y="435" width="34" height="14" rx="2" fill="#0A0F0C"/><rect x="222" y="435" width="26" height="14" rx="2" fill="#0A0F0C"/>
+    <rect x="356" y="432" width="6" height="20" rx="1" fill="#C9A96A" opacity="0.7"/>
+    <circle cx="350" cy="442" r="3" fill="#0B0E13"/>
+    <rect x="170" y="376" width="180" height="12" rx="3" fill="#0B100D" stroke="#1B241D" stroke-width="1"/>
+    <rect x="176" y="380" width="168" height="2" fill="#C9A96A" opacity="0.45"/>
+    <rect x="140" y="120" width="54" height="22" rx="3" fill="url(#it-atx)"/>
+    <g fill="#4A5260"><rect x="147" y="127" width="3" height="3"/><rect x="153" y="127" width="3" height="3"/><rect x="159" y="127" width="3" height="3"/><rect x="165" y="127" width="3" height="3"/><rect x="171" y="127" width="3" height="3"/><rect x="177" y="127" width="3" height="3"/><rect x="147" y="133" width="3" height="3"/><rect x="153" y="133" width="3" height="3"/><rect x="159" y="133" width="3" height="3"/><rect x="165" y="133" width="3" height="3"/><rect x="171" y="133" width="3" height="3"/><rect x="177" y="133" width="3" height="3"/></g>
+    <rect x="140" y="120" width="8" height="22" rx="3" fill="#9AA4B2" opacity="0.9"/>
+    <rect x="608" y="258" width="28" height="15" rx="2" fill="#2E7DD8" opacity="0.85"/><rect x="612" y="264" width="20" height="3" fill="#0B0E13" opacity="0.5"/>
+    <rect x="608" y="278" width="28" height="15" rx="2" fill="#C0463C" opacity="0.85"/><rect x="612" y="284" width="20" height="3" fill="#0B0E13" opacity="0.5"/>
+    <rect x="608" y="298" width="28" height="15" rx="2" fill="#E9C46A" opacity="0.85"/><rect x="612" y="304" width="20" height="3" fill="#0B0E13" opacity="0.5"/>
+    <g><circle cx="130" cy="110" r="6" fill="#20262D" stroke="#0A0F0C" stroke-width="1"/><circle cx="130" cy="110" r="3" fill="#10141A"/><path d="M126 110 h8 M130 106 v8" stroke="#3A424C" stroke-width="0.8"/></g>
+    <g><circle cx="670" cy="110" r="6" fill="#20262D" stroke="#0A0F0C" stroke-width="1"/><circle cx="670" cy="110" r="3" fill="#10141A"/><path d="M666 110 h8 M670 106 v8" stroke="#3A424C" stroke-width="0.8"/></g>
+    <g><circle cx="130" cy="490" r="6" fill="#20262D" stroke="#0A0F0C" stroke-width="1"/><circle cx="130" cy="490" r="3" fill="#10141A"/><path d="M126 490 h8 M130 486 v8" stroke="#3A424C" stroke-width="0.8"/></g>
+    <g><circle cx="670" cy="490" r="6" fill="#20262D" stroke="#0A0F0C" stroke-width="1"/><circle cx="670" cy="490" r="3" fill="#10141A"/><path d="M666 490 h8 M670 486 v8" stroke="#3A424C" stroke-width="0.8"/></g>
+    <circle cx="350" cy="185" r="11" fill="#FFB86B" opacity="0.28" filter="url(#it-b2)"/><circle cx="350" cy="185" r="3" fill="#FFB86B"/>
+    <circle cx="648" cy="150" r="9" fill="#5FD69B" opacity="0.25" filter="url(#it-b2)"/><circle cx="648" cy="150" r="2.6" fill="#5FD69B"/>
+    <circle cx="250" cy="478" r="9" fill="#4DD8E8" opacity="0.25" filter="url(#it-b2)"/><circle cx="250" cy="478" r="2.6" fill="#4DD8E8"/>
+    <text x="150" y="498" font-size="8" letter-spacing="3" fill="#5E7A6A" opacity="0.8">NOVA-BOARD v2</text>
+    <text x="300" y="196" font-size="7" fill="#5E7A6A">AM4</text>
   </g>
+  <rect width="800" height="600" filter="url(#it-noise)" opacity="0.05"/>
+  <rect width="800" height="600" fill="url(#it-vig)"/>
 </svg>

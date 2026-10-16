@@ -17,7 +17,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v1.31.0";
+const CACHE_VERSION = "v2.0.1";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
@@ -37,6 +37,19 @@ const PRECACHE_ASSETS = [
   "./data/flashcards.js",
   "./data/threat-theatre.js",
   "./worker.js",
+  "./fonts/plex-arabic-arabic-400.woff2",
+  "./fonts/plex-arabic-arabic-500.woff2",
+  "./fonts/plex-arabic-arabic-600.woff2",
+  "./fonts/plex-arabic-arabic-700.woff2",
+  "./fonts/plex-arabic-latin-400.woff2",
+  "./fonts/plex-arabic-latin-500.woff2",
+  "./fonts/plex-arabic-latin-600.woff2",
+  "./fonts/plex-arabic-latin-700.woff2",
+  "./fonts/plex-mono-latin-400.woff2",
+  "./fonts/plex-mono-latin-500.woff2",
+  "./fonts/plex-mono-latin-600.woff2",
+  "./fonts/inter-latin.woff2",
+  "./fonts/jetbrains-mono-latin.woff2",
   "./images/icon.svg",
   "./images/icon-maskable.svg",
   "./images/algorithms.svg",
