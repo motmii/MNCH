@@ -2704,26 +2704,6 @@ async function clearQuizData() {
   renderPicks();
 }
 
-/* Merge topic lessons from data/lessons.json into LESSONS. */
-async function loadLessonData() {
-  let data = null;
-  try { data = await fetchJsonWithRetry("./data/lessons.json"); }
-  catch (e) { console.warn("Lesson data unavailable:", e.message); return; }
-  if (!data || typeof data !== "object" || Array.isArray(data)) return;
-  let merged = 0;
-  Object.keys(data).forEach((sk) => {
-    const topics = data[sk];
-    if (!topics || typeof topics !== "object" || Array.isArray(topics)) return;
-    if (!LESSONS[sk] || typeof LESSONS[sk] !== "object") LESSONS[sk] = {};
-    Object.keys(topics).forEach((tk) => {
-      const L = topics[tk];
-      if (L && typeof L === "object" && L.title && L.title.ar && L.explanation && L.explanation.ar) { LESSONS[sk][tk] = L; merged++; }
-    });
-  });
-  if (merged > 0) console.info("Lessons: merged " + merged + " topic(s).");
-}
-
-/* Bootstrap the quiz UI only if its mount point exists. */
 /* Bootstrap the quiz UI only if its mount point exists. */
 (async function bootQuiz() {
   if (!app) return;
@@ -2755,7 +2735,6 @@ async function loadLessonData() {
      not only after the next store write or view switch. */
   document.dispatchEvent(new CustomEvent("nova:progress-changed"));
   loadQuizData();
-  loadLessonData();
   MissedBank.prune();
 
   /* Live locale switching for the picker / result screens. A question

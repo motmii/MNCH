@@ -13,6 +13,7 @@ node_modules/
 # Dev scratch files
 __*.js
 out.txt
+test-results.txt
 
 # Local-only heavy media: the raw hero-loop source stays on the machine it
 # was trimmed on — the repo ships the compressed images/hero-bg.mp4 only.

@@ -4,22 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>منصة أمن المعلومات | Information Security Platform — الترم الحالي</title>
-  <!-- MODULE 67 · MaterialViewer: read a chapter PDF in place instead of
-       downloading it. Hidden until a real chapter link is clicked. -->
-  <div class="mat-viewer" id="matViewer" role="dialog" aria-modal="true" aria-labelledby="matViewerTitle" aria-hidden="true" inert>
-    <div class="mat-viewer-panel">
-      <div class="mat-viewer-head">
-        <h2 id="matViewerTitle" class="mat-viewer-title">عرض الفصل</h2>
-        <a class="btn btn-sm btn-ghost mat-viewer-open" id="matViewerOpen" target="_blank" rel="noopener">فتح في تبويب جديد</a>
-        <button type="button" class="btn btn-sm btn-ghost mat-viewer-close" id="matViewerClose" aria-label="إغلاق">✕</button>
-      </div>
-      <div class="mat-viewer-body">
-        <object class="mat-viewer-frame" id="matViewerFrame" type="application/pdf" aria-label="عرض الفصل">
-          <p class="mat-viewer-fallback">لا يدعم متصفحك العرض المدمج — <a id="matViewerLink" href="#" download>حمّل الفصل</a> بدلًا من ذلك.</p>
-        </object>
-      </div>
-    </div>
-  </div>
   <meta name="description" content="منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال. An Arabic-first learning platform for Information Security diploma students: learning paths, quizzes, security tools and labs — offline-ready." />
   <meta name="keywords" content="أمن المعلومات, منصة تعليمية, اختبارات, سيبراني, information security, cybersecurity, learning platform, quizzes" />
   <link rel="canonical" href="https://motmii.github.io/MNCH/" />
@@ -1667,6 +1651,24 @@
       </div>
       <ul id="searchResults" class="search-results" role="listbox" aria-label="نتائج البحث"></ul>
       <p class="search-foot"><kbd>/</kbd> <span data-i18n="search.hint">أو Ctrl+K للفتح · Esc للإغلاق · ↑↓ للتنقل</span></p>
+    </div>
+  </div>
+
+  <!-- MODULE 67 · MaterialViewer: read a chapter PDF in place instead of
+       downloading it. Hidden until a real chapter link is clicked.
+       (Body-level dialog — a dialog inside <head> would break the head.) -->
+  <div class="mat-viewer" id="matViewer" role="dialog" aria-modal="true" aria-labelledby="matViewerTitle" aria-hidden="true" inert>
+    <div class="mat-viewer-panel">
+      <div class="mat-viewer-head">
+        <h2 id="matViewerTitle" class="mat-viewer-title">عرض الفصل</h2>
+        <a class="btn btn-sm btn-ghost mat-viewer-open" id="matViewerOpen" target="_blank" rel="noopener">فتح في تبويب جديد</a>
+        <button type="button" class="btn btn-sm btn-ghost mat-viewer-close" id="matViewerClose" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="mat-viewer-body">
+        <object class="mat-viewer-frame" id="matViewerFrame" type="application/pdf" aria-label="عرض الفصل">
+          <p class="mat-viewer-fallback">لا يدعم متصفحك العرض المدمج — <a id="matViewerLink" href="#" download>حمّل الفصل</a> بدلًا من ذلك.</p>
+        </object>
+      </div>
     </div>
   </div>
 
