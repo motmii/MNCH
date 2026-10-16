@@ -95,7 +95,10 @@ check("loop hidden until a frame rendered", css.includes(".hero-media.is-playing
 check(".hero-media[hidden] respected", css.includes(".hero-media[hidden] { display: none; }"));
 check("drift stops while the loop plays", css.includes(".hero.is-media-playing .hero-bg { animation-play-state: paused; }"));
 check("contrast overlay keeps text readable under the loop", css.includes(".hero.is-media-playing::before"));
-check("light theme deepens the scrim", css.includes('[data-theme="light"] .hero.is-media-playing::before'));
+check("v2.0.0 layer dims the loop behind the obsidian band",
+  /\.hero \.hero-media\.is-playing\s*\{[\s\S]{0,160}opacity: 0\.26;/.test(css));
+check("scrim is obsidian ink (single identity)",
+  css.includes(".hero.is-media-playing::before { background: rgb(9 9 11 /"));
 check("layer order inside .hero is explicit", (() => {
   const at = css.indexOf("\n.hero {");
   const heroBlock = at > -1 ? css.slice(at, at + 800) : "";

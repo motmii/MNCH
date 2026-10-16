@@ -1,19 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
-  <rect width="800" height="500" fill="#0C1220"/>
-  <rect x="100" y="60" width="600" height="380" rx="8" fill="#10161D" stroke="#3A4757" stroke-width="2"/>
-  <rect x="100" y="60" width="600" height="34" rx="8" fill="#1F2733"/>
-  <text x="130" y="83" font-family="monospace" font-size="12" fill="#A8B2C1">Kali GNU/Linux — Graphical install</text>
-  <rect x="130" y="120" width="300" height="34" rx="6" fill="#1F2733" stroke="#A9C6F5" stroke-width="2"/>
-  <text x="145" y="142" font-family="monospace" font-size="12" fill="#E6EAF2">▸ Graphical install ◂</text>
-  <text x="145" y="175" font-family="monospace" font-size="11" fill="#5A6878">Install · Advanced · Rescue</text>
-  <rect x="450" y="120" width="220" height="120" rx="8" fill="#0E1116" stroke="#3A4757"/>
-  <text x="465" y="148" font-family="monospace" font-size="11" fill="#A9C6F5">Guided — entire disk</text>
-  <text x="465" y="172" font-family="monospace" font-size="11" fill="#A8B2C1">user: kali / host: kali</text>
-  <text x="465" y="196" font-family="monospace" font-size="11" fill="#A8B2C1">GRUB → /dev/sda ✓</text>
-  <text x="465" y="220" font-family="monospace" font-size="11" fill="#8FE3B8">████████ 72%</text>
-  <text x="130" y="280" font-family="monospace" font-size="11" fill="#5A6878">Language → العربية/English · Location · Keyboard</text>
-  <text x="130" y="310" font-family="monospace" font-size="11" fill="#E9C46A">⚠ only inside the VM — never touch your real disk</text>
-  <text x="130" y="360" font-family="monospace" font-size="12" fill="#E6EAF2">Installing the base system… please wait</text>
-  <rect x="130" y="380" width="540" height="14" rx="7" fill="#1F2733"/>
-  <rect x="130" y="380" width="390" height="14" rx="7" fill="#3F4FA8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="ki-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0D12"/><stop offset="1" stop-color="#12161D"/></linearGradient>
+    <linearGradient id="ki-bd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4C5B6E"/><stop offset="1" stop-color="#39475A"/></linearGradient>
+    <radialGradient id="ki-vig" cx="0.5" cy="0.45" r="0.8"><stop offset="0.62" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.5"/></radialGradient>
+    <linearGradient id="ki-panel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F5F7"/><stop offset="1" stop-color="#E6E8EB"/></linearGradient>
+    <linearGradient id="ki-title" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E0E3E7"/><stop offset="1" stop-color="#CFD3D9"/></linearGradient>
+    <linearGradient id="ki-bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5AA0EC"/><stop offset="1" stop-color="#3465A4"/></linearGradient>
+    <pattern id="ki-stripes" width="46" height="46" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="12" height="46" fill="#FFFFFF" opacity="0.035"/></pattern>
+    <filter id="ki-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="ki-b2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <rect width="800" height="500" fill="url(#ki-bg)"/>
+  <rect x="74" y="39" width="680" height="450" rx="12" fill="#05070C" opacity="0.6" filter="url(#ki-b1)"/>
+  <rect x="60" y="25" width="680" height="450" rx="10" fill="url(#ki-bd)"/>
+  <rect x="60" y="25" width="680" height="450" rx="10" fill="url(#ki-stripes)"/>
+  <rect x="60" y="25" width="680" height="90" fill="#FFFFFF" opacity="0.04"/>
+  <rect x="156" y="132" width="500" height="260" rx="10" fill="#05070C" opacity="0.5" filter="url(#ki-b2)"/>
+  <rect x="150" y="120" width="500" height="260" rx="8" fill="url(#ki-panel)" stroke="#9AA0A8" stroke-width="1"/>
+  <path d="M150 128 a8 8 0 0 1 8-8 h484 a8 8 0 0 1 8 8 v24 H150 z" fill="url(#ki-title)"/>
+  <line x1="150" y1="152" x2="650" y2="152" stroke="#B9BEC6" stroke-width="1"/>
+  <text x="400" y="140" font-size="11" fill="#2A2F36" text-anchor="middle">Kali GNU/Linux Installer</text>
+  <path d="M628 132 l8 8 M636 132 l-8 8" stroke="#5A616B" stroke-width="1.4"/>
+  <text x="178" y="186" font-size="12.5" font-weight="700" fill="#20242C">Installing the base system</text>
+  <text x="178" y="204" font-size="9.5" fill="#6A7280">Downloading and installing packages (1482 files)</text>
+  <rect x="178" y="220" width="444" height="16" rx="8" fill="#D5D8DE" stroke="#C3C7CE" stroke-width="1"/>
+  <rect x="180" y="222" width="318" height="12" rx="6" fill="url(#ki-bar)"/>
+  <rect x="184" y="225" width="310" height="3" rx="1.5" fill="#FFFFFF" opacity="0.25"/>
+  <text x="616" y="232" font-size="9.5" fill="#4A5260" text-anchor="end">72%</text>
+  <circle cx="184" cy="262" r="4" fill="#3E9B6C"/>
+  <text x="196" y="266" font-size="9.5" fill="#30363E">Language: English  -  Keyboard: Arabic</text>
+  <circle cx="184" cy="292" r="4" fill="#3E9B6C"/>
+  <text x="196" y="296" font-size="9.5" fill="#30363E">Time zone: Riyadh  -  Network: automatic</text>
+  <path d="M178 322 l4 5 l9 -11" fill="none" stroke="#3E9B6C" stroke-width="2.2"/>
+  <text x="196" y="326" font-size="9.5" fill="#30363E">Disk: Guided - use entire disk <tspan font-family="Consolas, monospace" fill="#6A7280">(/dev/sda)</tspan></text>
+  <path d="M178 352 l4 5 l9 -11" fill="none" stroke="#3E9B6C" stroke-width="2.2"/>
+  <text x="196" y="356" font-size="9.5" fill="#30363E">GRUB boot loader: installed to <tspan font-family="Consolas, monospace" fill="#6A7280">/dev/sda</tspan></text>
+  <rect x="436" y="312" width="310" height="134" rx="8" fill="#05070C" opacity="0.55" filter="url(#ki-b2)"/>
+  <rect x="430" y="300" width="310" height="134" rx="6" fill="#0B0E12" stroke="#26303C" stroke-width="1"/>
+  <path d="M430 306 a6 6 0 0 1 6-6 h298 a6 6 0 0 1 6 6 v14 H430 z" fill="#161B23"/>
+  <text x="444" y="314" font-size="8.5" fill="#7A8494">installer log</text>
+  <g font-family="Consolas, monospace" font-size="8.5"><text x="444" y="338" fill="#C6CDD8">$ debootstrap bookworm /target</text><text x="444" y="355" fill="#8FE3B8">I: base system 100%</text><text x="444" y="372" fill="#C6CDD8">$ grub-install /dev/sda</text><text x="444" y="389" fill="#5FD69B">Installation finished. No error reported.</text></g>
+  <rect width="800" height="500" fill="url(#ki-vig)"/>
 </svg>

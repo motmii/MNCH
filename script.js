@@ -9,6 +9,35 @@
     12 ContactForm 13 QuizEngine 14-19 CyberTools
     21 MaterialsFilter 22 Lang (AR/EN) 23 PWA
    ============================================================ */
+/* ---------- 00 · Icon system (inline stroke SVGs) -------- */
+const ICON = {
+  play: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3l14 9-14 9V3z"/></svg>',
+  compass: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>',
+  target: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  book: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  clock: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+  calendar: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  download: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>',
+  eye: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>',
+  lock: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  shield: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>',
+  globe: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+  cpu: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg>',
+  key: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>',
+  network: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>',
+  crosshair: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/></svg>',
+  search: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+  clipboard: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
+  alertOctagon: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+  flag: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>',
+  leaf: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+  medal: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/></svg>',
+  flask: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>',
+  flame: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+  grad: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v4c0 1.66 2.69 3 6 3s6-1.34 6-3v-4"/></svg>'
+};
+
 (() => {
 "use strict";
 
@@ -1146,18 +1175,17 @@ window.PLATFORM_LESSONS = LESSONS;
    Exposed on window as PLATFORM_SUBJECTS for the AI assistant
    and Stats.Live.
    ============================================================ */
-/* MODULE 73 · SUBJECT HUE RAMP — a calm indigo arc.
-   The five subjects used to sit at 190/205/265/130/300 painted at ~80%
-   chroma, which scattered five saturated, widely-spaced bars across the
-   dashboard. They now sit inside one narrow arc around the accent hue so
-   the cards read as one family. Only the hue travels in JS; the saturation
-   and lightness live in the --hue-sat / --hue-light tokens in style.css,
-   so the same five hues re-pitch themselves per theme.
-     200 steel blue (IT components) · 224 indigo (algorithms)
-     236 periwinkle (OS concepts) · 248 soft purple (security design)
-     262 violet (policy & ethics)
+/* MODULE 73 · SUBJECT HUE RAMP — a curated five-colour code.
+   The five subjects each own one quiet, distinct hue — brass, terracotta,
+   patina, steel and plum — so cards read as an indexed field-manual set
+   instead of five saturated dashboard bars. Only the hue travels in JS;
+   the saturation and lightness live in the --hue-sat / --hue-light tokens
+   in style.css, so the same five hues re-pitch themselves per theme.
+     42 brass (algorithms) · 168 patina (OS concepts)
+     288 plum (policy & ethics) · 20 terracotta (IT components)
+     210 steel (security design)
    Every stop clears 5.0:1 against --surface-2 in the dark theme, and
-   5.5:1 against --surface-2 in the light theme. */
+   4.9:1 against --surface-2 in the light theme. */
 const SUBJECTS = [
   /* ---- current semester · official study plan (exactly 5 subjects) ---- */
   {
@@ -1166,7 +1194,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الأحد", startTime: "09:00 AM", endTime: "12:00 PM",
     descriptionAr: "تحليل الخوارزميات وتعقيدها الزمني، هياكل البيانات، استراتيجيات التصميم (فرّق تسُد، الجشع، البرمجة الديناميكية)، والرسوم البيانية.",
-    icon: "images/algorithms.svg", hue: 224,
+    icon: "images/algorithms.svg", hue: 42,
     tag: "algorithms", panel: "01", contentStatus: "available", quizKey: "260210030702"
   },
   {
@@ -1175,7 +1203,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الأحد", startTime: "12:00 PM", endTime: "03:00 PM",
     descriptionAr: "وظائف نظام التشغيل، العمليات والخيوط والجدولة، إدارة الذاكرة والترحيل، المزامنة والأقفال الميتة، ونظم الملفات.",
-    icon: "images/os-concepts.svg", hue: 236,
+    icon: "images/os-concepts.svg", hue: 168,
     tag: "osconcepts", panel: "02", contentStatus: "available", quizKey: "260210030802"
   },
   {
@@ -1184,7 +1212,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الاثنين", startTime: "09:00 AM", endTime: "12:00 PM",
     descriptionAr: "سياسات الأمن وأنواعها، التشريعات والخصوصية والملكية الفكرية، الأخلاقيات المهنية والإذن القانوني، والامتثال.",
-    icon: "images/policies-ethics.svg", hue: 262,
+    icon: "images/policies-ethics.svg", hue: 288,
     tag: "policy", panel: "03", contentStatus: "available", quizKey: "260210030902"
   },
   {
@@ -1193,7 +1221,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الاثنين", startTime: "12:00 PM", endTime: "03:00 PM",
     descriptionAr: "مكونات أنظمة تقنية المعلومات من عتاد وبرمجيات وشبكات ومرافق، والمحاكاة الافتراضية والسحابة، وعلاقتها بتأمين البيئة.",
-    icon: "images/it-components.svg", hue: 200,
+    icon: "images/it-components.svg", hue: 20,
     tag: "components", panel: "04", contentStatus: "available", quizKey: "260210031002"
   },
   {
@@ -1202,7 +1230,7 @@ const SUBJECTS = [
     creditHours: 3, semester: "current",
     day: "الثلاثاء", startTime: "09:00 AM", endTime: "12:00 PM",
     descriptionAr: "مبادئ تصميم الأمن: الدفاع في العمق، أقل الصلاحيات، الفصل بين المهام، الثقة الصفرية، والتحكم في الوصول.",
-    icon: "images/security-design.svg", hue: 248,
+    icon: "images/security-design.svg", hue: 210,
     tag: "design", panel: "05", contentStatus: "available", quizKey: "260210031102"
   },
 ];
@@ -1235,12 +1263,12 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
     const data = (typeof window !== "undefined" && window.PLATFORM_CURRENT_SEMESTER) || {};
     const subject = (data.subjects || []).find((item) => item.code === s.code);
     const materials = subject && Array.isArray(subject.materials) ? subject.materials : [];
-    if (!materials.length) return `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">تحميل التجميعات ⬇</span>`;
+    if (!materials.length) return `<span class="card-link is-soon" title="سيتم إضافة المحتوى قريبًا">تحميل التجميعات <svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>`;
     const items = materials.map((material, index) => {
       const label = material.title && (material.title.ar || material.title.en) || `الفصل ${index + 1}`;
-      return `<a class="chapter-download" href="${escS(material.path || "")}" target="_blank" rel="noopener"><span>${escS(label)}</span><b aria-hidden="true">⬇</b></a>`;
+      return `<a class="chapter-download" href="${escS(material.path || "")}" target="_blank" rel="noopener"><span>${escS(label)}</span><b aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></b></a>`;
     }).join("");
-    return `<details class="card-materials"><summary class="card-link card-materials-trigger">تحميل التجميعات <span aria-hidden="true">⬇</span></summary><div class="chapter-menu">${items}</div></details>`;
+    return `<details class="card-materials"><summary class="card-link card-materials-trigger">تحميل التجميعات <span aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span></summary><div class="chapter-menu">${items}</div></details>`;
   }
 
   function linksHtml(s) {
@@ -2734,8 +2762,14 @@ async function clearQuizData() {
      HeroContinue) so the homepage continue-card paints on first load,
      not only after the next store write or view switch. */
   document.dispatchEvent(new CustomEvent("nova:progress-changed"));
-  loadQuizData();
-  MissedBank.prune();
+  /* Prune only after the banks arrive: loadQuizData() is async, and
+     pruning against the still-empty QUIZZES validated every saved
+     missed question against "no bank" and wiped the whole store on
+     each boot. Re-notify after pruning so counts re-read cleaned data. */
+  loadQuizData().then(() => {
+    MissedBank.prune();
+    document.dispatchEvent(new CustomEvent("nova:progress-changed"));
+  });
 
   /* Live locale switching for the picker / result screens. A question
      in progress keeps its language until the next render (by design). */
@@ -2988,10 +3022,10 @@ async function clearQuizData() {
       if (payload.exp) {
         const ms = payload.exp * 1000;
         warnings += Date.now() > ms
-          ? `⛔ انتهت صلاحية الرمز في ${new Date(ms).toLocaleString("ar")}.`
-          : `✅ الرمز صالح حتى ${new Date(ms).toLocaleString("ar")}.`;
+          ? `✕ انتهت صلاحية الرمز في ${new Date(ms).toLocaleString("ar")}.`
+          : `✓ الرمز صالح حتى ${new Date(ms).toLocaleString("ar")}.`;
       } else if (!warnings) {
-        warnings = "ℹ لا يحتوي الرمز على حقل انتهاء صلاحية (exp).";
+        warnings = "لا يحتوي الرمز على حقل انتهاء صلاحية (exp).";
       }
       warn.textContent = warnings;
     } catch {
@@ -3230,10 +3264,10 @@ async function clearQuizData() {
     });
 
     let cls = "";
-    let label = pw ? "ضعيفة جدًا 🔴" : "ابدأ بالكتابة لتحليل القوة…";
-    if (pw && entropy >= 80) { cls = "is-strong"; label = "قوية جدًا 🟢"; }
-    else if (pw && entropy >= 60) { cls = "is-good"; label = "قوة جيدة 🔵"; }
-    else if (pw && entropy >= 40) { cls = "is-fair"; label = "مقبولة 🟠"; }
+    let label = pw ? "ضعيفة جدًا" : "ابدأ بالكتابة لتحليل القوة…";
+    if (pw && entropy >= 80) { cls = "is-strong"; label = "قوية جدًا"; }
+    else if (pw && entropy >= 60) { cls = "is-good"; label = "قوة جيدة"; }
+    else if (pw && entropy >= 40) { cls = "is-fair"; label = "مقبولة"; }
     else if (pw) { cls = "is-weak"; }
 
     fill.className = `pw-meter-fill ${cls}`.trim();
@@ -3242,8 +3276,8 @@ async function clearQuizData() {
     var crackLabel = analysis.crackTime || crackTime(Math.pow(2, Math.min(entropy, 128)) / 2 / 10000);
     // Downgrade strength when predictable patterns exist, even if entropy is high.
     if (pw && (rules.keyboardPattern || rules.sequentialPattern || rules.repeatedChars || !rules.common)) {
-      if (cls === "is-strong") { cls = "is-fair"; label = "مقبولة 🟠 (ب존속 أنماط متوقعة)"; }
-      else if (cls === "is-good") { cls = "is-fair"; label = "مقبولة 🟠 (ب존속 أنماط متوقعة)"; }
+      if (cls === "is-strong") { cls = "is-fair"; label = "مقبولة (بسبب أنماط متوقعة)"; }
+      else if (cls === "is-good") { cls = "is-fair"; label = "مقبولة (بسبب أنماط متوقعة)"; }
     }
     verdict.textContent = pw
       ? `${label} — الإنتروبيا: ${entropy} بت · زمن الكسر التقديري: ${crackLabel} (تقديري — يعتمد على قوة الجهاز وهجوم القاموس)`
@@ -3255,6 +3289,7 @@ async function clearQuizData() {
     input.type = show ? "text" : "password";
     eye.setAttribute("aria-pressed", String(show));
     eye.setAttribute("aria-label", show ? "إخفاء كلمة المرور" : "إظهار كلمة المرور");
+    eye.innerHTML = show ? ICON.eyeOff : ICON.eye;
   });
 
   input.addEventListener("input", run);
@@ -3415,7 +3450,7 @@ const Lang = (() => {
       "nav.flashcardsTimed": "المراجعة الموقوتة",
       "nav.games": "تحديات CTF", "nav.redteam": "المختبر الهجومي", "nav.ir": "الاستجابة للحوادث", "nav.cryptolab": "مختبر التشفير",
       "nav.cta": "ابدأ التعلم",
-      "hero.eyebrow": "✦ منصة تعليمية وتدريبية عملية — دبلوم أمن المعلومات (تجسير مهني)",
+      "hero.eyebrow": "منصة تعليمية وتدريبية عملية — دبلوم أمن المعلومات (تجسير مهني)",
       "hero.title1": "منصة تعليمية", "hero.title2": "وتدريبية عملية ", "hero.titleAccent": "لطلاب أمن المعلومات",
       "hero.sub": "منصة عربية متكاملة لطلاب أمن المعلومات: تعلّم أساسيات كل مادة، راجِع المصطلحات بالبطاقات، اختبر نفسك بأسئلة عملية، وطبّق ما تعلّمته بأدوات أمنية ومعامل محاكاة حقيقية — كل ذلك يعمل داخل متصفحك وبدون إنترنت.",
       "hero.ctaStart": "ابدأ رحلة التعلم", "hero.ctaTools": "جرّب الأدوات", "hero.ctaLabs": "ادخل المعامل العملية",
@@ -3442,7 +3477,7 @@ const Lang = (() => {
       "dash.noLesson": "لا يوجد درس مفتوح بعد",
       "dash.resumeQuiz": "استئناف: {sub}",
       "dash.newQuiz": "اختبار جديد: {sub}",
-      "dash.allDone": "أكملت جميع الاختبارات 🎉",
+      "dash.allDone": "أكملت جميع الاختبارات",
       /* Phase 1 · student command-center dashboard */
       "dash.kicker": "لوحة الطالب",
       "dash.welcomeNew": "مرحبًا بك في لوحة تعلّمك",
@@ -3477,9 +3512,9 @@ const Lang = (() => {
       "dash.tabPath": "مساري",
       "dash.tabMotivation": "التحفيز",
       "now.loading": "جارٍ تحديد موعد حصتك القادمة…",
-      "now.greetMorning": "صباح الخير 👋",
-      "now.greetEvening": "مساء الخير 👋",
-      "now.greetNight": "أهلاً بك 👋",
+      "now.greetMorning": "صباح الخير",
+      "now.greetEvening": "مساء الخير",
+      "now.greetNight": "أهلاً بك",
       "now.nextClass": "حصتك القادمة: {name}",
       "now.startsAt": "{day} الساعة {time}",
       "now.chipNow": "الآن مباشر",
@@ -3566,12 +3601,12 @@ const Lang = (() => {
       "tools.sub": "اثنتا عشرة أداة تفاعلية تعمل بالكامل في متصفحك — من تشفير Caesar إلى تحليل JWT وحساب الشبكات.",
       "quiz.eyebrow": "الاختبارات التجريبية", "quiz.title": "اختبر نفسك في كل مادة",
       "quiz.sub": "أسئلة لكل مادة مع شرح فوري لكل إجابة، وضع مؤقّت اختياري، وحفظ تلقائي للنتائج.",
-      "quiz.hint": "💡 اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.",
+      "quiz.hint": "اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.",
       "flash.eyebrow": "البطاقات التعليمية",
       "flash.title": "راجع المصطلحات <em class=\"grad\">بالبطاقات</em>",
       "flash.sub": "اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.",
       "flash.shuffle": "خلط البطاقات", "flash.tap": "اضغط للقلب",
-      "flash.speak": "🔊 اقرأ البطاقة",
+      "flash.speak": "اقرأ البطاقة",
       /* ---------- T02 · timed review engine (MODULE 34) ---------- */
       "flash.start": "ابدأ المراجعة",
       "flash.count": "{n} مصطلحًا في هذه الجلسة",
@@ -3581,7 +3616,7 @@ const Lang = (() => {
       "flash.dontKnow": "لم أعرف",
       "flash.correct": "✓ إجابة صحيحة",
       "flash.wrong": "✗ إجابة خاطئة",
-      "flash.timeUp": "⏳ انتهى الوقت!",
+      "flash.timeUp": "انتهى الوقت!",
       "flash.revealLabel": "التعريف الصحيح",
       "flash.next": "البطاقة التالية",
       "flash.autoNext": "انتقال تلقائي إلى البطاقة التالية…",
@@ -3593,7 +3628,7 @@ const Lang = (() => {
       "flash.elapsed": "الوقت: {t}",
       "flash.best": "أفضل نتيجة: {n}٪",
       "flash.noBest": "لا توجد أفضل نتيجة بعد",
-      "flash.newBest": "🏆 رقم قياسي جديد!",
+      "flash.newBest": "رقم قياسي جديد!",
       "flash.reviewTitle": "أخطاء تحتاج إلى مراجعة",
       "flash.reviewHint": "ستسبق هذه البطاقات في الجلسة القادمة",
       "flash.reviewEmpty": "لا أخطاء في هذه الجلسة — أحسنت!",
@@ -3610,9 +3645,9 @@ const Lang = (() => {
       "contact.eyebrow": "تواصل معنا", "contact.title": "سؤال أو <em class=\"grad\">اقتراح؟</em>",
       "contact.sub": "نسعد بملاحظاتك ومساهماتك في المحتوى — أرسل رسالتك وسنعود إليك بأسرع وقت.",
       "contact.name": "اسمك", "contact.email": "بريدك الإلكتروني", "contact.type": "نوع الرسالة",
-      "contact.message": "رسالتك", "contact.submit": "إرسال المساهمة ✦",
+      "contact.message": "رسالتك", "contact.submit": "إرسال المساهمة",
       "contact.sending": "جارٍ إرسال رسالتك…", "contact.sent": "✓ تم إرسال رسالتك بنجاح. شكراً لتواصلك!",
-      "contact.error": "✗ تعذر الإرسال. جرّب البريد motmi757@gmail.com", "contact.invalid": "⚠️ يرجاء تصحيح الحقول المطلوبة.",
+      "contact.error": "✗ تعذر الإرسال. جرّب البريد motmi757@gmail.com", "contact.invalid": "⚠ يرجاء تصحيح الحقول المطلوبة.",
       "contact.fallback": "افتح تطبيق البريد",
       "footer.copy": "© 2026 منصة أمن المعلومات — صُمّم وطُوّر بواسطة أحمد مطمي.",
       "footer.local": "دبلوم أمن المعلومات (تجسير مهني) • الترم الحالي",
@@ -3629,7 +3664,7 @@ const Lang = (() => {
       "paths.relatedQuiz": "اختبارات مرتبطة", "paths.relatedTools": "أدوات ومعامل مرتبطة",
       "paths.markDone": "تحديد كمكتمل", "paths.markUndone": "إلغاء التحديد",
       "paths.doneByQuiz": "مكتمل عبر اختبار المادة",
-      "paths.complete": "أكملت هذا المسار — أحسنت! 🎉",
+      "paths.complete": "أكملت هذا المسار — أحسنت!",
       "paths.soonTitle": "هذا المسار قيد الإعداد",
       "paths.soonBody": "محتوى هذا المسار لم يُنشر بعد — نفضّل قول ذلك بصراحة بدل عرض محتوى ناقص. يمكنك استكمال باقي المسارات حتى تجهز.",
       "paths.soonMeanwhile": "وفي الأثناء — أقرب محتوى متاح الآن:",
@@ -3792,14 +3827,14 @@ const Lang = (() => {
       "beginner.title": "مبتدئ؟ ابدأ من هنا — خطواتك الأربع",
       "beginner.s1": "اختر مادة من «المواد» واقرأ وصفها.", "beginner.s2": "احفظ المصطلحات ببطاقات الفلاش السريعة.", "beginner.s3": "اختبر نفسك في المادة واقرأ شرح كل إجابة.", "beginner.s4": "طبّق بأداة تفاعلية واحدة ثم جرّب معمل المحاكاة.",
       "beginner.cta": "ابدأ الخطوة الأولى", "beginner.pathCta": "ابدأ المسار الموصى به",
-      "toolsEdu.notice": "⚠️ أدوات تعليمية تعمل محليًا في متصفحك — لا تُدخل كلمات مرور حقيقية أو مفاتيح API أو رموز خاصة أو أي بيانات سرية.",
+      "toolsEdu.notice": "⚠ أدوات تعليمية تعمل محليًا في متصفحك — لا تُدخل كلمات مرور حقيقية أو مفاتيح API أو رموز خاصة أو أي بيانات سرية.",
       "toolsEdu.name": "الاسم", "toolsEdu.purpose": "الهدف التعليمي", "toolsEdu.safety": "تنبيه وحدود الأداة",
       "toolsEdu.tryExample": "مثال آمن", "toolsEdu.reset": "إعادة ضبط", "toolsEdu.copy": "نسخ النتيجة", "toolsEdu.copied": "✓ تم النسخ",
       "toolsEdu.related": "مرتبط بـ", "toolsEdu.lessonChip": "الدرس", "toolsEdu.pathChip": "المسار", "toolsEdu.quizChip": "اختبار",
       "labs.objective": "الهدف", "labs.skills": "المهارات المُتدرَّبة", "labs.hints": "تلميحات",
       "labs.markDone": "تحديد المعمل كمكتمل", "labs.markUndone": "إلغاء الإكمال", "labs.completed": "مكتمل ✓",
       "labs.explainTitle": "ماذا تعلمت؟",
-      "labs.responsibleUse": "⚠️ استخدام مسؤول: هذه محاكاة تعليمية داخل متصفحك فقط — لا تُجرِّب هذه التقنيات على أنظمة أو شبكات لا تملكها أو لا تملك إذنًا خطيًا باختبارها.",
+      "labs.responsibleUse": "⚠ استخدام مسؤول: هذه محاكاة تعليمية داخل متصفحك فقط — لا تُجرِّب هذه التقنيات على أنظمة أو شبكات لا تملكها أو لا تملك إذنًا خطيًا باختبارها.",
       "labs.eyebrow": "المعامل العملية",
       "labs.title": "المعامل <em class=\"grad\">التطبيقية</em> والتدريب العملي",
       "labs.sub": "أربع معامل محاكاة تعمل كاملة داخل متصفحك — من محاكاة الهجمات إلى الاستجابة للحوادث وفك الشفرات.",
@@ -3818,7 +3853,7 @@ const Lang = (() => {
       "progress.bestTitle": "أفضل نتائجك",
       "progress.best": "آخر نتيجة: {score} من {total}",
       "progress.retakeBtn": "أعد الاختبار",
-      "progress.emptyTitle": "لم تبدأ بعد! 🎯",
+      "progress.emptyTitle": "لم تبدأ بعد!",
       "progress.emptySub": "ابدأ بأول اختبار في أي مادة وستظهر هنا نتائجك وأفضل درجاتك وتقدّمك — كل ذلك محفوظ على جهازك فقط.",
       "progress.emptyCta": "ابدأ أول اختبار",
       "about.sub": "منصة عربية لطلاب دبلوم أمن المعلومات تجمع بين التعليم والتدريب العملي — تعلّم المادة نظريًا ثم طبّقها بالأدوات والمعامل.",
@@ -3829,7 +3864,7 @@ const Lang = (() => {
       "about.p4": "خصوصية كاملة", "about.p4d": "لا حسابات ولا تتبّع — نتائجك تُحفظ على جهازك فقط.",
       "about.p5": "تدريب عملي", "about.p5d": "معامل محاكاة للهجمات والاستجابة للحوادث وتحديات CTF داخل المتصفح.",
       "about.p6": "مساعد ذكي", "about.p6d": "يجيب عن أسئلتك من محتوى المنصة نفسها — في أي وقت وبدون إنترنت.",
-      "onboarding.title": "مرحبًا بك في منصة أمن المعلومات 👋",
+      "onboarding.title": "مرحبًا بك في منصة أمن المعلومات",
       "onboarding.subtitle": "أسئلة سريعة لنقترح لك مسارًا مناسبًا — لا يتطلب تسجيلًا.",
       "onboarding.skip": "تخطي",
       "onboarding.next": "التالي",
@@ -3863,7 +3898,7 @@ const Lang = (() => {
       "tour.counter": "الخطوة {i} من {n}",
       "tour.areaLabel": "القسم المميّز:",
       "tour.hint": "استخدم Tab للتنقل بين الأزرار · Esc لتخطي الجولة.",
-      "tour.s1Title": "أهلًا بك في منصة أمن المعلومات 👋",
+      "tour.s1Title": "أهلًا بك في منصة أمن المعلومات",
       "tour.s1Text": "منصة عربية لتعلّم أمن المعلومات: تعلّم الأساسيات، اختبر نفسك، وتدرّب عمليًا — كل ذلك داخل متصفحك.",
       "tour.s1Area": "الواجهة الرئيسية للمنصة",
       "tour.s2Title": "لوحة الطالب — تقدّمك",
@@ -3954,7 +3989,7 @@ const Lang = (() => {
       "search.group.quiz": "الاختبارات",
       "search.group.flash": "البطاقات",
       "search.group.term": "المصطلحات والشرح",
-      /* ---------- MODULE 58 · WhatsNew (زر التعجب 👍 + لوحة آخر التحديثات) ---------- */
+      /* ---------- MODULE 58 · WhatsNew (زر التعجب + لوحة آخر التحديثات) ---------- */
       "updates.title": "آخر التحديثات",
       "updates.sub": "أحدث ما أُضيف إلى المنصة — من الأحدث إلى الأقدم",
       "updates.empty": "لا توجد تحديثات لعرضها بعد.",
@@ -4238,7 +4273,7 @@ const Lang = (() => {
       "nav.flashcardsTimed": "Timed Review",
       "nav.games": "CTF Lab", "nav.redteam": "Red Team Lab", "nav.ir": "Incident Response", "nav.cryptolab": "Crypto Lab",
       "nav.cta": "Start learning",
-      "hero.eyebrow": "✦ An educational & practical training platform — Infosec Diploma (Professional Bridging)",
+      "hero.eyebrow": "An educational & practical training platform — Infosec Diploma (Professional Bridging)",
       "hero.title1": "An educational &", "hero.title2": "practical training platform ", "hero.titleAccent": "for Infosec students",
       "hero.sub": "An Arabic-first platform for Information Security students: learn the fundamentals of every subject, review terms with flashcards, quiz yourself with practical questions, then apply what you learned with security tools and real simulation labs — all in your browser, even offline.",
       "hero.ctaStart": "Start Learning", "hero.ctaTools": "Try the Tools", "hero.ctaLabs": "Enter the Labs",
@@ -4265,7 +4300,7 @@ const Lang = (() => {
       "dash.noLesson": "No lesson opened yet",
       "dash.resumeQuiz": "Resume: {sub}",
       "dash.newQuiz": "New quiz: {sub}",
-      "dash.allDone": "All quizzes completed 🎉",
+      "dash.allDone": "All quizzes completed",
       /* Phase 1 · student command-center dashboard */
       "dash.kicker": "Student dashboard",
       "dash.welcomeNew": "Welcome to your learning dashboard",
@@ -4300,9 +4335,9 @@ const Lang = (() => {
       "dash.tabPath": "My Path",
       "dash.tabMotivation": "Motivation",
       "now.loading": "Finding your next scheduled class…",
-      "now.greetMorning": "Good morning 👋",
-      "now.greetEvening": "Good evening 👋",
-      "now.greetNight": "Welcome 👋",
+      "now.greetMorning": "Good morning",
+      "now.greetEvening": "Good evening",
+      "now.greetNight": "Welcome",
       "now.nextClass": "Next class: {name}",
       "now.startsAt": "{day} at {time}",
       "now.chipNow": "LIVE NOW",
@@ -4389,11 +4424,11 @@ const Lang = (() => {
       "tools.sub": "Twelve interactive tools running entirely in your browser — from Caesar cipher to JWT decoding and subnet math.",
       "quiz.eyebrow": "Practice Exams", "quiz.title": "Test yourself in every course",
       "quiz.sub": "Questions per course with instant explanations, an optional timer and automatic progress saving.",
-      "quiz.hint": "💡 Pick a course to begin — you can resume a previous attempt or retake it from scratch.",
+      "quiz.hint": "Pick a course to begin — you can resume a previous attempt or retake it from scratch.",
       "flash.eyebrow": "Flashcards",
       "flash.title": "Review Terms with <em class=\"grad\">Flashcards</em>",
       "flash.sub": "Tap any card to flip it — a security term in English with its Arabic meaning and a short explanation.",
-      "flash.shuffle": "Shuffle cards", "flash.speak": "🔊 Read the card", "flash.tap": "Tap to flip",
+      "flash.shuffle": "Shuffle cards", "flash.speak": "Read the card", "flash.tap": "Tap to flip",
       /* ---------- T02 · timed review engine (MODULE 34) ---------- */
       "flash.start": "Start review",
       "flash.count": "{n} terms in this session",
@@ -4403,7 +4438,7 @@ const Lang = (() => {
       "flash.dontKnow": "I don't know",
       "flash.correct": "✓ Correct",
       "flash.wrong": "✗ Wrong",
-      "flash.timeUp": "⏳ Time's up!",
+      "flash.timeUp": "Time's up!",
       "flash.revealLabel": "The correct definition",
       "flash.next": "Next card",
       "flash.autoNext": "Auto-advancing to the next card…",
@@ -4415,7 +4450,7 @@ const Lang = (() => {
       "flash.elapsed": "Time: {t}",
       "flash.best": "Best score: {n}%",
       "flash.noBest": "No best score yet",
-      "flash.newBest": "🏆 New personal best!",
+      "flash.newBest": "New personal best!",
       "flash.reviewTitle": "Mistakes to review",
       "flash.reviewHint": "These cards come first in the next session",
       "flash.reviewEmpty": "No mistakes this session — well done!",
@@ -4432,9 +4467,9 @@ const Lang = (() => {
       "contact.eyebrow": "Contact us", "contact.title": "A question or a <em class=\"grad\">suggestion?</em>",
       "contact.sub": "We'd love your feedback and contributions — send your message and we'll get back to you shortly.",
       "contact.name": "Your name", "contact.email": "Your email", "contact.type": "Message type",
-            "contact.message": "Your message", "contact.submit": "Send contribution ✦",
+            "contact.message": "Your message", "contact.submit": "Send contribution",
       "contact.sending": "Sending your message…", "contact.sent": "✓ Message sent successfully. Thank you for reaching out!",
-      "contact.error": "✗ Send failed. Try emailing motmi757@gmail.com", "contact.invalid": "⚠️ Please fix the required fields.",
+      "contact.error": "✗ Send failed. Try emailing motmi757@gmail.com", "contact.invalid": "⚠ Please fix the required fields.",
       "contact.fallback": "Open email app",
       "footer.copy": "© 2026 Information Security Platform — Designed & developed by Ahmed Motmi.",
       "footer.local": "Information Security Diploma (Professional Bridging) • Current Semester",
@@ -4451,7 +4486,7 @@ const Lang = (() => {
       "paths.relatedQuiz": "Related quizzes", "paths.relatedTools": "Related tools & labs",
       "paths.markDone": "Mark as done", "paths.markUndone": "Mark as not done",
       "paths.doneByQuiz": "Done via the subject quiz",
-      "paths.complete": "You completed this path — great job! 🎉",
+      "paths.complete": "You completed this path — great job!",
       "paths.soonTitle": "This path is in preparation",
       "paths.soonBody": "This path's content isn't published yet — we'd rather say that openly than show half-ready material. Explore the other paths meanwhile.",
       "paths.soonMeanwhile": "Meanwhile — the closest live content:",
@@ -4613,14 +4648,14 @@ const Lang = (() => {
       "beginner.title": "New here? Start with these four steps",
       "beginner.s1": "Pick a subject from «Subjects» and read its description.", "beginner.s2": "Memorize the terms with quick flashcards.", "beginner.s3": "Quiz yourself on the subject and read each explanation.", "beginner.s4": "Apply with one interactive tool, then try a simulation lab.",
       "beginner.cta": "Take the first step", "beginner.pathCta": "Start the recommended path",
-      "toolsEdu.notice": "⚠️ Educational tools that run locally in your browser — never enter real passwords, API keys, private tokens or any confidential data.",
+      "toolsEdu.notice": "⚠ Educational tools that run locally in your browser — never enter real passwords, API keys, private tokens or any confidential data.",
       "toolsEdu.name": "Name", "toolsEdu.purpose": "Learning objective", "toolsEdu.safety": "Safety & limitations",
       "toolsEdu.tryExample": "Safe example", "toolsEdu.reset": "Reset", "toolsEdu.copy": "Copy output", "toolsEdu.copied": "✓ Copied",
       "toolsEdu.related": "Related", "toolsEdu.lessonChip": "Lesson", "toolsEdu.pathChip": "Path", "toolsEdu.quizChip": "Quiz",
       "labs.objective": "Objective", "labs.skills": "Skills practiced", "labs.hints": "Hints",
       "labs.markDone": "Mark lab as completed", "labs.markUndone": "Mark as not completed", "labs.completed": "Completed ✓",
       "labs.explainTitle": "What you learned",
-      "labs.responsibleUse": "⚠️ Responsible use: this is an in-browser educational simulation — never try these techniques on systems or networks you do not own or lack written permission to test.",
+      "labs.responsibleUse": "⚠ Responsible use: this is an in-browser educational simulation — never try these techniques on systems or networks you do not own or lack written permission to test.",
       "labs.eyebrow": "Practical Labs",
       "labs.title": "Hands-on <em class=\"grad\">Labs</em> & Training",
       "labs.sub": "Four simulation labs that run entirely in your browser — from simulating attacks to incident response and real cipher work.",
@@ -4639,7 +4674,7 @@ const Lang = (() => {
       "progress.bestTitle": "Your best results",
       "progress.best": "Latest result: {score} of {total}",
       "progress.retakeBtn": "Retake",
-      "progress.emptyTitle": "You haven't started yet! 🎯",
+      "progress.emptyTitle": "You haven't started yet!",
       "progress.emptySub": "Take your first quiz in any subject and your results, best scores and progress will appear here — all saved on this device only.",
       "progress.emptyCta": "Start your first quiz",
       "about.sub": "An Arabic-first platform for Information Security diploma students that combines education with practical training — study the theory, then practice it with tools and labs.",
@@ -4650,7 +4685,7 @@ const Lang = (() => {
       "about.p4": "Full privacy", "about.p4d": "No accounts and no tracking — your results are saved on your device only.",
       "about.p5": "Practical training", "about.p5d": "Simulation labs for attacks, incident response and CTF challenges — right in the browser.",
       "about.p6": "Smart assistant", "about.p6d": "Answers your questions from the platform's own content — any time, even offline.",
-      "onboarding.title": "Welcome to Information Security 👋",
+      "onboarding.title": "Welcome to Information Security",
       "onboarding.subtitle": "A few quick questions — we'll recommend a learning path. No registration needed.",
       "onboarding.skip": "Skip", "onboarding.next": "Next",
       "onboarding.back": "Back", "onboarding.finish": "Start learning",
@@ -4682,7 +4717,7 @@ const Lang = (() => {
       "tour.counter": "Step {i} of {n}",
       "tour.areaLabel": "Highlighted area:",
       "tour.hint": "Use Tab to move between the buttons · Esc to skip the tour.",
-      "tour.s1Title": "Welcome to the Information Security platform 👋",
+      "tour.s1Title": "Welcome to the Information Security platform",
       "tour.s1Text": "An Arabic-first platform for learning information security: study the basics, test yourself and practise hands-on — all inside your browser.",
       "tour.s1Area": "the platform home screen",
       "tour.s2Title": "Your dashboard — progress",
@@ -4726,7 +4761,7 @@ const Lang = (() => {
       "search.group.quiz": "Quizzes",
       "search.group.flash": "Flashcards",
       "search.group.term": "Glossary terms",
-      /* ---------- MODULE 58 · WhatsNew (navbar 👍 + latest updates) ---------- */
+      /* ---------- MODULE 58 · WhatsNew (navbar + latest updates) ---------- */
       "updates.title": "Latest updates",
       "updates.sub": "The newest additions to the platform, newest first",
       "updates.empty": "No updates to show yet.",
@@ -4966,11 +5001,11 @@ const Lang = (() => {
       resTimeout: " انتهى وقتها", resUnknown: " غير محسوبة",
       correct: "إجابة صحيحة ✓",
       wrong: "إجابة غير صحيحة ✗ — الصحيح: {ans}",
-      timeout: "انتهى الوقت ⏱ — الصحيح: {ans}",
-      explain: "💡 شرح الإجابة",
+      timeout: "انتهى الوقت — الصحيح: {ans}",
+      explain: "شرح الإجابة",
       resumed: "تم استئناف جلستك السابقة عند السؤال {i} من {total}.",
       resultIn: "درجتك في {sub}", timedSuffix: " (وضع موقوت)",
-      bestSaved: "أفضل نتيجة محفوظة: {pct}%", newRec: " 🎉 رقم جديد!",
+      bestSaved: "أفضل نتيجة محفوظة: {pct}%", newRec: "رقم جديد!",
       noteHi: "ممتاز! أنت جاهز للاختبار.", noteMid: "جيد — راجع الملاحظات ثم أعد المحاولة.",
       noteLo: "تحتاج إلى مراجعة المادة ثم أعد الاختبار.",
       reviewTitle: "مراجعة الأخطاء — اقرأ شرح كل إجابة",
@@ -4992,11 +5027,11 @@ const Lang = (() => {
       resTimeout: " timed out", resUnknown: " not counted",
       correct: "Correct ✓",
       wrong: "Wrong ✗ — correct: {ans}",
-      timeout: "Time up ⏱ — correct: {ans}",
-      explain: "💡 Explanation",
+      timeout: "Time up — correct: {ans}",
+      explain: "Explanation",
       resumed: "Resumed your saved session at question {i} of {total}.",
       resultIn: "Your score in {sub}", timedSuffix: " (timed)",
-      bestSaved: "Best saved score: {pct}%", newRec: " 🎉 New record!",
+      bestSaved: "Best saved score: {pct}%", newRec: "New record!",
       noteHi: "Excellent! You're ready for the exam.", noteMid: "Good — review the notes and try again.",
       noteLo: "You need to review the material, then retake the exam.",
       reviewTitle: "Review your mistakes — read each explanation",
@@ -5343,14 +5378,14 @@ window.Lang = Lang;
           if (S.fixed) return [["[api] 403 — رُفض: التحقق من ملكية المورد مفعّل.", "cmd-fail"]];
           if (id === "7") {
             S.pwn = true;
-            return [["[api] ✅ حُذف حساب المستخدم 7 وأنت id=42! ثغرة IDOR مثبتة.", "cmd-bad"], ["[api] عالجها: fix acl", "cmd-warn"]];
+            return [["[api] ✓ حُذف حساب المستخدم 7 وأنت id=42! ثغرة IDOR مثبتة.", "cmd-bad"], ["[api] عالجها: fix acl", "cmd-warn"]];
           }
           return [["[api] تمت العملية — لكن جرّب remove 7 لإثبات الثغرة.", "cmd-neutral"]];
         }
         if (cmd === "fix") {
           if (args[0] !== "acl") return [["usage: fix acl", "cmd-warn"]];
           S.fixed = true;
-          return [["[api] ✅ فحص ملكية صريح (ownership check) على كل عمليات التعديل.", "cmd-ok"]];
+          return [["[api] ✓ فحص ملكية صريح (ownership check) على كل عمليات التعديل.", "cmd-ok"]];
         }
         if (cmd === "status") return statusView(ctx, [
           ["id", "42 (user)", "sv-up"],
@@ -5393,7 +5428,7 @@ window.Lang = Lang;
         if (cmd === "fix") {
           if (args[0] !== "input-validation") return [["usage: fix input-validation", "cmd-warn"]];
           S.fixed = true;
-          return [["[app] ✅ المدخلات تُمرَّر كمُعامَل/قائمة بيضاء — لا سلسلة أوامر.", "cmd-ok"]];
+          return [["[app] ✓ المدخلات تُمرَّر كمُعامَل/قائمة بيضاء — لا سلسلة أوامر.", "cmd-ok"]];
         }
         if (cmd === "status") return statusView(ctx, [
           ["injection shown", S.injected ? "PROVEN" : "—", S.injected ? "sv-up" : "sv-down"],
@@ -5425,7 +5460,7 @@ window.Lang = Lang;
           return [
             ["[board] ◉ نُشرت التعليقات.", S.fixed ? "cmd-neutral" : "cmd-bad"],
             ...(S.injected && !S.fixed
-              ? [["[board] ⚠️ ستنفَّذ سكربتاتك لمتصفحات الزوار! ثغرة XSS مخزنة.", "cmd-bad"], ["[app] عالجها: fix output-encoding", "cmd-warn"]]
+              ? [["[board] ⚠ ستنفَّذ سكربتاتك لمتصفحات الزوار! ثغرة XSS مخزنة.", "cmd-bad"], ["[app] عالجها: fix output-encoding", "cmd-warn"]]
               : [])
           ];
         }
@@ -5440,7 +5475,7 @@ window.Lang = Lang;
         if (cmd === "fix") {
           if (args[0] !== "output-encoding") return [["usage: fix output-encoding", "cmd-warn"]];
           S.fixed = true;
-          return [["[app] ✅ ترميز المخرجات (HTML-escape) مفعّل — التعليقات آمنة.", "cmd-ok"]];
+          return [["[app] ✓ ترميز المخرجات (HTML-escape) مفعّل — التعليقات آمنة.", "cmd-ok"]];
         }
         if (cmd === "status") return statusView(ctx, [
           ["XSS injected", S.injected ? "YES" : "—", S.injected ? "sv-up" : "sv-down"],
@@ -5485,7 +5520,7 @@ window.Lang = Lang;
         if (cmd === "fix") {
           if (args[0] !== "headers") return [["usage: fix headers", "cmd-warn"]];
           S.fixed = true;
-          return [["[web] ✅ إيقاف الفهرسة · server_tokens=off · DEBUG=false · رؤوس صارمة.", "cmd-ok"]];
+          return [["[web] ✓ إيقاف الفهرسة · server_tokens=off · DEBUG=false · رؤوس صارمة.", "cmd-ok"]];
         }
         if (cmd === "status") return statusView(ctx, [
           ["leak shown", S.leaked ? "YES" : "—", S.leaked ? "sv-up" : "sv-down"],
@@ -5515,14 +5550,14 @@ window.Lang = Lang;
           if (S.fixed) return [["[auth] 403 — الحساب مُقفل (5 محاولات) + MFA مطلوبة.", "cmd-fail"]];
           if (user === "admin" && (pass === "12345" || pass === "admin")) {
             S.weak = true;
-            return [["[auth] ✅ دخول ناجح ببيانات افتراضية! لا قفل ولا حد محاولات — ثغرة A07.", "cmd-bad"], ["[auth] عالجها: fix lockout", "cmd-warn"]];
+            return [["[auth] ✓ دخول ناجح ببيانات افتراضية! لا قفل ولا حد محاولات — ثغرة A07.", "cmd-bad"], ["[auth] عالجها: fix lockout", "cmd-warn"]];
           }
           return [["[auth] فشل — لكن لاحظ: لا حدّ لعدد المحاولات (∞).", "cmd-neutral"]];
         }
         if (cmd === "fix") {
           if (args[0] !== "lockout") return [["usage: fix lockout", "cmd-warn"]];
           S.fixed = true;
-          return [["[auth] ✅ قفل بعد 5 محاولات + MFA + إجبار تغيير البيانات الافتراضية.", "cmd-ok"]];
+          return [["[auth] ✓ قفل بعد 5 محاولات + MFA + إجبار تغيير البيانات الافتراضية.", "cmd-ok"]];
         }
         if (cmd === "status") return statusView(ctx, [
           ["weak login shown", S.weak ? "YES" : "—", S.weak ? "sv-up" : "sv-down"],
@@ -5553,14 +5588,14 @@ window.Lang = Lang;
           if (S.fixed) return [["[proxy] 403 — خارج القائمة البيضاء.", "cmd-fail"]];
           if (/169\.254\.169\.254/.test(url) || /metadata/i.test(url)) {
             S.ssrf = true;
-            return [["[proxy] ❗ وصَلت إلى البيانات الوصفية الداخلية:", "cmd-bad"], ["  role: ir-admin · secret: sk-ir-7f3… (جزئي)", "cmd-bad"], ["  ← ثغرة SSRF! عالجها: fix allowlist", "cmd-warn"]];
+            return [["[proxy] وصَلت إلى البيانات الوصفية الداخلية:", "cmd-bad"], [" role: ir-admin · secret: sk-ir-7f3… (جزئي)", "cmd-bad"], [" ← ثغرة SSRF! عالجها: fix allowlist", "cmd-warn"]];
           }
           return [["[proxy] جُلبت " + url + " (صورة) بنجاح.", "cmd-neutral"]];
         }
         if (cmd === "fix") {
           if (args[0] !== "allowlist") return [["usage: fix allowlist", "cmd-warn"]];
           S.fixed = true;
-          return [["[proxy] ✅ قائمة بيضاء (https فقط) + منع العناوين الداخلية وميتاداتا السحابة.", "cmd-ok"]];
+          return [["[proxy] ✓ قائمة بيضاء (https فقط) + منع العناوين الداخلية وميتاداتا السحابة.", "cmd-ok"]];
         }
         if (cmd === "status") return statusView(ctx, [
           ["SSRF shown", S.ssrf ? "YES" : "—", S.ssrf ? "sv-up" : "sv-down"],
@@ -5744,7 +5779,7 @@ window.Lang = Lang;
           '</span><span class="games-sc-domain">' + escG(sc.domain) + "</span></div>" +
           '<p class="games-sc-desc">' + escG(sc.brief) + "</p>" +
           (best != null
-            ? '<p class="games-sc-best' + (done ? " s-done" : "") + '">🏆 أفضل نتيجة: ' + best + " نقطة</p>"
+            ? '<p class="games-sc-best' + (done ? " s-done" : "") + '"> أفضل نتيجة: ' + best + " نقطة</p>"
             : "");
         btn.addEventListener("click", () => boot(key));
         list.appendChild(btn);
@@ -6722,7 +6757,7 @@ window.Lang = Lang;
     let html = '<div class="ft-top">' +
       '<span class="ft-count">' + esc(Lang.t("flash.qnum", { i: state.idx + 1, total: state.deck.length })) + "</span>" +
       (revealed ? "" :
-        '<span class="ft-timer' + (low ? " is-low" : "") + '" role="timer" aria-label="' + esc(Lang.t("flash.timeLeft", { n: secs })) + '">⏱ <span id="ftTimerNum">' + secs + "</span></span>") +
+        '<span class="ft-timer' + (low ? " is-low" : "") + '" role="timer" aria-label="' + esc(Lang.t("flash.timeLeft", { n: secs })) + '"> <span id="ftTimerNum">' + secs + "</span></span>") +
       "</div>";
     if (!revealed) {
       html += '<div class="ft-timerbar"><div class="ft-timerfill" id="ftTimerBar" style="width:' + pct.toFixed(1) + '%"></div></div>';
@@ -7064,161 +7099,6 @@ window.Lang = Lang;
 
 
 /* ============================================================
-   MODULE 36 · ThemeSwitch — dark default · light opt-in
-   Resolution order: explicit stored choice ("motmi-portal:theme"
-   in localStorage via Store) → system preference
-   (prefers-color-scheme) → DARK (Slate Indigo). The pre-paint
-   inline <head> script mirrors this logic so there is no flash of
-   the wrong theme. While no explicit choice is stored, live OS
-   switches (light↔dark) update the page immediately; once the user
-   taps the toggle their choice wins and OS changes are ignored.
-   NOTE: :root holds the dark tokens, so a missing data-theme can
-   never flash a light page on a dark shell.
-   ============================================================ */
-(function () {
-  const root = document.documentElement;
-  const btn = $id("themeToggle");
-  const LBL_LIGHT = "الوضع الداكن / Dark mode";   /* shown while light is ON */
-  const LBL_DARK = "الوضع الفاتح / Light mode";   /* shown while dark is ON  */
-  /* Browser-chrome colours, one per palette (Slate Indigo is the default).
-     Kept in sync with the --bg token of each block in style.css. */
-  const CANVAS = {
-    slate:  { dark: "#0E1116", light: "#F2F4F8" },
-    classic: { dark: "#0A141A", light: "#EFF4F6" },
-  };
-  const mq = (typeof window.matchMedia === "function")
-    ? window.matchMedia("(prefers-color-scheme: dark)")
-    : null;
-
-  /** The canvas colour for the currently active palette + mode.
-      @returns {string} A hex colour for the theme-color meta. */
-  function canvasColor() {
-    const pal = root.getAttribute("data-palette") === "classic" ? "classic" : "slate";
-    const mode = root.getAttribute("data-theme") === "light" ? "light" : "dark";
-    return CANVAS[pal][mode];
-  }
-
-  /**
-   * Apply a theme mode to <html>, the toggle state and the theme-color meta.
-   * @param {"dark"|"light"} mode Target mode.
-   * @returns {void}
-   */
-  function apply(mode) {
-    const isLight = mode === "light";
-    root.setAttribute("data-theme", isLight ? "light" : "dark");
-    if (btn) {
-      btn.setAttribute("aria-pressed", String(isLight));
-      btn.title = isLight ? LBL_LIGHT : LBL_DARK;
-      btn.setAttribute("aria-label", isLight ? LBL_LIGHT : LBL_DARK);
-    }
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", canvasColor());
-  }
-
-  /** Stored user choice, or null when the user never picked manually.
-      @returns {"dark"|"light"|null} */
-  function storedChoice() {
-    const v = Store.get("theme");
-    return v === "light" || v === "dark" ? v : null;
-  }
-
-  /* Restore: stored choice → dark. (With no explicit choice the OS is
-     followed live by the change listener below; the boot value is dark
-     so a light-preferring OS still gets the calm default first.) */
-  apply(storedChoice() || "dark");
-
-  if (btn) {
-    btn.addEventListener("click", () => {
-      const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
-      apply(next);
-      Store.set("theme", next); /* explicit choice — overrides the OS */
-    });
-  }
-
-  /* Follow live OS theme changes until the user makes an explicit choice. */
-  if (mq) {
-    const onSystemChange = (e) => {
-      if (storedChoice() === null) apply(e.matches ? "dark" : "light");
-    };
-    if (typeof mq.addEventListener === "function") mq.addEventListener("change", onSystemChange);
-    else if (typeof mq.addListener === "function") mq.addListener(onSystemChange); /* legacy Safari */
-  }
-})();
-
-/* ============================================================
-   MODULE 36b · PaletteSwitch — slate (default) ↔ ocean (second)
-   Orthogonal to MODULE 36 (dark↔light): <html data-palette="classic">
-   picks the calm Ocean token set in BOTH modes; the attribute absent
-   means slate (Slate Indigo). Persisted under "motmi-portal:palette"
-   and restored pre-paint by the inline <head> script (no FOUC).
-   The theme-color meta follows theme AND palette so the browser
-   chrome always matches the visible canvas.
-   ============================================================ */
-(function () {
-  const root = document.documentElement;
-  const btn = $id("paletteToggle");
-  const LBL_OCEAN = "لوحة المحيط / Ocean palette";   /* shown while slate is ON */
-  const LBL_SLATE = "لوحة الحجر / Slate palette";    /* shown while ocean is ON */
-  /* Both palettes keep a LIGHT ribbon, so button text is dark ink on
-     either one; the runtime value is re-asserted so a stale inline
-     value can never leave white text on a light ribbon. */
-  const RIBBON_INK = "#10131A";
-
-  /**
-   * Apply a palette to <html>, the toggle state and the theme-color meta.
-   * @param {"slate"|"classic"} pal Target palette.
-   * @returns {void}
-   */
-  function applyPalette(pal) {
-    const classic = pal === "classic";
-    if (classic) root.setAttribute("data-palette", "classic");
-    else root.removeAttribute("data-palette");
-    /* Buttons paint their text from --on-grad; both ribbons are pale,
-       so the ink stays dark in both palettes. */
-    root.style.setProperty("--on-grad", RIBBON_INK);
-    if (btn) {
-      btn.setAttribute("aria-pressed", String(classic));
-      btn.title = classic ? LBL_SLATE : LBL_OCEAN;
-      btn.setAttribute("aria-label", classic ? LBL_SLATE : LBL_OCEAN);
-    }
-    syncMeta();
-  }
-
-  /** Re-sync the meta when MODULE 36 changes the mode (palette kept). @returns {void} */
-  function syncMeta() {
-    const pal = root.getAttribute("data-palette") === "classic" ? "classic" : "slate";
-    const mode = root.getAttribute("data-theme") === "light" ? "light" : "dark";
-    const CANVAS = {
-      slate:   { dark: "#0E1116", light: "#F2F4F8" },
-      classic: { dark: "#0A141A", light: "#EFF4F6" },
-    };
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", CANVAS[pal][mode]);
-  }
-
-  /** Stored palette choice, defaulting to slate. @returns {"slate"|"classic"} */
-  function storedPalette() {
-    return Store.get("palette") === "classic" ? "classic" : "slate";
-  }
-
-  applyPalette(storedPalette());
-  /* Observe MODULE 36's mode flips so the meta never goes stale. */
-  if ("MutationObserver" in window) {
-    new MutationObserver((muts) => {
-      if (muts.some((m) => m.attributeName === "data-theme")) syncMeta();
-    }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
-  }
-
-  if (btn) {
-    btn.addEventListener("click", () => {
-      const next = root.getAttribute("data-palette") === "classic" ? "slate" : "classic";
-      applyPalette(next);
-      Store.set("palette", next);
-    });
-  }
-})();
-
-/* ============================================================
    MODULE 32 · Nav.ScrollSpy — highlight the section in view
    Observes the main sections and mirrors the active one onto the
    desktop nav links via aria-current="true" (also styled in CSS).
@@ -7395,7 +7275,7 @@ function labDownload(name, text) {
     }
 
     out("── نتيجة: " + q, "cmd-sys");
-    if (injected) out("⚠️ حمولة حقن في WHERE — عادت كل الصفوف!", "cmd-bad");
+    if (injected) out("⚠ حمولة حقن في WHERE — عادت كل الصفوف!", "cmd-bad");
     out("id | name | course | grade", "cmd-neutral");
     rows.forEach((r) => out(r.join("  |  "), "cmd-neutral"));
     if (!rows.length) out("(لا صفوف مطابقة) — الحل الآمن: معاملات parameterized", "cmd-neutral");
@@ -7785,7 +7665,7 @@ function sevCls(sev) { return "sev-" + sev; }
         const sel = card.querySelector("input:checked");
         if (!sel) { fb.textContent = "اختر أحد الخيارات أولًا."; fb.className = "rca-fb is-warn"; return; }
         const ok = +sel.value === sc.correct;
-        fb.textContent = (ok ? "✅ صحيح: " : "❌ راجع: ") + sc.why;
+        fb.textContent = (ok ? "✓ صحيح: " : "✕ راجع: ") + sc.why;
         fb.className = "rca-fb" + (ok ? " is-ok" : " is-bad");
       });
       card.appendChild(btn);
@@ -7838,7 +7718,7 @@ function sevCls(sev) { return "sev-" + sev; }
     irOut("بدء محاكاة: " + CAMPAIGN.name, "cmd-sys");
     CAMPAIGN.alerts.forEach((a) => {
       const id = setTimeout(() => {
-        irOut("🔔 [" + a.sev.toUpperCase() + "] " + a.text, a.sev === "crit" ? "cmd-bad" : "cmd-warn");
+        irOut("[" + a.sev.toUpperCase() + "] " + a.text, a.sev === "crit" ? "cmd-bad" : "cmd-warn");
         teamOut("أحلام", "تنبيه جديد! إليك التلميح: " + TEAM_HINTS[a.id][0], "is-info");
       }, a.delay);
       LIVE.timers.push(id);
@@ -7873,15 +7753,15 @@ function sevCls(sev) { return "sev-" + sev; }
         (expect === "block" && parts[2] === "src" && parts[3] === "203.0.113.77");
       if (ok) {
         LIVE.contained[id] = true;
-        irOut("✅ تمت احتواء " + id + " (" + MITIGATE[id] + ")", "cmd-ok");
+        irOut("✓ تمت احتواء " + id + " (" + MITIGATE[id] + ")", "cmd-ok");
         if (teamPhase) teamPhase.textContent = CAMPAIGN.alerts.filter((x) => !LIVE.contained[x.id]).length + " حوادث مفتوحة";
         if (CAMPAIGN.alerts.every((x) => LIVE.contained[x.id])) {
           LIVE.done = true;
-          irOut("🎉 كل الحوادث محتواة خلال " + Math.round((Date.now() - LIVE.startAt) / 1000) + "ث.", "cmd-flag");
-          labToast("احتواء كامل للحادثة! 🧯", "ok");
+          irOut("كل الحوادث محتواة خلال " + Math.round((Date.now() - LIVE.startAt) / 1000) + "ث.", "cmd-flag");
+          labToast("احتواء كامل للحادثة!", "ok");
         }
       } else {
-        irOut("⚠️ إجراء غير مناسب — تابع التحليل (detail <id>).", "cmd-bad");
+        irOut("⚠ إجراء غير مناسب — تابع التحليل (detail <id>).", "cmd-bad");
         teamOut("أحلام", "أنظر ماذا يتطلب هذا الحدث: " + MITIGATE[id], "is-warn");
       }
       return;
@@ -7889,7 +7769,7 @@ function sevCls(sev) { return "sev-" + sev; }
     if (cmd === "status") {
       const cont = CAMPAIGN.alerts.filter((a) => LIVE.contained[a.id]).length;
       irOut("الحالة: " + cont + "/" + CAMPAIGN.alerts.length + " حوادث محتواة · " +
-        (LIVE.done ? "انتهت 🎉" : CAMPAIGN.alerts.find((a) => !LIVE.contained[a.id]) ? "التالي: " + CAMPAIGN.alerts.find((a) => !LIVE.contained[a.id]).id : "لا أحداث قادمة"), "cmd-neutral");
+        (LIVE.done ? "انتهت" : CAMPAIGN.alerts.find((a) => !LIVE.contained[a.id]) ? "التالي: " + CAMPAIGN.alerts.find((a) => !LIVE.contained[a.id]).id : "لا أحداث قادمة"), "cmd-neutral");
       return;
     }
     irOut("أمر غير معروف — اكتب help", "cmd-bad");
@@ -8131,7 +8011,7 @@ if (irForm) irForm.addEventListener("submit", (e) => {
         const h = fnv1a32(s);
         if (map.has(h) && map.get(h) !== s) {
           colFill.style.width = "100%";
-          colOut.textContent = "🎯 تصادم بعد " + tries + " محاولة (بحث عيد الميلاد):\nأ1 = \"" + map.get(h) +
+          colOut.textContent = "تصادم بعد " + tries + " محاولة (بحث عيد الميلاد):\nأ1 = \"" + map.get(h) +
             "\" → 0x" + h.toString(16).padStart(8, "0") + "\nأ2 = \"" + s + "\" → 0x" + h.toString(16).padStart(8, "0");
           return;
         }
@@ -8560,7 +8440,7 @@ function rxMatch(node, s, i) {
         if (i === PORTS.length - 1) {
           const opens = PORTS.filter((q) => stateFor(host, q) === "open");
           outEl.textContent = "اكتمل الفحص: " + host + " — مفتوحة: " + (opens.join(", ") || "لا شيء") +
-            " · الحالة: " + (opens.length ? "مُعرض ⚠️" : "آمن ✅");
+            " · الحالة: " + (opens.length ? "مُعرض ⚠" : "آمن ✓");
         }
       }, 250 + i * 260);
     });
@@ -8654,7 +8534,7 @@ function rxMatch(node, s, i) {
     const pct = total ? Math.round(((p.idx || 0) / total) * 100) : 0;
     return (
       '<article class="progress-card progress-resume">' +
-      '<div class="progress-card-head"><span class="progress-ico" aria-hidden="true">▶️</span><h3>' + escP(Lang.t("progress.resumeTitle")) + '</h3></div>' +
+      '<div class="progress-card-head"><span class="progress-ico" aria-hidden="true">' + ICON.play + '</span><h3>' + escP(Lang.t("progress.resumeTitle")) + '</h3></div>' +
       '<p class="progress-subject">' + escP(subjectName(key)) + '</p>' +
       '<p class="progress-meta">' + escP(Lang.t("progress.atQuestion", { i: at, total: total })) + '</p>' +
       '<div class="progress-bar" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
@@ -8695,7 +8575,7 @@ function rxMatch(node, s, i) {
   function emptyHtml() {
     return (
       '<div class="progress-empty">' +
-      '<span class="progress-empty-ico" aria-hidden="true">🎯</span>' +
+      '<span class="progress-empty-ico" aria-hidden="true">' + ICON.target + '</span>' +
       '<h3>' + escP(Lang.t("progress.emptyTitle")) + '</h3>' +
       '<p>' + escP(Lang.t("progress.emptySub")) + '</p>' +
       '<div class="progress-actions"><a href="#quiz" class="btn btn-primary">' + escP(Lang.t("progress.emptyCta")) + '</a></div>' +
@@ -8975,7 +8855,7 @@ function rxMatch(node, s, i) {
   const LEARNING_PATHS = [
     {
       id: "fundamentals",
-      ico: "🛡️",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>',
       level: "beginner",
       status: "live",
       recommended: true,
@@ -8994,7 +8874,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "networking",
-      ico: "🌐",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
       level: "beginner",
       status: "live",
       title: { ar: "الشبكات الحاسوبية", en: "Computer Networks" },
@@ -9013,7 +8893,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "operating-systems",
-      ico: "💻",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg>',
       level: "beginner",
       status: "live",
       title: { ar: "أنظمة التشغيل ولينكس", en: "Operating Systems and Linux" },
@@ -9030,7 +8910,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "cryptography",
-      ico: "🔐",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>',
       level: "intermediate",
       status: "live",
       title: { ar: "التشفير", en: "Cryptography" },
@@ -9050,7 +8930,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "websec",
-      ico: "🌍",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>',
       level: "intermediate",
       status: "live",
       title: { ar: "أمن الويب والتطبيقات", en: "Web and Application Security" },
@@ -9068,7 +8948,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "pentest",
-      ico: "🕵️",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M22 12h-4M6 12H2M12 6V2M12 22v-4"/></svg>',
       level: "advanced",
       status: "live",
       title: { ar: "الاختبار الأخلاقي والمحاكاة الهجومية", en: "Ethical Hacking and Offensive Simulation" },
@@ -9087,7 +8967,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "forensics",
-      ico: "🔍",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
       level: "intermediate",
       status: "soon",
       title: { ar: "التحليل الجنائي الرقمي", en: "Digital Forensics" },
@@ -9100,7 +8980,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "riskgov",
-      ico: "📋",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
       level: "advanced",
       status: "soon",
       title: { ar: "إدارة المخاطر والحوكمة", en: "Risk Management and Governance" },
@@ -9112,7 +8992,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "incident",
-      ico: "🚨",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
       level: "intermediate",
       status: "live",
       title: { ar: "الاستجابة للحوادث", en: "Incident Response" },
@@ -9130,7 +9010,7 @@ function rxMatch(node, s, i) {
     },
     {
       id: "ctf",
-      ico: "🚩",
+      ico: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>',
       level: "intermediate",
       status: "live",
       title: { ar: "تحديات CTF والمعامل العملية", en: "CTF and Practical Labs" },
@@ -9319,7 +9199,7 @@ function rxMatch(node, s, i) {
       const isUnknown = Boolean(id);
       detailBody.innerHTML =
         '<div class="path-detail-empty">' +
-        '<span class="path-detail-ico" aria-hidden="true">🧭</span>' +
+        '<span class="path-detail-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg></span>' +
         '<h2 class="path-detail-title" id="pathDetailTitle">' +
           escL(isUnknown ? Lang.t("paths.unknownTitle") : Lang.t("paths.emptyPick")) + "</h2>" +
         (isUnknown ? '<p class="path-detail-desc">' + escL(Lang.t("paths.unknownBody")) + "</p>" : "") +
@@ -9866,7 +9746,7 @@ function showLesson(subjectKey,topicKey){
     /* Honest placeholder for topics without authored lessons — plus the
        derived sections that work from real data without authored content. */
     root.innerHTML=`<div class="lesson-shell" data-lsn-sub="${escHtml(subjectKey)}" data-lsn-topic="${escHtml(topicKey)}">`+
-      `<div class="lesson-placeholder"><span class="lesson-ico" aria-hidden="true">📝</span><h2>${escHtml(Lang.t("lesson.soonTitle"))}</h2><p>${escHtml(Lang.t("lesson.soonBody"))}</p><a href="#quiz" class="btn btn-primary">${escHtml(Lang.t("lesson.backToQuiz"))}</a></div>`+
+      `<div class="lesson-placeholder"><span class="lesson-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><h2>${escHtml(Lang.t("lesson.soonTitle"))}</h2><p>${escHtml(Lang.t("lesson.soonBody"))}</p><a href="#quiz" class="btn btn-primary">${escHtml(Lang.t("lesson.backToQuiz"))}</a></div>`+
       `<div class="lesson-block"><h3>${escHtml(Lang.t("lesson.objectives"))}</h3><p class="lesson-muted">${escHtml(Lang.t("lesson.noObjectives"))}</p></div>`+
       `<div class="lesson-meta"><span class="lesson-meta-chip">${escHtml(Lang.t("lesson.difficulty"))}: ${escHtml(Lang.t("lesson.difficultyUnknown"))}</span></div>`+
       prereqHtml+checksHtml+relHtml+actionsHtml+notesHtml+reviewHtml+
@@ -9902,7 +9782,7 @@ function showLesson(subjectKey,topicKey){
   const mins=lessonMinutes(B);
   const diff=lessonDifficulty(subjectKey,topicKey,B);
   const metaChips=[];
-  if(mins)metaChips.push(`<span class="lesson-meta-chip" title="${escHtml(Lang.t("lesson.timeNote"))}">⏱ ${escHtml(Lang.t("lesson.minutes",{minutes:mins}))}</span>`);
+  if(mins)metaChips.push(`<span class="lesson-meta-chip" title="${escHtml(Lang.t("lesson.timeNote"))}"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${escHtml(Lang.t("lesson.minutes",{minutes:mins}))}</span>`);
   if(diff){
     const dk="lesson.difficulty"+diff.level.charAt(0).toUpperCase()+diff.level.slice(1);
     const ds=diff.source==="quiz-mix"?"lesson.fromQuizMix":(diff.source==="path"?"lesson.fromPath":dk);
@@ -10104,8 +9984,8 @@ const TOOLS_META = {
       en: "See how a shift cipher works — and why it breaks by trying just 26 shifts."
     },
     safety: {
-      ar: "⚠️ تعليمي فقط وليس تشفيرًا آمنًا — لا تستخدمه لحماية أي بيانات حقيقية.",
-      en: "⚠️ Educational only and NOT secure encryption — never protect real data with it."
+      ar: "⚠ تعليمي فقط وليس تشفيرًا آمنًا — لا تستخدمه لحماية أي بيانات حقيقية.",
+      en: "⚠ Educational only and NOT secure encryption — never protect real data with it."
     },
     example: { fill: [{ id: "cipherIn", value: "meet me at noon" }] },
     copy: null
@@ -10118,8 +9998,8 @@ const TOOLS_META = {
       en: "Break down the token structure — header, payload, expiry — and realise any intermediary can read it."
     },
     safety: {
-      ar: "⚠️ فك الترميز ليس تحققًا من التوقيع: الأداة لا تتحقق من صحة التوقيع إطلاقًا. لا تلصق رموزًا حقيقية أو خاصة أبدًا.",
-      en: "⚠️ Decoding is NOT signature verification: this tool never validates the signature. Never paste real tokens."
+      ar: "⚠ فك الترميز ليس تحققًا من التوقيع: الأداة لا تتحقق من صحة التوقيع إطلاقًا. لا تلصق رموزًا حقيقية أو خاصة أبدًا.",
+      en: "⚠ Decoding is NOT signature verification: this tool never validates the signature. Never paste real tokens."
     },
     example: {
       fill: [{ id: "jwtIn", value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c" }]
@@ -10247,8 +10127,8 @@ const TOOLS_META = {
       en: "Compare classical ciphers (Caesar, Vigenère, XOR, RC4) and encodings side by side."
     },
     safety: {
-      ar: "⚠️ كل الخوارزميات هنا كلاسيكية/تعليمية — لا تستخدم أيًا منها لحماية بيانات حقيقية.",
-      en: "⚠️ Every cipher here is classical/educational — never protect real data with them."
+      ar: "⚠ كل الخوارزميات هنا كلاسيكية/تعليمية — لا تستخدم أيًا منها لحماية بيانات حقيقية.",
+      en: "⚠ Every cipher here is classical/educational — never protect real data with them."
     },
     example: { fill: [{ id: "cpIn", value: "attack at dawn" }, { id: "cpKey", value: "key" }], click: "cpEnc" },
     copy: "cpOut"
@@ -10813,7 +10693,7 @@ const LABS_META = {
 
   function cardHtml(s) {
     const meta = s.meta || {};
-    const hue = meta.hue || 234;   /* MODULE 73 · the accent hue, as a safe default */
+    const hue = meta.hue || 42;   /* MODULE 73 · the accent hue, as a safe default */
     const diffKey = "paths.level." + (s.difficulty || "");
     const diffRaw = T10(diffKey);
     const diffLabel = diffRaw ? esc(diffRaw) : esc(s.difficulty || "");
@@ -10835,7 +10715,7 @@ const LABS_META = {
       '<li class="sem-chip is-credit"><b>' + (meta.creditHours == null ? "—" : meta.creditHours) + "</b> " + escHtmlL(T10("semester.creditHours")) + "</li>" +
       (s.difficulty ? '<li class="sem-chip is-diff is-' + esc(s.difficulty) + '">' + diffLabel + "</li>" : "") +
       (s.estimatedHours ? '<li class="sem-chip is-hours"><b>' + s.estimatedHours + "</b> " + escHtmlL(T10("semester.estHours")) + "</li>" : "") +
-      (schedule ? '<li class="sem-chip is-sched">🗓 ' + schedule + "</li>" : "") +
+      (schedule ? '<li class="sem-chip is-sched">' + '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>' + " " + schedule + "</li>" : "") +
       "</ul>" +
       '<p class="sem-desc">' + esc(T(s.shortDescription)) + "</p>" +
       '<div class="sem-blocks">' + prereqHtml(s) + materialsHtml(s) +
@@ -11790,6 +11670,18 @@ const LABS_META = {
   var DAILY_GOAL = 40;
   var WEEKLY_GOAL = 200;
   var SEMESTER_CODES = ["260210030702", "260210030802", "260210030902", "260210031002", "260210031102"];
+  var BADGE_ICO = {
+    leaf: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+    target: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    medal: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/></svg>',
+    flask: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>',
+    key: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>',
+    network: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>',
+    alertOctagon: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+    flame: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+    grad: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v4c0 1.66 2.69 3 6 3s6-1.34 6-3v-4"/></svg>',
+    lock: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+  };
 
   /** @returns {Object|null} Namespaced Store bridge when available. */
   function store() {
@@ -12040,15 +11932,15 @@ const LABS_META = {
 
   /** Achievement registry — each rule reads only real platform data. */
   var BADGES = [
-    { id: "firstLesson", ico: "🌱", check: function () { return Object.keys(state.events).some(function (k) { return k.indexOf("lesson:") === 0; }); } },
-    { id: "firstQuiz", ico: "🎯", check: function (c) { return c.hasQuiz; } },
-    { id: "quizMaster", ico: "🏆", check: function (c) { return c.quizMaster; } },
-    { id: "labExplorer", ico: "🧪", check: function (c) { return c.hasLab; } },
-    { id: "cryptoApprentice", ico: "🔐", check: function (c) { return c.crypto; } },
-    { id: "networkNavigator", ico: "🌐", check: function (c) { return c.network; } },
-    { id: "incidentResponder", ico: "🚨", check: function (c) { return c.incident; } },
-    { id: "streak7", ico: "🔥", check: function (c) { return c.streak >= 7; } },
-    { id: "semesterFinisher", ico: "🎓", check: function (c) { return c.semesterFinisher; } }
+    { id: "firstLesson", ico: BADGE_ICO.leaf, check: function () { return Object.keys(state.events).some(function (k) { return k.indexOf("lesson:") === 0; }); } },
+    { id: "firstQuiz", ico: BADGE_ICO.target, check: function (c) { return c.hasQuiz; } },
+    { id: "quizMaster", ico: BADGE_ICO.medal, check: function (c) { return c.quizMaster; } },
+    { id: "labExplorer", ico: BADGE_ICO.flask, check: function (c) { return c.hasLab; } },
+    { id: "cryptoApprentice", ico: BADGE_ICO.key, check: function (c) { return c.crypto; } },
+    { id: "networkNavigator", ico: BADGE_ICO.network, check: function (c) { return c.network; } },
+    { id: "incidentResponder", ico: BADGE_ICO.alertOctagon, check: function (c) { return c.incident; } },
+    { id: "streak7", ico: BADGE_ICO.flame, check: function (c) { return c.streak >= 7; } },
+    { id: "semesterFinisher", ico: BADGE_ICO.grad, check: function (c) { return c.semesterFinisher; } }
   ];
 
   /**
@@ -12286,7 +12178,7 @@ const LABS_META = {
       var stateLabel = tx(isOn ? "motivation.unlocked" : "motivation.locked");
       return '<div class="motivation-badge ' + (isOn ? "is-unlocked" : "is-locked") + '" role="listitem"' +
         ' aria-label="' + esc(name + " — " + desc + " (" + stateLabel + ")") + '">' +
-        '<span class="motivation-badge-ico" aria-hidden="true">' + (isOn ? b.ico : "🔒") + "</span>" +
+        '<span class="motivation-badge-ico" aria-hidden="true">' + (isOn ? b.ico : BADGE_ICO.lock) + "</span>" +
         '<span class="motivation-badge-text"><b>' + esc(name) + "</b><span>" + esc(desc) + "</span></span></div>";
     }).join("");
     badgesEl.innerHTML = html;
@@ -12565,7 +12457,7 @@ const LABS_META = {
       '<article class="skill-card' + (isSoon ? " is-soon" : "") + (p.recommended ? " is-recommended" : "") +
         '" role="listitem" tabindex="-1" data-skill-id="' + esc(p.id) + '" aria-labelledby="' + esc(id) + '">' +
         '<div class="skill-card-top">' +
-          '<span class="skill-ico" aria-hidden="true">' + esc(p.ico || "🛡️") + "</span>" +
+          '<span class="skill-ico" aria-hidden="true">' + (p.ico || ICON.shield) + "</span>" +
           '<h3 class="skill-title" id="' + esc(id) + '">' + esc(bi(p.title)) + "</h3>" +
           (p.recommended ? '<span class="skill-badge is-recommended">' + esc(T("skills.recommended")) + "</span>" : "") +
           (isSoon ? '<span class="skill-badge is-soon">' + esc(T("skills.soon")) + "</span>" : "") +
@@ -14933,9 +14825,9 @@ const LABS_META = {
         })();
         const label = T("announce.heroQuiz", { name: subjName || sName });
         let chipText = label || (subjName || sName);
-        if (quiz.status === "live") chipText = "⏰ " + (T("announce.chipLive") || "الآن") + " · " + chipText;
-        else if (quiz.status === "today") chipText = "⏰ " + (T("announce.chipToday") || "اليوم") + " · " + chipText;
-        else chipText = "⏰ " + (T("announce.chipInDays") || "بعد {n} أيام").replace("{n}", String(quiz.daysAway)) + " · " + chipText;
+        if (quiz.status === "live") chipText = (T("announce.chipLive") || "الآن") + " · " + chipText;
+        else if (quiz.status === "today") chipText = (T("announce.chipToday") || "اليوم") + " · " + chipText;
+        else chipText = (T("announce.chipInDays") || "بعد {n} أيام").replace("{n}", String(quiz.daysAway)) + " · " + chipText;
         quizEl.textContent = chipText;
         quizEl.className = "hero-now-quiz is-" + quiz.status;
         quizEl.hidden = false;
@@ -15274,7 +15166,7 @@ const LABS_META = {
 })();
 
 /* ============================================================
-   MODULE 58 · WhatsNew — زر التعجب (👍) + لوحة «آخر التحديثات»
+   MODULE 58 · WhatsNew — زر التعجب () + لوحة «آخر التحديثات»
    ------------------------------------------------------------
    Navbar trigger (the slot right after the links, in the red
    box) that opens a dated changelog popover.
@@ -15307,6 +15199,15 @@ const LABS_META = {
   if (typeof btn.addEventListener !== "function") return;
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
+    {
+      date: "2026-10-16",
+      tag: "release",
+      title: { ar: "الإصدار 2.0 — الهوية الجديدة «V0 Obsidian»", en: "v2.0.0 — the new «V0 Obsidian» identity" },
+      desc: {
+        ar: "أكبر تحديث بصري حتى الآن: هوية واحدة أنيقة على خلفية سوداء عميقة (#09090b) مع شبكة جزيئات تفاعلية تتحرك خلف كل الأقسام وتتبع مؤشر الفأرة. الشريط العلوي والبطاقات أصبحت زجاجية شفافة بحدود بيضاء رقيقة، ولمسات نيون خضراء وسماوية للعناصر التفاعلية. خط Inter للنصوص اللاتينية وJetBrains Mono للأكواد والبيانات، وزر «GitHub» دائم في الشريط العلوي. تمت إزالة مبدّل الوضع الفاتح/الداكن ومبدّل الألوان نهائيًا: المنصة الآن بتصميم داكن واحد متقن. كل شيء محلي في متصفحك — لا شبكة ولا تتبع.",
+        en: "The biggest visual update yet: one refined identity on a deep #09090b canvas with an interactive particle network drifting behind every section and leaning toward your cursor. The navbar and foreground cards are true frosted glass with hairline borders, and neon green/cyan accents mark interactive elements. Inter for latin text, JetBrains Mono for code and data, and a persistent «GitHub» button in the navbar. The light/dark switch and the second palette are gone for good — the platform now ships one carefully crafted dark identity. All local to your browser — no network, no tracking."
+      }
+    },
     {
       date: "2026-10-11",
       tag: "new",
@@ -15962,7 +15863,7 @@ const LABS_META = {
   function buildInline(g) {
     clear(inlineMount);
     const card = el("div", "sem-guide");
-    const ico = el("span", "sem-guide-ico", "🎓");
+    const ico = el("span", "sem-guide-ico");
     ico.setAttribute("aria-hidden", "true");
     const txt = el("div", "sem-guide-text");
     txt.appendChild(el("strong", null, T("guide.cardTitle")));
@@ -18249,7 +18150,7 @@ const LABS_META = {
 
     const ico = el("span", "announce-ico");
     ico.setAttribute("aria-hidden", "true");
-    ico.textContent = kind === "quiz" ? "📣" : "🔔";
+    ico.setAttribute("data-kind", kind);
     row.appendChild(ico);
 
     const body = el("div", "announce-body");
@@ -18331,4 +18232,213 @@ const LABS_META = {
   } catch (e) { /* read-only window */ }
 })();
 /* @@ANNOUNCE_END@@ */
+
+/* ============================================================
+   MODULE 80 · CyberField — interactive particle-network canvas
+   The platform's ambient backdrop: a fixed <canvas> behind every
+   section drawing a slow constellation that leans toward the
+   pointer. Colours are read from the live design tokens
+   (--accent-rgb / --accent-2-rgb), so a future repaint carries
+   the field with it. Pointer tracking lives on window (the canvas
+   itself is pointer-inert), the device pixel ratio is honoured
+   (capped at 2), and the loop is polite:  40–96 nodes by area,
+   paused on a hidden tab, one static frame under reduced motion,
+   clean no-op without a canvas or context.
+   ============================================================ */
+(function () {
+  "use strict";
+  /* $id lives in the app shell closure; test harnesses that extract this
+     module on its own may not define it, so degrade to the document. */
+  const canvas = typeof $id === "function" ? $id("cyberCanvas") : document.getElementById("cyberCanvas");
+  if (!canvas || typeof canvas.getContext !== "function") return;
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  const reducedQuery = typeof window.matchMedia === "function"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : null;
+  const LINK_DIST = 132;          /* node-to-node connection radius (px) */
+  const TOUCH_DIST = 168;         /* pointer attraction radius (px)     */
+  const DRIFT = 0.22;             /* base speed (px/frame)              */
+
+  let width = 0;
+  let height = 0;
+  let nodes = [];
+  let rafId = 0;
+  let running = false;
+  let visible = !document.hidden;
+  const pointer = { x: 0, y: 0, active: false };
+
+  /** Parse the space-separated rgb triplet of a CSS custom property.
+      @param {string} name Token name, e.g. "--accent-rgb".
+      @param {number[]} fallback Value when the token is missing.
+      @returns {number[]} An [r,g,b] triple. */
+  function tokenRgb(name, fallback) {
+    try {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      const parts = raw.split(/[\s,]+/).map(Number);
+      if (parts.length >= 3 && parts.every((n) => Number.isFinite(n))) return parts.slice(0, 3);
+    } catch (e) { /* fall through */ }
+    return fallback;
+  }
+
+  const INK = tokenRgb("--accent-rgb", [61, 245, 165]);
+  const INK2 = tokenRgb("--accent-2-rgb", [110, 231, 255]);
+
+  /** Resize the backing store to the viewport (DPR capped at 2).
+      @returns {void} */
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed();
+  }
+
+  /** Rebuild the node field for the current viewport size. @returns {void} */
+  function seed() {
+    const count = Math.max(40, Math.min(96, Math.round((width * height) / 22000)));
+    nodes = [];
+    for (let i = 0; i < count; i++) {
+      nodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * DRIFT,
+        vy: (Math.random() - 0.5) * DRIFT,
+        r: Math.random() < 0.18 ? 1.9 : 1.15,
+        accent2: Math.random() < 0.14
+      });
+    }
+  }
+
+  /** Advance every node one step (drift + gentle pointer lean + wrap). @returns {void} */
+  function step() {
+    for (const n of nodes) {
+      n.x += n.vx;
+      n.y += n.vy;
+      if (pointer.active) {
+        const dx = pointer.x - n.x;
+        const dy = pointer.y - n.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > 1 && d2 < TOUCH_DIST * TOUCH_DIST) {
+          const pull = (1 - Math.sqrt(d2) / TOUCH_DIST) * 0.06;
+          n.x += dx * pull;
+          n.y += dy * pull;
+        }
+      }
+      if (n.x < -12) n.x = width + 12; else if (n.x > width + 12) n.x = -12;
+      if (n.y < -12) n.y = height + 12; else if (n.y > height + 12) n.y = -12;
+    }
+  }
+
+  /** Paint one frame: link lines first, then the nodes. @returns {void} */
+  function paint() {
+    context.clearRect(0, 0, width, height);
+    const ink = INK.join(" ");
+    const ink2 = INK2.join(" ");
+    for (let a = 0; a < nodes.length; a++) {
+      const na = nodes[a];
+      for (let b = a + 1; b < nodes.length; b++) {
+        const nb = nodes[b];
+        const dx = na.x - nb.x;
+        const dy = na.y - nb.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < LINK_DIST * LINK_DIST) {
+          const alpha = (1 - Math.sqrt(d2) / LINK_DIST) * 0.16;
+          context.strokeStyle = "rgb(" + ink + " / " + alpha.toFixed(3) + ")";
+          context.lineWidth = 1;
+          context.beginPath();
+          context.moveTo(na.x, na.y);
+          context.lineTo(nb.x, nb.y);
+          context.stroke();
+        }
+      }
+    }
+    for (const n of nodes) {
+      const rgb = n.accent2 ? ink2 : ink;
+      context.fillStyle = "rgb(" + rgb + " / 0.55)";
+      context.beginPath();
+      context.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      context.fill();
+    }
+  }
+
+  /** One animation step: advance + paint, then schedule the next frame.
+      @returns {void} */
+  function frame() {
+    step();
+    paint();
+    rafId = requestAnimationFrame(frame);
+  }
+
+  /** Start the loop (idempotent; static frame under reduced motion). @returns {void} */
+  function start() {
+    if (running || !visible) return;
+    running = true;
+    if (reducedQuery && reducedQuery.matches) {
+      step();
+      paint();
+      running = false;
+      return;
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+
+  /** Stop the loop (idempotent). @returns {void} */
+  function stop() {
+    if (!running) return;
+    running = false;
+    cancelAnimationFrame(rafId);
+  }
+
+  /* ---------- wiring ---------- */
+  let resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      resize();
+      if (!running) paint();
+    }, 160);
+  });
+  window.addEventListener("orientationchange", function () {
+    setTimeout(function () { resize(); if (!running) paint(); }, 220);
+  });
+  window.addEventListener("pointermove", function (e) {
+    pointer.x = e.clientX;
+    pointer.y = e.clientY;
+    pointer.active = true;
+  }, { passive: true });
+  window.addEventListener("pointerleave", function () { pointer.active = false; });
+  document.addEventListener("visibilitychange", function () {
+    visible = !document.hidden;
+    if (visible) start(); else stop();
+  });
+  if (reducedQuery) {
+    const onReduced = function () {
+      if (reducedQuery.matches) { stop(); step(); paint(); }
+      else start();
+    };
+    if (typeof reducedQuery.addEventListener === "function") reducedQuery.addEventListener("change", onReduced);
+    else if (typeof reducedQuery.addListener === "function") reducedQuery.addListener(onReduced);
+  }
+
+  resize();
+  start();
+
+  /* Public surface for tests and diagnostics. */
+  try {
+    window.PlatformCyberField = {
+      running: function () { return running; },
+      count: function () { return nodes.length; },
+      resize: resize,
+      start: start,
+      stop: stop
+    };
+  } catch (e) { /* read-only window */ }
+})();
+
 

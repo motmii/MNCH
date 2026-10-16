@@ -1,17 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
-    <linearGradient id="bgK1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E1116"/><stop offset="1" stop-color="#141A21"/></linearGradient>
+    <linearGradient id="vd-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0D12"/><stop offset="1" stop-color="#12161D"/></linearGradient>
+    <radialGradient id="vd-amb" cx="0.5" cy="0.3" r="0.65"><stop offset="0" stop-color="#367BF0" stop-opacity="0.07"/><stop offset="1" stop-color="#367BF0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vd-vig" cx="0.5" cy="0.45" r="0.8"><stop offset="0.62" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.5"/></radialGradient>
+    <linearGradient id="vd-btn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A90E2"/><stop offset="1" stop-color="#367BF0"/></linearGradient>
+    <filter id="vd-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
   </defs>
-  <rect width="800" height="500" fill="url(#bgK1)"/>
-  <rect x="150" y="50" width="500" height="400" rx="10" fill="#10161D" stroke="#2B3644" stroke-width="2"/>
-  <rect x="150" y="50" width="500" height="36" rx="10" fill="#1F2733"/>
-  <circle cx="175" cy="68" r="6" fill="#F08A8A" opacity="0.8"/><circle cx="198" cy="68" r="6" fill="#E9C46A" opacity="0.8"/><circle cx="221" cy="68" r="6" fill="#5FD69B" opacity="0.8"/>
-  <text x="250" y="73" font-family="monospace" font-size="12" fill="#A8B2C1">virtualbox.org — Downloads</text>
-  <rect x="220" y="150" width="360" height="52" rx="8" fill="#141A21" stroke="#9FB0EE" stroke-width="2"/>
-  <text x="250" y="182" font-family="monospace" font-size="13" fill="#C3C9F2">Windows hosts — amd64 ⬇</text>
-  <rect x="220" y="220" width="360" height="40" rx="8" fill="#161E29" stroke="#3A4757" stroke-width="1.5"/>
-  <text x="250" y="246" font-family="monospace" font-size="12" fill="#A8B2C1">macOS / Linux hosts…</text>
-  <rect x="220" y="290" width="360" height="44" rx="8" fill="#2F7D52"/>
-  <text x="330" y="318" font-family="monospace" font-size="14" fill="#fff">Download ⬇</text>
-  <text x="220" y="390" font-family="monospace" font-size="11" fill="#9FB0EE" opacity="0.7">VirtualBox-7.x-Win.exe · ~110 MB</text>
+  <rect width="800" height="500" fill="url(#vd-bg)"/>
+  <rect width="800" height="500" fill="url(#vd-amb)"/>
+  <rect x="84" y="58" width="660" height="420" rx="12" fill="#05070C" opacity="0.6" filter="url(#vd-b1)"/>
+  <rect x="70" y="40" width="660" height="420" rx="10" fill="#14181F"/>
+  <path d="M70 50 a10 10 0 0 1 10-10 h640 a10 10 0 0 1 10 10 v26 H70 z" fill="#0F1319"/>
+  <path d="M88 52 a6 6 0 0 1 6-6 h240 a6 6 0 0 1 6 6 v24 H88 z" fill="#1C222B"/>
+  <rect x="98" y="51" width="11" height="11" rx="3" fill="#367BF0"/>
+  <text x="117" y="61" font-size="10.5" fill="#C6CDD8">Downloads - Oracle VM VirtualBox</text>
+  <rect x="348" y="52" width="60" height="24" rx="6" fill="#171C24"/>
+  <path d="M420 57 h10 M425 52 v10" stroke="#5A6878" stroke-width="1.6"/>
+  <path d="M676 55 h10" stroke="#5A6878" stroke-width="1.5"/>
+  <rect x="696" y="50" width="10" height="10" rx="1.5" fill="none" stroke="#5A6878" stroke-width="1.5"/>
+  <path d="M712 51 l9 9 M721 51 l-9 9" stroke="#5A6878" stroke-width="1.5"/>
+  <rect x="70" y="76" width="660" height="34" fill="#1A1F27"/>
+  <g stroke="#5A6878" stroke-width="1.6" fill="none"><path d="M104 87 l-7 6 l7 6"/><path d="M124 87 l7 6 l-7 6"/><path d="M144 86 a7 7 0 1 1 -2 11"/><path d="M142 86 h4 v4"/></g>
+  <rect x="168" y="82" width="392" height="24" rx="12" fill="#10141A" stroke="#262E39" stroke-width="1"/>
+  <rect x="184" y="90" width="7" height="6" rx="1.5" fill="none" stroke="#8FE3B8" stroke-width="1.2"/>
+  <path d="M185.5 90 v-2.5 a3 3 0 0 1 6 0 V90" fill="none" stroke="#8FE3B8" stroke-width="1.2"/>
+  <text x="200" y="98" font-size="10.5" fill="#9AA4B2">virtualbox.org/wiki/Downloads</text>
+  <path d="M540 87.5 l2 4.1 4.5 0.6 -3.3 3.2 0.8 4.5 -4 -2.1 -4 2.1 0.8 -4.5 -3.3 -3.2 4.5 -0.6 z" fill="none" stroke="#5A6878" stroke-width="1.2"/>
+  <rect x="70" y="110" width="660" height="350" fill="#E9EAED"/>
+  <rect x="70" y="111" width="660" height="1" fill="#D0D3D8"/>
+  <rect x="70" y="110" width="660" height="54" fill="#F7F8F9"/>
+  <line x1="70" y1="164" x2="730" y2="164" stroke="#DADDE2" stroke-width="1"/>
+  <rect x="100" y="124" width="26" height="26" rx="6" fill="#367BF0"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="1.4"><path d="M113 130 l7 4 v8 l-7 4 l-7 -4 v-8 z"/><path d="M106 134 l7 4 l7 -4"/><path d="M113 146 v-8"/></g>
+  <text x="138" y="142" font-size="13" font-weight="700" fill="#333A44">Oracle VM VirtualBox</text>
+  <text x="608" y="141" font-size="9.5" fill="#367BF0">Downloads</text>
+  <text x="664" y="141" font-size="9.5" fill="#6A7280">Docs</text>
+  <text x="696" y="141" font-size="9.5" fill="#6A7280">Support</text>
+  <text x="100" y="186" font-size="8.5" fill="#8A929E">VirtualBox  /  Downloads</text>
+  <text x="100" y="214" font-size="17" font-weight="700" fill="#20242C">Downloads</text>
+  <text x="100" y="232" font-size="10" fill="#6A7280">VirtualBox 7.0.20 platform packages for Windows, macOS and Linux.</text>
+  <rect x="100" y="248" width="600" height="30" fill="#EAF2FE"/>
+  <rect x="100" y="248" width="3" height="30" fill="#367BF0"/>
+  <rect x="116" y="255" width="16" height="16" rx="3" fill="#FFFFFF" stroke="#4A5260" stroke-width="1.3"/>
+  <path d="M124 255 v16 M116 263 h16" stroke="#4A5260" stroke-width="1"/>
+  <text x="140" y="267" font-size="11" fill="#30363E">Windows hosts</text>
+  <text x="470" y="267" font-size="9.5" fill="#6A7280" font-family="Consolas, monospace">7.0.20</text>
+  <rect x="500" y="253" width="58" height="20" rx="3" fill="#FFFFFF" stroke="#C9CED8" stroke-width="1"/>
+  <text x="529" y="266" font-size="8" fill="#6A7280" text-anchor="middle">x86/amd64</text>
+  <rect x="572" y="252" width="100" height="22" rx="4" fill="url(#vd-btn)"/>
+  <text x="622" y="267" font-size="9.5" fill="#FFFFFF" text-anchor="middle">Download</text>
+  <rect x="100" y="278" width="600" height="30" fill="#FFFFFF"/>
+  <rect x="116" y="285" width="16" height="16" rx="3" fill="#FFFFFF" stroke="#4A5260" stroke-width="1.3"/>
+  <path d="M124 285 v16 M116 293 h16" stroke="#4A5260" stroke-width="1"/>
+  <text x="140" y="297" font-size="11" fill="#30363E">macOS / Intel hosts</text>
+  <text x="470" y="297" font-size="9.5" fill="#6A7280" font-family="Consolas, monospace">7.0.20</text>
+  <rect x="572" y="282" width="100" height="22" rx="4" fill="none" stroke="#367BF0" stroke-width="1.2"/>
+  <text x="622" y="297" font-size="9.5" fill="#367BF0" text-anchor="middle">Download</text>
+  <rect x="100" y="308" width="600" height="30" fill="#F4F5F6"/>
+  <rect x="116" y="315" width="16" height="16" rx="3" fill="#FFFFFF" stroke="#4A5260" stroke-width="1.3"/>
+  <path d="M124 315 v16 M116 323 h16" stroke="#4A5260" stroke-width="1"/>
+  <text x="140" y="327" font-size="11" fill="#30363E">Linux distributions</text>
+  <text x="470" y="327" font-size="9.5" fill="#6A7280" font-family="Consolas, monospace">7.0.20</text>
+  <rect x="572" y="312" width="100" height="22" rx="4" fill="none" stroke="#367BF0" stroke-width="1.2"/>
+  <text x="622" y="327" font-size="9.5" fill="#367BF0" text-anchor="middle">Download</text>
+  <text x="100" y="368" font-size="8.5" fill="#8A929E">Also available: Extension Pack and Guest Additions.</text>
+  <rect x="722" y="114" width="5" height="300" rx="2.5" fill="#DADDE2"/>
+  <rect x="722" y="130" width="5" height="80" rx="2.5" fill="#C2C7CE"/>
+  <rect x="70" y="40" width="660" height="420" rx="10" fill="none" stroke="#2B3644" stroke-width="1"/>
+  <rect width="800" height="500" fill="url(#vd-vig)"/>
 </svg>

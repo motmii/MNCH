@@ -1,16 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
-  <rect width="800" height="500" fill="#0A0F16"/>
-  <rect x="100" y="60" width="600" height="380" rx="8" fill="#10161D" stroke="#3A4757" stroke-width="2"/>
-  <rect x="100" y="60" width="600" height="34" rx="8" fill="#1F2733"/>
-  <circle cx="125" cy="77" r="5" fill="#5FD69B"/><circle cx="143" cy="77" r="5" fill="#E9C46A"/>
-  <text x="165" y="82" font-family="monospace" font-size="12" fill="#A8B2C1">kali@kali: ~</text>
-  <text x="130" y="130" font-family="monospace" font-size="13" fill="#8FE3B8">┌──(kali㉿kali)-[~]</text>
-  <text x="130" y="152" font-family="monospace" font-size="13" fill="#E6EAF2">└─$ sudo apt update &amp;&amp; sudo apt full-upgrade -y</text>
-  <text x="130" y="180" font-family="monospace" font-size="11" fill="#5A6878">Get:1 http://kali.download … 42.1 MB ✓</text>
-  <text x="130" y="202" font-family="monospace" font-size="11" fill="#5A6878">Upgrading 312 packages… ████████ done ✓</text>
-  <text x="130" y="236" font-family="monospace" font-size="13" fill="#E6EAF2">└─$ sudo apt install -y --reinstall virtualbox-guest-x11</text>
-  <text x="130" y="264" font-family="monospace" font-size="11" fill="#8FE3B8">✓ Guest Additions installed — reboot…</text>
-  <text x="130" y="300" font-family="monospace" font-size="13" fill="#E6EAF2">└─$ sudo reboot now<span font-family="monospace" font-size="13" fill="#A9C6F5"> ▊</span></text>
-  <rect x="130" y="330" width="220" height="40" rx="8" fill="#1F2733" stroke="#A9C6F5"/>
-  <text x="150" y="356" font-family="monospace" font-size="12" fill="#A9C6F5">🐉 Kali desktop ready</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="kf-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A111F"/><stop offset="0.55" stop-color="#12233E"/><stop offset="1" stop-color="#0D1A2E"/></linearGradient>
+    <radialGradient id="kf-glow" cx="0.5" cy="0.94" r="0.6"><stop offset="0" stop-color="#2777FF" stop-opacity="0.2"/><stop offset="1" stop-color="#2777FF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="kf-vig" cx="0.5" cy="0.45" r="0.8"><stop offset="0.62" stop-color="#05070A" stop-opacity="0"/><stop offset="1" stop-color="#05070A" stop-opacity="0.5"/></radialGradient>
+    <linearGradient id="kf-title" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2C313A"/><stop offset="1" stop-color="#23272F"/></linearGradient>
+    <linearGradient id="kf-fold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6FA8F5"/><stop offset="1" stop-color="#2F6ED0"/></linearGradient>
+    <filter id="kf-b1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="kf-b2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <rect width="800" height="500" fill="url(#kf-wall)"/>
+  <rect width="800" height="500" fill="url(#kf-glow)"/>
+  <circle cx="680" cy="120" r="90" fill="none" stroke="#4A7BC8" stroke-width="1.5" opacity="0.08"/>
+  <g stroke="#4A7BC8" stroke-width="1.2" fill="none" opacity="0.1"><path d="M60 420 H180 L220 380 H320"/><path d="M520 90 L560 130 H660"/><path d="M100 160 H200 L240 200 H300"/><path d="M600 380 H680"/></g>
+  <g fill="#4A7BC8" opacity="0.15"><circle cx="220" cy="380" r="2"/><circle cx="560" cy="130" r="2"/><circle cx="240" cy="200" r="2"/></g>
+  <rect x="0" y="0" width="800" height="27" fill="#10151C" opacity="0.96"/>
+  <line x1="0" y1="27" x2="800" y2="27" stroke="#2B3644" stroke-width="1" opacity="0.8"/>
+  <circle cx="26" cy="13.5" r="8" fill="#2777FF"/>
+  <text x="26" y="17" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">K</text>
+  <text x="42" y="17" font-size="10" fill="#C6CDD8">Applications</text>
+  <path d="M104 13.5 l4 4.5 l4 -4.5" fill="none" stroke="#8A93A1" stroke-width="1.4"/>
+  <path d="M630 16 a10 10 0 0 1 16 0" fill="none" stroke="#B7BFC9" stroke-width="1.4"/>
+  <circle cx="638" cy="17.5" r="1.4" fill="#B7BFC9"/>
+  <path d="M662 8 l7 5 h4 v7 h-4 l-7 5 z" fill="#B7BFC9" opacity="0.9"/>
+  <path d="M676 10 a6 6 0 0 1 0 8" fill="none" stroke="#B7BFC9" stroke-width="1.3"/>
+  <rect x="694" y="8" width="17" height="10" rx="2" fill="none" stroke="#B7BFC9" stroke-width="1.3"/>
+  <rect x="696" y="10" width="10" height="6" rx="1" fill="#5FD69B"/>
+  <rect x="712" y="11" width="2.5" height="4" rx="1" fill="#B7BFC9"/>
+  <text x="782" y="17" font-size="10" fill="#DDE3EA" text-anchor="end">10:24</text>
+  <path d="M20 64 h12 l4 5 h16 a3 3 0 0 1 3 3 v14 a3 3 0 0 1 -3 3 h-32 a3 3 0 0 1 -3 -3 v-19 a3 3 0 0 1 3 -3 z" fill="url(#kf-fold)"/>
+  <text x="34" y="106" font-size="8.5" fill="#D8E0EC" text-anchor="middle">Home</text>
+  <rect x="18" y="122" width="32" height="26" rx="4" fill="#1B2430" stroke="#6FA8F5" stroke-width="1.4"/>
+  <rect x="18" y="122" width="32" height="6" rx="3" fill="#2B3644"/>
+  <path d="M25 136 h6" stroke="#8FE3B8" stroke-width="1.5"/>
+  <path d="M32 141 l4 3 l-4 3" fill="none" stroke="#8FE3B8" stroke-width="1.5"/>
+  <text x="34" y="162" font-size="8.5" fill="#D8E0EC" text-anchor="middle">Terminal</text>
+  <rect x="570" y="44" width="214" height="42" rx="8" fill="#05070C" opacity="0.4" filter="url(#kf-b2)"/>
+  <rect x="566" y="42" width="214" height="42" rx="8" fill="#141A23" stroke="#2B3644" stroke-width="1"/>
+  <rect x="566" y="42" width="3" height="42" fill="#2777FF"/>
+  <text x="582" y="62" font-size="9.5" fill="#E6EAF2">Network - Connected</text>
+  <text x="582" y="76" font-size="8.5" fill="#8A93A1">Adapter 1 - NAT</text>
+  <rect x="186" y="110" width="480" height="330" rx="10" fill="#04060A" opacity="0.55" filter="url(#kf-b1)"/>
+  <rect x="170" y="95" width="480" height="330" rx="8" fill="#0D1117" stroke="#2B3644" stroke-width="1"/>
+  <path d="M170 103 a8 8 0 0 1 8-8 h464 a8 8 0 0 1 8 8 v20 H170 z" fill="url(#kf-title)"/>
+  <circle cx="188" cy="109" r="5" fill="#F06A62"/><circle cx="208" cy="109" r="5" fill="#E9C46A"/><circle cx="228" cy="109" r="5" fill="#57C97D"/>
+  <text x="410" y="113" font-size="10" fill="#B7BFC9" text-anchor="middle">kali@kali: ~ - Terminal</text>
+  <text x="186" y="136" font-size="8.5" fill="#8A93A1">File   Edit   View   Terminal   Help</text>
+  <g font-family="Consolas, 'Cascadia Code', monospace" font-size="11.5">
+    <text x="186" y="162" fill="#E6EAF2"><tspan fill="#5FD69B">kali@kali</tspan><tspan fill="#C3C9F2">:~$ </tspan>sudo apt update</text>
+    <text x="186" y="183" fill="#A8B2C1">Hit:1 http://kali.download/kali kali-rolling InRelease</text>
+    <text x="186" y="204" fill="#A8B2C1">Reading package lists... Done</text>
+    <text x="186" y="225" fill="#A8B2C1">All packages are up to date.</text>
+    <text x="186" y="246" fill="#E6EAF2"><tspan fill="#5FD69B">kali@kali</tspan><tspan fill="#C3C9F2">:~$ </tspan>sudo apt full-upgrade -y</text>
+    <text x="186" y="267" fill="#A8B2C1">Calculating upgrade... Done</text>
+    <text x="186" y="288" fill="#A8B2C1">0 upgraded, 0 newly installed, 0 to remove.</text>
+    <text x="186" y="309" fill="#E6EAF2"><tspan fill="#5FD69B">kali@kali</tspan><tspan fill="#C3C9F2">:~$ </tspan></text>
+  </g>
+  <rect x="275" y="298" width="8" height="14" fill="#C3C9F2" opacity="0.9"/>
+  <rect width="800" height="500" fill="url(#kf-vig)"/>
 </svg>
