@@ -79,7 +79,7 @@ check("canonical link", html.includes('rel="canonical"'));
 check("Twitter card metadata", html.includes('name="twitter:card"'));
 check("JSON-LD structured data", html.includes('application/ld+json'));
 check("bilingual title", html.includes("منصة أمن المعلومات | Information Security Platform"));
-check("hero background preloaded", html.includes('rel="preload" as="image" href="images/backweb.jpg"'));
+check("hero media fully retired (v3 cyber shell)", !html.includes('images/backweb.jpg') && !html.includes('images/hero-bg.mp4'));
 
 console.log("— index.html: regressions —");
 check("current-semester.js loaded exactly once", html.split('src="current-semester.js"').length - 1 === 1);

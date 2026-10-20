@@ -8,7 +8,9 @@
  *   2. #semesterMeta receives the summary block (non-empty).
  *   3. #semesterGrid receives 5 subject cards (non-empty).
  *   4. Each card carries a real data-quiz-jump link.
- *   5. The honest empty-lessons state renders (no fake content).
+ *   5. All five subjects have authored lessons (8 Algorithms, 8 OS,
+ *      6 Policies, 7 IT Components, 7 Security Design) — no honest
+ *      empty-lessons state remains.
  * Run: node tests/semester-render.test.js
  */
 const fs = require("fs");
@@ -117,7 +119,7 @@ check("#semesterMeta populated (non-empty)", meta.innerHTML.trim().length > 0);
 check("#semesterGrid populated (non-empty)", grid.innerHTML.trim().length > 0);
 check("5 subject cards rendered", (grid.innerHTML.match(/class="work-card sem-card"/g) || []).length === 5);
 check("5 real quiz links (data-quiz-jump)", (grid.innerHTML.match(/data-quiz-jump="/g) || []).length === 5);
-check("honest empty-lessons state ×5", (grid.innerHTML.match(/سيتم إضافة الدروس قريبًا/g) || []).length === 5);
+check("honest empty-lessons state ×0 (all five authored cards list their lessons)", (grid.innerHTML.match(/سيتم إضافة الدروس قريبًا/g) || []).length === 0 && grid.innerHTML.includes("مقدمة في الخوارزميات") && grid.innerHTML.includes("مقدمة في نظم التشغيل") && grid.innerHTML.includes("مقدمة في السياسات الأمنية") && grid.innerHTML.includes("نظم المعلومات ومكوناتها") && grid.innerHTML.includes("مقدمة في مبادئ التصميم الأمني"));
 check("no [object Object] leaked into the DOM", !grid.innerHTML.includes("[object Object]") && !meta.innerHTML.includes("[object Object]"));
 check("summary shows 5 subjects + 15 credit hours", meta.innerHTML.includes("<dd>5</dd>") && meta.innerHTML.includes("<dd>15</dd>"));
 

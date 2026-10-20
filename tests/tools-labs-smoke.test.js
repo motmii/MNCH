@@ -6,8 +6,8 @@
  *     AR/EN name, valid level, bilingual purpose + safety, example,
  *     an owning path that EXISTS in LEARNING_PATHS, and quiz refs that
  *     resolve to the 5 current-semester banks (course codes)
- *   - with LESSONS = {} (migration 2) no tool carries a lesson chip —
- *     no dead #lesson/ links are rendered
+ *   - every tool lesson ref (when present) resolves against the REAL
+ *     authored LESSONS registry — no dead #lesson/ links are rendered
  *   - required safety wording (Caesar/playground not secure, JWT is
  *     not signature verification, local-only password analysis,
  *     global no-real-secrets notice)
@@ -169,7 +169,11 @@ Object.keys(TOOLS_META).forEach((id) => {
 });
 check("path + quiz refs resolve to real content (paths + current banks)", refsOk);
 const withLesson = Object.keys(TOOLS_META).filter((id) => TOOLS_META[id].lesson);
-check("no lesson refs while LESSONS is empty (migration 2)", Object.keys(LSN).length === 0 && withLesson.length === 0);
+check("tool lesson refs stay consistent with authored LESSONS",
+  withLesson.every((id) => {
+    const p = TOOLS_META[id].lesson.split("/");
+    return !!(LSN[p[0]] && LSN[p[0]][p[1]]);
+  }));
 const withQuiz = Object.keys(TOOLS_META).filter((id) => TOOLS_META[id].quiz);
 check("every quiz ref is a current-semester course code", withQuiz.length > 0 && withQuiz.every((id) => quizSubjects.indexOf(TOOLS_META[id].quiz) >= 0));
 check("every owning path id exists in LEARNING_PATHS", Object.keys(TOOLS_META).every((id) => pathIds.indexOf(TOOLS_META[id].path) >= 0));

@@ -29,16 +29,35 @@ function check(name, cond) {
 }
 
 console.log("- announcements.js: single source of truth -");
-check("exposes items array", Array.isArray(ann.items) && ann.items.length >= 1);
+check("exposes items array", Array.isArray(ann.items));
+check("no active reminders shipped (short-quiz alert removed on request)", ann.items.length === 0);
 check("has a numeric leadDays", typeof ann.leadDays === "number" && ann.leadDays >= 0);
-check("every item bilingual title", ann.items.every((a) => a.title && a.title.ar && a.title.en));
-check("every item has an ISO date", ann.items.every((a) => /^\d{4}-\d{2}-\d{2}$/.test(a.date)));
-check("subjectKey is a non-empty string", ann.items.every((a) => typeof a.subjectKey === "string" && a.subjectKey.length > 0));
+/* The banner engine stays covered via a fixture copy of the retired quiz
+   item — the same facts the real registry carried before the removal. */
+const FIXTURE_ITEM = {
+  id: "quiz-os-2026-10-18",
+  kind: "quiz",
+  subjectKey: "260210030802",
+  title: {
+    ar: "الاختبار القصير الأول — مفاهيم نظم التشغيل",
+    en: "First Short Quiz — Operating Systems Concepts"
+  },
+  date: "2026-10-18",
+  startTime: "2:40 PM",
+  endTime: "3:00 PM",
+  durationMin: 20,
+  questions: 5,
+  weight: { ar: "5% من الدرجة النهائية", en: "5% of the final grade" },
+  link: "#quiz"
+};
+const FIXTURE = Object.assign({}, ann, { items: [FIXTURE_ITEM] });
+check("fixture item is bilingual", !!FIXTURE_ITEM.title.ar && !!FIXTURE_ITEM.title.en);
+check("fixture item has an ISO date", /^\d{4}-\d{2}-\d{2}$/.test(FIXTURE_ITEM.date));
 const realCodes = new Set(cs.subjects.map((s) => String(s.code || s.id)));
-check("subjectKey exists in the official plan", ann.items.every((a) => realCodes.has(String(a.subjectKey))));
-check("quiz item carries honest facts (duration/questions/weight)",
-  ann.items.every((a) => a.kind !== "quiz" || (a.durationMin && a.questions && a.weight && a.weight.ar && a.weight.en)));
-check("link points at an existing view (#quiz)", ann.items.every((a) => typeof a.link === "string" && a.link.charAt(0) === "#"));
+check("fixture subjectKey exists in the official plan", realCodes.has(String(FIXTURE_ITEM.subjectKey)));
+check("fixture quiz carries honest facts (duration/questions/weight)",
+  !!(FIXTURE_ITEM.durationMin && FIXTURE_ITEM.questions && FIXTURE_ITEM.weight && FIXTURE_ITEM.weight.ar));
+check("fixture link points at an existing view (#quiz)", FIXTURE_ITEM.link.charAt(0) === "#");
 
 console.log("- index.html: mount + load order -");
 check("mounts #announceBar", html.includes('id="announceBar"'));
@@ -123,7 +142,7 @@ function makeNode(id) {
   };
 }
 
-function boot() {
+function boot(registry) {
   const bar = makeNode("announceBar");
   bar.hidden = true;
   const byId = { announceBar: bar };
@@ -153,7 +172,7 @@ function boot() {
   const localStorageStub = { getItem() { return null; }, setItem() {}, removeItem() {} };
   const sandbox = {
     console, document: documentStub, localStorage: localStorageStub, Lang: LangStub,
-    PLATFORM_CURRENT_SEMESTER: cs, PLATFORM_STORE: null, PLATFORM_ANNOUNCEMENTS: ann,
+    PLATFORM_CURRENT_SEMESTER: cs, PLATFORM_STORE: null, PLATFORM_ANNOUNCEMENTS: registry || ann,
     Date, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Error, isNaN, parseInt, parseFloat, Intl,
     setTimeout, clearTimeout
   };
@@ -166,7 +185,7 @@ function boot() {
 /* --- timing classification (pure) --- */
 {
   const api = boot().sandbox.window.PlatformAnnouncements;
-  const item = ann.items[0];
+  const item = FIXTURE_ITEM;
   check("timing: same day inside window → live",
     api.timing(item, new Date(2026, 9, 18, 14, 45)).status === "live");
   check("timing: same day before start → today",
@@ -186,7 +205,7 @@ function boot() {
 /* --- ICS output --- */
 {
   const api = boot().sandbox.window.PlatformAnnouncements;
-  const ics = api.buildIcs(ann.items[0], new Date(2026, 0, 1, 0, 0, 0));
+  const ics = api.buildIcs(FIXTURE_ITEM, new Date(2026, 0, 1, 0, 0, 0));
   check("buildIcs: RFC 5545 skeleton",
     ics.includes("BEGIN:VCALENDAR") && ics.includes("BEGIN:VEVENT") && ics.includes("END:VEVENT") && ics.includes("END:VCALENDAR"));
   check("buildIcs: has DTSTART/DTEND/SUMMARY/UID/DTSTAMP",
@@ -201,21 +220,35 @@ function boot() {
 
 /* --- the banner never fabricates a reminder for an elapsed/far exam --- */
 {
-  const app = boot();
+  const app = boot(FIXTURE);
   const api = app.sandbox.window.PlatformAnnouncements;
-  const original = ann.items[0].date;
-  ann.items[0].date = "2099-01-10";       /* far future → past → hidden */
+  const original = FIXTURE_ITEM.date;
+  FIXTURE_ITEM.date = "2099-01-10";       /* far future → past → hidden */
   api.render();
   check("far-future reminder hides the banner", app.bar.hidden === true);
-  ann.items[0].date = "2001-01-01";       /* genuinely elapsed exam */
+  FIXTURE_ITEM.date = "2001-01-01";       /* genuinely elapsed exam */
   api.render();
   check("elapsed exam date does not resurrect the banner", app.bar.hidden === true);
-  ann.items[0].date = original;
+  FIXTURE_ITEM.date = original;
   api.render();
-  /* With the real clock the canonical 2026-10-18 quiz is within the lead
-     window, so the banner is shown and tagged with a status. */
-  check("a near/future quiz surfaces the banner (not hidden)",
-    app.bar.hidden === false && app.bar.getAttribute("data-status") !== null);
+  /* Clock-relative: the fixture quiz is 2026-10-18 — on/before that day the
+     banner must show; once it has passed it must stay hidden. */
+  const today = new Date();
+  const daysAway = Math.round((new Date(2026, 9, 18) - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 86400000);
+  if (daysAway >= 0 && daysAway <= ann.leadDays) {
+    check("a near/future quiz surfaces the banner (not hidden)",
+      app.bar.hidden === false && app.bar.getAttribute("data-status") !== null);
+  } else {
+    check("an out-of-window fixture quiz keeps the banner hidden", app.bar.hidden === true);
+  }
+}
+
+/* --- the shipped (empty) registry keeps the banner hidden --- */
+{
+  const app = boot();
+  const api = app.sandbox.window.PlatformAnnouncements;
+  api.render();
+  check("empty registry keeps the banner hidden", app.bar.hidden === true);
 }
 
 /* --- MODULE 55.findUrgentQuiz surfaces a near/live quiz --- */
@@ -226,25 +259,26 @@ function boot() {
   const fnStart = heroMod.indexOf("function findUrgentQuiz");
   const fnEnd = heroMod.indexOf("function render()", fnStart);
   const fnSrc = heroMod.slice(fnStart, fnEnd > -1 ? fnEnd : undefined);
-  const sandbox = {
-    window: { PLATFORM_ANNOUNCEMENTS: ann, PLATFORM_CURRENT_SEMESTER: cs },
-    Date, Math, isNaN, String, Number, Array, Object,
-    parseTimeMinutes(str) {
-      const m = String(str).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
-      if (!m) return null;
-      let h = parseInt(m[1], 10); const min = parseInt(m[2], 10);
-      const ap = m[3] ? m[3].toUpperCase() : null;
-      if (ap === "PM" && h < 12) h += 12;
-      if (ap === "AM" && h === 12) h = 0;
-      return h * 60 + min;
-    }
-  };
-  let test = null;
-  try {
+  function makeFind(registry) {
+    const sandbox = {
+      window: { PLATFORM_ANNOUNCEMENTS: registry, PLATFORM_CURRENT_SEMESTER: cs },
+      Date, Math, isNaN, String, Number, Array, Object,
+      parseTimeMinutes(str) {
+        const m = String(str).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+        if (!m) return null;
+        let h = parseInt(m[1], 10); const min = parseInt(m[2], 10);
+        const ap = m[3] ? m[3].toUpperCase() : null;
+        if (ap === "PM" && h < 12) h += 12;
+        if (ap === "AM" && h === 12) h = 0;
+        return h * 60 + min;
+      }
+    };
     vm.createContext(sandbox);
     vm.runInContext("findUrgentQuiz = " + fnSrc.trim(), sandbox, { filename: "findUrgentQuiz.js" });
-    test = sandbox.findUrgentQuiz;
-  } catch (e) { /* fall through */ }
+    return sandbox.findUrgentQuiz;
+  }
+  let test = null;
+  try { test = makeFind(FIXTURE); } catch (e) { /* fall through */ }
   check("findUrgentQuiz extracted", typeof test === "function");
   if (typeof test === "function") {
     const live = test(new Date(2026, 9, 18, 14, 45));
@@ -254,6 +288,9 @@ function boot() {
     check("findUrgentQuiz: null when far away", test(new Date(2026, 8, 1, 9, 0)) === null);
     check("findUrgentQuiz: null after the exam", test(new Date(2026, 9, 25, 9, 0)) === null);
   }
+  check("findUrgentQuiz: shipped empty registry → always null", (() => {
+    try { return makeFind(ann)(new Date(2026, 9, 18, 14, 45)) === null; } catch (e) { return false; }
+  })());
 }
 
 console.log("\n" + (failures ? "✗ " + failures + " check(s) FAILED" : "✓ all checks passed"));

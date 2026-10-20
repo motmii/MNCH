@@ -12,7 +12,7 @@ A responsive cybersecurity education platform for Information Security diploma s
 - Practice mode: explanation drawer after every answer (auto-opens on mistakes)
 - Exam mode: explanations move to the result screen so timing stays fair — a **review-your-mistakes** list shows each missed question with the correct answer and full explanation
 - Final score with best-score tracking, answer breakdown (correct / wrong / timed-out / not counted) and a **per-category breakdown** that reveals strengths & weaknesses
-- **Retry incorrect questions** — replays only the missed ones (original indexes are kept, so retries compose safely)
+- **Retry incorrect questions** — replays only the missed ones (original indexes are kept, so retries compose safely). The subject card in the quiz picker always opens the **full bank**; a missed-only replay runs only from explicit controls (the «راجع أخطاءك» button under the card, the result screen's retry, or the Progress hub)
 - **Continue-learning link** on the result screen jumps back to the owning learning path
 - Hardened persistence: incomplete or corrupted progress entries are dropped at load; valid progress is never reset (IndexedDB + one-time localStorage migration untouched)
 ### Phase 4)

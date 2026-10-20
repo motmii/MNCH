@@ -62,8 +62,8 @@ const CURRENT_SEMESTER = {
       },
 
       shortDescription: {
-        ar: "تحليل الخوارزميات وتعقيدها الزمني، هياكل البيانات، استراتيجيات التصميم (فرّق تسُد، الجشع، البرمجة الديناميكية)، والرسوم البيانية.",
-        en: "Algorithm analysis and time complexity, data structures, design strategies (divide & conquer, greedy, dynamic programming) and graphs."
+        ar: "مفاهيم الخوارزمية ومعطياتها، تمثيل الحل بالكود الكاذب والمخططات الانسيابية، الهياكل الشرطية والتكرارية، خوارزميات البحث والترتيب، المصفوفات والقوائم، السلاسل النصية، ومقدمة في التشفير.",
+        en: "Algorithm concepts and data, representing solutions with pseudocode and flowcharts, conditional and iterative structures, searching and sorting algorithms, arrays and lists, strings, and an introduction to cryptography."
       },
 
       whyItMatters: {
@@ -76,28 +76,42 @@ const CURRENT_SEMESTER = {
       prerequisites: [],
 
       learningOutcomes: [
-        { ar: "قياس كفاءة الخوارزمية بتدوين Big-O زمنيًا ومكانيًا.", en: "Measure algorithm efficiency with Big-O in time and space." },
-        { ar: "اختيار هيكل البيانات المناسب (مصفوفة، مكدس، طابور، شجرة، رسم).", en: "Choose the right data structure (array, stack, queue, tree, graph)." },
-        { ar: "تطبيق استراتيجيات فرّق تسُد والجشع والبرمجة الديناميكية.", en: "Apply divide & conquer, greedy and dynamic-programming strategies." },
-        { ar: "تنقّل الرسوم البيانية بـ BFS وDFS وتقييم أقصر المسارات.", en: "Traverse graphs with BFS/DFS and evaluate shortest paths." }
+        { ar: "تعريف الخوارزمية ومعطياتها وتمييز الحسابية من غير الحسابية وموضع البرنامج منها.", en: "Define an algorithm, its data, computational vs non-computational kinds and the program's place." },
+        { ar: "تمثيل الحل بالكود الكاذب والمخططات الانسيابية وتوظيف الهياكل الشرطية والتكرارية.", en: "Represent solutions with pseudocode and flowcharts and apply conditional and iterative structures." },
+        { ar: "تطبيق خوارزميات البحث الخطي والثنائي والترتيب بالفقاعات والاختيار والإدراج وتتبع أثرها خطوة بخطوة.", en: "Apply linear and binary search and bubble, selection and insertion sorting, tracing their steps." },
+        { ar: "تنفيذ عمليات القوائم على المصفوفات ومعالجة السلاسل النصية ومقارنة كفاءة الخوارزميات بالتعقيد الزمني.", en: "Implement array-based list operations and string processing, and compare algorithm efficiency via time complexity." },
+        { ar: "شرح خدمات الأمن الأساسية ودور المفتاح ودوال التجزئة والتشفير المتماثل وغير المتماثل.", en: "Explain core security services and the roles of keys, hash functions and symmetric/asymmetric encryption." }
       ],
 
       commonMistakes: [
-        { ar: "الخلط بين التعقيد الزمني وعدد أسطر الكود أو سرعة الجهاز.", en: "Confusing time complexity with lines of code or hardware speed." },
-        { ar: "حفظ الخوارزميات دون تتبّع تنفيذها خطوة بخطوة على أمثلة.", en: "Memorizing algorithms without tracing them step by step on examples." },
-        { ar: "نسيان حالة الأساس في العودية فيسلك الاستدعاء بلا نهاية.", en: "Forgetting the recursion base case, so calls never terminate." }
+        { ar: "نسيان تحديث متغير التحكم داخل حلقة التكرار فيدخل البرنامج في تكرار لا نهائي.", en: "Forgetting the control variable's update inside a loop, causing an infinite loop." },
+        { ar: "تشغيل البحث الثنائي على قائمة غير مرتبة فيُستبعد النصف الذي يحوي الهدف دون رسالة خطأ.", en: "Running binary search on an unsorted list, so the half holding the target is discarded silently." },
+        { ar: "الخلط بين سعة المصفوفة وطول القائمة فيُكتب عنصر جديد في موضع لا وجود له.", en: "Confusing an array's capacity with the list's length, writing a new element into a nonexistent slot." },
+        { ar: "الاعتماد على سرية الخوارزمية لحماية البيانات مع أن الأمان في سرية المفتاح.", en: "Relying on the algorithm's secrecy while security actually rests on the key's secrecy." }
       ],
 
       keyTerms: [
         { ar: "الخوارزمية", en: "Algorithm" },
+        { ar: "الكود الكاذب", en: "Pseudocode" },
+        { ar: "المخطط الانسيابي", en: "Flowchart" },
+        { ar: "البحث الثنائي", en: "Binary Search" },
+        { ar: "الترتيب", en: "Sorting" },
         { ar: "التعقيد الزمني", en: "Time Complexity" },
-        { ar: "هياكل البيانات", en: "Data Structures" },
-        { ar: "فرّق تسُد", en: "Divide & Conquer" },
-        { ar: "البرمجة الديناميكية", en: "Dynamic Programming" },
-        { ar: "الرسوم البيانية", en: "Graphs" }
+        { ar: "المصفوفة", en: "Array" },
+        { ar: "السلسلة النصية", en: "String" },
+        { ar: "التشفير", en: "Encryption" }
       ],
 
-      lessons: [],
+      lessons: [
+        { ar: "الفصل 1 · مقدمة في الخوارزميات", en: "Chapter 1 · Introduction to Algorithms" },
+        { ar: "الفصل 2 · الوصف الطبيعي والكود الكاذب والمخططات الانسيابية", en: "Chapter 2 · Natural Description, Pseudocode & Flowcharts" },
+        { ar: "الفصل 3 · الهياكل الشرطية والتكرارية", en: "Chapter 3 · Conditional & Iterative Structures" },
+        { ar: "الفصل 4 · خوارزميات البحث", en: "Chapter 4 · Searching Algorithms" },
+        { ar: "الفصل 5 · خوارزميات الترتيب", en: "Chapter 5 · Sorting Algorithms" },
+        { ar: "الفصل 6 · المصفوفات والقوائم", en: "Chapter 6 · Arrays & Lists" },
+        { ar: "الفصل 7 · السلاسل النصية", en: "Chapter 7 · Strings" },
+        { ar: "الفصل 8 · مقدمة في التشفير", en: "Chapter 8 · Introduction to Cryptography" }
+      ],
       materials: [
         {
           title: { ar: "الفصل 1: مدخل إلى الخوارزميات", en: "Chapter 1: Introduction to Algorithms" },
@@ -153,8 +167,8 @@ const CURRENT_SEMESTER = {
       },
 
       shortDescription: {
-        ar: "وظائف نظام التشغيل، العمليات والخيوط والجدولة، إدارة الذاكرة والترحيل، المزامنة والأقفال الميتة، ونظم الملفات.",
-        en: "Operating-system functions, processes, threads and scheduling, memory management and paging, synchronization and deadlocks, and file systems."
+        ar: "وظائف نظام التشغيل، النواة والواجهات، الأجهزة الافتراضية، العمليات والخيوط، الجدولة والمقاطعات، إدارة الذاكرة والترحيل، نظم الملفات، وأساسيات سطر أوامر Linux.",
+        en: "Operating-system functions, kernel and interfaces, virtual machines, processes and threads, scheduling and interrupts, memory management and paging, file systems, and Linux command-line fundamentals."
       },
 
       whyItMatters: {
@@ -167,28 +181,43 @@ const CURRENT_SEMESTER = {
       prerequisites: [],
 
       learningOutcomes: [
-        { ar: "شرح وظائف نظام التشغيل وعلاقته بالعتاد والتطبيقات.", en: "Explain OS functions and their relation to hardware and apps." },
-        { ar: "التمييز بين العمليات والخيوط وكيفية عمل الجدولة.", en: "Distinguish processes from threads and how scheduling works." },
-        { ar: "وصف إدارة الذاكرة والترحيل والذاكرة الافتراضية.", en: "Describe memory management, paging and virtual memory." },
-        { ar: "تحليل حالات المزامنة والأقفال الميتة ونظم الملفات.", en: "Analyze synchronization, deadlocks and file systems." }
+        { ar: "شرح وظائف نظام التشغيل وتطوره وأنواعه ومعايير اختياره.", en: "Explain OS functions, evolution, types and selection criteria." },
+        { ar: "تمييز مهام النواة والواجهات وأوضاع التشغيل واستدعاءات النظام.", en: "Distinguish kernel tasks, interfaces, execution modes and system calls." },
+        { ar: "إنشاء الأجهزة الافتراضية وتوزيع مواردها وإدارتها باللقطات وضبط شبكاتها.", en: "Create virtual machines, allocate resources, manage snapshots and configure their networks." },
+        { ar: "تحليل العمليات والخيوط وحالاتها وضبط التزامن وتشخيص حالات النظام.", en: "Analyze processes, threads and states, tame concurrency and diagnose system states." },
+        { ar: "تتبع الجدولة وإدارة الذاكرة والترحيل ونظم الملفات وأوامر الطرفية.", en: "Trace scheduling, memory management and paging, file systems and terminal commands." }
       ],
 
       commonMistakes: [
-        { ar: "الاعتقاد أن خيوط العملية الواحدة تعمل بذاكرة مستقلة تمامًا.", en: "Assuming threads of one process run with fully separate memory." },
-        { ar: "الخلط بين ذاكرة RAM المؤقتة والتخزين الدائم للبيانات.", en: "Mixing up volatile RAM with permanent storage." },
-        { ar: "نسيان أن القفل الميت يحتاج شروطًا متزامنة ليقع.", en: "Forgetting that a deadlock needs several conditions at once." }
+        { ar: "الاعتقاد أن خيوط العملية الواحدة محمية من بعضها كالعمليات المنفصلة مع أن الذاكرة مشتركة.", en: "Believing sibling threads are protected like separate processes while their memory is shared." },
+        { ar: "تجاهل أن لكل عملية فضاء عناوين خاصًا وأن العناوين الافتراضية تترجم قبل الوصول إلى الذاكرة.", en: "Ignoring that each process owns an address space and virtual addresses translate before memory is reached." },
+        { ar: "علاج اختناق مورد مشبع بترقية مورد آخر غير مشبع، كما في مثال الطابعة المنشغلة 133%.", en: "Treating a saturated-resource bottleneck by upgrading a different resource, as in the 133% printer example." },
+        { ar: "توجيه إشارة القتل الفوري قبل تجربة الإنهاء اللطيف، ومحاولة قتل العمليات الزومبي.", en: "Sending instant kills before gentle exits, and trying to kill zombie processes." },
+        { ar: "تنفيذ أوامر الحذف من غير التحقق من الموقع الحالي وعرض المحتوى أولًا.", en: "Running deletion commands without verifying the current location and listing the target first." }
       ],
 
       keyTerms: [
+        { ar: "النواة", en: "Kernel" },
+        { ar: "الجهاز الافتراضي", en: "Virtual Machine" },
         { ar: "العملية", en: "Process" },
         { ar: "الخيط", en: "Thread" },
         { ar: "الجدولة", en: "Scheduling" },
-        { ar: "الترحيل", en: "Paging" },
-        { ar: "القفل الميت", en: "Deadlock" },
-        { ar: "نظام الملفات", en: "File System" }
+        { ar: "المقاطعة", en: "Interrupt" },
+        { ar: "الذاكرة الافتراضية", en: "Virtual Memory" },
+        { ar: "نظام الملفات", en: "File System" },
+        { ar: "الطرفية", en: "Terminal" }
       ],
 
-      lessons: [],
+      lessons: [
+        { ar: "الفصل 1 · مقدمة في نظم التشغيل", en: "Chapter 1 · Introduction to Operating Systems" },
+        { ar: "الفصل 2 · مهام نظام التشغيل: النواة والواجهات", en: "Chapter 2 · OS Tasks: Kernel & Interfaces" },
+        { ar: "الفصل 3 · الأجهزة الافتراضية", en: "Chapter 3 · Virtual Machines" },
+        { ar: "الفصل 4 · إدارة العمليات والخيوط", en: "Chapter 4 · Process & Thread Management" },
+        { ar: "الفصل 5 · جدولة المعالج والمقاطعات", en: "Chapter 5 · CPU Scheduling & Interrupts" },
+        { ar: "الفصل 6 · إدارة الذاكرة", en: "Chapter 6 · Memory Management" },
+        { ar: "الفصل 7 · نظم الملفات", en: "Chapter 7 · File Systems" },
+        { ar: "الفصل 8 · الطرفية: سطر أوامر Linux", en: "Chapter 8 · The Linux Terminal" }
+      ],
       materials: [
         {
           title: { ar: "الفصل 1: مقدمة في نظم التشغيل", en: "Chapter 1: Introduction to Operating Systems" },
@@ -259,8 +288,8 @@ const CURRENT_SEMESTER = {
       },
 
       shortDescription: {
-        ar: "سياسات الأمن وأنواعها، التشريعات والخصوصية والملكية الفكرية، الأخلاقيات المهنية والإذن القانوني، والامتثال.",
-        en: "Security policies and their types, legislation, privacy and intellectual property, professional ethics and legal authorization, and compliance."
+        ar: "مفاهيم السياسة الأمنية وهيكلها وأهدافها، والتشريعات المرتبطة بأمن المعلومات والتحكم في الوصول والتشفير وتكامل البيانات، والأخلاقيات المهنية وسرية المعلومات وتعارض المصالح وحدود الصلاحيات والإبلاغ عن الحوادث، والامتثال التنظيمي وتقييم المخاطر القانونية والأخلاقية، والثقافة التنظيمية وبرامج التوعية الأمنية.",
+        en: "Security policy concepts, structure and goals; information-security legislation, access control, cryptography and data integrity; professional ethics, confidentiality, conflicts of interest, authority limits and incident reporting; regulatory compliance and legal/ethical risk assessment; and organizational culture and security-awareness programs."
       },
 
       whyItMatters: {
@@ -273,28 +302,35 @@ const CURRENT_SEMESTER = {
       prerequisites: [],
 
       learningOutcomes: [
-        { ar: "صياغة سياسة أمنية وتمييز أنواعها ومكوناتها.", en: "Draft a security policy and distinguish its types and parts." },
-        { ar: "التعرف على التشريعات والخصوصية والملكية الفكرية.", en: "Recognize legislation, privacy and intellectual-property concepts." },
-        { ar: "التطبيق الأخلاقي المهني وحدود الإذن القانوني.", en: "Apply professional ethics and the limits of legal authorization." },
-        { ar: "فهم متطلبات الامتثال وكيفية التحقق منها.", en: "Understand compliance requirements and how they are verified." }
+        { ar: "تعريف السياسة الأمنية ومكوناتها وهرم وثائقها من السياسة إلى البرامج والمعايير والإجراءات.", en: "Define a security policy, its components and the document hierarchy from policy to programs, standards and procedures." },
+        { ar: "تمييز التشريعات المرتبطة بأمن المعلومات ومفاهيم التحكم في الوصول والتشفير وتكامل البيانات.", en: "Distinguish information-security legislation and the concepts of access control, cryptography and data integrity." },
+        { ar: "تطبيق الأخلاقيات المهنية في سرية المعلومات وتعارض المصالح وحدود الصلاحيات والإبلاغ عن الحوادث.", en: "Apply professional ethics in confidentiality, conflicts of interest, authority limits and incident reporting." },
+        { ar: "تفسير الامتثال التنظيمي وتقييم المخاطر القانونية والأخلاقية وبناء برنامج توعية أمنية وثقافة تنظيمية.", en: "Interpret regulatory compliance and legal/ethical risk assessment and build a security-awareness program and organizational culture." }
       ],
 
       commonMistakes: [
-        { ar: "الخلط بين السياسة (قرار داخلي) والتشريع (قانون ملزم).", en: "Mixing policy (an internal decision) with legislation (binding law)." },
-        { ar: "افتراض أن الفعل القانوني هو تلقائيًا فعل أخلاقي والعكس.", en: "Assuming anything legal is automatically ethical — or the reverse." },
-        { ar: "التعامل مع الامتثال كمهمة لمرة واحدة لا دورة مستمرة.", en: "Treating compliance as a one-time task instead of a continuous cycle." }
+        { ar: "الاعتماد على سياسة شفوية أو منح استثناء للسياسة الأمنية دون تصريح رسمي مسبق.", en: "Relying on an unwritten policy or granting late policy exceptions without prior formal authorization." },
+        { ar: "الافتراض أن وحدة الالتزام وحدها كافية لمعالجة المخالفات دون دور للتدقيق الداخلي أو الإدارة.", en: "Assuming the compliance unit alone can handle violations without internal audit or management involvement." },
+        { ar: "قياس نجاح برنامج التوعية فقط بحضور الموظفين للمحاضرات دون تقييم التغيير السلوكي.", en: "Measuring awareness-program success only by attendance rather than behavioral change." }
       ],
 
       keyTerms: [
-        { ar: "سياسة الأمن", en: "Security Policy" },
-        { ar: "التشريع", en: "Legislation" },
-        { ar: "الخصوصية", en: "Privacy" },
-        { ar: "الملكية الفكرية", en: "Intellectual Property" },
-        { ar: "الإذن القانوني", en: "Legal Authorization" },
-        { ar: "الامتثال", en: "Compliance" }
+        { ar: "السياسة الأمنية", en: "Security Policy" },
+        { ar: "التشريعات المرتبطة بأمن المعلومات", en: "Information-Security Legislation" },
+        { ar: "الأخلاقيات المهنية", en: "Professional Ethics" },
+        { ar: "الالتزام التنظيمي", en: "Regulatory Compliance" },
+        { ar: "تقييم المخاطر", en: "Risk Assessment" },
+        { ar: "برنامج التوعية الأمنية", en: "Security Awareness Program" }
       ],
 
-      lessons: [],
+      lessons: [
+        { ar: "الفصل 1 · مقدمة في السياسات الأمنية", en: "Chapter 1 · Introduction to Security Policies" },
+        { ar: "الفصل 2 · التشريعات والقوانين المرتبطة بأمن المعلومات", en: "Chapter 2 · Legislation and Laws Related to Information Security" },
+        { ar: "الفصل 3 · الأخلاقيات المهنية في أمن المعلومات", en: "Chapter 3 · Professional Ethics in Information Security" },
+        { ar: "الفصل 4 · الامتثال والالتزام التنظيمي", en: "Chapter 4 · Compliance and Regulatory Adherence" },
+        { ar: "الفصل 5 · تقييم المخاطر القانونية والأخلاقية", en: "Chapter 5 · Legal and Ethical Risk Assessment" },
+        { ar: "الفصل 6 · الثقافة التنظيمية والتوعية الأمنية", en: "Chapter 6 · Organizational Culture and Security Awareness" }
+      ],
       materials: [
         {
           title: { ar: "الفصل 1: مقدمة في السياسات الأمنية", en: "Chapter 1: Introduction to Security Policies" },
@@ -310,6 +346,11 @@ const CURRENT_SEMESTER = {
           title: { ar: "الفصل 3: الأخلاقيات المهنية في أمن المعلومات", en: "Chapter 3: Professional Ethics in Information Security" },
           type: "lecture",
           path: "materials/policies-ethics/chapter-03-professional-ethics.pdf"
+        },
+        {
+          title: { ar: "الفصل 4: الامتثال والالتزام التنظيمي", en: "Chapter 4: Compliance and Regulatory Adherence" },
+          type: "lecture",
+          path: "materials/policies-ethics/chapter-04-regulatory-compliance.pdf"
         },
         {
           title: { ar: "الفصل 5: تقييم المخاطر القانونية والأخلاقية", en: "Chapter 5: Legal and Ethical Risk Assessment" },
@@ -384,33 +425,56 @@ const CURRENT_SEMESTER = {
       keyTerms: [
         { ar: "العتاد", en: "Hardware" },
         { ar: "البرمجيات", en: "Software" },
-        { ar: "المحاكاة الافتراضية", en: "Virtualization" },
         { ar: "الحوسبة السحابية", en: "Cloud Computing" },
-        { ar: "الشبكات", en: "Networks" },
-        { ar: "المرافق", en: "Facilities" }
+        { ar: "أمن الشبكات", en: "Network Security" },
+        { ar: "قواعد البيانات", en: "Databases" },
+        { ar: "تحليل الأنظمة وتصميمها", en: "Systems Analysis and Design" }
       ],
 
-      lessons: [],
+      lessons: [
+        { ar: "الفصل 1 · نظم المعلومات ومكوناتها", en: "Chapter 1 · Information Systems and Their Components" },
+        { ar: "الفصل 2 · مكونات الأجهزة والبرمجيات", en: "Chapter 2 · Hardware and Software Components" },
+        { ar: "الفصل 3 · الحوسبة السحابية", en: "Chapter 3 · Cloud Computing" },
+        { ar: "الفصل 4 · أمن المعلومات والشبكات", en: "Chapter 4 · Information and Network Security" },
+        { ar: "الفصل 5 · قواعد البيانات", en: "Chapter 5 · Databases" },
+        { ar: "الفصل 6 · أمن الشبكات وحمايتها", en: "Chapter 6 · Network Security and Protection" },
+        { ar: "الفصل 7 · تحليل الأنظمة وتصميمها", en: "Chapter 7 · Systems Analysis and Design" }
+      ],
       materials: [
         {
-          title: { ar: "الفصل 1: مقدمة إلى أنظمة تقنية المعلومات", en: "Chapter 1: Introduction to IT Systems" },
+          title: { ar: "الفصل 1: نظم المعلومات ومكوناتها", en: "Chapter 1: Information Systems and Their Components" },
           type: "lecture",
-          path: "materials/it-components/chapter-01-introduction-to-it-systems.pdf"
+          path: "materials/it-components/chapter-01-information-systems-and-their-components.pdf"
         },
         {
-          title: { ar: "الفصل 2: مكونات الحاسب الآلي الأساسية", en: "Chapter 2: Basic Computer Components" },
+          title: { ar: "الفصل 2: مكونات الأجهزة والبرمجيات", en: "Chapter 2: Hardware and Software Components" },
           type: "lecture",
-          path: "materials/it-components/chapter-02-basic-computer-components.pdf"
+          path: "materials/it-components/chapter-02-hardware-and-software-components.pdf"
         },
         {
-          title: { ar: "الفصل 3: البنية التحتية لتقنية المعلومات", en: "Chapter 3: IT Infrastructure" },
+          title: { ar: "الفصل 3: الحوسبة السحابية", en: "Chapter 3: Cloud Computing" },
           type: "lecture",
-          path: "materials/it-components/chapter-03-it-infrastructure.pdf"
+          path: "materials/it-components/chapter-03-cloud-computing.pdf"
         },
         {
-          title: { ar: "الفصل 4: الشبكات في أنظمة تقنية المعلومات", en: "Chapter 4: Networks in IT Systems" },
+          title: { ar: "الفصل 4: أمن المعلومات والشبكات", en: "Chapter 4: Information and Network Security" },
           type: "lecture",
-          path: "materials/it-components/chapter-04-networks-in-it-systems.pdf"
+          path: "materials/it-components/chapter-04-information-and-network-security.pdf"
+        },
+        {
+          title: { ar: "الفصل 5: قواعد البيانات", en: "Chapter 5: Databases" },
+          type: "lecture",
+          path: "materials/it-components/chapter-05-databases.pdf"
+        },
+        {
+          title: { ar: "الفصل 6: أمن الشبكات وحمايتها", en: "Chapter 6: Network Security and Protection" },
+          type: "lecture",
+          path: "materials/it-components/chapter-06-network-security-and-protection.pdf"
+        },
+        {
+          title: { ar: "الفصل 7: تحليل الأنظمة وتصميمها", en: "Chapter 7: Systems Analysis and Design" },
+          type: "lecture",
+          path: "materials/it-components/chapter-07-systems-analysis-and-design.pdf"
         }
       ],
       quizzes: ["260210031002"],
@@ -481,7 +545,15 @@ const CURRENT_SEMESTER = {
         { ar: "سطح الهجوم", en: "Attack Surface" }
       ],
 
-      lessons: [],
+      lessons: [
+        { ar: "الفصل 1 · مقدمة في مبادئ التصميم الأمني", en: "Chapter 1 · Introduction to Security Design Principles" },
+        { ar: "الفصل 2 · مكونات التصميم الأمني", en: "Chapter 2 · Security Design Components" },
+        { ar: "الفصل 3 · نماذج التهديد وتحليل المخاطر وصمود النظم", en: "Chapter 3 · Threat Modeling, Risk Analysis and System Resilience" },
+        { ar: "الفصل 4 · مبادئ التصميم المقاومة للهجمات السيبرانية", en: "Chapter 4 · Attack-Resistant Design Principles" },
+        { ar: "الفصل 5 · أمان البرمجيات وواجهات المستخدم وإدارة الأخطاء", en: "Chapter 5 · Software Security, User Interfaces and Error Handling" },
+        { ar: "الفصل 6 · الاختبار الآمن والامتثال وتحسين التصميم", en: "Chapter 6 · Security Testing, Compliance and Design Improvement" },
+        { ar: "الفصل 7 · مبادئ التصميم في بيئات الحوسبة الحديثة", en: "Chapter 7 · Design Principles in Modern Computing Environments" }
+      ],
       materials: [
         {
           title: { ar: "الفصل 1: مقدمة في مبادئ التصميم الأمني", en: "Chapter 1: Introduction to Security Design Principles" },

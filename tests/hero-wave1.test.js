@@ -94,7 +94,7 @@ check("ribbon chip mount starts hidden", html.includes('id="heroNowChip" hidden'
 check("tablist present", html.includes('id="heroDashTabs" role="tablist"'));
 check("3 tabs with role=tab + aria-controls",
   (html.match(/role="tab" aria-/g) || []).length >= 3 &&
-  html.includes('id="heroTabToday" role="tab" aria-selected="true" aria-controls="heroPanelToday" tabindex="0"'));
+  html.includes('id="heroTabRadar" role="tab" aria-selected="true" aria-controls="heroPanelRadar" tabindex="0"'));
 check("inactive tabs carry tabindex=-1",
   (html.match(/aria-selected="false" aria-controls="heroPanel\w+" tabindex="-1"/g) || []).length === 2);
 check("3 panels with role=tabpanel + aria-labelledby",

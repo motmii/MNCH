@@ -12,8 +12,10 @@
  *     credit hours (15 total), difficulty, study hours
  *   - every card links to a REAL quiz bank (data-quiz-jump), tool card
  *     (data-tool-jump) and lab view — no fake links
- *   - honest empty states: lessons → «سيتم إضافة الدروس قريبًا»,
- *     empty prerequisites → explicit note (×5 each)
+ *   - honest empty states for subjects without authored content;
+ *     all five subjects now have authored lessons (8 Algorithms, 8 OS,
+ *     6 Policies, 7 IT Components, 7 Security Design) — no empty-state
+ *     note remains
  *   - MODULE 22 dict: every "semester.*" key exists in BOTH ar & en
  * Run: node tests/semester-dashboard-smoke.test.js
  */
@@ -45,7 +47,15 @@ const EXPECTED = ["260210030702", "260210030802", "260210030902", "260210031002"
 const TOOLS = ["tool-hash", "tool-caesar", "tool-playground", "tool-vuln", "tool-portscan", "tool-cidr", "tool-sniffer"];
 check("5 official subjects in current-semester.js", cs.subjects.length === 5 && EXPECTED.every((c) => cs.subjects.some((s) => s.code === c)));
 check("total credit hours = 15", cs.subjects.reduce((a, s) => a + s.meta.creditHours, 0) === 15);
-check("all lesson arrays honestly empty", cs.subjects.every((s) => Array.isArray(s.lessons) && s.lessons.length === 0));
+check("lesson arrays: 8 for Algorithms & OS, 6 for Policies, 7 for IT Components & Security Design, none empty",
+  cs.subjects.every((s) => Array.isArray(s.lessons) &&
+    (s.code === "260210030702" || s.code === "260210030802"
+      ? s.lessons.length === 8 && s.lessons.every((l) => !!l.ar && !!l.en)
+      : s.code === "260210030902"
+        ? s.lessons.length === 6 && s.lessons.every((l) => !!l.ar && !!l.en)
+        : s.code === "260210031002" || s.code === "260210031102"
+          ? s.lessons.length === 7 && s.lessons.every((l) => !!l.ar && !!l.en)
+          : s.lessons.length === 0)));
 
 console.log("\u2014 MODULE 43 render (stubbed DOM) \u2014");
 const modStart = js.indexOf("(function initSemesterDashboard()");
@@ -90,7 +100,8 @@ const DICT_AR = {
   "nav.cryptolab": "مختبر التشفير", "nav.redteam": "المختبر الهجومي",
   "paths.level.beginner": "مبتدئ", "paths.level.intermediate": "متوسط",
 };
-const LangStub = { current: "ar", t: (k) => (k in DICT_AR ? DICT_AR[k] : k), onSwitch() {} };
+const switchHooks = [];
+const LangStub = { current: "ar", t: (k) => (k in DICT_AR ? DICT_AR[k] : k), onSwitch(fn) { if (typeof fn === "function") switchHooks.push(fn); } };
 new Function("document", "window", "Lang", "TOOLS_META", "QUIZZES", "escHtml", mod)(
   documentStub, { PLATFORM_CURRENT_SEMESTER: cs }, LangStub, undefined, undefined,
   (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (m) =>
@@ -112,13 +123,36 @@ check("5 real quiz links (#quiz + data-quiz-jump)", (G.match(/data-quiz-jump="/g
 check("7 tool chips (data-tool-jump to real cards)", (G.match(/data-tool-jump="/g) || []).length === 7);
 check("tool chips point to #tools", G.includes('href="#tools" data-tool-jump='));
 check("lab links (#redteam + #cryptolab)", G.includes('href="#redteam"') && G.includes('href="#cryptolab"'));
-check("lessons empty state ×5", (G.match(/سيتم إضافة الدروس قريبًا/g) || []).length === 5);
+check("lessons empty state \u00d70 (all five authored cards list their chapters)",
+  (G.match(/سيتم إضافة الدروس قريبًا/g) || []).length === 0 &&
+  cs.subjects.find((s) => s.code === "260210030702").lessons.every((l) => G.includes(l.ar)) &&
+  cs.subjects.find((s) => s.code === "260210030802").lessons.every((l) => G.includes(l.ar)) &&
+  cs.subjects.find((s) => s.code === "260210030902").lessons.every((l) => G.includes(l.ar)) &&
+  cs.subjects.find((s) => s.code === "260210031002").lessons.every((l) => G.includes(l.ar)) &&
+  cs.subjects.find((s) => s.code === "260210031102").lessons.every((l) => G.includes(l.ar)));
 check("prerequisites empty state ×5", (G.match(/لا توجد متطلبات سابقة/g) || []).length === 5);
 check("outcomes blocks", G.includes("مخرجات التعلم"));
 check("mistakes blocks", G.includes("أخطاء شائعة"));
 check("key terms blocks", G.includes("مصطلحات أساسية"));
 check("difficulty labels via paths.level.*", G.includes("مبتدئ") && G.includes("متوسط"));
 check("estimated study hours", G.includes("ساعات دراسة تقديرية") && G.includes("<b>18</b>"));
+
+console.log("\u2014 live locale switch (bilingual data follows the toggle) \u2014");
+const escEq = (s) => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+LangStub.current = "en";
+switchHooks.forEach((fn) => fn());
+const G_EN = grid.innerHTML;
+check("switch to EN re-renders all authored chapter titles in EN (Algorithms + OS + Policies + IT Components + Security Design)",
+  cs.subjects.find((s) => s.code === "260210030702").lessons.every((l) => G_EN.includes(escEq(l.en))) &&
+  cs.subjects.find((s) => s.code === "260210030802").lessons.every((l) => G_EN.includes(escEq(l.en))) &&
+  cs.subjects.find((s) => s.code === "260210030902").lessons.every((l) => G_EN.includes(escEq(l.en))) &&
+  cs.subjects.find((s) => s.code === "260210031002").lessons.every((l) => G_EN.includes(escEq(l.en))) &&
+  cs.subjects.find((s) => s.code === "260210031102").lessons.every((l) => G_EN.includes(escEq(l.en))));
+check("switch to EN drops the AR lesson titles", !G_EN.includes("مقدمة في الخوارزميات") && !G_EN.includes("خوارزميات البحث") && !G_EN.includes("مقدمة في نظم التشغيل") && !G_EN.includes("نظم المعلومات ومكوناتها") && !G_EN.includes("مقدمة في مبادئ التصميم الأمني") && !G_EN.includes("مقدمة في السياسات الأمنية"));
+check("switch to EN renders subject names in EN", cs.subjects.every((s) => G_EN.includes(escEq(s.name.en))));
+LangStub.current = "ar";
+switchHooks.forEach((fn) => fn());
+check("switch back to AR restores AR subject names + lessons", cs.subjects.every((s) => grid.innerHTML.includes(escEq(s.name.ar))) && grid.innerHTML.includes("مقدمة في الخوارزميات") && grid.innerHTML.includes("مقدمة في نظم التشغيل") && grid.innerHTML.includes("مقدمة في السياسات الأمنية") && grid.innerHTML.includes("نظم المعلومات ومكوناتها") && grid.innerHTML.includes("مقدمة في مبادئ التصميم الأمني"));
 
 console.log("\u2014 i18n dictionary (MODULE 22) \u2014");
 ["ar", "en"].forEach((loc) => {

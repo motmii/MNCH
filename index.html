@@ -3,22 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Content Security Policy — the platform is online-first now, and the
+       only third-party origin it talks to is Canva (embedded decks, gallery
+       designs, whiteboards and background media). Everything else must be
+       first-party: scripts, styles, fonts and objects stay 'self'.
+       - frame-src / img-src / media-src / connect-src: Canva origins only.
+       - object-src is 'self' (NOT 'none') because the chapter viewer embeds
+         the platform's own local PDFs in an <object>.
+       - 'unsafe-inline' is required by the platform's own inline bootstrap
+         snippets and data-i18n-mutated markup. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.canva.com https://canva.com; media-src 'self' blob: https://*.canva.com https://canva.com; frame-src 'self' https://*.canva.com https://canva.com; connect-src 'self' https://*.canva.com https://canva.com; font-src 'self'; object-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'self'" />
   <title>منصة أمن المعلومات | Information Security Platform — الترم الحالي</title>
-  <meta name="description" content="منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال. An Arabic-first learning platform for Information Security diploma students: learning paths, quizzes, security tools and labs — offline-ready." />
+  <meta name="description" content="منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة، واستوديو كانفا للعروض والتصاميم. An Arabic-first learning platform for Information Security diploma students: learning paths, quizzes, security tools, labs and a Canva-powered visual studio." />
   <meta name="keywords" content="أمن المعلومات, منصة تعليمية, اختبارات, سيبراني, information security, cybersecurity, learning platform, quizzes" />
   <link rel="canonical" href="https://motmii.github.io/MNCH/" />
   <!-- Open Graph / social sharing -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="منصة أمن المعلومات — Information Security Platform" />
   <meta property="og:title" content="منصة أمن المعلومات | Information Security Platform" />
-  <meta property="og:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال. An Arabic-first infosec learning platform: paths, quizzes, tools and labs — offline-ready." />
+  <meta property="og:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية، واستوديو كانفا بصري. An Arabic-first infosec learning platform: paths, quizzes, tools, labs and a Canva visual studio." />
   <meta property="og:url" content="https://motmii.github.io/MNCH/" />
   <meta property="og:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
   <meta property="og:locale" content="ar_SA" />
   <meta property="og:locale:alternate" content="en_US" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="منصة أمن المعلومات | Information Security Platform" />
-  <meta name="twitter:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية — تعمل دون اتصال." />
+  <meta name="twitter:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية، واستوديو كانفا بصري." />
   <meta name="twitter:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
   <!-- Structured data (JSON-LD) — language switchable via Lang hook in script.js -->
   <script type="application/ld+json">
@@ -29,16 +39,20 @@
     "alternateName": "Information Security Platform — منصة أمن المعلومات",
     "url": "https://motmii.github.io/MNCH/",
     "inLanguage": ["ar", "en"],
-    "description": "منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال."
+    "description": "منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة، واستوديو كانفا للتصاميم البصرية."
   }
   </script>
-  <link rel="preload" as="image" href="images/backweb.jpg" fetchpriority="high" />
   <!-- Self-hosted typefaces — no CDN.
        Inter (variable latin) + IBM Plex Sans Arabic (Arabic) + JetBrains Mono.
        Preload the two faces that paint the first screen. -->
   <link rel="preload" as="font" type="font/woff2" href="fonts/plex-arabic-arabic-400.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="fonts/inter-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="style.css?v=2.0.1" />
+  <link rel="stylesheet" href="style.css?v=3.0.0" />
+  <!-- MODULE 90 · Motion stylesheet (Lenis baseline, BlurText word units,
+       pointer glow). Additive only — everything is scoped to
+       html.motion-on, which motion.js sets only when the vendored libs
+       loaded and reduced motion is off. -->
+  <link rel="stylesheet" href="motion.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#09090b" />
   <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
@@ -98,25 +112,31 @@
           <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
           <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
           <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
-          <li><a href="#kali" data-i18n="nav.kali">تثبت كالي</a></li>
           <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
-          <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
-          <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
-          <li><a href="#flashcards/timed" data-i18n="nav.flashcardsTimed">المراجعة الموقوتة</a></li>
           <li class="nav-more">
             <details class="nav-more-details" id="navMoreDetails">
               <summary data-i18n="nav.more">المزيد</summary>
               <ul class="nav-more-menu">
-                <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
-                <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
-                <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
-                <li><a href="#student" data-i18n="nav.student">أدوات الطالب</a></li>
-                <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
-                <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
-                <li><a href="#theatre" data-i18n="nav.theatre">مسرح التهديدات</a></li>
-                <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
-                <li><a href="#depth" data-i18n="nav.depth">العمق الدفاعي</a></li>
-                <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
+                <li><a href="#semester">
+                  <span class="nmm-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg></span>
+                  <span class="nmm-text"><span class="nmm-title" data-i18n="nav.semester">الترم الحالي</span><span class="nmm-desc" data-i18n="nav.semester.desc">جدولك ومواد الترم الحالي</span></span>
+                </a></li>
+                <li><a href="#labs">
+                  <span class="nmm-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3.5h6M10 3.5v5.5l-5.6 8.4A2.5 2.5 0 0 0 6.6 21h10.8a2.5 2.5 0 0 0 2.2-3.6L14 9V3.5"/><path d="M7.6 13.5h8.8"/></svg></span>
+                  <span class="nmm-text"><span class="nmm-title" data-i18n="nav.labs">المعامل</span><span class="nmm-desc" data-i18n="nav.labs.desc">بيئات محاكاة عملية آمنة</span></span>
+                </a></li>
+                <li><a href="#flash">
+                  <span class="nmm-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 9 4.5-9 4.5-9-4.5 9-4.5Z"/><path d="m3.5 12.5 8.5 4.3 8.5-4.3"/><path d="m3.5 16.5 8.5 4.3 8.5-4.3"/></svg></span>
+                  <span class="nmm-text"><span class="nmm-title" data-i18n="nav.flashcards">البطاقات</span><span class="nmm-desc" data-i18n="nav.flash.desc">راجع المصطلحات بالبطاقات</span></span>
+                </a></li>
+                <li><a href="#about">
+                  <span class="nmm-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 10.8v5.4M12 7.7h.01"/></svg></span>
+                  <span class="nmm-text"><span class="nmm-title" data-i18n="nav.about">حول المنصة</span><span class="nmm-desc" data-i18n="nav.about.desc">قصة المنصة وفكرتها</span></span>
+                </a></li>
+                <li><a href="#contact">
+                  <span class="nmm-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.4"/><path d="m3.8 7 8.2 6 8.2-6"/></svg></span>
+                  <span class="nmm-text"><span class="nmm-title" data-i18n="nav.contact">التواصل</span><span class="nmm-desc" data-i18n="nav.contact.desc">اسألني أو شارك ملاحظاتك</span></span>
+                </a></li>
               </ul>
             </details>
           </li>
@@ -147,6 +167,14 @@
           </div>
         </div>
       </div>
+      <!-- MODULE 95 · NavResume — pill «متابعة» يظهر بعد أول تنقّل:
+           يعيد فتح آخر زر زرته (بما فيه الروابط العميقة #lesson/...).
+           التوقيت يُدار بالكامل من script.js (MODULE 10c). -->
+      <a href="#" class="nav-resume" id="navResume" hidden>
+        <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" focusable="false" fill="currentColor" stroke="none"><path d="M8 5.5v13a1 1 0 0 0 1.54.84l9-6.5a1 1 0 0 0 0-1.68l-9-6.5A1 1 0 0 0 8 5.5Z"/></svg>
+        <span class="nav-resume-text" data-i18n="nav.resumeChip">متابعة</span>
+        <span class="nav-resume-target" id="navResumeTarget"></span>
+      </a>
       <!-- MODULE 60 · navbar primary action. The top bar had no desktop CTA
            at all (the same action only existed inside the mobile menu), so
            the page never offered one obvious next step while scrolling. It
@@ -175,27 +203,21 @@
         </button>
       </div>
     </div>
+    <!-- MODULE 95 · reading progress — خط رفيع أسفل الشريط يعكس تقدم
+         التمرير في الصفحة (يعتمد اتجاهه على dir عبر CSS فقط). -->
+    <div class="nav-progress" aria-hidden="true"><span id="navProgressBar"></span></div>
   </nav>
 
-  <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="القائمة" aria-hidden="true" inert>
+  <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="القائمة" aria-hidden="true" inert data-lenis-prevent>
     <ul>
       <li><a href="#hero" data-i18n="nav.home">الرئيسية</a></li>
       <li><a href="#subjects" data-i18n="nav.subjects">المواد</a></li>
       <li><a href="#quiz" data-i18n="nav.quiz">الاختبارات</a></li>
-      <li><a href="#kali" data-i18n="nav.kali">تثبت كالي</a></li>
       <li><a href="#paths" data-i18n="nav.paths">مسارات التعلم</a></li>
-      <li><a href="#tools" data-i18n="nav.tools">الأدوات</a></li>
-      <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
-      <li><a href="#flashcards/timed" data-i18n="nav.flashcardsTimed">المراجعة الموقوتة</a></li>
       <li><a href="#semester" data-i18n="nav.semester">الترم الحالي</a></li>
-      <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
-      <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
-      <li><a href="#student" data-i18n="nav.student">أدوات الطالب</a></li>
-      <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
       <li><a href="#flash" data-i18n="nav.flashcards">البطاقات</a></li>
-      <li><a href="#theatre" data-i18n="nav.theatre">مسرح التهديدات</a></li>
+      <li><a href="#labs" data-i18n="nav.labs">المعامل</a></li>
       <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
-      <li><a href="#depth" data-i18n="nav.depth">العمق الدفاعي</a></li>
       <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
     </ul>
     <a href="#paths" class="btn btn-primary" data-i18n="nav.cta">ابدأ التعلم</a>
@@ -301,262 +323,380 @@
   <div class="announce-bar" id="announceBar" role="status" aria-live="polite" aria-label="تنبيهات المواد / Course announcements" hidden></div>
 
   <header class="hero is-active" id="hero">
-      <!-- Animated hero background (MODULE 59). Two layers, cheapest first:
-           1. .hero-bg — the still hero photo, gently drifting via CSS
-              (@keyframes heroDrift). Always present, so the hero keeps a
-              real animated background even if nothing else is allowed to run.
-           2. .hero-media — a 10s / 1280×720 / silent, locally generated
-              loop (images/hero-bg.mp4, derived from the same photo) that
-              fades in
-              over the photo only when the device and the visitor's
-              preferences allow it (script.js MODULE 59 gates: reduced motion,
-              Save-Data / slow connection, narrow screens, low battery).
-           There is deliberately no autoplay attribute: with preload="none"
-           the file is not downloaded at all until those gates pass. -->
-      <div class="hero-bg" aria-hidden="true"></div>
-      <video class="hero-media" id="heroMedia" muted loop playsinline preload="none"
-             poster="images/backweb.jpg" aria-hidden="true" tabindex="-1">
-        <source src="images/hero-bg.mp4" type="video/mp4" />
-      </video>
-      <div class="hero-glow hero-glow-a" aria-hidden="true"></div>
-      <div class="hero-glow hero-glow-b" aria-hidden="true"></div>
+      <!-- MODULE 92 · Cyber OS hero (v3.0.0). The background is pure
+           geometry now — an animated grid + drifting gradient orbs painted
+           above the fixed CyberField canvas (see MODULE 92 in style.css).
+           The old photo/video layers and MODULE 59 HeroMedia are gone:
+           the hero never downloads a background asset anymore.
+
+           Layout is a deliberate asymmetric split:
+             · .hero-main — live radar telemetry pill (MODULE 55), the
+               platform lockup, the headline, the command-search trigger
+               into the MODULE 48 palette, the magnetic CTA bar, the
+               new-user strip and the honest live counters.
+             · .hero-side — the Command Deck: a tilting console (motion.js)
+               with three tabs (MODULE 56 engine): Semester Radar (live
+               timetable from current-semester.js), a mini cyber terminal,
+               and the Telemetry HUD that still hosts every MODULE 47/37b/
+               50 mount plus the MODULE 57 next-action strip.
+           Below them sits the Cyber Bento Matrix: semester schedule,
+           simulation labs and the 12-tool arsenal. -->
+      <div class="hero-fx" aria-hidden="true">
+        <span class="hero-grid"></span>
+        <span class="hero-orb hero-orb-a"></span>
+        <span class="hero-orb hero-orb-b"></span>
+        <span class="hero-orb hero-orb-c"></span>
+      </div>
 
       <div class="hero-content">
-        <!-- "Now" strip (MODULE 55). A slim, honest line: a time-of-day
-             greeting plus the NEXT real class, computed locally from the
-             official timetable already published in current-semester.js
-             (subject.schedule). No network, no stored personal data, and
-             when no timetable exists the strip says so instead of guessing. -->
-        <div class="hero-now reveal" id="heroNow" role="status">
-          <span class="hero-now-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
-          <span class="hero-now-text" id="heroNowText" data-i18n="now.loading">جارٍ تحديد موعد حصتك القادمة…</span>
-          <span class="hero-now-chip" id="heroNowChip" hidden></span>
-          <!-- MODULE 61 contextual entry point: shown by MODULE 55 only when a
-               class is live or starts today/tomorrow — one tap to the access guide. -->
-          <a class="hero-now-guide" id="heroNowGuide" href="#guide" data-i18n="guide.nowCta" hidden>كيف أصل للمحاضرة؟</a>
-          <!-- MODULE 74 · contextual quiz reminder chip (hidden by default).
-               Painted by MODULE 55 only when a dated quiz in announcements.js
-               is live, today, or within the reminder window. -->
-          <a class="hero-now-quiz" id="heroNowQuiz" href="#quiz" hidden></a>
-        </div>
-
-        <!-- Platform identity — clear name in Arabic & English + short description -->
-        <div class="hero-brand reveal" aria-label="اسم المنصة بالعربية والإنجليزية">
-          <strong class="hero-brand-ar">منصة أمن المعلومات</strong>
-          <span class="hero-brand-sep" aria-hidden="true">·</span>
-          <span class="hero-brand-en" lang="en" dir="ltr">Information Security Platform</span>
-        </div>
-        <p class="hero-tagline reveal" data-i18n="hero.tagline">منصة عربية تعليمية لطلاب دبلوم أمن المعلومات — تعلّم، اختبر نفسك، وتدرّب عمليًا داخل متصفحك ودون اتصال.</p>
-        <h1 class="hero-title">
-          <span class="line"><span class="reveal-line" data-i18n="hero.title1">منصة تعليمية</span></span>
-          <span class="line"><span class="reveal-line" data-i18n="hero.title2">وتدريبية عملية </span><em class="grad" data-i18n="hero.titleAccent">لطلاب أمن المعلومات</em></span>
-        </h1>
-        <p class="hero-sub reveal" data-i18n="hero.sub">منصة عربية متكاملة لطلاب أمن المعلومات: تعلّم أساسيات كل مادة، راجِع المصطلحات بالبطاقات، اختبر نفسك بأسئلة عملية، وطبّق ما تعلّمته بأدوات أمنية ومعامل محاكاة حقيقية — كل ذلك يعمل داخل متصفحك وبدون إنترنت.</p>
-        <div class="hero-actions reveal">
-          <a href="#paths" class="btn btn-primary btn-lg magnetic" data-i18n="hero.ctaStart">ابدأ رحلة التعلم</a>
-          <a href="#semester" class="btn btn-ghost magnetic" data-i18n="hero.ctaSemester">استكشف الترم الحالي</a>
-        </div>
-
-        <!-- Start Here — new users: beginner-friendly entry point pointing at
-             the Fundamentals path + the existing onboarding wizard. -->
-        <div class="hero-start reveal" id="heroStartHere">
-          <span class="hero-start-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg></span>
-          <div class="hero-start-text">
-            <strong data-i18n="starthere.title">جديد هنا؟ ابدأ من هنا</strong>
-            <span data-i18n="starthere.desc">مسار «الأساسيات» مصمم للمبتدئين — خمس خطوات قصيرة تنقلك من الصفر إلى أول اختبار.</span>
-          </div>
-          <div class="hero-start-actions">
-            <a href="#path/fundamentals" class="btn btn-primary btn-sm" data-i18n="starthere.cta">ابدأ مسار الأساسيات</a>
-            <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
-            <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
-          </div>
-        </div>
-
-        <!-- Adaptive next step (MODULE 57). For students who already have
-             real saved progress this strip replaces the "new here?" strip
-             and offers the SINGLE most useful next action, derived only
-             from local state: an unfinished quiz session → missed
-             questions → the last opened lesson → a path in progress.
-             Both strip buttons are document-delegated, so the replay
-             controls keep working from here. -->
-        <div class="hero-start hero-next reveal" id="heroNextAction" hidden>
-          <span class="hero-start-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
-          <div class="hero-start-text">
-            <strong id="heroNextTitle" data-i18n="next.title">خطوتك التالية</strong>
-            <span id="heroNextMeta" aria-live="polite">—</span>
-          </div>
-          <div class="hero-start-actions">
-            <a href="#quiz" class="btn btn-primary btn-sm" id="heroNextBtn">ابدأ</a>
-            <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
-            <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
-            <button type="button" class="btn btn-ghost btn-sm" id="heroNextDismiss" data-i18n="next.dismiss">إخفاء</button>
-          </div>
-        </div>
-
-        <!-- Student command center (MODULE 47). Always visible on the homepage:
-             welcome, overall progress, current path, next learning step,
-             unfinished work, and a Continue-Learning shortcut. JS fills it in
-             from the platform's real local progress data only. -->
-        <section class="hero-dash hero-command reveal" id="heroDash" aria-labelledby="heroDashTitle">
-          <div class="hero-dash-head">
-            <div class="hero-dash-intro">
-              <p class="hero-dash-kicker" data-i18n="dash.kicker">لوحة الطالب</p>
-              <h2 class="hero-dash-title" id="heroDashTitle">مرحبًا بك في لوحة تعلّمك</h2>
-              <p class="hero-dash-welcome" id="heroDashWelcome" aria-live="polite">ابدأ مسارًا أو اختبارًا وسيظهر تقدمك هنا — محفوظًا على جهازك فقط.</p>
+        <div class="hero-split">
+          <!-- ═══ Primary column ═══ -->
+          <div class="hero-main">
+            <!-- "Now" strip (MODULE 55). A slim, honest line: a time-of-day
+                 greeting plus the NEXT real class, computed locally from the
+                 official timetable already published in current-semester.js
+                 (subject.schedule). No network, no stored personal data, and
+                 when no timetable exists the strip says so instead of guessing. -->
+            <div class="hero-now reveal" id="heroNow" role="status">
+              <span class="radar-pulse" aria-hidden="true"></span>
+              <span class="radar-badge" data-i18n="hero.radarBadge">دبلوم أمن المعلومات — الترم الحالي</span>
+              <span class="hero-now-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+              <span class="hero-now-text" id="heroNowText" data-i18n="now.loading">جارٍ تحديد موعد حصتك القادمة…</span>
+              <span class="hero-now-chip" id="heroNowChip" hidden></span>
+              <!-- MODULE 61 contextual entry point: shown by MODULE 55 only when a
+                   class is live or starts today/tomorrow — one tap to the access guide. -->
+              <a class="hero-now-guide" id="heroNowGuide" href="#guide" data-i18n="guide.nowCta" hidden>كيف أصل للمحاضرة؟</a>
+              <!-- MODULE 74 · contextual quiz reminder chip (hidden by default).
+                   Painted by MODULE 55 only when a dated quiz in announcements.js
+                   is live, today, or within the reminder window. -->
+              <a class="hero-now-quiz" id="heroNowQuiz" href="#quiz" hidden></a>
             </div>
-            <div class="hero-dash-overall">
-              <span class="hero-dash-label" data-i18n="dash.overall">التقدم العام في الاختبارات</span>
-              <strong class="hero-dash-value"><span id="heroDashPct">0</span>%</strong>
-              <div class="hero-dash-bar" id="heroDashOverallMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="التقدم العام في الاختبارات"><i id="heroDashBar" style="width:0%"></i></div>
-            </div>
-          </div>
 
-          <!-- Section tabs (MODULE 56). The dashboard's blocks are grouped
-               behind three tabs instead of being stacked, so the hero stays
-               compact while every value keeps its own mount id. Arrow keys
-               move between tabs (RTL-aware), only the active panel is in the
-               tab order, and the inactive panels are `hidden`. -->
-          <div class="hero-tabs" id="heroDashTabs" role="tablist" aria-label="أقسام لوحة الطالب">
-            <button type="button" class="hero-tab is-active" id="heroTabToday" role="tab" aria-selected="true" aria-controls="heroPanelToday" tabindex="0">
-              <span class="hero-tab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span data-i18n="dash.tabToday">اليوم</span>
+            <!-- Platform identity — clear name in Arabic & English + short description -->
+            <div class="hero-brand reveal" aria-label="اسم المنصة بالعربية والإنجليزية">
+              <strong class="hero-brand-ar">منصة أمن المعلومات</strong>
+              <span class="hero-brand-sep" aria-hidden="true">·</span>
+              <span class="hero-brand-en" lang="en" dir="ltr">Information Security Platform</span>
+            </div>
+            <h1 class="hero-title">
+              <span class="line"><span class="reveal-line" data-i18n="hero.title1">منصة تعليمية</span></span>
+              <span class="line"><span class="reveal-line" data-i18n="hero.title2">وتدريبية عملية </span><em class="grad" data-i18n="hero.titleAccent">لطلاب أمن المعلومات</em></span>
+            </h1>
+            <p class="hero-tagline reveal" data-i18n="hero.tagline">منصة عربية تعليمية لطلاب دبلوم أمن المعلومات — تعلّم، اختبر نفسك، وتدرّب عمليًا داخل متصفحك ودون اتصال.</p>
+            <p class="hero-sub reveal" data-i18n="hero.sub">منصة عربية متكاملة لطلاب أمن المعلومات: تعلّم أساسيات كل مادة، راجِع المصطلحات بالبطاقات، اختبر نفسك بأسئلة عملية، وطبّق ما تعلّمته بأدوات أمنية ومعامل محاكاة حقيقية — كل ذلك يعمل داخل متصفحك وبدون إنترنت.</p>
+
+            <!-- Command search trigger → opens the MODULE 48 palette by
+                 clicking the real navbar trigger, so there is a single
+                 source of truth for the dialog's behavior. -->
+            <button type="button" class="hero-search reveal" id="heroSearchTrigger" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="بحث في المنصة / Search the platform">
+              <span class="hero-search-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+              <span class="hero-search-text" data-i18n="hero.searchCta">ابحث في المنصة — درس، أداة، اختبار…</span>
+              <kbd aria-hidden="true">/</kbd>
             </button>
-            <button type="button" class="hero-tab" id="heroTabPath" role="tab" aria-selected="false" aria-controls="heroPanelPath" tabindex="-1">
-              <span class="hero-tab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg></span><span data-i18n="dash.tabPath">مساري</span>
-            </button>
-            <button type="button" class="hero-tab" id="heroTabMotivation" role="tab" aria-selected="false" aria-controls="heroPanelMotivation" tabindex="-1">
-              <span class="hero-tab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/></svg></span><span data-i18n="dash.tabMotivation">التحفيز</span>
-            </button>
-          </div>
 
-          <!-- Panel 1 · Today — the three actionable cells. -->
-          <div class="hero-panel" id="heroPanelToday" role="tabpanel" aria-labelledby="heroTabToday" tabindex="0">
-            <div class="hero-dash-grid is-3">
-              <article class="hero-dash-cell hero-dash-panel">
-                <span class="hero-dash-label" data-i18n="dash.nextLesson">الدرس التالي</span>
-                <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
-                <p class="hero-dash-meta" id="heroDashLessonMeta">—</p>
-              </article>
-
-              <article class="hero-dash-cell hero-dash-panel">
-                <span class="hero-dash-label" data-i18n="dash.pending">عمل غير مكتمل</span>
-                <strong class="hero-dash-value is-text" id="heroDashTasks">—</strong>
-                <p class="hero-dash-meta" id="heroDashTasksMeta">—</p>
-              </article>
-
-              <article class="hero-dash-cell hero-dash-panel is-continue">
-                <span class="hero-dash-label" data-i18n="dash.continueLabel">متابعة التعلم</span>
-                <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
-                <p class="hero-dash-meta" id="heroDashLast">—</p>
-                <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
-              </article>
+            <div class="hero-actions reveal">
+              <a href="#paths" class="btn btn-primary btn-lg magnetic" data-i18n="hero.ctaStart">ابدأ رحلة التعلم</a>
+              <a href="#semester" class="btn btn-ghost magnetic" data-i18n="hero.ctaSemester">استكشف الترم الحالي</a>
+              <a href="#labs" class="btn btn-ghost magnetic" data-i18n="hero.ctaLabs">ادخل المعامل</a>
             </div>
 
-            <div class="hero-dash-empty" id="heroDashEmpty" hidden>
-              <span aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg></span>
-              <p data-i18n="dash.emptyBody">لا يوجد تقدم محفوظ بعد. ابدأ بالمسار المقترح أو أول اختبار — ستظهر خطوتك التالية هنا تلقائيًا.</p>
-              <a href="#paths" class="btn btn-ghost btn-sm" id="heroDashEmptyLink" data-i18n="dash.emptyCta">استكشف مسارات التعلم</a>
-            </div>
-          </div>
-
-          <!-- Panel 2 · My path — the current learning path in full width. -->
-          <div class="hero-panel" id="heroPanelPath" role="tabpanel" aria-labelledby="heroTabPath" tabindex="0" hidden>
-            <div class="hero-dash-grid is-1">
-              <article class="hero-dash-cell hero-dash-panel">
-                <span class="hero-dash-label" data-i18n="dash.currentPath">المسار الحالي</span>
-                <strong class="hero-dash-value is-text" id="heroDashPath">—</strong>
-                <p class="hero-dash-meta" id="heroDashPathMeta">—</p>
-                <div class="hero-dash-bar is-path" id="heroDashPathMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المسار"><i id="heroDashPathBar" style="width:0%"></i></div>
-                <a href="#paths" class="hero-dash-link" id="heroDashPathLink" data-i18n="dash.openPath">افتح المسار</a>
-              </article>
-            </div>
-          </div>
-
-          <!-- Panel 3 · Motivation (MODULE 50) — unchanged content and ids. -->
-          <div class="hero-panel" id="heroPanelMotivation" role="tabpanel" aria-labelledby="heroTabMotivation" tabindex="0" hidden>
-
-          <!-- Local motivation system (MODULE 50). Purely local XP, levels,
-               goals, streak and achievements; no leaderboards or competition. -->
-          <section class="hero-dash-motivation" id="heroDashMotivation" aria-labelledby="motivationTitle">
-            <div class="motivation-top">
-              <div class="motivation-level">
-                <p class="motivation-kicker" data-i18n="motivation.kicker">نظام التحفيز المحلي</p>
-                <h3 class="motivation-title" id="motivationTitle">
-                  <span data-i18n="motivation.level">المستوى</span>
-                  <span id="heroDashLevel">1</span>
-                  <span aria-hidden="true">·</span>
-                  <span id="heroDashLevelTitle">مستكشف</span>
-                </h3>
-                <p class="hero-dash-meta" id="heroDashXp">0 XP</p>
-                <div class="hero-dash-bar is-xp" id="heroDashXpMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المستوى"><i id="heroDashXpBar" style="width:0%"></i></div>
-                <p class="hero-dash-meta" id="heroDashXpNext">—</p>
+            <!-- Start Here — new users: beginner-friendly entry point pointing at
+                 the Fundamentals path + the existing onboarding wizard. -->
+            <div class="hero-start reveal" id="heroStartHere">
+              <span class="hero-start-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg></span>
+              <div class="hero-start-text">
+                <strong data-i18n="starthere.title">جديد هنا؟ ابدأ من هنا</strong>
+                <span data-i18n="starthere.desc">مسار «الأساسيات» مصمم للمبتدئين — خمس خطوات قصيرة تنقلك من الصفر إلى أول اختبار.</span>
               </div>
-
-              <div class="motivation-goals">
-                <div class="motivation-goal">
-                  <span class="hero-dash-label" data-i18n="motivation.dailyGoal">هدف الدراسة اليومي</span>
-                  <strong class="motivation-goal-value" id="heroDashDaily">0 / 40 XP</strong>
-                  <div class="hero-dash-bar" id="heroDashDailyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="40" aria-valuenow="0" aria-label="هدف الدراسة اليومي"><i id="heroDashDailyBar" style="width:0%"></i></div>
-                </div>
-                <div class="motivation-goal">
-                  <span class="hero-dash-label" data-i18n="motivation.weeklyGoal">هدف الدراسة الأسبوعي</span>
-                  <strong class="motivation-goal-value" id="heroDashWeekly">0 / 200 XP</strong>
-                  <div class="hero-dash-bar" id="heroDashWeeklyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="200" aria-valuenow="0" aria-label="هدف الدراسة الأسبوعي"><i id="heroDashWeeklyBar" style="width:0%"></i></div>
-                </div>
-                <div class="motivation-goal is-streak">
-                  <span class="hero-dash-label" data-i18n="motivation.streak">سلسلة الدراسة</span>
-                  <strong class="motivation-goal-value" id="heroDashStreak">0</strong>
-                  <p class="hero-dash-meta" data-i18n="motivation.streakHint">أيام متتالية من النشاط الحقيقي</p>
-                </div>
+              <div class="hero-start-actions">
+                <a href="#path/fundamentals" class="btn btn-primary btn-sm" data-i18n="starthere.cta">ابدأ مسار الأساسيات</a>
+                <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
+                <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
               </div>
             </div>
 
-            <div class="motivation-achievements">
-              <div class="motivation-achievements-head">
-                <h4 data-i18n="motivation.achievements">الإنجازات</h4>
-                <span id="heroDashBadgeCount">0 / 9</span>
-              </div>
-              <div class="motivation-badges" id="heroDashBadges" role="list"></div>
+            <div class="hero-meta hero-meta--compact reveal">
+              <div class="hero-stat"><strong data-count="questions">0</strong><span data-i18n="hero.statq">سؤال تدريبي</span></div>
+              <div class="hero-stat"><strong data-count="subjects">0</strong><span data-i18n="hero.stats">مواد دراسية</span></div>
+              <div class="hero-stat"><strong data-count="tools">0</strong><span data-i18n="hero.statTools">أدوات تفاعلية</span></div>
             </div>
-
-            <div class="motivation-reset-row">
-              <p class="hero-dash-meta" data-i18n="motivation.resetNote">تُحفظ بيانات التحفيز على جهازك فقط، وإعادة الضبط لا تحذف نتائج الاختبارات أو تقدم المسارات.</p>
-              <button type="button" class="btn btn-ghost btn-sm" id="heroDashReset" data-i18n="motivation.reset">إعادة ضبط التحفيز</button>
-            </div>
-          </section>
           </div>
-        </section>
 
-        <!-- Continue-learning card (MODULE 37b). Hidden until the quiz store
-             holds a resumable session or saved results; JS fills it in. -->
-        <div class="hero-continue" id="heroContinue" hidden>
-          <div class="hero-continue-inner">
-            <span class="hero-continue-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3l14 9-14 9V3z"/></svg></span>
-            <div class="hero-continue-text">
-              <strong data-i18n="hero.continueLabel">متابعة التعلم</strong>
-              <span id="heroContinueMeta" class="hero-continue-meta" aria-live="polite"></span>
-            </div>
-            <button type="button" class="btn btn-primary btn-sm" id="heroContinueBtn">تابع من حيث توقفت</button>
+          <!-- ═══ Interactive column · Cyber Command Deck ═══ -->
+          <div class="hero-side">
+            <!-- Student command center (MODULE 47) inside a console shell.
+                 Tilt/spotlight are applied by motion.js (per-element, only
+                 when fine-hover + motion allowed). Every value keeps its
+                 own mount id, so MODULEs 37b/47/50/56/57 run unchanged. -->
+            <section class="hero-dash hero-command cmd-deck reveal" id="heroDash" aria-labelledby="heroDashTitle">
+              <div class="deck-chrome" aria-hidden="true">
+                <span class="deck-dot"></span><span class="deck-dot"></span><span class="deck-dot"></span>
+                <span class="deck-chrome-title" dir="ltr">nova://command-deck</span>
+                <span class="deck-chrome-led"></span>
+              </div>
+
+              <div class="hero-dash-head">
+                <div class="hero-dash-intro">
+                  <p class="hero-dash-kicker" data-i18n="dash.kicker">لوحة الطالب</p>
+                  <h2 class="hero-dash-title" id="heroDashTitle">مرحبًا بك في لوحة تعلّمك</h2>
+                  <p class="hero-dash-welcome" id="heroDashWelcome" aria-live="polite">ابدأ مسارًا أو اختبارًا وسيظهر تقدمك هنا — محفوظًا على جهازك فقط.</p>
+                </div>
+              </div>
+
+              <!-- Section tabs (MODULE 56). The dashboard's blocks are grouped
+                   behind three tabs instead of being stacked, so the hero stays
+                   compact while every value keeps its own mount id. Arrow keys
+                   move between tabs (RTL-aware), only the active panel is in the
+                   tab order, and the inactive panels are `hidden`.
+                   v3: Radar is the default face of the deck; the Telemetry tab
+                   keeps every legacy dashboard/motivation mount, and the
+                   MODULE 57 next-action strip lives there too. -->
+              <div class="hero-tabs" id="heroDashTabs" role="tablist" aria-label="أقسام لوحة الطالب">
+                <button type="button" class="hero-tab is-active" id="heroTabRadar" role="tab" aria-selected="true" aria-controls="heroPanelRadar" tabindex="0">
+                  <span class="hero-tab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 12 19 5"/><path d="M12 5a7 7 0 1 1-7 7"/><circle cx="12" cy="12" r="1"/></svg></span><span data-i18n="deck.tabRadar">رادار الترم</span>
+                </button>
+                <button type="button" class="hero-tab" id="heroTabTerminal" role="tab" aria-selected="false" aria-controls="heroPanelTerminal" tabindex="-1">
+                  <span class="hero-tab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m4 17 6-6-6-6"/><path d="M12 19h8"/></svg></span><span data-i18n="deck.tabTerminal">طرفية سيبرانية</span>
+                </button>
+                <button type="button" class="hero-tab" id="heroTabConsole" role="tab" aria-selected="false" aria-controls="heroPanelConsole" tabindex="-1">
+                  <span class="hero-tab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M12 3v9l6.4 3.2"/></svg></span><span data-i18n="deck.tabConsole">قياس الأداء</span>
+                </button>
+              </div>
+
+              <!-- Panel 1 · Semester radar — MODULE 92 paints the rows from
+                   current-semester.js (pure DOM text, no network). -->
+              <div class="hero-panel" id="heroPanelRadar" role="tabpanel" aria-labelledby="heroTabRadar" tabindex="0">
+                <div class="radar-head">
+                  <span class="radar-kicker" data-i18n="deck.radarKicker">الترم الحالي · مباشر</span>
+                  <span class="radar-next" id="heroRadarNext" aria-live="polite"></span>
+                </div>
+                <ul class="radar-list" id="heroRadarList"></ul>
+                <p class="radar-empty" id="heroRadarEmpty" data-i18n="deck.radarEmpty" hidden>لا توجد مواد مسجلة للترم الحالي بعد.</p>
+              </div>
+
+              <!-- Panel 2 · Mini cyber terminal — MODULE 92 wires the input;
+                   commands (scan/caesar/help/clear) run fully in the browser. -->
+              <div class="hero-panel" id="heroPanelTerminal" role="tabpanel" aria-labelledby="heroTabTerminal" tabindex="0" hidden>
+                <div class="deck-term-head">
+                  <span class="deck-term-title" dir="ltr">mini-sec-term ~ nova</span>
+                  <span class="deck-term-sug" data-i18n="deck.termHint">جرّب: scan · caesar · help</span>
+                </div>
+                <div class="deck-term-log" id="heroTermLog" role="log" aria-live="polite" data-lenis-prevent></div>
+                <form class="deck-term-form" id="heroTermForm">
+                  <span class="deck-term-prompt" aria-hidden="true" dir="ltr">guest@nova:~$</span>
+                  <input class="deck-term-input" id="heroTermInput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" dir="ltr" placeholder="type a command…" aria-label="أمر الطرفية المصغرة / Mini terminal command" />
+                </form>
+                <a class="deck-term-link" href="#labs" data-i18n="deck.termLab">افتح معمل المحاكاة الكامل ←</a>
+              </div>
+
+              <!-- Panel 3 · Telemetry & XP HUD — every legacy mount lives here
+                   exactly as before; the radial gauges mirror MODULEs 50/47
+                   via MODULE 92 (DOM values only). -->
+              <div class="hero-panel" id="heroPanelConsole" role="tabpanel" aria-labelledby="heroTabConsole" tabindex="0" hidden>
+                <div class="hud-gauges">
+                  <div class="hud-gauge">
+                    <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false"><circle class="hud-ring" cx="60" cy="60" r="46"/><circle class="hud-ring is-value" id="heroGaugeLevelArc" cx="60" cy="60" r="46" pathLength="100"/></svg>
+                    <strong class="hud-gauge-value" id="heroGaugeLevelValue">1</strong>
+                    <span class="hud-gauge-label" data-i18n="motivation.level">المستوى</span>
+                  </div>
+                  <div class="hud-gauge">
+                    <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false"><circle class="hud-ring" cx="60" cy="60" r="46"/><circle class="hud-ring is-value" id="heroGaugeXpArc" cx="60" cy="60" r="46" pathLength="100"/></svg>
+                    <strong class="hud-gauge-value is-text" id="heroGaugeXpValue">0 XP</strong>
+                    <span class="hud-gauge-label" data-i18n="motivation.xp">XP</span>
+                  </div>
+                  <div class="hud-gauge">
+                    <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false"><circle class="hud-ring" cx="60" cy="60" r="46"/><circle class="hud-ring is-value" id="heroGaugeDoneArc" cx="60" cy="60" r="46" pathLength="100"/></svg>
+                    <strong class="hud-gauge-value"><span id="heroDashPct">0</span>%</strong>
+                    <span class="hud-gauge-label" data-i18n="dash.overall">التقدم العام في الاختبارات</span>
+                  </div>
+                </div>
+
+                <div class="hero-dash-overall hud-meter-row">
+                  <span class="hero-dash-label" data-i18n="dash.overall">التقدم العام في الاختبارات</span>
+                  <div class="hero-dash-bar" id="heroDashOverallMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="التقدم العام في الاختبارات"><i id="heroDashBar" style="width:0%"></i></div>
+                </div>
+
+                <!-- Adaptive next step (MODULE 57). For students who already
+                     have real saved progress this strip replaces the "new here?"
+                     strip and offers the SINGLE most useful next action,
+                     derived only from local state: an unfinished quiz session →
+                     missed questions → the last opened lesson → a path in
+                     progress. Both strip buttons are document-delegated, so the
+                     replay controls keep working from here. It stays inside the
+                     dashboard section (hidden panels included) because the
+                     "start here" swap is one of its contracts. -->
+                <div class="hero-start hero-next reveal" id="heroNextAction" hidden>
+                  <span class="hero-start-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+                  <div class="hero-start-text">
+                    <strong id="heroNextTitle" data-i18n="next.title">خطوتك التالية</strong>
+                    <span id="heroNextMeta" aria-live="polite">—</span>
+                  </div>
+                  <div class="hero-start-actions">
+                    <a href="#quiz" class="btn btn-primary btn-sm" id="heroNextBtn">ابدأ</a>
+                    <button type="button" class="btn btn-ghost btn-sm" data-tour-reopen data-i18n="starthere.tour">جولة الأقسام</button>
+                    <button type="button" class="btn btn-ghost btn-sm" data-onboarding-reopen data-i18n="starthere.wizard">جولة التعريف</button>
+                    <button type="button" class="btn btn-ghost btn-sm" id="heroNextDismiss" data-i18n="next.dismiss">إخفاء</button>
+                  </div>
+                </div>
+
+                <div class="hero-dash-grid is-3">
+                  <article class="hero-dash-cell hero-dash-panel">
+                    <span class="hero-dash-label" data-i18n="dash.nextLesson">الدرس التالي</span>
+                    <strong class="hero-dash-value is-text" id="heroDashLesson">—</strong>
+                    <p class="hero-dash-meta" id="heroDashLessonMeta">—</p>
+                  </article>
+
+                  <article class="hero-dash-cell hero-dash-panel">
+                    <span class="hero-dash-label" data-i18n="dash.pending">عمل غير مكتمل</span>
+                    <strong class="hero-dash-value is-text" id="heroDashTasks">—</strong>
+                    <p class="hero-dash-meta" id="heroDashTasksMeta">—</p>
+                  </article>
+
+                  <article class="hero-dash-cell hero-dash-panel is-continue">
+                    <span class="hero-dash-label" data-i18n="dash.continueLabel">متابعة التعلم</span>
+                    <strong class="hero-dash-value is-text" id="heroDashQuiz">—</strong>
+                    <p class="hero-dash-meta" id="heroDashLast">—</p>
+                    <a href="#paths" class="btn btn-primary btn-sm btn-block" id="heroDashContinue" data-i18n="dash.continue">متابعة التعلم</a>
+                  </article>
+                </div>
+
+                <div class="hero-dash-empty" id="heroDashEmpty" hidden>
+                  <span aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg></span>
+                  <p data-i18n="dash.emptyBody">لا يوجد تقدم محفوظ بعد. ابدأ بالمسار المقترح أو أول اختبار — ستظهر خطوتك التالية هنا تلقائيًا.</p>
+                  <a href="#paths" class="btn btn-ghost btn-sm" id="heroDashEmptyLink" data-i18n="dash.emptyCta">استكشف مسارات التعلم</a>
+                </div>
+
+                <div class="hero-dash-grid is-1">
+                  <article class="hero-dash-cell hero-dash-panel">
+                    <span class="hero-dash-label" data-i18n="dash.currentPath">المسار الحالي</span>
+                    <strong class="hero-dash-value is-text" id="heroDashPath">—</strong>
+                    <p class="hero-dash-meta" id="heroDashPathMeta">—</p>
+                    <div class="hero-dash-bar is-path" id="heroDashPathMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المسار"><i id="heroDashPathBar" style="width:0%"></i></div>
+                    <a href="#paths" class="hero-dash-link" id="heroDashPathLink" data-i18n="dash.openPath">افتح المسار</a>
+                  </article>
+                </div>
+
+                <!-- Local motivation system (MODULE 50). Purely local XP, levels,
+                     goals, streak and achievements; no leaderboards or competition. -->
+                <section class="hero-dash-motivation" id="heroDashMotivation" aria-labelledby="motivationTitle">
+                  <div class="motivation-top">
+                    <div class="motivation-level">
+                      <p class="motivation-kicker" data-i18n="motivation.kicker">نظام التحفيز المحلي</p>
+                      <h3 class="motivation-title" id="motivationTitle">
+                        <span data-i18n="motivation.level">المستوى</span>
+                        <span id="heroDashLevel">1</span>
+                        <span aria-hidden="true">·</span>
+                        <span id="heroDashLevelTitle">مستكشف</span>
+                      </h3>
+                      <p class="hero-dash-meta" id="heroDashXp">0 XP</p>
+                      <div class="hero-dash-bar is-xp" id="heroDashXpMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم المستوى"><i id="heroDashXpBar" style="width:0%"></i></div>
+                      <p class="hero-dash-meta" id="heroDashXpNext">—</p>
+                    </div>
+
+                    <div class="motivation-goals">
+                      <div class="motivation-goal">
+                        <span class="hero-dash-label" data-i18n="motivation.dailyGoal">هدف الدراسة اليومي</span>
+                        <strong class="motivation-goal-value" id="heroDashDaily">0 / 40 XP</strong>
+                        <div class="hero-dash-bar" id="heroDashDailyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="40" aria-valuenow="0" aria-label="هدف الدراسة اليومي"><i id="heroDashDailyBar" style="width:0%"></i></div>
+                      </div>
+                      <div class="motivation-goal">
+                        <span class="hero-dash-label" data-i18n="motivation.weeklyGoal">هدف الدراسة الأسبوعي</span>
+                        <strong class="motivation-goal-value" id="heroDashWeekly">0 / 200 XP</strong>
+                        <div class="hero-dash-bar" id="heroDashWeeklyMeter" role="progressbar" aria-valuemin="0" aria-valuemax="200" aria-valuenow="0" aria-label="هدف الدراسة الأسبوعي"><i id="heroDashWeeklyBar" style="width:0%"></i></div>
+                      </div>
+                      <div class="motivation-goal is-streak">
+                        <span class="hero-dash-label" data-i18n="motivation.streak">سلسلة الدراسة</span>
+                        <strong class="motivation-goal-value" id="heroDashStreak">0</strong>
+                        <p class="hero-dash-meta" data-i18n="motivation.streakHint">أيام متتالية من النشاط الحقيقي</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="motivation-achievements">
+                    <div class="motivation-achievements-head">
+                      <h4 data-i18n="motivation.achievements">الإنجازات</h4>
+                      <span id="heroDashBadgeCount">0 / 9</span>
+                    </div>
+                    <div class="motivation-badges" id="heroDashBadges" role="list"></div>
+                  </div>
+
+                  <div class="motivation-reset-row">
+                    <p class="hero-dash-meta" data-i18n="motivation.resetNote">تُحفظ بيانات التحفيز على جهازك فقط، وإعادة الضبط لا تحذف نتائج الاختبارات أو تقدم المسارات.</p>
+                    <button type="button" class="btn btn-ghost btn-sm" id="heroDashReset" data-i18n="motivation.reset">إعادة ضبط التحفيز</button>
+                  </div>
+                </section>
+
+                <!-- Continue-learning card (MODULE 37b). Hidden until the quiz store
+                     holds a resumable session or saved results; JS fills it in. -->
+                <div class="hero-continue" id="heroContinue" hidden>
+                  <div class="hero-continue-inner">
+                    <span class="hero-continue-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 3l14 9-14 9V3z"/></svg></span>
+                    <div class="hero-continue-text">
+                      <strong data-i18n="hero.continueLabel">متابعة التعلم</strong>
+                      <span id="heroContinueMeta" class="hero-continue-meta" aria-live="polite"></span>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" id="heroContinueBtn">تابع من حيث توقفت</button>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
-        <p class="hero-credit reveal" data-i18n-html="hero.credit">صُمّم وطُوّر بواسطة <em class="grad">أحمد مطمي</em></p>
-        <div class="hero-meta hero-meta--compact reveal">
-          <div class="hero-stat"><strong data-count="questions">0</strong><span data-i18n="hero.statq">سؤال تدريبي</span></div>
-          <div class="hero-stat"><strong data-count="subjects">0</strong><span data-i18n="hero.stats">مواد دراسية</span></div>
-          <div class="hero-stat"><strong data-count="tools">0</strong><span data-i18n="hero.statTools">أدوات تفاعلية</span></div>
+        <!-- ═══ Cyber Bento Matrix (MODULE 92) ═══ -->
+        <div class="bento-matrix" id="bentoMatrix">
+          <article class="bento-card bento-sem reveal">
+            <span class="bento-glow" aria-hidden="true"></span>
+            <div class="bento-head">
+              <p class="bento-kicker" data-i18n="bento.semKicker">نظرة سريعة</p>
+              <h3 class="bento-title" data-i18n="bento.semTitle">الجدول الأسبوعي للترم الحالي</h3>
+            </div>
+            <ul class="bento-sched" id="bentoSemList"></ul>
+            <a href="#semester" class="bento-cta" data-i18n="bento.semCta">افتح لوحة الترم كاملة ←</a>
+          </article>
+
+          <article class="bento-card bento-soc reveal">
+            <span class="bento-glow" aria-hidden="true"></span>
+            <div class="bento-head">
+              <p class="bento-kicker" data-i18n="bento.socKicker">مختبرات المحاكاة</p>
+              <h3 class="bento-title" data-i18n="bento.socTitle">غرفة العمليات الأمنية</h3>
+            </div>
+            <div class="bento-labs">
+              <a class="soc-lab" href="#redteam">
+                <span class="soc-lab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                <strong data-i18n="labs.redteam">المختبر الهجومي</strong>
+                <span class="soc-lab-meta" dir="ltr">Bash · SQL · NetLab</span>
+              </a>
+              <a class="soc-lab" href="#cryptolab">
+                <span class="soc-lab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                <strong data-i18n="labs.crypto">مختبر التشفير</strong>
+                <span class="soc-lab-meta" dir="ltr">Caesar · RSA · Enigma</span>
+              </a>
+              <a class="soc-lab" href="#ir">
+                <span class="soc-lab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></span>
+                <strong data-i18n="labs.ir">مركز الحوادث</strong>
+                <span class="soc-lab-meta" dir="ltr">SIEM · RCA · Kill-chain</span>
+              </a>
+              <a class="soc-lab" href="#games">
+                <span class="soc-lab-ico" aria-hidden="true"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12h4M8 10v4"/><circle cx="15.5" cy="13.5" r="1"/><circle cx="18.5" cy="10.5" r="1"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.6c-.09.75-.15 1.5-.2 2.25a48 48 0 0 0 0 2.3A3.5 3.5 0 0 0 6 16.5c1 0 1.9-.5 2.5-1.2l.7-.8h5.6l.7.8c.6.7 1.5 1.2 2.5 1.2a3.5 3.5 0 0 0 3.5-3.35 48 48 0 0 0 0-2.3c-.05-.75-.11-1.5-.2-2.25A4 4 0 0 0 17.32 5Z"/></svg></span>
+                <strong data-i18n="labs.games">مختبر الحوادث (CTF)</strong>
+                <span class="soc-lab-meta" dir="ltr">CTF · IR console</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="bento-card bento-arsenal reveal">
+            <span class="bento-glow" aria-hidden="true"></span>
+            <div class="bento-head">
+              <p class="bento-kicker" data-i18n="bento.arsenalKicker">الترسانة</p>
+              <h3 class="bento-title" data-i18n="bento.arsenalTitle">12 أداة تعمل في متصفحك</h3>
+            </div>
+            <div class="arsenal-strip" id="arsenalStrip"></div>
+            <a href="#tools" class="bento-cta" data-i18n="bento.arsenalCta">افتح كل الأدوات ←</a>
+          </article>
         </div>
       </div>
-
-      <div class="scroll-hint" aria-hidden="true"><span></span></div>
     </header>
-
-    <!-- MARQUEE -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
-        <span>أمن المعلومات&nbsp;✦</span><span>الخوارزميات&nbsp;✦</span><span>نظم التشغيل&nbsp;✦</span><span>السياسات والتشريعات&nbsp;✦</span><span>مكونات تقنية المعلومات&nbsp;✦</span><span>التصميم في الأمن السيبراني&nbsp;✦</span>
-        <span>أمن المعلومات&nbsp;✦</span><span>الخوارزميات&nbsp;✦</span><span>نظم التشغيل&nbsp;✦</span><span>السياسات والتشريعات&nbsp;✦</span><span>مكونات تقنية المعلومات&nbsp;✦</span><span>التصميم في الأمن السيبراني&nbsp;✦</span>
-      </div>
-    </div>
 
     <!-- LEARNING PATHS -->
     <section class="section paths" id="paths" aria-labelledby="pathsTitle">
@@ -564,6 +704,11 @@
         <p class="eyebrow" data-i18n="paths.eyebrow">مسارات التعلم</p>
         <h2 class="section-title" id="pathsTitle" data-i18n-html="paths.title">من أين تبدأ؟ إليك <em class="grad">مساراتك</em></h2>
         <p class="section-sub" data-i18n="paths.sub">عشرة مسارات منظمة تغطي رحلتك كاملة في أمن المعلومات — من الأساسيات إلى الاختراق الأخلاقي والاستجابة للحوادث: لكل مسار مواضيع مرتبة واختبارات وأدوات عملية.</p>
+        <div class="quick-strip reveal" role="navigation" aria-label="اختصارات المسارات السريعة">
+          <a href="#skills" class="btn btn-sm btn-ghost" data-i18n="nav.skills">شجرة المهارات</a>
+          <a href="#kali" class="btn btn-sm btn-ghost" data-i18n="nav.kali">تثبت كالي</a>
+          <a href="#guide" class="btn btn-sm btn-ghost" data-i18n="nav.guide">دليل المحاضرات</a>
+        </div>
       </div>
 
       <!-- Structured path cards (MODULE 39 · LearningPaths). Rendered from
@@ -636,6 +781,15 @@
         <p class="eyebrow" data-i18n="semester.eyebrow">دليل الترم الحالي</p>
         <h2 class="section-title" id="semesterTitle" data-i18n-html="semester.title">لوحة <em class="grad">الترم الحالي</em></h2>
         <p class="section-sub" data-i18n="semester.sub">خطة الترم الحالي كاملة في مكان واحد: المواد الرسمية، الجدول الأسبوعي، الساعات المعتمدة، وحلقات الوصول إلى الاختبارات والأدوات والمعامل.</p>
+      </div>
+
+      <div class="quick-strip reveal" role="navigation" aria-label="اختصارات الترم السريعة">
+        <!-- MODULE 97 · كل ما خُفت من القوائم العالمية لهذا الاتجاه أصبح صفًّا واحدًا داخل بيته. -->
+        <a href="#guide" class="btn btn-sm btn-ghost" data-i18n="nav.guide">دليل المحاضرات</a>
+        <a href="#progress" class="btn btn-sm btn-ghost" data-i18n="nav.progress">تقدمك</a>
+        <a href="#student" class="btn btn-sm btn-ghost" data-i18n="nav.student">أدوات الطالب</a>
+        <a href="#skills" class="btn btn-sm btn-ghost" data-i18n="nav.skills">شجرة المهارات</a>
+        <a href="#kali" class="btn btn-sm btn-ghost" data-i18n="nav.kali">تثبت كالي</a>
       </div>
 
       <div class="semester-summary reveal" id="semesterMeta"></div>
@@ -941,6 +1095,18 @@
           <p class="quiz-hint" data-i18n="quiz.hint"> اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
         </div>
       </details>
+      <!-- MODULE 99 · بنك الفترات — past-quiz revision lists. One hub for ALL
+           subjects (outside the quiz grid): each row opens a question &
+           answer sheet. New subjects append automatically as
+           data/quiz-bank.json grows; the panel stays hidden until banks
+           exist, so a failed load never leaves an empty shell. -->
+      <div id="bankHub" class="bank-hub" hidden>
+        <div class="bank-hub-head">
+          <h3 class="bank-hub-title" data-i18n="bank.hubTitle">بنك الفترات</h3>
+          <p class="bank-hub-sub" data-i18n="bank.hubSub">سؤال وجواب من كويزات الفترات السابقة — ورقة مراجعة مباشرة قبل الاختبار.</p>
+        </div>
+        <div id="bankHubList" class="bank-hub-list"></div>
+      </div>
       <!-- MODULE 64 · MockExam — one full paper from every bank, one total timer. -->
       <div id="mockApp" class="mock-app reveal" aria-live="polite"></div>
     </section>
@@ -1546,6 +1712,10 @@
         <li><a href="#flashcards/timed" data-i18n="nav.flashcardsTimed">المراجعة الموقوتة</a></li>
         <li><a href="#progress" data-i18n="nav.progress">تقدمك</a></li>
         <li><a href="#theatre" data-i18n="nav.theatre">مسرح التهديدات</a></li>
+        <li><a href="#guide" data-i18n="nav.guide">دليل المحاضرات</a></li>
+        <li><a href="#skills" data-i18n="nav.skills">شجرة المهارات</a></li>
+        <li><a href="#student" data-i18n="nav.student">أدوات الطالب</a></li>
+        <li><a href="#depth" data-i18n="nav.depth">العمق الدفاعي</a></li>
         <li><a href="#about" data-i18n="nav.about">حول المنصة</a></li>
         <li><a href="#contact" data-i18n="nav.contact">التواصل</a></li>
       </ul>
@@ -1587,7 +1757,7 @@
           </svg>
         </button>
       </header>
-      <div id="assistantLog" class="assistant-log" role="log" aria-live="polite" aria-label="سجل المحادثة"></div>
+      <div id="assistantLog" class="assistant-log" role="log" aria-live="polite" aria-label="سجل المحادثة" data-lenis-prevent></div>
       <div id="assistantChips" class="assistant-chips" aria-label="أسئلة مقترحة"></div>
       <form id="assistantForm" class="assistant-form">
         <input id="assistantInput" class="assistant-input" type="text" autocomplete="off"
@@ -1631,8 +1801,8 @@
           <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
-      <ul id="searchResults" class="search-results" role="listbox" aria-label="نتائج البحث"></ul>
-      <p class="search-foot"><kbd>/</kbd> <span data-i18n="search.hint">أو Ctrl+K للفتح · Esc للإغلاق · ↑↓ للتنقل</span></p>
+      <ul id="searchResults" class="search-results" role="listbox" aria-label="نتائج البحث" data-lenis-prevent></ul>
+      <p class="search-foot"><kbd>/</kbd> <span data-i18n="search.hint">أو Ctrl+K للفتح · Esc للإغلاق · ↑↓ للتنقل</span><span class="search-kbds" aria-hidden="true"><kbd>↑</kbd><kbd>↓</kbd><kbd>Enter</kbd><kbd>Esc</kbd></span></p>
     </div>
   </div>
 
@@ -1646,7 +1816,7 @@
         <a class="btn btn-sm btn-ghost mat-viewer-open" id="matViewerOpen" target="_blank" rel="noopener">فتح في تبويب جديد</a>
         <button type="button" class="btn btn-sm btn-ghost mat-viewer-close" id="matViewerClose" aria-label="إغلاق">✕</button>
       </div>
-      <div class="mat-viewer-body">
+      <div class="mat-viewer-body" data-lenis-prevent>
         <object class="mat-viewer-frame" id="matViewerFrame" type="application/pdf" aria-label="عرض الفصل">
           <p class="mat-viewer-fallback">لا يدعم متصفحك العرض المدمج — <a id="matViewerLink" href="#" download>حمّل الفصل</a> بدلًا من ذلك.</p>
         </object>
@@ -1654,28 +1824,133 @@
     </div>
   </div>
 
+  <!-- MODULE 54c · CanvaStudio — the online-only Canva companion.
+       One floating trigger opens a slide-over studio bundling ten Canva
+       experiences: deck theatre, gallery + lightbox, subject flip-cards,
+       visual explainers, student templates, shared whiteboard, card of
+       the day, cinematic background mode, share card and the weekly
+       flyer. Every slot stays inert until a real Canva link is pasted
+       into CANVA_LINKS inside script.js (MODULE 54c). -->
+  <button type="button" id="canvaFab" class="canva-fab" aria-haspopup="dialog" aria-controls="canvaStudio" aria-expanded="false">
+    <svg class="ui-ico canva-fab-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>
+    <span class="canva-fab-label" data-i18n="canva.fab">استوديو كانفا</span>
+  </button>
+
+  <div class="canva-studio" id="canvaStudio" role="dialog" aria-modal="true" aria-labelledby="canvaTitle" aria-hidden="true" inert hidden>
+    <div class="canva-studio-panel" data-lenis-prevent>
+      <div class="canva-studio-head">
+        <div class="canva-studio-titles">
+          <h2 id="canvaTitle" class="canva-studio-title" data-i18n="canva.title">استوديو كانفا</h2>
+          <p id="canvaSub" class="canva-studio-sub" data-i18n="canva.sub">عشر تجارب بصرية تفاعلية — عروض، معرض تصاميم، بطاقات مواد، سبورة مشتركة والمزيد.</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-ghost canva-close" id="canvaClose" aria-label="إغلاق / Close">✕</button>
+      </div>
+      <div class="canva-tabs" id="canvaTabs" role="tablist" aria-label="أقسام الاستوديو">
+        <button type="button" class="canva-tab is-active" id="canvaTabHome" role="tab" aria-selected="true" aria-controls="canvaPanelHome" tabindex="0" data-i18n="canva.tab.home">الرئيسية</button>
+        <button type="button" class="canva-tab" id="canvaTabMedia" role="tab" aria-selected="false" aria-controls="canvaPanelMedia" tabindex="-1" data-i18n="canva.tab.media">العروض والمعرض</button>
+        <button type="button" class="canva-tab" id="canvaTabExplain" role="tab" aria-selected="false" aria-controls="canvaPanelExplain" tabindex="-1" data-i18n="canva.tab.explain">الشرح البصري</button>
+        <button type="button" class="canva-tab" id="canvaTabCards" role="tab" aria-selected="false" aria-controls="canvaPanelCards" tabindex="-1" data-i18n="canva.tab.cards">بطاقات المواد</button>
+        <button type="button" class="canva-tab" id="canvaTabWork" role="tab" aria-selected="false" aria-controls="canvaPanelWork" tabindex="-1" data-i18n="canva.tab.work">الورشة</button>
+      </div>
+      <div class="canva-body">
+        <section class="canva-panel" id="canvaPanelHome" role="tabpanel" aria-labelledby="canvaTabHome" tabindex="0">
+          <div class="canva-pin" id="canvaFlyerMount"></div>
+          <div class="canva-daily" id="canvaDaily"></div>
+          <div class="canva-row">
+            <button type="button" class="btn btn-sm btn-ghost" id="canvaAmbientBtn" aria-pressed="false" data-i18n="canva.ambientOff">شغّل الخلفية السينمائية</button>
+            <p class="canva-note" id="canvaAmbientNote" data-i18n="canva.unconfigured">لم يُضَف رابط كانفا بعد.</p>
+          </div>
+          <div class="canva-row">
+            <button type="button" class="btn btn-sm btn-primary" id="canvaShareBtn" data-i18n="canva.shareBtn">مشاركة المنصة</button>
+            <a class="btn btn-sm btn-ghost" id="canvaPosterLink" href="#" target="_blank" rel="noopener noreferrer" hidden data-i18n="canva.posterLink">افتح ملصق الإنجاز في كانفا</a>
+            <p class="canva-note" id="canvaShareNote" hidden></p>
+          </div>
+        </section>
+        <section class="canva-panel" id="canvaPanelMedia" role="tabpanel" aria-labelledby="canvaTabMedia" tabindex="0" hidden>
+          <div class="canva-deckrow">
+            <label class="canva-label" for="canvaDeckSelect" data-i18n="canva.deckSelect">اختر عرضًا</label>
+            <select class="canva-select" id="canvaDeckSelect"></select>
+          </div>
+          <div class="canva-embed" id="canvaDeckHost"></div>
+          <h3 class="canva-h3" data-i18n="canva.galleryTitle">معرض التصاميم</h3>
+          <div class="canva-gallery" id="canvaGalleryGrid"></div>
+        </section>
+        <section class="canva-panel" id="canvaPanelExplain" role="tabpanel" aria-labelledby="canvaTabExplain" tabindex="0" hidden>
+          <h3 class="canva-h3" data-i18n="canva.explainTitle">اشرح لي بصريًا</h3>
+          <div class="canva-explain-list" id="canvaExplainMount"></div>
+        </section>
+        <section class="canva-panel" id="canvaPanelCards" role="tabpanel" aria-labelledby="canvaTabCards" tabindex="0" hidden>
+          <h3 class="canva-h3" data-i18n="canva.cardsTitle">بطاقات المواد المتحركة</h3>
+          <p class="canva-hint" data-i18n="canva.cardsHint">اضغط أي بطاقة لتقلبها وتشاهد ملصق كانفا الخاص بالمادة.</p>
+          <div class="canva-cards" id="canvaCardsMount"></div>
+        </section>
+        <section class="canva-panel" id="canvaPanelWork" role="tabpanel" aria-labelledby="canvaTabWork" tabindex="0" hidden>
+          <h3 class="canva-h3" data-i18n="canva.templatesTitle">قوالب جاهزة للطلاب</h3>
+          <div class="canva-template-list" id="canvaTemplatesMount"></div>
+          <h3 class="canva-h3" data-i18n="canva.whiteboardTitle">السبورة الجماعية</h3>
+          <div class="canva-embed" id="canvaWhiteboardMount"></div>
+        </section>
+      </div>
+    </div>
+    <div class="canva-lightbox" id="canvaLightbox" role="dialog" aria-modal="true" aria-labelledby="canvaLightboxTitle" aria-hidden="true" hidden>
+      <div class="canva-lightbox-panel">
+        <div class="canva-lightbox-head">
+          <h3 class="canva-lightbox-title" id="canvaLightboxTitle"></h3>
+          <div class="canva-lightbox-nav">
+            <button type="button" class="btn btn-sm btn-ghost" id="canvaLightboxPrev" data-i18n="canva.prev">السابق</button>
+            <button type="button" class="btn btn-sm btn-ghost" id="canvaLightboxNext" data-i18n="canva.next">التالي</button>
+            <button type="button" class="btn btn-sm btn-ghost canva-close" id="canvaLightboxClose" aria-label="إغلاق / Close">✕</button>
+          </div>
+        </div>
+        <div class="canva-embed canva-lightbox-host" id="canvaLightboxHost"></div>
+      </div>
+    </div>
+  </div>
+  <video id="canvaAmbient" class="canva-ambient" muted loop playsinline preload="none" aria-hidden="true" hidden></video>
+
   <script src="data/flashcards.js" defer></script>
   <script src="data/threat-theatre.js" defer></script>
   <script src="current-semester.js" defer></script>
   <script src="announcements.js" defer></script>
   <script src="script.js" defer></script>
   <script src="assistant.js" defer></script>
-  <!-- SW registration must happen after script.js so navigator.serviceWorker is available.
-       Scope is intentionally relative (./) so it works under GH Pages project paths. -->
+  <!-- MODULE 90 · Motion layer: vendored GSAP core + ScrollTrigger + Lenis
+       (local copies, loaded with defer in dependency order) and the
+       platform glue. All optional — motion.js feature-detects and the
+       site falls back to its original native-scroll behaviour. -->
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/ScrollTrigger.min.js" defer></script>
+  <script src="vendor/lenis.min.js" defer></script>
+  <script src="motion.js" defer></script>
+  <!-- ONLINE-ONLY MODE — the platform no longer installs a service worker.
+       Visitors who still carry an older registration from previous releases
+       get it removed here, and every Cache Storage bucket it created is
+       deleted, so a stale offline copy can never shadow the live site.
+       The retired sw.js file stays in the repo only as a historical record
+       for the offline-era test suite; nothing registers it anymore. -->
   <script>
     (function () {
       "use strict";
-      var scope = "./";
-      var swPath = "./sw.js";
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register(swPath, { scope: scope })
-            .then(function (reg) {
-              if (reg.active) { window.dispatchEvent(new CustomEvent("nova:sw-ready", { detail: { reg: reg } })); }
+      var jobs = [];
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          jobs.push(navigator.serviceWorker.getRegistrations()
+            .then(function (regs) {
+              return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
             })
-            .catch(function (err) { console.warn("[SW] registration skipped:", err && err.message); });
-        });
-      }
+            .catch(function (err) { console.warn("[online-only] unregister skipped:", err && err.message); }));
+        }
+      } catch (e) { /* no service worker support — nothing to retire */ }
+      try {
+        if (window.caches && caches.keys) {
+          jobs.push(caches.keys()
+            .then(function (names) {
+              return Promise.all(names.map(function (name) { return caches.delete(name); }));
+            })
+            .catch(function () { /* storage denied — fine */ }));
+        }
+      } catch (e2) { /* Cache Storage unavailable */ }
+      window.PlatformOnlineOnly = { pending: jobs };
     })();
   </script>
 </body>

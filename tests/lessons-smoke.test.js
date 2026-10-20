@@ -7,9 +7,10 @@
  * stubs, asserting:
  *   - route guard: non-lesson hashes (#path/x, "") never touch the lesson view
  *     (regression: a two-segment hash used to hijack the initial view)
- *   - LESSONS is EMPTY (migration 2): every #lesson/<subject>/<key> deep link —
- *     including ones built from the current course codes — renders the honest
- *     placeholder (no fake lesson content)
+ *   - unknown #lesson/<subject>/<key> deep links (including ones built from
+ *     the current course codes) render the honest placeholder; the authored
+ *     Algorithms, OS, IT Components and Security Design chapter-1 lessons
+ *     render real content
  *   - SUBJECT_TO_PATH routes exactly the 5 current course codes to real paths
  *   - computeCategoryBreakdown / retryIndices logic, incl. the topic-based
  *     fallback used by the current-semester question banks
@@ -59,6 +60,9 @@ const fnSrc = m40Src.slice(fnStart);
 
 /* ---------- stub environment ---------- */
 let lang = "ar";
+const langHooks = [];
+const docHooks = {};
+const docState = { hasChecks: false };
 function fakeEl(id) {
   const el = {
     id: id, _html: "",
@@ -77,7 +81,11 @@ const sandbox = {
   __activated: [],
   __body: fakeEl("lessonBody"),
   $id(id) { return id === "lessonBody" ? sandbox.__body : null; },
-  document: { getElementById(id) { return id === "lessonBody" ? sandbox.__body : null; }, addEventListener() {} },
+  document: {
+    getElementById(id) { return id === "lessonBody" ? sandbox.__body : null; },
+    addEventListener(type, fn) { (docHooks[type] = docHooks[type] || []).push(fn); },
+    querySelector(sel) { return docState.hasChecks && sel.indexOf("lesson-check") >= 0 ? {} : null; },
+  },
   window: null, /* self-reference set below */
   escHtml(s) { return String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[m])); },
   prefersReducedMotion: false,
@@ -92,7 +100,7 @@ const sandbox = {
     get current() { return lang; },
     t(key, p) { return interp(key, p); },
     qt(key, p) { return interp(key, p); },
-    onSwitch() {},
+    onSwitch(fn) { if (typeof fn === "function") langHooks.push(fn); },
   },
 };
 sandbox.window = {
@@ -123,7 +131,7 @@ sandbox.location.hash = "";
 run();
 check("empty hash leaves lesson body untouched", sandbox.__body._html === "");
 
-console.log("\n\u2014 empty LESSONS (migration 2): honest placeholder \u2014");
+console.log("\n\u2014 topics without authored lessons: honest placeholder \u2014");
 sandbox.location.hash = "#lesson/260210030702/algo-basics";
 run();
 let body = sandbox.__body._html;
@@ -133,6 +141,109 @@ check("placeholder uses the AR title key", body.indexOf("lesson.soonTitle") >= 0
 check("placeholder body copy present", body.indexOf("lesson.soonBody") >= 0);
 check("no fake lesson content is rendered", body.indexOf("lesson-concept") < 0 && body.indexOf("lesson-term-grid") < 0);
 check("placeholder offers the back-to-quiz CTA", body.indexOf("lesson.backToQuiz") >= 0);
+
+console.log("\n\u2014 authored lesson (الخوارزميات · الفصل 1) renders real content \u2014");
+sandbox.location.hash = "#lesson/260210030702/intro";
+run();
+body = sandbox.__body._html;
+check("authored lesson renders (not the placeholder)", body.indexOf("lesson-placeholder") < 0);
+check("lesson title rendered", body.indexOf("مقدمة في الخوارزميات") >= 0);
+check("objectives block rendered", body.indexOf("lesson-objectives") >= 0);
+check("concepts block rendered", body.indexOf("lesson-concept") >= 0);
+check("example block rendered", body.indexOf("lesson-example") >= 0);
+check("mistakes block rendered", body.indexOf("lesson-mistakes") >= 0);
+check("terminology grid rendered", body.indexOf("lesson-term-grid") >= 0);
+
+console.log("\n\u2014 language switch re-renders the open lesson \u2014");
+lang = "en";
+langHooks.forEach(function (fn) { fn(); });
+body = sandbox.__body._html;
+check("switch to EN renders the EN lesson title", body.indexOf("Introduction to Algorithms") >= 0);
+check("switch to EN drops the AR lesson title", body.indexOf("مقدمة في الخوارزميات") < 0);
+lang = "ar";
+langHooks.forEach(function (fn) { fn(); });
+body = sandbox.__body._html;
+check("switch back to AR restores the AR lesson title", body.indexOf("مقدمة في الخوارزميات") >= 0);
+check("switch back to AR drops the EN lesson title", body.indexOf("Introduction to Algorithms") < 0);
+
+console.log("\n\u2014 authored lesson (مفاهيم نظم التشغيل · الفصل 1) renders real content \u2014");
+sandbox.location.hash = "#lesson/260210030802/intro";
+run();
+body = sandbox.__body._html;
+check("authored OS lesson renders (not the placeholder)", body.indexOf("lesson-placeholder") < 0);
+check("OS lesson title rendered", body.indexOf("مقدمة في نظم التشغيل") >= 0);
+check("OS objectives + example + mistakes + terms blocks rendered",
+  body.indexOf("lesson-objectives") >= 0 && body.indexOf("lesson-example") >= 0 &&
+  body.indexOf("lesson-mistakes") >= 0 && body.indexOf("lesson-term-grid") >= 0);
+lang = "en";
+langHooks.forEach(function (fn) { fn(); });
+check("switch to EN renders the OS EN lesson title", sandbox.__body._html.indexOf("Introduction to Operating Systems") >= 0);
+lang = "ar";
+langHooks.forEach(function (fn) { fn(); });
+check("switch back to AR restores the OS AR lesson title", sandbox.__body._html.indexOf("مقدمة في نظم التشغيل") >= 0);
+
+console.log("\n\u2014 authored lesson (مبادئ التصميم في الأمن السيبراني · الفصل 1) renders real content \u2014");
+sandbox.location.hash = "#lesson/260210031102/intro";
+run();
+body = sandbox.__body._html;
+check("authored Security Design lesson renders (not the placeholder)", body.indexOf("lesson-placeholder") < 0);
+check("Security Design lesson title rendered", body.indexOf("مقدمة في مبادئ التصميم الأمني") >= 0);
+check("Security Design objectives + example + mistakes + terms blocks rendered",
+  body.indexOf("lesson-objectives") >= 0 && body.indexOf("lesson-example") >= 0 &&
+  body.indexOf("lesson-mistakes") >= 0 && body.indexOf("lesson-term-grid") >= 0);
+lang = "en";
+langHooks.forEach(function (fn) { fn(); });
+check("switch to EN renders the Security Design EN lesson title", sandbox.__body._html.indexOf("Introduction to Security Design Principles") >= 0);
+lang = "ar";
+langHooks.forEach(function (fn) { fn(); });
+check("switch back to AR restores the Security Design AR lesson title", sandbox.__body._html.indexOf("مقدمة في مبادئ التصميم الأمني") >= 0);
+
+console.log("\n\u2014 authored lesson (مكونات أنظمة تقنية المعلومات · الفصل 1) renders real content \u2014");
+sandbox.location.hash = "#lesson/260210031002/systems";
+run();
+body = sandbox.__body._html;
+check("authored IT Components lesson renders (not the placeholder)", body.indexOf("lesson-placeholder") < 0);
+check("IT Components lesson title rendered", body.indexOf("نظم المعلومات ومكوناتها") >= 0);
+check("IT Components objectives + example + mistakes + terms blocks rendered",
+  body.indexOf("lesson-objectives") >= 0 && body.indexOf("lesson-example") >= 0 &&
+  body.indexOf("lesson-mistakes") >= 0 && body.indexOf("lesson-term-grid") >= 0);
+lang = "en";
+langHooks.forEach(function (fn) { fn(); });
+check("switch to EN renders the IT Components EN lesson title", sandbox.__body._html.indexOf("Information Systems and Their Components") >= 0);
+lang = "ar";
+langHooks.forEach(function (fn) { fn(); });
+check("switch back to AR restores the IT Components AR lesson title", sandbox.__body._html.indexOf("نظم المعلومات ومكوناتها") >= 0);
+
+console.log("\n— authored Policies lesson (الفصل 1 · مقدمة في السياسات الأمنية) renders real content —");
+sandbox.location.hash = "#lesson/260210030902/policy";
+run();
+body = sandbox.__body._html;
+check("authored Policies lesson renders (not the placeholder)", body.indexOf("lesson-placeholder") < 0);
+check("Policies lesson title rendered", body.indexOf("مقدمة في السياسات الأمنية") >= 0);
+check("Policies objectives + example + mistakes + terms blocks rendered",
+  body.indexOf("lesson-objectives") >= 0 && body.indexOf("lesson-example") >= 0 &&
+  body.indexOf("lesson-mistakes") >= 0 && body.indexOf("lesson-term-grid") >= 0);
+lang = "en";
+langHooks.forEach(function (fn) { fn(); });
+check("switch to EN renders the Policies EN lesson title", sandbox.__body._html.indexOf("Introduction to Security Policies") >= 0);
+lang = "ar";
+langHooks.forEach(function (fn) { fn(); });
+check("switch back to AR restores the Policies AR lesson title", sandbox.__body._html.indexOf("مقدمة في السياسات الأمنية") >= 0);
+
+console.log("\n\u2014 bank arrival upgrades a cold deep link (guarded) \u2014");
+sandbox.__body._html = "MARKER";
+docState.hasChecks = false;
+(docHooks["nova:progress-changed"] || []).forEach(function (fn) { fn(); });
+check("progress event re-renders the lesson while the checks block is absent", sandbox.__body._html !== "MARKER");
+sandbox.__body._html = "MARKER";
+docState.hasChecks = true;
+(docHooks["nova:progress-changed"] || []).forEach(function (fn) { fn(); });
+check("no re-render once the checks block exists (reading is not interrupted)", sandbox.__body._html === "MARKER");
+sandbox.location.hash = "#quiz";
+sandbox.__body._html = "MARKER";
+docState.hasChecks = false;
+(docHooks["nova:progress-changed"] || []).forEach(function (fn) { fn(); });
+check("progress event leaves non-lesson routes untouched", sandbox.__body._html === "MARKER");
 
 console.log("\n\u2014 every current course code lands on the placeholder \u2014");
 let allPlaceholder = true;
@@ -184,7 +295,8 @@ check("breakdown: topic 2/2 = 100%", !!t1 && t1.correct === 2 && t1.total === 2 
 check("breakdown: topic label falls back to the raw Arabic topic", !!t2 && t2.label === "التعقيد الزمني");
 check("breakdown: no cat → never collapses into 'general'", !bdTopic.some((x) => x.cat === "general"));
 
-/* Integration: run the real helper over the REAL current bank questions. */
+/* Integration: run the real helper over the REAL current bank questions
+   (the Security Design bank's topics are its lesson keys). */
 const fs2 = require("fs");
 const path2 = require("path");
 const quizJson = JSON.parse(fs2.readFileSync(path2.join(__dirname, "..", "data", "quizzes.json"), "utf8"));
@@ -196,7 +308,49 @@ const bdReal = sandbox.computeCategoryBreakdown({
 });
 check("breakdown: real bank yields " + realBank.length + " scored questions", bdReal.reduce(function (a, x) { return a + x.total; }, 0) === realBank.length);
 check("breakdown: real bank classifies by its authored topics", bdReal.length >= 5 && bdReal.every((x) => x.pct >= 0 && x.pct <= 100));
-check("breakdown: real bank labels are the Arabic topics (no raw keys lost)", bdReal.every((x) => x.label && x.label === x.cat));
+check("breakdown: real bank labels are its topic keys (no raw keys lost)", bdReal.every((x) => x.label && x.label === x.cat));
+
+/* Authored lessons ↔ real bank topics: lessonChecks matches q.topic === lesson key. */
+console.log("\n\u2014 authored lessons \u2194 real Algorithms bank topics \u2014");
+const lessonKeys = vm.runInContext("Object.keys(LESSONS['260210030702'])", sandbox);
+const algoBank = quizJson["260210030702"].questions;
+check("8 authored lessons for the Algorithms course", lessonKeys.length === 8);
+check("every bank topic is an authored lesson key (per-lesson checks match)", algoBank.every((q) => lessonKeys.indexOf(q.topic) >= 0));
+check("every authored lesson key has its own questions (no pool fallback)", lessonKeys.every((k) => algoBank.some((q) => q.topic === k)));
+check("bank covers the 8 chapters with 4 questions each", algoBank.length === 32 && lessonKeys.every((k) => algoBank.filter((q) => q.topic === k).length === 4));
+
+console.log("\n\u2014 authored lessons \u2194 real Security Design bank topics \u2014");
+const desKeys = vm.runInContext("Object.keys(LESSONS['260210031102'])", sandbox);
+const desBank = quizJson["260210031102"].questions;
+check("7 authored lessons for the Security Design course", desKeys.length === 7);
+check("every Security Design bank topic is an authored lesson key (per-lesson checks match)", desBank.every((q) => desKeys.indexOf(q.topic) >= 0));
+check("every Security Design lesson key has its own questions (no pool fallback)", desKeys.every((k) => desBank.some((q) => q.topic === k)));
+check("Security Design bank covers the 7 chapters with 4 questions each", desBank.length === 28 && desKeys.every((k) => desBank.filter((q) => q.topic === k).length === 4));
+
+console.log("\n\u2014 authored lessons \u2194 real OS bank topics \u2014");
+const osKeys = vm.runInContext("Object.keys(LESSONS['260210030802'])", sandbox);
+const osBank = quizJson["260210030802"].questions;
+check("8 authored lessons for the OS course", osKeys.length === 8);
+check("every OS bank topic is an authored lesson key (per-lesson checks match)", osBank.every((q) => osKeys.indexOf(q.topic) >= 0));
+check("every OS lesson key has its own questions (no pool fallback)", osKeys.every((k) => osBank.some((q) => q.topic === k)));
+check("OS bank covers the 8 chapters with 4 questions each", osBank.length === 32 && osKeys.every((k) => osBank.filter((q) => q.topic === k).length === 4));
+
+console.log("\n\u2014 authored lessons \u2194 real IT Components bank topics \u2014");
+const itcKeys = vm.runInContext("Object.keys(LESSONS['260210031002'])", sandbox);
+const itcBank = quizJson["260210031002"].questions;
+check("7 authored lessons for the IT Components course", itcKeys.length === 7);
+check("every IT Components bank topic is an authored lesson key (per-lesson checks match)", itcBank.every((q) => itcKeys.indexOf(q.topic) >= 0));
+check("every IT Components lesson key has its own questions (no pool fallback)", itcKeys.every((k) => itcBank.some((q) => q.topic === k)));
+check("IT Components bank covers the 7 chapters with 4 questions each", itcBank.length === 28 && itcKeys.every((k) => itcBank.filter((q) => q.topic === k).length === 4));
+
+console.log("\n— authored lessons ↔ real Policies bank topics —");
+const polKeys = vm.runInContext("Object.keys(LESSONS['260210030902'])", sandbox);
+const polBank = quizJson["260210030902"].questions;
+check("6 authored lessons for the Policies course", polKeys.length === 6);
+check("every Policies bank topic is an authored lesson key (per-lesson checks match)", polBank.every((q) => polKeys.indexOf(q.topic) >= 0));
+check("every Policies lesson key has its own questions (no pool fallback)", polKeys.every((k) => polBank.some((q) => q.topic === k)));
+check("Policies bank covers the 6 chapters with 4 questions each", polBank.length === 24 && polKeys.every((k) => polBank.filter((q) => q.topic === k).length === 4));
+
 
 /* SUBJECT_TO_PATH must route exactly the 5 current course codes to real paths. */
 const stp = sandbox.window.SUBJECT_TO_PATH;

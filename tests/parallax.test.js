@@ -83,7 +83,11 @@ check("every visible string is keyed (no hard-coded orphans)",
   (sec.match(/<(p|h3)\b[^>]*>/g) || []).every((tag) => /data-i18n(-html)?=/.test(tag)));
 check("the section adds no inline style and no extra asset",
   !/\sstyle=/.test(sec) && !/<(img|video|iframe)\b/.test(sec));
-check("linked from BOTH nav menus", (html.match(/href="#depth" data-i18n="nav\.depth"/g) || []).length === 2);
+check("reachable from the footer sitemap (global menus slimmed in MODULE 97)",
+  /* the mobile drawer link keeps the inline i18n key — footer sitemap
+     carries the same pair since apply() rewrites textContent only */
+  /id="mobileMenu"[\s\S]{0,3000}href="#depth" data-i18n="nav\.depth"/.test(html) ||
+  /class="footer"[\s\S]{0,8000}?href="#depth" data-i18n="nav\.depth"/.test(html));
 
 /* ---------- script.js ---------- */
 console.log("\n\u2014 script.js: registration, keys, and no JS-driven motion \u2014");

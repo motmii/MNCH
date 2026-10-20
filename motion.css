@@ -1,0 +1,117 @@
+/* ============================================================
+   MODULE 90 · Motion stylesheet — Lenis + GSAP polish layer
+   Loaded after style.css; everything here is additive and scoped
+   to html.motion-on (set by motion.js only when the vendored
+   libs loaded AND prefers-reduced-motion is not "reduce"), so
+   the site's baseline rendering never depends on this file.
+
+   Arabic-first rule (style.css MODULE 80): word-level spans
+   only, never per-character — and no letter-spacing is
+   introduced on Arabic text anywhere in this file.
+   ============================================================ */
+
+/* ---------- Lenis baseline (verbatim from lenis.css v1.3.27) ---------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
+}
+
+/* The platform sets html { scroll-behavior: smooth } (style.css:358)
+   for pre-motion deep links. While Lenis is running it drives the
+   scroll itself — native CSS smoothing would race the virtual
+   scroll, so it is neutralised exactly while .lenis-smooth is on. */
+.lenis.lenis-smooth,
+.lenis.lenis-smooth body {
+  scroll-behavior: auto;
+}
+
+/* ---------- BlurText word units (motion.js splits text nodes) ---------- */
+/* A word is the smallest unit that can be safely animated in Arabic:
+   inline-block keeps line wrapping between words intact and no
+   tracking is added, so cursive joining inside a word is untouched. */
+html.motion-on .m-word {
+  display: inline-block;
+}
+
+html.motion-on .hero-title .m-word,
+html.motion-on .hero-tagline .m-word,
+html.motion-on .hero-sub .m-word {
+  will-change: transform, opacity, filter;
+}
+
+/* ---------- 21st.dev-style pointer glow on interactive cards ---------- */
+/* motion.js writes --mx/--my (pointer position relative to the card)
+   while hovering; the ::after paints only a whisper of the accent
+   family over the card surface. Existing per-card hover rules in
+   style.css (border/translate) stay in charge of the lift. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html.motion-on .tool-card,
+  html.motion-on .lab-link,
+  html.motion-on .skill-card,
+  html.motion-on .path-card,
+  html.motion-on .hero-dash-panel,
+  html.motion-on .bento-card {
+    position: relative;
+  }
+
+  html.motion-on .tool-card::after,
+  html.motion-on .lab-link::after,
+  html.motion-on .skill-card::after,
+  html.motion-on .path-card::after,
+  html.motion-on .hero-dash-panel::after,
+  html.motion-on .bento-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(var(--accent-rgb) / 0.10),
+      rgba(var(--accent-2-rgb) / 0.05) 45%,
+      transparent 70%);
+  }
+
+  html.motion-on .tool-card:hover::after,
+  html.motion-on .lab-link:hover::after,
+  html.motion-on .skill-card:hover::after,
+  html.motion-on .path-card:hover::after,
+  html.motion-on .hero-dash-panel:hover::after,
+  html.motion-on .bento-card:hover::after {
+    opacity: 1;
+  }
+
+  /* Bento cells get their first hover treatment: a neon hairline ring
+     (tokens only — --accent / --accent-2 / --glow from MODULE 80). */
+  html.motion-on .hero-dash-panel {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  html.motion-on .hero-dash-panel:hover {
+    border-color: rgba(var(--accent-rgb) / 0.35);
+    box-shadow: var(--shadow-sm), 0 0 0 1px rgba(var(--accent-2-rgb) / 0.10);
+  }
+}

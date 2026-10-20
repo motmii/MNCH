@@ -10,6 +10,13 @@ node_modules/
 .env
 .env.*
 
+# Build output — there is no bundler by design (the site serves plain
+# files), but keep the usual folders ignored so an experiment with one
+# can never leak half-built output into the repo.
+dist/
+build/
+.vite/
+
 # Dev scratch files
 __*.js
 out.txt

@@ -62,7 +62,7 @@ check("nav link in the desktop More menu",
   html.indexOf('href="#guide" data-i18n="nav.guide"') > -1);
 check("nav link in the mobile menu", (html.match(/href="#guide"/g) || []).length >= 3);
 check("contextual #heroNowGuide anchor (hidden by default, own route)",
-  /id="heroNow"[\s\S]{0,700}?id="heroNowGuide" href="#guide" data-i18n="guide\.nowCta" hidden/.test(html));
+  /id="heroNow"[\s\S]{0,1400}?id="heroNowGuide" href="#guide" data-i18n="guide\.nowCta" hidden/.test(html));
 check("current-semester.js still loads before script.js",
   html.indexOf('src="current-semester.js"') > -1 &&
   html.indexOf('src="current-semester.js"') < html.indexOf('src="script.js"'));

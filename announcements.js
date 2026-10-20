@@ -41,40 +41,9 @@ const ANNOUNCEMENTS = {
   /* How many days ahead a reminder becomes visible (0 = only on the day). */
   leadDays: 7,
 
-  items: [
-    /* ---- الاختبار القصير الأول · مفاهيم نظم التشغيل ---- */
-    {
-      id: "quiz-os-2026-10-18",
-      kind: "quiz",
-      subjectKey: "260210030802",
-      title: {
-        ar: "الاختبار القصير الأول — مفاهيم نظم التشغيل",
-        en: "First Short Quiz — Operating Systems Concepts"
-      },
-      date: "2026-10-18",
-      startTime: "2:40 PM",
-      endTime: "3:00 PM",
-      durationMin: 20,
-      questions: 5,
-      questionType: {
-        ar: "اختيار من متعدد",
-        en: "Multiple choice"
-      },
-      weight: {
-        ar: "5% من الدرجة النهائية (درجة واحدة لكل سؤال)",
-        en: "5% of the final grade (one point per question)"
-      },
-      notes: {
-        ar: "يُرجى الاستعداد للاختبار بمراجعة محتوى الفصل الأول، والالتزام بالوقت المحدد.",
-        en: "Please prepare by reviewing the first chapter's content and respect the set time."
-      },
-      link: "#quiz",
-      linkLabel: {
-        ar: "ابدأ المراجعة",
-        en: "Start reviewing"
-      }
-    }
-  ]
+  /* No active reminders right now. Add dated items here (honouring the
+     rules above) when a quiz/deadline is announced by the department. */
+  items: []
 };
 
 /* Expose as a plain data registry (window.PLATFORM_ANNOUNCEMENTS).

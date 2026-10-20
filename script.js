@@ -3,7 +3,7 @@
    Application core · modular IIFE architecture · JSDoc-documented
    ------------------------------------------------------------
    Modules:
-    01 Helpers   02 Store    03 Sfx       04 Preloader
+    01 Helpers   02 Store    03 Sfx       03b Soundscape   04 Preloader
     05 PointerFX 06 Cursor           08 Reveal/Nav
     09 Counters  10 MobileMenu 11 Tilt/Magnetic
     12 ContactForm 13 QuizEngine 14-19 CyberTools
@@ -345,6 +345,101 @@ function sanitizeQuizPayload(raw) {
     });
   }
   return out;
+}
+
+/**
+ * MODULE 98 · بنك الفترات — sanitize the past-quiz bank and group its
+ * items into per-subject virtual banks that merge into QUIZZES. Two
+ * shapes live side by side:
+ *  — entries: full MCQ items (opts + a) → drillable engine questions.
+ *  — refs:    reference items (q + answerText) → question + answer only,
+ *    exactly what students study from before finals. The engine never
+ *    runs a refs-only bank (questions stays empty and startQuiz guards).
+ * @param {Object} raw Parsed data/quiz-bank.json.
+ * @returns {Object<string,{name:string,questions:Array,refs:Array}>} Banks.
+ */
+function sanitizeQuizBank(raw) {
+  const out = {};
+  const src = raw && typeof raw === "object" ? raw : {};
+  const subs = window.PLATFORM_SUBJECTS;
+  const subjectName = (id) => {
+    if (Array.isArray(subs)) {
+      const s = subs.find((x) => x && (x.id === id || x.code === id));
+      if (s && s.nameAr) return s.nameAr;
+    }
+    return id;
+  };
+  const ensure = (subId) => {
+    const key = "bank:" + subId;
+    if (!out[key]) out[key] = { name: "بنك الفترات — " + subjectName(subId), questions: [], refs: [] };
+    return out[key];
+  };
+  /* Full MCQ entries — same contract as the engine question shape. */
+  (Array.isArray(src.entries) ? src.entries : []).forEach((e, i) => {
+    if (!e || typeof e !== "object") return;
+    if (typeof e.q !== "string" || !e.q.trim()) return;
+    if (!Array.isArray(e.opts) || e.opts.length < 2) return;
+    if (typeof e.a !== "number" || e.a < 0 || e.a >= e.opts.length) return;
+    const subId = String(e.subjectId || "").trim();
+    if (!subId) return;
+    const q = {
+      id: typeof e.id === "string" && e.id.trim() ? e.id.trim() : ("bank-" + subId + "-" + i),
+      subjectId: subId,
+      difficulty: typeof e.difficulty === "string" ? e.difficulty : "easy",
+      topic: typeof e.topic === "string" && e.topic.trim() ? e.topic : "",
+      q: e.q,
+      opts: e.opts.map(String),
+      a: e.a,
+      ex: typeof e.ex === "string" ? e.ex : ""
+    };
+    ensure(subId).questions.push(q);
+  });
+  /* Reference-only items — question + answer, no options required. */
+  (Array.isArray(src.refs) ? src.refs : []).forEach((e, i) => {
+    if (!e || typeof e !== "object") return;
+    if (typeof e.q !== "string" || !e.q.trim()) return;
+    if (typeof e.answerText !== "string" || !e.answerText.trim()) return;
+    const subId = String(e.subjectId || "").trim();
+    if (!subId) return;
+    ensure(subId).refs.push({
+      id: typeof e.id === "string" && e.id.trim() ? e.id.trim() : ("ref-" + subId + "-" + i),
+      subjectId: subId,
+      source: typeof e.source === "string" && e.source.trim() ? e.source : "كويز صفّي",
+      topic: typeof e.topic === "string" && e.topic.trim() ? e.topic : "",
+      q: e.q,
+      answerText: e.answerText,
+      ex: typeof e.ex === "string" ? e.ex : ""
+    });
+  });
+  /* A bank with neither drillable questions nor refs is not a bank. */
+  Object.keys(out).forEach((k) => {
+    if (!out[k].questions.length && !out[k].refs.length) delete out[k];
+  });
+  return out;
+}
+
+/**
+ * Fetch + merge the past-quiz bank into QUIZZES. Failures are honest
+ * console warnings only — the main banks are never affected.
+ * @returns {Promise<void>}
+ */
+async function loadQuizBankData() {
+  let raw = null;
+  try {
+    raw = await fetchJsonWithRetry("./data/quiz-bank.json");
+  } catch (e) {
+    console.warn("Quiz bank unavailable — skipping:", e.message);
+    return;
+  }
+  const merged = sanitizeQuizBank(raw);
+  const added = Object.keys(merged).length;
+  if (added > 0) {
+    Object.assign(QUIZZES, merged);
+    const refs = Object.keys(merged).reduce((n, k) => n + (merged[k].refs ? merged[k].refs.length : 0), 0);
+    console.info("Quiz bank merged: " + added + " past-quiz bank(s), " + refs + " reference item(s).");
+  } else if (raw) {
+    console.info("Quiz bank is empty — nothing merged yet.");
+  }
 }
 
 /**
@@ -1146,17 +1241,2738 @@ window.PLATFORM_A11Y = {
   /* Render localized step 1 on load, keep the panel closed until mounted. */
   showStep(1);
 })();
-/* MODULE 39b · Lessons — removed in migration 2.
-   The authored lessons belonged to the previous-semester subjects,
-   which were removed from the platform entirely. The lesson view
-   (#lesson) and its routing remain and now show an honest
-   unavailable state; new lessons for the current-semester subjects
-   will be added here later (same embedded structure). */
-const LESSONS = {};
+/* MODULE 39b · Lessons — authored content for the current-semester
+   subjects, written from the official course books (e.g. ISE121 for
+   260210030702 · الخوارزميات). Per-topic structure:
+   { title, explanation, objectives[], concepts[{term,def}],
+     example, mistakes[], terminology[{ar,en}], level? } — every text
+   bilingual. Topics without an entry keep the honest unavailable
+   state; prereqs/checks/related blocks are derived from real data. */
+const LESSONS = {
+  /* ---- 260210030702 · الخوارزميات · ISE121 course book ---- */
+  "260210030702": {
+    intro: {
+      title: {
+        ar: "الفصل 1 · مقدمة في الخوارزميات",
+        en: "Chapter 1 · Introduction to Algorithms"
+      },
+      explanation: {
+        ar: "لا يكفي أن نعرف النتيجة المطلوبة من مسألة حتى نتمكن من الوصول إليها؛ فقد نعرف المقدار الرياضي المراد حسابه من غير أن نحدد ترتيب الحساب. الخوارزمية هي مجموعة مرتبة من العمليات المعرّفة والمعدودة والضرورية لإنجاز حل لمسألة والحصول على النتيجة الصحيحة، يجمعها ترتيب يحدد كيف ينتقل العمل من خطوة إلى التي تليها. تعالج الخوارزمية معطيات قد تكون مخزنة أو مدخلة، وتُضمّن عمليات تتحقق من صلاحيتها قبل الاعتماد عليها، ولا تنحصر المعطيات في الأعداد بل تشمل الرموز والنصوص والرسوم والصور والأصوات بحسب المسألة. تُوضع الخوارزمية أولًا ثم يوضع البرنامج المنفذ لها؛ وقد تختلف تصورات المبرمجين لحل المسألة الواحدة، لكن المفاضلة لا تكون إلا بعد بلوغ النتيجة الصحيحة، ثم بقلة الجهد والزمن وسهولة الفهم وسرعة التنفيذ. وتنقسم الخوارزميات إلى حسابية تتعامل مع المقادير الرياضية، وغير حسابية كمعالجة النصوص وتخزين المعلومات واستعادتها وإدارة قواعد البيانات والتدقيق الإملائي.",
+        en: "Knowing the required result of a problem is not enough to reach it: you may know the quantity to compute yet have no defined order of calculation. An algorithm is an ordered set of defined, countable and necessary operations that accomplishes the solution of a problem and reaches the correct result, tied together by an order that moves the work from one step to the next. It processes data that may be stored or input, and it embeds operations that verify this data is valid before relying on it; data is not limited to numbers but includes symbols, texts, drawings, images and sounds according to the problem. The algorithm is drafted first and the program that executes it comes after; programmers may picture different solutions to the same problem, but preference is only decided after correctness, then by less effort and time, easier understanding and faster execution. Algorithms split into computational ones that handle mathematical quantities and non-computational ones such as text processing, storing and retrieving information, database management and spell checking."
+      },
+      objectives: [
+        { ar: "تعرّف الخوارزمية وبيان صفات عملياتها: معرّفة ومعدودة وضرورية.", en: "Define an algorithm and state the qualities of its operations: defined, countable and necessary." },
+        { ar: "تعليل ضرورة ترتيب الخطوات وعدم تجاهل الخطوة اللازمة.", en: "Justify why step order matters and no necessary step may be dropped." },
+        { ar: "التمييز بين المعطيات المخزنة والمدخلة، وتعداد أشكال المعطيات غير الأعداد.", en: "Distinguish stored from input data, and list data forms beyond numbers." },
+        { ar: "توضيح الحاجة إلى التحقق من صحة المعطيات قبل المعالجة.", en: "Explain why data must be validated before processing." },
+        { ar: "المقارنة بين الخوارزميات الحسابية وغير الحسابية بحسب موضوع العمل.", en: "Compare computational and non-computational algorithms by the subject of their work." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الخوارزمية", en: "Algorithm" },
+          def: { ar: "مجموعة مرتبة من العمليات المعرّفة والمعدودة والضرورية لإنجاز حل مسألة والحصول على النتيجة الصحيحة.", en: "An ordered set of defined, countable and necessary operations that accomplishes a problem's solution and yields the correct result." }
+        },
+        {
+          term: { ar: "التسلسل وفق الورود", en: "Sequential order" },
+          def: { ar: "تنفيذ تعليمات الخوارزمية بحسب ترتيب ظهورها في وصفها؛ وتبديل موضعي عمليتين قد يؤدي إلى نتيجة غير مقصودة.", en: "Executing the algorithm's instructions in the order they appear; swapping two operations may produce an unintended result." }
+        },
+        {
+          term: { ar: "البداية والنهاية", en: "Start and end" },
+          def: { ar: "موضع الشروع في تنفيذ الخوارزمية وموضع اكتمال العمل الموصوف؛ العلاقة الرياضية تبينّ ارتباط المقادير لكنها لا تحددهما وحدها.", en: "Where execution starts and where the described work completes; a mathematical relation links quantities but does not define these by itself." }
+        },
+        {
+          term: { ar: "المعطيات المخزنة والمدخلة", en: "Stored vs. input data" },
+          def: { ar: "المعطيات المخزنة متاحة للخوارزمية قبل المعالجة، أما المدخلة فتُقدَّم إليها لتعمل عليها، ويتوقف الناتج على ما عالجته.", en: "Stored data is available before processing, while input data is handed to the algorithm to work on; the output depends on what it processed." }
+        },
+        {
+          term: { ar: "التحقق من صحة المعطيات", en: "Data validation" },
+          def: { ar: "عمليات تتأكد من صلاحية ما ستعالجه الخوارزمية، سواء جاء المعطى من قيمة مخزنة أو من إدخال، قبل متابعة المعالجة.", en: "Operations that confirm the data an algorithm will process is valid — whether stored or input — before processing continues." }
+        },
+        {
+          term: { ar: "الخوارزمية الحسابية", en: "Computational algorithm" },
+          def: { ar: "خوارزمية تكون المقادير الرياضية موضوع المعالجة فيها، مثل حساب مساحة مستطيل من طوله وعرضه.", en: "An algorithm whose subject of processing is mathematical quantities, such as computing a rectangle's area from its sides." }
+        },
+        {
+          term: { ar: "الخوارزمية غير الحسابية", en: "Non-computational algorithm" },
+          def: { ar: "خوارزمية لا يكون موضوع عملها حساب المقادير الرياضية، مثل معالجة النصوص وتخزين المعلومات واستعادتها وإدارة قواعد البيانات والتدقيق الإملائي.", en: "An algorithm whose work is not computing quantities, such as text processing, storing and retrieving information, database management and spell checking." }
+        }
+      ],
+      example: {
+        ar: "المقدار الرياضي y = (2x + 3) / (3x − 4) يبيّن ارتباط المقادير بعضها ببعض، لكنه ليس وحده خوارزمية لحساب y: تبدأ خطوات الحل بالحصول على قيمة x، ثم حساب البسط (2x + 3) والمقام (3x − 4) وعرضهما، والتأكد من أن المقام ليس صفرًا قبل إجراء القسمة، ثم إظهار النتيجة. عند x = 2 يكون y = 3.5 فتُجرى القسمة وتُعرض النتيجة، أما عند x = 4/3 فيساوي المقام صفرًا فلا تُجرى القسمة، وتنتهي الخطوات دون نتيجة.",
+        en: "The relation y = (2x + 3) / (3x − 4) links quantities to one another, but it is not by itself an algorithm for computing y: the steps start by obtaining the value of x, then computing the numerator (2x + 3) and the denominator (3x − 4) and displaying them, verifying the denominator is not zero before dividing, and finally showing the result. With x = 2 the value is y = 3.5, so the division runs and the result is shown; with x = 4/3 the denominator is zero, so no division happens and the steps end without a result."
+      },
+      mistakes: [
+        { ar: "الاكتفاء بتعداد الخطوات من غير التأكد من ترتيبها أو من سقوط خطوة ضرورية؛ فالترتيب الخاطئ والحذف الخاطئ أمران متلازمان مع اكتمال الحل.", en: "Listing the steps without checking their order or whether a necessary step was dropped; wrong order and missing steps both break a complete solution." },
+        { ar: "عدّ كتابة المقدار الرياضي حلًا تنفيذيًا مكتملًا؛ فالعلاقة لا تحدد البداية ولا النهاية ولا ترتيب العمليات، وقد تؤدي القسمة على مقام صفري.", en: "Treating a written mathematical relation as a complete executable solution; it defines no start, no end and no order, and may divide by a zero denominator." },
+        { ar: "افتراض صحة المعطى لمجرد أنه مخزّن أو أُدخل إلى الخوارزمية؛ والتصحيح بإضافة عملية تحقق مناسبة قبل الاعتماد عليه.", en: "Assuming data is correct just because it is stored or entered; the fix is adding a proper validation step before relying on it." },
+        { ar: "حصر معنى الخوارزمية في الحساب لأن الأمثلة الحسابية مألوفة؛ فالتدقيق الإملائي وإدارة قواعد البيانات من الخوارزميات غير الحسابية.", en: "Restricting the meaning of algorithms to computation because numeric examples are familiar; spell checking and database management are non-computational algorithms." },
+        { ar: "البدء بوضع البرنامج مع بقاء خطوات حل المسألة غير محددة؛ فالخوارزمية توضع أولًا ثم يأتي البرنامج المنفذ لها.", en: "Writing the program while the solution steps remain undefined; the algorithm is drafted first and the executing program comes after it." },
+        { ar: "عدّ جميع تصورات حل المسألة متساوية ما دامت تسعى إلى الغاية نفسها؛ فلا بد أولًا من بلوغ النتيجة الصحيحة ثم المفاضلة بالجهد والزمن وسهولة الفهم وسرعة التنفيذ.", en: "Treating all solution attempts as equal just for sharing the same goal; correctness must come first, then preference by effort, time, clarity and speed." }
+      ],
+      terminology: [
+        { ar: "الخوارزمية", en: "Algorithm" },
+        { ar: "التسلسل وفق الورود", en: "Sequential order" },
+        { ar: "معطيات مخزنة", en: "Stored data" },
+        { ar: "معطيات مدخلة", en: "Input data" },
+        { ar: "التحقق من صحة المعطيات", en: "Data validation" },
+        { ar: "خوارزميات حسابية", en: "Computational algorithms" },
+        { ar: "خوارزميات غير حسابية", en: "Non-computational algorithms" }
+      ],
+      level: "easy"
+    },
+    describing: {
+      title: {
+        ar: "الفصل 2 · الوصف الطبيعي والكود الكاذب والمخططات الانسيابية",
+        en: "Chapter 2 · Natural Description, Pseudocode & Flowcharts"
+      },
+      explanation: {
+        ar: "لتمثيل الخوارزمية قبل كتابتها بلغة البرمجة طريقتان رئيسيتان: طريقة نصية تشمل الوصف باللغة الطبيعية والكود الكاذب، وطريقة رسومية تعتمد على الأشكال الهندسية وتُعرف بمخططات الانسياب. الوصف باللغة الطبيعية سرد حر للخطوات بلغة البشر اليومية يُستعمل في مراحل التفكير الأولى (العصف الذهني)، وعيبه احتمال الغموض وتعدد التفسيرات ولذلك يصعب تحويله مباشرة إلى برنامج دقيق. أما الكود الكاذب فأسلوب لوصف الخطوات بلغة قريبة من لغة الإنسان منظمة بتراكيب وكلمات مفتاحية ثابتة: (ابدأ/انتهِ) لتحديد نطاق الخوارزمية، و(اقرأ/أدخل) لاستقبال البيانات، و(اطبع/أخرج) لعرض النتائج، والإسناد بالسهم (←)، و(إذا...وإلا) لاتخاذ القرار و(وإلا إذا) لاختبار شروط متتالية، و(كرر...حتى) لتكرار الخطوات حتى تحقق شرط التوقف؛ فيكون جسرًا يربط تفكير الإنسان بالشيفرة النهائية. ويخضع الكود الكاذب لقواعد تنظيمية: خطوات مرقمة متسلسلة، وأسماء متغيرات واضحة، وإزاحة للخطوات الواقعة داخل الشروط والحلقات، وإغلاق التراكيب بكلمات واضحة مثل (انتهى إذا). ويعرض المخطط الانسيابي الخطوات بأشكال قياسية متصلة بأسهم: البيضاوي للبداية والنهاية، ومتوازي الأضلاع للإدخال والإخراج، والمستطيل للمعالجة والإسناد، والمعين للقرار الذي يتفرع منه مسارا (نعم/لا)، والدائرة لربط أجزاء المخطط في الصفحة نفسها. ويكون الانسياب تتابعيًا يُنفذ الخطوات واحدة بعد أخرى في خط مستقيم، أو تفريعيًا يتخذ قرارًا فيتجه السهمان إلى الأمام نحو خطوات مختلفة، أو تكراريًا يعود فيه سهم إلى خطوة سابقة لإعادة تنفيذها. ويقابل كل تركيب نصي شكل هندسي ومسارات أسهم محددة: فالمعين يوضع بعد خطوات (كرر...حتى) ويخرج منه سهم (لا) يعود إلى أول خطوة في الحلقة وسهم (نعم) يخرج إلى ما بعدها، ويقابل (انتهى إذا/حتى) نقطة التقاء المسارات. أما أخطاء التصميم فمنطقية كمقارنة لا تغطي حالة التساوي أو حلقة لا تنتهي أو إدخال فارغ بلا معالجة، وهندسية كمخالفة قواعد الرسم كاستخدام رمز هندسي في غير موضعه أو إخراج سهمين من المعين دون تسميتهما.",
+        en: "There are two main ways to represent an algorithm before writing it in a programming language: a textual way covering natural-language description and pseudocode, and a graphical way based on geometric shapes known as flowcharts. A natural-language description is a free narration of the steps in everyday human language used in early thinking stages (brainstorming); its flaw is possible ambiguity and multiple interpretations of one sentence, which makes it hard to turn directly into a precise program. Pseudocode is a way of describing the steps in a language close to human language but organized with fixed keywords and structures: (start/end) bounding the algorithm, (read/input) receiving data, (print/output) showing results, assignment with the arrow (←), (if...else) for decisions with (else if) for successive conditions, and (repeat...until) looping steps until the stop condition holds — making it the bridge between human thinking and the final code. Pseudocode follows organizing rules: numbered sequential steps, clear variable names, indentation for steps inside conditions and loops, and closing structures with explicit words such as (end if). A flowchart presents the steps with standard shapes joined by arrows: an oval for start/end, a parallelogram for input/output, a rectangle for processing and assignment, a diamond for decisions branching into (yes/no) paths, and a circle to join parts of the chart on the same page. The flow can be sequential — steps executed one after another in a straight line — branching, where a decision sends the two arrows forward to different steps, or looping, where an arrow returns to a previous step to repeat it. Every textual structure matches a geometric shape and defined arrow paths: the diamond sits after the steps of (repeat...until), its (no) arrow returns to the first step of the loop and its (yes) arrow exits beyond it, while (end if / until) matches the meeting point of paths. Design errors are either logical — a comparison that misses equality, a loop that never ends, or unhandled empty input — or structural, breaking drawing rules such as using a shape out of place or sending two unnamed arrows out of a diamond."
+      },
+      objectives: [
+        { ar: "المقارنة بين الوصف باللغة الطبيعية والكود الكاذب من حيث الدقة والقابلية للتحويل إلى برنامج.", en: "Compare natural-language description and pseudocode in precision and readiness for programming." },
+        { ar: "تعداد الكلمات المفتاحية والتراكيب الأساسية في الكود الكاذب وبيان وظيفة كل منها.", en: "List the keywords and basic structures of pseudocode and state each one's function." },
+        { ar: "تعليل أهمية قاعدة الإزاحة وإغلاق التراكيب بكلمات واضحة.", en: "Justify the indentation rule and closing structures with explicit words." },
+        { ar: "تمييز رموز مخططات الانسياب وأنواع الانسياب الثلاثة: التتابعي والتفريعي والتكراري.", en: "Identify flowchart symbols and the three flow types: sequential, branching and looping." },
+        { ar: "التمييز بين الأخطاء المنطقية والأخطاء الهندسية عند تصميم الخوارزميات.", en: "Distinguish logical from structural (drawing) errors in algorithm design." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الوصف باللغة الطبيعية", en: "Natural-language description" },
+          def: { ar: "سرد حر للخطوات المنطقية بلغة البشر اليومية دون قيود برمجية صارمة، يُستخدم في مرحلة العصف الذهني، وعيبه احتمال الغموض وتعدد التفسيرات.", en: "A free narration of the logical steps in everyday human language without strict programming constraints, used while brainstorming; its flaw is ambiguity and multiple interpretations." }
+        },
+        {
+          term: { ar: "الكود الكاذب", en: "Pseudocode" },
+          def: { ar: "أسلوب لوصف خطوات الخوارزمية بلغة قريبة من لغة الإنسان منظمة بتراكيب وكلمات مفتاحية ثابتة، يعمل جسرًا بين تفكير الإنسان والشيفرة البرمجية النهائية.", en: "A way of describing an algorithm's steps in language close to human speech, organized by fixed structures and keywords; a bridge between human thinking and the final code." }
+        },
+        {
+          term: { ar: "الكلمات المفتاحية والتراكيب", en: "Keywords and structures" },
+          def: { ar: "(ابدأ/انتهِ) لتحديد البداية والنهاية، و(اقرأ/أدخل) للإدخال، و(اطبع/أخرج) للإخراج، والإسناد بالسهم (←)، و(إذا...وإلا/وإلا إذا) للقرار، و(كرر...حتى) للتكرار.", en: "(start/end) bound the algorithm, (read/input) receive data, (print/output) show results, assignment uses the arrow (←), (if...else / else if) decide, and (repeat...until) loops." }
+        },
+        {
+          term: { ar: "الإزاحة", en: "Indentation" },
+          def: { ar: "ترك مسافة بادئة للخطوات الواقعة داخل الشروط وحلقات التكرار لتوضيح نطاقها؛ ويُغلق التركيب بكلمات واضحة مثل (انتهى إذا) ليعرف القارئ أين ينتهي الشرط.", en: "Leaving a leading space for steps inside conditions and loops to show their scope; the structure is closed with explicit words such as (end if) so the reader knows where the condition ends." }
+        },
+        {
+          term: { ar: "المخطط الانسيابي", en: "Flowchart" },
+          def: { ar: "تمثيل رسومي لخطوات الخوارزمية بأشكال هندسية قياسية متصلة بأسهم، يسهل تتبع المنطق بالعين واكتشاف الأخطاء مبكرًا وتوثيق العمل لغير المبرمجين.", en: "A graphical representation of an algorithm's steps with standard geometric shapes linked by arrows; it makes the logic easy to follow, catches errors early and documents the work for non-programmers." }
+        },
+        {
+          term: { ar: "رموز المخطط القياسية", en: "Standard flowchart symbols" },
+          def: { ar: "الشكل البيضاوي للبداية والنهاية، ومتوازي الأضلاع للإدخال والإخراج، والمستطيل للمعالجة والإسناد، والمعين للقرار بسهمي (نعم/لا)، والأسهم لخطوط الاتجاه، والدائرة للربط داخل الصفحة.", en: "The oval for start/end, the parallelogram for input/output, the rectangle for processing and assignment, the diamond for decisions with (yes/no) arrows, arrows for direction lines, and the circle for joining parts on the same page." }
+        },
+        {
+          term: { ar: "الأخطاء الهندسية", en: "Structural errors" },
+          def: { ar: "مخالفات قواعد الرسم القياسية في المخططات، كاستخدام رمز هندسي في غير موضعه، أو إخراج سهمين من المعين دون تسميتهما، أو وجود أكثر من نقطة بداية، أو ترك خطوط سائبة لا تنتهي عند شكل محدد.", en: "Violations of the standard drawing rules: using a shape out of place, sending two unnamed arrows out of a diamond, having more than one start point, or leaving dangling lines that end at no shape." }
+        }
+      ],
+      example: {
+        ar: "خوارزمية طباعة الأعداد من 1 إلى 5: يبدأ الكود الكاذب بتعيين (العداد ← 1)، ثم (كرر: اطبع العداد * العداد ← العداد + 1 حتى يصبح العداد 5). وفي المخطط الانسيابي يقابل (كرر...حتى) معين يوضع بعد خطوات الحلقة: يخرج منه سهم (لا) يعود إلى خطوة الطباعة لتكرارها، وسهم (نعم) يخرج إلى ما بعد الحلقة. فتُطبع القيم 1 و2 و3 و4 و5 ثم يتحقق الشرط فيخرج المسار إلى النهاية، ولو غُفلت خطوة (العداد ← العداد + 1) لبقي العداد ثابتًا ودارت الحلقة بلا توقف.",
+        en: "An algorithm printing the numbers 1 to 5: the pseudocode begins with (counter ← 1), then (repeat: print counter * counter ← counter + 1 until counter becomes 5). In the flowchart, (repeat...until) matches a diamond placed after the loop's steps: its (no) arrow returns to the print step to repeat it and its (yes) arrow exits beyond the loop. The values 1, 2, 3, 4 and 5 are printed, then the condition holds and the path exits to the end; had the step (counter ← counter + 1) been omitted, the counter would stay fixed and the loop would spin forever."
+      },
+      mistakes: [
+        { ar: "استعمال السرد الحر (الوصف باللغة الطبيعية) حيث تلزم خطوات منظمة قابلة للتحويل إلى برنامج؛ فالغموض وتعدد التفسيرات عيبه الأساسي.", en: "Using free narration (natural-language description) where organized, program-ready steps are needed; ambiguity and multiple interpretations are its core flaw." },
+        { ar: "إهمال الإزاحة أو كلمات الإغلاق مثل (انتهى إذا)، فيصعب تحديد ما يتبع كل شرط أو حلقة.", en: "Neglecting indentation or closing words such as (end if), making it hard to tell what belongs to each condition or loop." },
+        { ar: "استخدام رمز هندسي في غير موضعه، ككتابة (اقرأ السعر) داخل مستطيل بدل متوازي الأضلاع؛ والتصحيح باستبدال الرمز بالشكل المطابق للعملية.", en: "Using a shape out of place, e.g. writing (read price) inside a rectangle instead of a parallelogram; the fix is replacing it with the shape matching the operation." },
+        { ar: "إخراج سهمين من المعين دون تسميتهما (نعم/لا)، فلا يُعرف أي المسارين يقابل تحقق الشرط.", en: "Sending two arrows out of a diamond without labeling them (yes/no), so nobody knows which path means the condition held." },
+        { ar: "حلقة تكرار لا تنتهي بسبب نسيان تحديث متغير التحكم، ككتابة (العداد ← 1 ثم كرر: اطبع العداد) دون (العداد ← العداد + 1) فيبقى الشرط صحيحًا أبدًا.", en: "A loop that never ends because the control variable is never updated — writing (counter ← 1 then repeat: print counter) without (counter ← counter + 1) keeps the condition true forever." },
+        { ar: "مقارنة لا تغطي حالة التساوي عند الحد، كاختبار (إذا الدرجة أكبر من 60) فيُعد الحاصل على 60 راسبًا خطأً؛ والتصحيح بعكس المقارنة لتشمل الحد.", en: "A comparison that misses equality at the boundary, e.g. testing (if grade > 60) wrongly fails a student scoring exactly 60; the fix is flipping the comparison so it includes the boundary." }
+      ],
+      terminology: [
+        { ar: "الوصف باللغة الطبيعية", en: "Natural-language description" },
+        { ar: "الكود الكاذب", en: "Pseudocode" },
+        { ar: "الإسناد", en: "Assignment" },
+        { ar: "الإزاحة", en: "Indentation" },
+        { ar: "المخطط الانسيابي", en: "Flowchart" },
+        { ar: "المعين (القرار)", en: "Decision diamond" },
+        { ar: "الانسياب التكراري", en: "Looping flow" }
+      ],
+      level: "easy"
+    },
+    control: {
+      title: {
+        ar: "الفصل 3 · الهياكل الشرطية والتكرارية",
+        en: "Chapter 3 · Conditional & Iterative Structures"
+      },
+      explanation: {
+        ar: "تحتاج كل خوارزمية تقريبًا إلى اتخاذ قرار بحسب نتيجة مقارنة، وإلى تكرار خطوة أو مجموعة خطوات. تقوم المقارنة المنطقية على ثلاثة عناصر: القيمتان المقارنتان والعلاقة المطلوب اختبارها بينهما، وتجريها وحدة الحساب والمنطق بأربع علاقات أساسية: أكبر من، وأصغر من، والمساواة، وعدم المساواة؛ ونتيجتها جواب باحتمالين فقط: 1 إذا تحققت العلاقة و0 إذا لم تتحقق. وتُبنى من هذه العلاقات مقارنات مركبة بالربط بـ(و) الذي يعطي 1 فقط إذا كانت نتيجة المقارنتين معًا 1، وبـ(أو) الذي يعطي 1 إذا كانت نتيجة إحداهما على الأقل 1. ويجعل الهيكل الشرطي الخطوة التالية متوقفة على نتيجة مقارنة: مسار يُنفذ إذا كانت النتيجة 1 ومسار آخر يُنفذ إذا كانت 0، ولا يُنفذ المساران معًا في المرة الواحدة لأن نتيجة المقارنة إما 1 وإما 0. وتوجد صورة أحادية المسار تُنفذ عملًا واحدًا عند التحقق فقط ولا تعمل شيئًا عند غيابه، وصورة متعددة الاختيارات (متداخلة) يوضع فيها هيكل شرطي ثانٍ داخل أحد مساري الأول فتفاضل بين ثلاثة مسارات أو أكثر. أما الهيكل التكراري فيعيد خطوة أو مجموعة خطوات مرات عدة، وعنصراه: الخطوات التي تتكرر، والمقارنة المنطقية التي تُختبر في كل دورة لتحديد هل يستمر التكرار. وشرط التوقف هو المقارنة التي ينتهي التكرار حين تصبح نتيجتها 0، وأهميته أنه يحدد عدد مرات التكرار ويضمن وصول الخوارزمية إلى الإخراج؛ فالحواسيب تُبرمج لأداء وظيفة محددة فقط ولا تتوقف من تلقاء نفسها. ويكون التكرار بعدد مرات معلوم بعدّاد يبدأ بقيمة محددة ويزيد بزيادة ثابتة مع شرط توقف يقارنه بقيمة ثابتة، أو بعدد مرات غير معلوم يستمر حتى تظهر في البيانات المدخلة قيمة معينة فلا يُعرف عدد الدورات إلا بعد انتهائها. كما يختلف موضع اختبار شرط الاستمرار: قبله لا تُنفذ الخطوات ولا مرة واحدة إذا كانت النتيجة 0 عند الاختبار الأول، وبعده تُنفذ الخطوات مرة واحدة على الأقل ثم يُختبر الشرط.",
+        en: "Almost every algorithm needs a decision based on a comparison's outcome, and repetition of a step or group of steps. A logical comparison has three elements: the two compared values and the relation to test between them; the arithmetic and logic unit performs four basic comparisons — greater than, less than, equality and inequality — and the result has only two possibilities: 1 when the relation holds and 0 when it does not. Compound comparisons are built from them with (and), whose result is 1 only if both comparisons are 1, and (or), which gives 1 if at least one comparison is 1. A conditional structure makes the next step depend on a comparison's result: one path executes when the result is 1 and another when it is 0, and the two paths never run together in one pass because the result is either 1 or 0. There is a single-path form that performs one action only when the condition holds and does nothing otherwise, and a multi-choice (nested) form where a second conditional sits inside one branch of the first, choosing among three or more paths. The iterative structure repeats a step or group of steps several times, with two elements: the repeated steps and the logical comparison tested each cycle to decide whether repetition continues. The stop condition is the comparison whose result of 0 ends repetition; its importance is that it fixes the number of repetitions and guarantees the algorithm reaches its output — computers are programmed to perform a defined function only and never stop on their own. Repetition may have a known number of cycles, using a counter that starts at a defined value and increases by a fixed step with a stop condition comparing it to a constant, or an unknown number of cycles that continues until an input value appears, so the cycle count is only known once it ends. The position of the continuation test also varies: testing before the steps means they may not run even once when the first result is 0, while testing after them runs the steps at least once before the test."
+      },
+      objectives: [
+        { ar: "تعريف المقارنة المنطقية وتعداد عناصرها الثلاثة.", en: "Define a logical comparison and list its three elements." },
+        { ar: "تعداد علاقات المقارنة الأربع التي تجريها وحدة الحساب والمنطق ومتى تتحقق كل منها.", en: "List the four comparisons the ALU performs and when each holds." },
+        { ar: "توضيح نتيجة الربط بـ(و) والربط بـ(أو) في المقارنات المركبة.", en: "Explain the result of (and) and (or) links in compound comparisons." },
+        { ar: "تعداد عناصر الهيكل الشرطي وتمييز صورته أحادية المسار ومتعددة الاختيارات.", en: "List a conditional structure's elements and distinguish its single-path and multi-choice forms." },
+        { ar: "المقارنة بين التكرار المختبر شرطه قبل الخطوات والمختبر شرطه بعدها وبيان أهمية شرط التوقف.", en: "Compare pre-test and post-test repetition and state the importance of the stop condition." }
+      ],
+      concepts: [
+        {
+          term: { ar: "المقارنة المنطقية", en: "Logical comparison" },
+          def: { ar: "عملية تضع قيمتين في علاقة محددة لمعرفة هل تتحقق هذه العلاقة بينهما؛ عناصرها: القيمة الأولى، والقيمة الثانية، والعلاقة المطلوب اختبارها.", en: "An operation placing two values in a defined relation to see whether it holds; its elements are the first value, the second value and the relation being tested." }
+        },
+        {
+          term: { ar: "علاقات المقارنة الأربع", en: "The four comparisons" },
+          def: { ar: "أكبر من، وأصغر من، والمساواة، وعدم المساواة؛ وهي عمليات وحدة الحساب والمنطق، ونتيجة كل منها 1 عند التحقق و0 عند عدمه.", en: "Greater than, less than, equality and inequality — the ALU's operations; each yields 1 when it holds and 0 when it does not." }
+        },
+        {
+          term: { ar: "ربط المقارنات (و/أو)", en: "Linking comparisons (and/or)" },
+          def: { ar: "جمع مقارنتين في شرط واحد: الربط بـ(و) يعطي 1 فقط إذا كانت نتيجتا المقارنتين معًا 1، والربط بـ(أو) يعطي 1 إذا كانت نتيجة إحداهما على الأقل 1.", en: "Joining two comparisons into one condition: (and) gives 1 only when both are 1, while (or) gives 1 when at least one is 1." }
+        },
+        {
+          term: { ar: "الهيكل الشرطي", en: "Conditional structure" },
+          def: { ar: "بنية تجعل الخطوة التالية تتوقف على نتيجة مقارنة منطقية: مقارنة تُختبر، ومسار يُنفذ إذا كانت النتيجة 1، ومسار آخر إذا كانت 0، ولا يُنفذ المساران معًا في المرة الواحدة.", en: "A structure making the next step depend on a comparison: a tested comparison, a path for result 1 and another for result 0 — the two paths never run together in a single pass." }
+        },
+        {
+          term: { ar: "الهيكل الشرطي متعدد الاختيارات", en: "Multi-choice conditional" },
+          def: { ar: "هيكل شرطي يوضع داخل أحد مساري هيكل أول (متداخل)، فتختار الخوارزمية بين ثلاثة مسارات أو أكثر، وتمر البيانات الواحدة في مسار واحد فقط.", en: "A conditional placed inside one branch of another (nested), letting the algorithm choose among three or more paths; each datum travels exactly one path." }
+        },
+        {
+          term: { ar: "الهيكل التكراري", en: "Iterative structure" },
+          def: { ar: "بنية تُعاد فيها خطوة أو مجموعة خطوات مرات عدة؛ عنصراها: الخطوات المتكررة، والمقارنة التي تُختبر في كل دورة لتحديد هل يستمر التكرار.", en: "A structure repeating a step or group of steps; its two elements are the repeated steps and the comparison tested each cycle to decide whether repetition continues." }
+        },
+        {
+          term: { ar: "شرط التوقف", en: "Stop condition" },
+          def: { ar: "المقارنة التي ينتهي التكرار حين تصبح نتيجتها 0؛ يحدد عدد مرات التكرار ويضمن أن تصل الخوارزمية إلى الإخراج لأن الحاسب لا يتوقف من تلقاء نفسه.", en: "The comparison whose 0 result ends repetition; it fixes the repetition count and guarantees the algorithm reaches its output, since a computer never stops on its own." }
+        }
+      ],
+      example: {
+        ar: "تصنيف درجات الطلاب إلى ثلاث فئات: تُدخل الدرجة، ثم تُختبر أولًا (هل الدرجة أكبر من أو تساوي 90؟) فيُنفذ مسار (ممتاز) عند التحقق، وإلا تُختبر (هل الدرجة أكبر من أو تساوي 60؟) فيُنفذ مسار (ناجح)، وإلا يُنفذ مسار (راسب). وتمر كل درجة في مسار واحد فقط: فالدرجة 75 تعطي نتيجة 0 في المقارنة الأولى و1 في الثانية فتُصنف ناجحة، والدرجة 95 تعطي 1 في المقارنة الأولى فتُصنف ممتازة. ولو كُتبت المقارنة (الدرجة أكبر من 60) لما غطت حالة التساوي، فمرت الدرجة 60 بالضبط في مسار الرسوب خطأً، والتصحيح بعكس المقارنة لتصبح (الدرجة أصغر من 60) عند فحص الرسوب حتى تشمل الحد.",
+        en: "Sorting student grades into three classes: the grade is entered, then (is the grade ≥ 90?) is tested first — executing the (excellent) path when it holds — otherwise (is the grade ≥ 60?) is tested, running the (pass) path, and otherwise the (fail) path runs. Each grade travels exactly one path: 75 gives 0 in the first comparison and 1 in the second, so it passes; 95 gives 1 in the first, so it is excellent. Had the comparison been written (grade > 60) it would miss equality, and a grade of exactly 60 would wrongly take the fail path; the fix flips the comparison to (grade < 60) on the fail side so the boundary is included."
+      },
+      mistakes: [
+        { ar: "اختيار مقارنة لا تغطي حالة التساوي عند الحد، مثل (الدرجة أكبر من 60) بدل (أكبر من أو تساوي 60)، فيذهب الهيكل الشرطي إلى مسار غير مقصود؛ والتصحيح بعكس المقارنة.", en: "Choosing a comparison that misses equality at the boundary — (grade > 60) instead of (grade ≥ 60) — sends the conditional down an unintended path; the fix is flipping the comparison." },
+        { ar: "اختبار الحد بقيمة لا تساوي الحد تمامًا، فمع المقارنة (الدرجة أكبر من 59) تمر درجة 59.5 كحالة نجاح خطأً.", en: "Testing the boundary with a value that is not exactly the boundary: with (grade > 59), a grade of 59.5 wrongly passes as a success case." },
+        { ar: "كتابة تكرار لا تتغير فيه القيمة المقارنة، فتبقى نتيجة شرط التوقف 1 في كل دورة ولا ينتهي التكرار أبدًا.", en: "Writing a loop whose compared value never changes, so the stop condition stays 1 every cycle and repetition never ends." },
+        { ar: "توقع أن الحاسب يتوقف عن التكرار من تلقاء نفسه دون تحديد شرط توقف؛ فالحواسيب تُبرمج لأداء وظيفة محددة فقط.", en: "Expecting the computer to stop repeating on its own without a defined stop condition; computers are programmed to perform a defined function only." },
+        { ar: "الخلط بين الربط بـ(و) والربط بـ(أو): (و) لا تعطي 1 إلا بتحقق المقارنتين معًا، و(أو) تكفي فيها نتيجة إحداهما.", en: "Confusing (and) with (or): (and) yields 1 only when both comparisons hold, while (or) needs only one of them." },
+        { ar: "توقع تنفيذ مساري الهيكل الشرطي معًا، مع أن نتيجة المقارنة إما 1 وإما 0 في المرة الواحدة، فيُنفذ مسار واحد فقط.", en: "Expecting both paths of a conditional to run together even though the result is either 1 or 0 in a single pass, executing exactly one path." }
+      ],
+      terminology: [
+        { ar: "المقارنة المنطقية", en: "Logical comparison" },
+        { ar: "الهيكل الشرطي", en: "Conditional structure" },
+        { ar: "الربط بـ(و)", en: "AND link" },
+        { ar: "الربط بـ(أو)", en: "OR link" },
+        { ar: "الهيكل التكراري", en: "Iterative structure" },
+        { ar: "شرط التوقف", en: "Stop condition" },
+        { ar: "الدورة", en: "Cycle (iteration)" }
+      ],
+      level: "easy"
+    },
+    search: {
+      title: {
+        ar: "الفصل 4 · خوارزميات البحث",
+        en: "Chapter 4 · Searching Algorithms"
+      },
+      explanation: {
+        ar: "البحث عملية تحديد وجود قيمة معينة (الهدف) داخل مجموعة من البيانات وتحديد موقعها إن وُجدت، وتُخزَّن البيانات عادة في قائمة لكل عنصر فيها رقم موقع يسمى الفهرس يبدأ من 0، ويُقاس أداء خوارزمية البحث بعدد المقارنات لأن كل مقارنة تستهلك وقتًا. وتقوم خوارزميات البحث على بنية التكرار التي تتكون من ثلاثة عناصر: القيمة الابتدائية لمتغير التحكم، وشرط الاستمرار الذي يُفحص قبل كل دورة، وتحديث متغير التحكم داخل الجسم وهو ما يقرّب الحلقة من نهايتها؛ ونسيان هذا التحديث يوقع في التكرار اللانهائي. والبحث الخطي يقارن الهدف بعناصر القائمة واحدًا بعد آخر من الأول حتى الأخير، ويتوقف عند أول تطابق أو عند انتهاء القائمة دون العثور عليه؛ فلا يشترط أن تكون القائمة مرتبة، وهو بسيط في الكتابة والفهم، وعدد مقارناته يزداد بزيادة عدد العناصر حتى يقارن كل عناصر القائمة في أسوأ الحالات. أما البحث الثنائي فيشترط قائمة مرتبة تصاعديًا، بمقارنة الهدف بالعنصر الأوسط من الجزء المبحوث: فإن ساواه انتهى البحث، وإن كان الهدف أكبر استُبعد النصف الأيسر بـ(low = mid + 1)، وإن كان أصغر استُبعد النصف الأيمن بـ(high = mid − 1)، وتتكرر الخطوة على النصف المتبقي حتى العثور على الهدف أو انتهاء الجزء المبحوث. ويستعمل ثلاثة متغيرات: low فهرس بداية الجزء وتبدأ بـ0، وhigh فهرس نهايته وتبدأ بـ(len(items) − 1)، وmid فهرس العنصر الأوسط ويُحسب بحذف الكسر من (low + high) ÷ 2. وشرط الترتيب جوهري لأن استبعاد نصف القائمة لا يكون صحيحًا إلا إذا كان كل ما قبل العنصر الأوسط أصغر منه وكل ما بعده أكبر منه، وإلا استُبعد النصف الذي يحوي الهدف دون أي رسالة خطأ. ويُقاس التفاضل بين الخوارزميتين بالتعقيد الزمني الذي يصف كيف يزداد عدد الخطوات بازدياد حجم البيانات: تعقيد البحث الخطي O(n) فتتضاعف المقارنات تقريبًا بتضاعف العناصر، وتعقيد البحث الثنائي O(log n) فيكفي قسمة القائمة على 2 نحو عشر مرات للوصول من 1000 عنصر، فتزداد المقارنات واحدة فقط عند مضاعفة حجم القائمة. ولذلك يُختار البحث الخطي للقوائم الصغيرة أو غير المرتبة التي يُبحث فيها مرة واحدة فقط أو حين يُراد المرور على العناصر كلها، ويُختار البحث الثنائي للقوائم الكبيرة المرتبة أو التي تُرتب مرة واحدة ثم يُبحث فيها مرات كثيرة.",
+        en: "Searching is the process of determining whether a given value (the target) exists inside a data set and locating its position if found; data is usually stored in a list where every element has a position number called its index, starting at 0, and a search algorithm's performance is measured by how many comparisons it needs, since each comparison costs time. Search algorithms stand on the repetition structure, made of three elements: the control variable's initial value, the continuation condition checked before every cycle, and the control variable's update inside the body — the very update that moves the loop toward its end, and forgetting it causes an infinite loop. Linear search compares the target with the list's elements one after another, from the first to the last, stopping at the first match or when the list ends without a match; it needs no sorted order, is simple to write and understand, and its comparisons grow with the number of elements, comparing every element in the worst case. Binary search requires an ascending sorted list and compares the target with the middle element of the searched region: if equal the search ends, if the target is greater the left half is discarded with (low = mid + 1), if smaller the right half is discarded with (high = mid − 1), repeating on the remainder until the target is found or the region empties. It uses three variables: low, the region's start index beginning at 0; high, its end index beginning at (len(items) − 1); and mid, the middle element's index computed by dropping the fraction from (low + high) ÷ 2. The ordering requirement is essential because discarding half the list is only valid when everything before the middle is smaller and everything after is larger; otherwise the half holding the target is discarded with no error message at all. The two algorithms are compared through time complexity, which describes how the number of steps grows with data size: linear search is O(n) — comparisons roughly double as elements double — while binary search is O(log n): halving the list about ten times reaches any of 1000 elements, so doubling the list adds only one comparison. Linear search therefore suits small or unsorted lists searched once, or when every element must be visited; binary search suits large sorted lists, or lists sorted once and searched many times."
+      },
+      objectives: [
+        { ar: "تعريف البحث والتمييز بين نتيجتيه: إعادة فهرس الهدف عند وجوده والتأكد من غيابه عند عدمه.", en: "Define searching and distinguish its two outcomes: returning the target's index when found and confirming absence otherwise." },
+        { ar: "تعداد عناصر بنية التكرار الثلاثة وبيان سبب بدء متغير المجموع بالصفر قبل الحلقة.", en: "List the loop structure's three elements and explain why an accumulator starts at zero before the loop." },
+        { ar: "شرح البحث الخطي وتعداد خصائصه الثلاث.", en: "Explain linear search and list its three properties." },
+        { ar: "تتبع البحث الثنائي بمتغيراته low وhigh وmid وبيان شرط الترتيب.", en: "Trace binary search with its low, high and mid variables and state the ordering requirement." },
+        { ar: "المقارنة بين تعقيدي البحثين واختيار الأنسب بحسب حال البيانات.", en: "Compare the two searches' complexities and choose the fitting one for the data at hand." }
+      ],
+      concepts: [
+        {
+          term: { ar: "البحث", en: "Searching" },
+          def: { ar: "عملية تحديد وجود قيمة معينة داخل مجموعة من البيانات، وتحديد موقعها إن وُجدت؛ ويُقاس أداء خوارزميته بعدد المقارنات.", en: "Determining whether a given value exists in a data set and locating it when present; an algorithm's performance is measured by its comparison count." }
+        },
+        {
+          term: { ar: "الفهرس", en: "Index" },
+          def: { ar: "رقم موقع العنصر في القائمة، ويبدأ من 0؛ ويُختار الثابت −1 اتفاقًا للدلالة على عدم وجود الهدف لأنه لا يلتبس بأي فهرس صالح.", en: "An element's position number in a list, starting at 0; the constant −1 is agreed to mean 'not found' because it collides with no valid index." }
+        },
+        {
+          term: { ar: "بنية التكرار", en: "Repetition structure" },
+          def: { ar: "بنية تنفذ مجموعة تعليمات عدة مرات ما دام شرط معين متحققًا؛ عناصرها الثلاثة: القيمة الابتدائية لمتغير التحكم، وشرط الاستمرار، وتحديث المتغير داخل الجسم.", en: "A structure executing instructions many times while a condition holds; its three elements are the control variable's initial value, the continuation condition, and the update inside the body." }
+        },
+        {
+          term: { ar: "البحث الخطي", en: "Linear search" },
+          def: { ar: "خوارزمية تقارن الهدف بعناصر القائمة واحدًا بعد آخر وتتوقف عند أول تطابق أو عند انتهاء القائمة، وعدد مقارناتها يزداد بزيادة العناصر.", en: "An algorithm comparing the target with elements one after another, stopping at the first match or the list's end; its comparison count grows with the number of elements." }
+        },
+        {
+          term: { ar: "البحث الثنائي", en: "Binary search" },
+          def: { ar: "خوارزمية تبحث عن الهدف في قائمة مرتبة بمقارنته بالعنصر الأوسط، ثم تستبعد النصف الذي لا يمكن أن يكون فيه الهدف وتكرر ذلك على النصف المتبقي.", en: "An algorithm searching a sorted list by comparing the target with the middle element, then discarding the half that cannot contain it and repeating on the remainder." }
+        },
+        {
+          term: { ar: "شرط الترتيب التصاعدي", en: "Ascending-order requirement" },
+          def: { ar: "اشتراط البحث الثنائي؛ لأن استبعاد نصف القائمة لا يكون صحيحًا إلا إذا كان كل ما قبل العنصر الأوسط أصغر منه وكل ما بعده أكبر منه، وإلا استُبعد النصف الذي فيه الهدف.", en: "Binary search's requirement: discarding half the list is valid only when everything before the middle is smaller and everything after is larger, or the half holding the target gets discarded." }
+        },
+        {
+          term: { ar: "التعقيد الزمني", en: "Time complexity" },
+          def: { ar: "مقياس يصف كيف يزداد عدد خطوات الخوارزمية عندما يزداد حجم البيانات؛ يُكتب بترميز O الكبير: O(n) للبحث الخطي وO(log n) للبحث الثنائي.", en: "A measure of how an algorithm's steps grow with data size, written in Big O notation: O(n) for linear search and O(log n) for binary search." }
+        }
+      ],
+      example: {
+        ar: "البحث الثنائي عن المنفذ 443 في قائمة منافذ مرتبة [21, 22, 25, 53, 80, 110, 143, 443, 3306, 8080]: يبدأ الجزء المبحوث كاملًا (low = 0 وhigh = 9)، فيُحسب mid = 4 والعنصر 80 أصغر من الهدف فتصبح low = mid + 1 = 5؛ ثم يُحسب mid = 7 والعنصر 443 يساوي الهدف فيُعاد الفهرس 7 بمقارنتين فقط. ويحتاج البحث الخطي إلى ثماني مقارنات للهدف نفسه لأنه يمر على كل ما قبله، ويُعيد −1 عند عدم العثور على الهدف. أما تشغيل البحث الثنائي على قائمة غير مرتبة فيخفي الخطأ: البحث عن 3 في [77, 12, 45, 3, 90, 28] يُعيد 1 مع أن الهدف في الموضع 3، لأن المقارنة الأولى مع 45 والثانية مع 77 استبعدتا النصف الذي يحوي الهدف؛ والتصحيح ترتيب القائمة أولًا ثم البحث، مع الانتباه إلى أن الفهرس المعاد يخص القائمة المرتبة.",
+        en: "Binary search for port 443 in the sorted list [21, 22, 25, 53, 80, 110, 143, 443, 3306, 8080]: the searched region starts as the whole list (low = 0, high = 9), mid = 4 gives 80 — smaller than the target — so low becomes mid + 1 = 5; then mid = 7 gives 443, matching the target, returning index 7 after only two comparisons. Linear search would need eight comparisons for the same target since it walks everything before it, and returns −1 when the target is absent. Running binary search on an unsorted list hides the bug: searching for 3 in [77, 12, 45, 3, 90, 28] returns 1 though the target sits at position 3, because the first comparison with 45 and the second with 77 discarded the half containing the target; the fix is sorting the list first, noting the returned index then belongs to the sorted list."
+      },
+      mistakes: [
+        { ar: "كتابة شرط حلقة البحث الخطي بالرمز (i أصغر من أو يساوي len(items)) فتصل i إلى قيمة لا يوجد لها فهرس، ويظهر الخطأ IndexError: list index out of range؛ والتصحيح (i أصغر من len(items)) لأن آخر فهرس صحيح هو len(items) − 1.", en: "Writing the linear-search loop condition as (i ≤ len(items)) lets i reach a nonexistent index and raises IndexError: list index out of range; the fix is (i < len(items)) since the last valid index is len(items) − 1." },
+        { ar: "تشغيل البحث الثنائي على قائمة غير مرتبة، فيستبعد النصف الذي يحوي الهدف ويعيد موضعًا خاطئًا أو −1 دون أي رسالة خطأ؛ والتصحيح بترتيب القائمة قبل البحث.", en: "Running binary search on an unsorted list discards the half holding the target and returns a wrong index or −1 with no error at all; the fix is sorting the list first." },
+        { ar: "كتابة (low = mid) بدل (low = mid + 1) عند إزاحة الحد، فيبقى العنصر المفحوص داخل الجزء المبحوث ولا يضيق فتدخل الخوارزمية في تكرار لا نهائي؛ والتصحيح إخراج mid من الجزء لأنه فُحص فعلًا.", en: "Writing (low = mid) instead of (low = mid + 1) keeps the examined element inside the searched region, so it never shrinks and the algorithm loops forever; the fix is excluding mid since it was already checked." },
+        { ar: "استعمال ناتج البحث بلا فحص؛ فتمرير −1 إلى فهرسة القائمة يسبب خطأً دون رسالة توضح سبب الفشل، والصحيح فحص الناتج أولًا.", en: "Using a search result unchecked: passing −1 into list indexing fails without a message explaining why; the right way is checking the result first." },
+        { ar: "نسيان تحديث متغير التحكم في حلقة البحث، فتبقى نتيجة الشرط صحيحة في كل دورة (التكرار اللانهائي).", en: "Forgetting the control variable's update in the search loop keeps the condition true every cycle (an infinite loop)." },
+        { ar: "تفضيل البحث الثنائي دائمًا رغم أن ترتيب قائمة غير مرتبة قد يستهلك وقتًا أكبر من بحث خطي واحد عليها.", en: "Always preferring binary search even though sorting an unsorted list may cost more than a single linear pass over it." }
+      ],
+      terminology: [
+        { ar: "البحث", en: "Searching" },
+        { ar: "الفهرس", en: "Index" },
+        { ar: "البحث الخطي", en: "Linear search" },
+        { ar: "البحث الثنائي", en: "Binary search" },
+        { ar: "العنصر الأوسط", en: "Middle element" },
+        { ar: "التعقيد الزمني", en: "Time complexity" },
+        { ar: "ترميز O الكبير", en: "Big O notation" }
+      ],
+      level: "medium"
+    },
+    sorting: {
+      title: {
+        ar: "الفصل 5 · خوارزميات الترتيب",
+        en: "Chapter 5 · Sorting Algorithms"
+      },
+      explanation: {
+        ar: "الترتيب إعادة تنظيم عناصر مجموعة من البيانات بحيث تأخذ تسلسلًا محددًا وفق معيار للمقارنة: في الترتيب التصاعدي يكون كل عنصر أصغر من الذي يليه أو مساويًا له، وفي الترتيب التنازلي يكون أكبر منه أو مساويًا له. وتقدم خوارزميات الترتيب فائدة عملية مباشرة: فالبحث عن قيمة في جدول مرتب أسرع من البحث في جدول عشوائي، ويصبح استخراج أصغر قيمة وأكبرها واكتشاف القيم المتكررة أو الشاذة أيسر حين تتجاور القيم المتقاربة؛ ومثال ذلك ترتيب سجل محاولات الدخول إلى خادم وفق الوقت فتتجاوز المحاولات المتتابعة من المصدر نفسه متجاورة ويسهل اكتشاف محاولة اختراق بالتخمين المتكرر لكلمة المرور. وتعتمد خوارزميات الفصل على عمليتين أساسيتين: المقارنة لفحص عنصرين ومعرفة أيهما يسبق الآخر، والتبديل أو الإزاحة لنقل العناصر داخل الجدول حتى تأخذ مواضعها الصحيحة، ويُقاس أداء الخوارزمية غالبًا بعدد المقارنات وعدد التبديلات لأنهما تتكرران أكثر من غيرهما. ويحتاج تبديل قيمتي عنصرين إلى متغير ثالث مؤقت، لأن إسناد قيمة العنصر الثاني إلى الأول يمحو قيمة الأول قبل حفظها، فتُحفظ قيمة الأول في المتغير المؤقت أولًا ثم يأخذ الأول قيمة الثاني ثم يأخذ الثاني القيمة المحفوظة. وخوارزميات الفصل ثلاث: الترتيب بالفقاعات الذي يمر على الجدول مرات متتالية في كل منها يقارن عنصرين متجاورين ويبدلهما إذا كانا في غير ترتيبهما الصحيح، فتصعد القيمة الكبرى إلى نهاية الجدول في كل مرور كما تطفو فقاعة على سطح الماء؛ لذلك يقصر المرور التالي بمقدار عنصر واحد ويصير حد الحلقة الداخلية (n − 1 − i)، ويحتاج جدول من n عنصرًا إلى n − 1 مرور على الأكثر، وهو مستقر لأنه لا يبدل عنصرين متساويين، ويمكن إيقافه مبكرًا بمتغير مؤشر يأخذ 0 في بداية كل مرور و1 عند حدوث تبديل فيتوقف عند أول مرور بلا تبديل. والترتيب بالاختيار الذي يقسم الجدول إلى جزأين: جزء مرتب في البداية وجزء غير مرتب بعده، وفي كل خطوة يبحث عن أصغر عنصر في الجزء غير المرتب ثم يضعه في أول موضع منه بتبديل واحد، فيكبر الجزء المرتب عنصرًا واحدًا في كل خطوة؛ وعدد مقارناته ثابت مهما كانت حالة الجدول ويساوي n(n−1)/2، وتبديلاته لا تتجاوز n − 1، لكنه ليس مستقرًا لأن التبديل البعيد قد ينقل عنصرًا أمام عنصر يساويه. والترتيب بالإدراج الذي يأخذ العناصر واحدًا بعد الآخر ويُدرج كل عنصر في موضعه الصحيح داخل الجزء المرتب الذي يسبقه، مثل ترتيب بطاقات اللعب في اليد؛ فتُحفظ قيمة العنصر في متغير يسمى المفتاح ثم تُزاح العناصر الأكبر منه خطوة إلى اليمين لتفسح له مكانًا، ويستخدم الإزاحة بدل التبديل الكامل فكل إزاحة إسناد واحد، وهو مستقر وسريع جدًا على الجداول شبه المرتبة، ويُدرج البيانات التي تصل تباعًا دون إعادة ترتيب الجدول كله. ويُقارن بين الخوارزميات بالتعقيد الزمني، وهو تقدير لعدد العمليات بدلالة حجم البيانات ويُكتب بترميز O الكبير؛ وتُقاس ثلاثة أحوال: الفضلى حين تكون البيانات في أنسب وضع وغالبًا مرتبة مسبقًا، والمتوسطة حين تكون عشوائية، والأسوأ حين تكون بعكس الترتيب المطلوب. وتلتقي الخوارزميات الثلاث في تعقيد O(n²) في الحالة المتوسطة والأسوأ، وتختلف في الحالة الفضلى إذ يستفيد الترتيب بالفقاعات المحسن والترتيب بالإدراج من كون الجدول مرتبًا فيصلان إلى O(n)، ولا يستفيد الترتيب بالاختيار من ذلك فينفذ عدد المقارنات نفسه دائمًا. ويُختار بينها بحسب طبيعة البيانات: الجداول الصغيرة تصلح لها الخوارزميات الثلاث، والجداول شبه المرتبة أو البيانات التي تصل تباعًا يُفضَّل لها الإدراج، وحين يكون نقل العناصر مكلفًا يُفضَّل الاختيار لقلة تبديلاته، وحين يجب الحفاظ على ترتيب العناصر المتساوية يُختار الفقاعات أو الإدراج لأنهما مستقران، والجداول الكبيرة جدًا تصبح الخوارزميات الثلاث بطيئة لأن تعقيدها التربيعي O(n²).",
+        en: "Sorting is reorganizing a data set's elements into a defined sequence according to a comparison criterion: in ascending order every element is smaller than or equal to the one after it, and in descending order larger than or equal to it. Sorting brings direct practical value: searching for a value in a sorted table is faster than in a random one, and finding the smallest and largest values, or spotting repeated or anomalous values, becomes easier once similar values sit next to each other; for example, sorting a server's login-attempt log by time places consecutive attempts from the same source together, exposing a password-guessing intrusion. The chapter's algorithms rest on two core operations: comparison, examining two elements to learn which precedes the other, and swapping or shifting, moving elements inside the table until they take their correct places; performance is usually measured by the number of comparisons and swaps because those repeat more than anything else. Swapping two elements' values needs a third, temporary variable, because assigning the second element's value to the first erases the first's value before it is saved; the first value is stored in the temporary variable, then the first takes the second's value, then the second takes the saved value. The chapter covers three algorithms: bubble sort, which walks the table in successive passes, comparing each pair of adjacent elements and swapping them when out of order, so the largest value rises to the table's end each pass the way a bubble floats to the surface; each following pass therefore shortens by one element and the inner loop's limit becomes (n − 1 − i), a table of n elements needs at most n − 1 passes, and it is stable because it never swaps equal elements; it can be stopped early with a flag variable that takes 0 at each pass's start and 1 on any swap, halting at the first swap-free pass. Selection sort divides the table into a sorted part at the front and an unsorted part after it; each step finds the smallest element of the unsorted part and places it at that part's first position with one swap, growing the sorted part by one element per step; its comparison count is fixed regardless of the table's state and equals n(n−1)/2, its swaps never exceed n − 1, but it is not stable because a distant swap can move an element ahead of an equal one. Insertion sort takes elements one after another and inserts each into its correct place within the sorted prefix before it, like arranging playing cards in a hand; the element's value is saved in a variable called the key, then larger elements are shifted one step right to make room; it shifts rather than fully swapping, so each shift is a single assignment, it is stable and very fast on nearly sorted tables, and it inserts streaming data as it arrives without re-sorting the whole table. The algorithms are compared through time complexity, an estimate of the operation count in terms of data size, written in Big O notation; three cases are measured: best, when data is optimally arranged (usually already sorted), average, when random, and worst, when ordered the opposite way. All three meet at O(n²) in the average and worst cases and differ in the best case: improved bubble sort and insertion sort benefit from an already sorted table reaching O(n), while selection sort does not and runs the same comparison count every time. Choice among them follows the data: small tables suit all three; nearly sorted tables or streaming data favor insertion; when moving elements is costly, selection wins on its few swaps; when equal elements' prior order must be preserved, bubble or insertion are chosen as the stable pair; and very large tables leave all three slow because of their quadratic O(n²) complexity."
+      },
+      objectives: [
+        { ar: "تعريف الترتيب والتمييز بين الترتيب التصاعدي والتنازلي وبين عمليتي المقارنة والتبديل.", en: "Define sorting and distinguish ascending from descending order and comparison from swapping." },
+        { ar: "شرح الحاجة إلى متغير مؤقت عند التبديل وبيان ما يحدث عند إهماله.", en: "Explain the need for a temporary variable when swapping and what happens without one." },
+        { ar: "تتبع الترتيب بالفقاعات وبيان دور متغير change وحد الحلقة الداخلية n − 1 − i.", en: "Trace bubble sort and state the roles of the change flag and the n − 1 − i inner limit." },
+        { ar: "شرح الترتيب بالاختيار وسبب ثبات عدد مقارناته وحفظه موضع أصغر عنصر.", en: "Explain selection sort, why its comparison count is fixed, and why it stores the smallest element's index." },
+        { ar: "مقارنة الخوارزميات الثلاث بالحالات الثلاث ومعايير اختيار الأنسب للبيانات.", en: "Compare the three algorithms across the three cases and the criteria for choosing among them." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الترتيب", en: "Sorting" },
+          def: { ar: "إعادة تنظيم عناصر مجموعة من البيانات بحيث تأخذ تسلسلًا محددًا وفق معيار للمقارنة.", en: "Reorganizing a data set's elements into a defined sequence according to a comparison criterion." }
+        },
+        {
+          term: { ar: "المقارنة والتبديل", en: "Comparison & swap" },
+          def: { ar: "عمليتا الترتيب الأساسيتان: المقارنة لفحص عنصرين ومعرفة أيهما يسبق، والتبديل أو الإزاحة لنقل العناصر إلى مواضعها الصحيحة؛ ويُقاس الأداء بعددهما.", en: "Sorting's two core operations: comparison to learn which of two elements precedes, and swap or shift to move elements into place; performance is measured by their counts." }
+        },
+        {
+          term: { ar: "المتغير المؤقت", en: "Temporary variable" },
+          def: { ar: "متغير ثالث يُحفظ فيه أحد العنصرين قبل التبديل، لأن الإسناد المباشر يمحو القيمة الأولى قبل حفظها.", en: "A third variable holding one element before a swap, because direct assignment erases the first value before it is saved." }
+        },
+        {
+          term: { ar: "الترتيب بالفقاعات", en: "Bubble sort" },
+          def: { ar: "خوارزمية تقارن في كل مرور كل عنصرين متجاورين وتبدلهما إذا كانا في غير ترتيبهما، فتصعد القيمة الكبرى إلى نهاية الجدول؛ مستقرة وتتوقف مبكرًا بمتغير المؤشر.", en: "An algorithm comparing each pair of adjacent elements per pass and swapping them when out of order, floating the largest to the table's end; stable, with an early-stop flag." }
+        },
+        {
+          term: { ar: "الترتيب بالاختيار", en: "Selection sort" },
+          def: { ar: "خوارزمية تبحث في كل خطوة عن أصغر عنصر في الجزء غير المرتب وتضعه في أول موضع منه بتبديل واحد؛ عدد مقارناتها ثابت n(n−1)/2 وتبديلاتها لا تتجاوز n − 1.", en: "An algorithm finding the unsorted region's smallest element each step and placing it first there with one swap; comparisons are fixed at n(n−1)/2 and swaps never exceed n − 1." }
+        },
+        {
+          term: { ar: "الترتيب بالإدراج", en: "Insertion sort" },
+          def: { ar: "خوارزمية تُدرج كل عنصر في موضعه الصحيح داخل الجزء المرتب الذي يسبقه، بحفظ قيمته في المفتاح وإزاحة العناصر الأكبر منه؛ سريعة على شبه المرتبة.", en: "An algorithm inserting each element into its correct place within the sorted prefix, saving its value in the key and shifting larger elements; fast on nearly sorted data." }
+        },
+        {
+          term: { ar: "الاستقرار", en: "Stability" },
+          def: { ar: "خاصية خوارزمية لا تبدل عنصرين متساويين فتحافظ على ترتيبهما الأصلي؛ الفقاعات والإدراج مستقران والاختيار ليس كذلك.", en: "The property of never swapping equal elements, preserving their original order; bubble and insertion sort are stable, selection sort is not." }
+        },
+        {
+          term: { ar: "الحالات الثلاث", en: "Best, average & worst cases" },
+          def: { ar: "الفضلى حين تكون البيانات مرتبة مسبقًا غالبًا، والمتوسطة حين تكون عشوائية، والأسوأ حين تكون بعكس المطلوب؛ وتلتقي الخوارزميات الثلاث في O(n²) في الأخيرتين.", en: "Best when data is usually sorted already, average when random, worst when ordered oppositely; all three algorithms meet at O(n²) in the latter two." }
+        }
+      ],
+      example: {
+        ar: "تتبع الفقاعات على الجدول {5, 1, 4, 2, 8}: في المرور الأول تُقارن أربعة أزواج متجاورة ويُبدَّل 5 مع 1 ثم 5 مع 4 ثم 5 مع 2، فتبقى 8 في آخر الجدول وهي الأكبر؛ وفي المرور الثاني تُقارن ثلاثة أزواج فقط لأن الموضع الأخير استقر، ويُبدَّل 4 مع 2 فيصبح الجدول مرتبًا فعلًا؛ والمروران الثالث والرابع ينفذان المقارنات دون أي تبديل، فالناتج 1 2 4 5 8 بعد 10 مقارنات و4 تبديلات. وبالنسخة المحسنة يتوقف البرنامج بعد المرور الثالث لأن أول مرور بلا تبديل يثبت أن الجدول مرتب (passes = 3)، ولو كان الجدول مرتبًا من البداية لتوقف بعد مرور واحد. والترتيب بالاختيار على {64, 25, 12, 22, 11} يبحث في كل خطوة عن الأصغر (11 ثم 12 ثم 22) فينفذ 10 مقارنات = 5×4÷2 و3 تبديلات فعلية فقط، والناتج 11 12 22 25 64. والترتيب بالإدراج على {12, 11, 13, 5, 6}: العنصر 11 يُزاح قبله 12؛ والعنصر 13 لا يحتاج إزاحة فيتوقف بعد مقارنة واحدة؛ والعنصر 5 يُزاح قبله 13 ثم 12 ثم 11 ويوضع في الموضع 0؛ والعنصر 6 يُزاح قبله 11 ثم 12 ثم 13 لأنه أصغر من 5 فيتوقف؛ وبعد 7 إزاحات يصبح الناتج 5 6 11 12 13.",
+        en: "Tracing bubble sort on {5, 1, 4, 2, 8}: the first pass compares four adjacent pairs and swaps 5 with 1, then 5 with 4, then 5 with 2, leaving 8 — the largest — at the table's end; the second pass compares only three pairs since the last position is settled, and swaps 4 with 2, actually ordering the table; the third and fourth passes compare without any swap, yielding 1 2 4 5 8 after 10 comparisons and 4 swaps. The improved version stops after the third pass because the first swap-free pass proves the table is sorted (passes = 3); a table sorted from the start would stop after a single pass. Selection sort on {64, 25, 12, 22, 11} finds the smallest each step (11, then 12, then 22), running 10 comparisons = 5×4÷2 and only 3 actual swaps, outputting 11 12 22 25 64. Insertion sort on {12, 11, 13, 5, 6}: 11 shifts past 12; 13 needs no shift and stops after one comparison; 5 shifts past 13, 12 and 11, landing at position 0; 6 shifts past 11, 12 and 13, stopping since it exceeds 5; after 7 shifts the output is 5 6 11 12 13."
+      },
+      mistakes: [
+        { ar: "كتابة التبديل في سطرين دون متغير مؤقت (a = b ثم b = a) فتضيع القيمة الأولى ويساوي المتغيران القيمة الثانية (a = 3, b = 3)، ويُكتشف الخطأ بظهور قيم مكررة لم تكن في الجدول.", en: "Writing a two-line swap without a temporary variable (a = b then b = a) erases the first value and gives both variables the second value (a = 3, b = 3); the bug surfaces as duplicated values that were never in the table." },
+        { ar: "كتابة حد الحلقة الداخلية في الفقاعات j < n بدل j < n − 1 − i، فيقرأ البرنامج t[n] خارج حدود الجدول وينتج رقمًا غريبًا أو يتوقف برسالة Segmentation fault.", en: "Writing bubble sort's inner limit as j < n instead of j < n − 1 − i makes the program read t[n] past the table's bounds, producing a strange number or crashing with a Segmentation fault." },
+        { ar: "في الترتيب بالاختيار: حفظ قيمة أصغر عنصر بدل موضعه (min = t[j] بدل min = j) فلا يعرف البرنامج موضعها لإعادة القيمة القديمة، فتتكرر القيمة الصغرى وتضيع قيم أخرى.", en: "In selection sort, storing the smallest value instead of its index (min = t[j] instead of min = j) leaves the program unable to restore the old value, duplicating the minimum and losing other values." },
+        { ar: "كتابة شرط الإدراج بترتيب معكوس (t[j] > key && j >= 0) فيقرأ البرنامج t[-1] عندما تصل j إلى سالب واحد، وينجح أحيانًا بالصدفة ويفشل أحيانًا أخرى؛ والتصحيح وضع j >= 0 أولًا.", en: "Writing insertion's condition in reverse order (t[j] > key && j >= 0) makes the program read t[-1] once j turns negative, sometimes working by chance and sometimes failing; the fix puts j >= 0 first." },
+        { ar: "الاعتقاد أن الترتيب بالاختيار يستفيد من جدول مرتب جزئيًا؛ فهو ينفذ عدد المقارنات نفسه دائمًا مهما كانت حالة الجدول.", en: "Assuming selection sort benefits from a partially sorted table: it runs the same comparison count regardless of the table's state." },
+        { ar: "نسيان أن خوارزمية الإدراج تفقد ميزتها في الحالة الأسوأ، فتصل إلى العدد الأقصى من المقارنات n(n−1)/2 مثلها مثل الاختيار.", en: "Forgetting that insertion sort loses its edge in the worst case, reaching the maximum n(n−1)/2 comparisons just like selection sort." }
+      ],
+      terminology: [
+        { ar: "الترتيب", en: "Sorting" },
+        { ar: "التبديل", en: "Swap" },
+        { ar: "الإزاحة", en: "Shift" },
+        { ar: "الاستقرار", en: "Stability" },
+        { ar: "الترتيب بالفقاعات", en: "Bubble sort" },
+        { ar: "الترتيب بالاختيار", en: "Selection sort" },
+        { ar: "الترتيب بالإدراج", en: "Insertion sort" }
+      ],
+      level: "medium"
+    },
+    arrays: {
+      title: {
+        ar: "الفصل 6 · المصفوفات والقوائم",
+        en: "Chapter 6 · Arrays & Lists"
+      },
+      explanation: {
+        ar: "قد يحتاج البرنامج إلى الاحتفاظ بعدة قيم من النوع نفسه ثم قراءة قيمة بعينها أو تغييرها أو إضافة قيمة جديدة، وعندما تُوضع القيم في مصفوفة أمكن التعامل معها بوصفها عناصر مرتبة لها مواضع محددة. والمصفوفة بنية تحتفظ بعناصر يمكن الوصول إلى كل واحد منها من خلال موضعه الذي يسمى الفهرس، وتبدأ الفهارس بالصفر، فمصفوفة من ثلاثة أعداد يشير فيها values[0] إلى العنصر الأول وvalues[2] إلى العنصر الأخير. وعند استخدام المصفوفة لتنفيذ قائمة لا يكفي معرفة القيم المخزنة، بل يلزم معرفة ترتيبها وعدد العناصر المستخدمة فعلًا، لأن المصفوفة التي تتسع لخمس قيم قد تحتوي في لحظة معينة على ثلاث قيم فقط وتبقى المساحتان الأخريان متاحتين لإضافات لاحقة. ويُفصل لذلك بين السعة، وهي عدد المواضع المتاحة في المصفوفة، والطول الذي هو عدد المواضع التي تحتوي حاليًا على عناصر من القائمة؛ ويعيش آخر عنصر مستخدم عند الفهرس length − 1، ويجب تحديث الطول بعد كل إضافة أو حذف حتى تبقى عمليات القراءة اللاحقة محصورة في العناصر الفعلية. والوصول إلى عنصر لا يغير المصفوفة، وإذا طُلب عنصر بفهرس غير موجود فالمطلوب اكتشاف الخطأ قبل استعماله: قراءة الموضع الثالث من مصفوفة من ثلاثة عناصر ترفع استثناء out_of_range يكشف أن عدد العناصر ثلاثة بينما أول فهرس هو الصفر وآخر فهرس هو 2. والمرور على عناصر القائمة يبدأ بالفهرس 0 وينتهي قبل بلوغ الفهرس length، بشرط i أصغر من length لا أصغر من أو يساوي، لأن i = length ليس واحدًا من فهارس العناصر المستخدمة؛ ويُستعمل المرور لحساب قيمة تجمع معلومات من العناصر كما في حساب المجموع الذي يبدأ من الصفر وتضيف كل دورة إليه قيمة عنصر واحد بينما تظل عناصر المصفوفة في مواضعها. ويعمليتان لاحقًا تتعلقان ببنية القائمة: الإلحاق، وهو إضافة عنصر بعد آخر عنصر مستخدم في القائمة عند الفهرس values[length] ثم زيادة الطول، بشرط أن تسمح السعة بذلك، وهو يختلف عن الكتابة فوق آخر عنصر التي تستبدل قيمة موجودة ولا تضيف عنصرًا؛ والإدراج، وهو وضع عنصر في موضع محدد مع الإبقاء على العناصر التي كانت فيه وبعده، فيحتاج إزاحة تلك العناصر خطوة نحو النهاية قبل كتابة العنصر الجديد، وتبدأ الإزاحة من آخر عنصر مستخدم باتجاه موضع الإدراج حتى لا تُكتب قيمة فوق عنصر لم يُنقل بعد، ثم يُكتب العنصر ويزيد الطول. والحذف إزالة عنصر من القائمة مع إبقاء العناصر الأخرى بترتيبها: تنتقل العناصر التي تليه موضعًا واحدًا نحو البداية لسد الفراغ ثم ينقص الطول بمقدار واحد، لأن الموضع الأخير السابق لم يعد جزءًا من عناصر القائمة؛ ويُحدد الطول ما يدخل في المرور اللاحق وما يُستبعد منه، حتى لو بقيت قيمة قديمة في موضع خارج القائمة. وتحتاج عمليتا الإدراج والإلحاق إلى موضع متاح، فيسبق تنفيذ الإضافة فحص يقارن الطول بالسعة (length < capacity) ولا يصح افتراض وجود موضع إضافي للكتابة؛ وفي المقابل تأكد قراءة العنصر أو حذفه من وجود عنصر في الموضع المقصود، فلا يجوز أن تتجاوز الإضافة السعة ولا أن تتعامل القراءة أو الإزاحة مع موضع على أنه عنصر قائم لمجرد أنه يقع داخل المصفوفة.",
+        en: "A program may need to keep several values of the same type, then read a particular value, change it, or add a new one; placing the values in an array lets them be handled as ordered elements with defined positions. An array is a structure whose elements are each reachable through their position, called the index; indexes start at zero, so in an array of three numbers values[0] points to the first element and values[2] to the last. Using an array to implement a list requires knowing not just the stored values but their order and how many elements are actually in use, since an array with room for five may hold only three values at a given moment, leaving the last two slots for later additions. Capacity is therefore distinguished from length: capacity is the number of slots an array offers, while length is how many of them currently hold list elements; the last used element sits at index length − 1, and length must be updated after every addition or removal so later reads stay confined to actual elements. Reading an element never changes the array, and asking for a nonexistent index is an error to catch before use: reading the third position of a three-element array raises an out_of_range exception that exposes the distinction — three elements, first index zero, last index 2. Traversing the list's elements starts at index 0 and ends before reaching index length, with the condition i < length rather than i ≤ length, because i = length is not one of the used indexes; traversal computes a value gathering information from the elements, as in summing, where a total starts at zero and each cycle adds one element's value while the array's elements stay put. Two further operations concern the list structure: append, adding an element after the last used one at values[length] and then incrementing length, provided capacity allows — unlike overwriting the last element, which replaces an existing value and adds nothing; and insert, placing an element at a chosen position while keeping the elements at and after it, which requires shifting those elements one step toward the end before writing the new element, starting the shift from the last used element toward the insert position so no value is written over an element not yet moved, then writing the element and incrementing length. Removal deletes an element while keeping the others in order: the elements after it move one position toward the start to close the gap, then length decreases by one, since the former last position is no longer part of the list; length decides what later traversals include and exclude even if an old value lingers outside the list. Both insert and append need a free slot, so an addition is preceded by a check comparing length with capacity (length < capacity), and assuming an extra writable slot is never valid; conversely, reading or removing an element must confirm an element exists at the intended position — additions must not exceed capacity, and reads or shifts must not treat a position as a current element merely because it lies inside the array."
+      },
+      objectives: [
+        { ar: "التمييز بين فهرس العنصر وعدد العناصر وبين سعة المصفوفة وطول القائمة الفعلي.", en: "Distinguish an element's index from the element count, and an array's capacity from the list's actual length." },
+        { ar: "اكتشاف محاولة الوصول بفهرس خارج الحدود قبل استعمالها وبيان فهرس آخر عنصر.", en: "Catch out-of-bounds index access before use and state the last element's index." },
+        { ar: "المرور على عناصر القائمة بشرط i أصغر من length وحساب المجموع دون تغيير المصفوفة.", en: "Traverse the list's elements with the condition i < length and compute a sum without changing the array." },
+        { ar: "تنفيذ التحديث والإلحاق والإدراج مع إزاحة العناصر من النهاية نحو موضع الإدراج.", en: "Perform update, append and insert, shifting elements from the end toward the insert position." },
+        { ar: "تنفيذ الحذف بإزاحة العناصر نحو البداية وإنقاص الطول وفحص السعة قبل الإضافة.", en: "Perform removal by shifting elements toward the start and decrementing length, and check capacity before additions." }
+      ],
+      concepts: [
+        {
+          term: { ar: "المصفوفة", en: "Array" },
+          def: { ar: "بنية تحتفظ بعناصر يمكن الوصول إلى كل واحد منها من خلال موضعه، وعند استخدامها لتنفيذ قائمة يلزم أيضًا معرفة ترتيب العناصر وعددها المستخدم.", en: "A structure whose elements are each reachable through their position; implementing a list with it also requires knowing the elements' order and used count." }
+        },
+        {
+          term: { ar: "الفهرس", en: "Index" },
+          def: { ar: "موضع العنصر المطلوب داخل المصفوفة، ويبدأ بالصفر؛ فآخر عنصر في قائمة طولها ثلاثة فهرسه 2 لا 3.", en: "An element's position in the array, starting at zero; the last element of a length-3 list sits at index 2, not 3." }
+        },
+        {
+          term: { ar: "السعة", en: "Capacity" },
+          def: { ar: "عدد المواضع المتاحة في المصفوفة، ويُفصل عن طول القائمة لأن بعض المواضع قد تُحجز لإضافات لاحقة دون أن تصير عناصر مستخدمة.", en: "The number of slots an array offers, kept apart from list length because some slots may be reserved for later additions without being used elements yet." }
+        },
+        {
+          term: { ar: "طول القائمة", en: "List length" },
+          def: { ar: "عدد المواضع التي تحتوي حاليًا على عناصر القائمة؛ يحدد نهاية المرور وحيث يقع آخر عنصر مستخدم عند length − 1، ويُحدَّث بعد كل إضافة أو حذف.", en: "How many slots currently hold list elements; it fixes the traversal's end, places the last used element at length − 1, and updates after every addition or removal." }
+        },
+        {
+          term: { ar: "الإلحاق", en: "Append" },
+          def: { ar: "إضافة عنصر بعد آخر عنصر مستخدم عند values[length] ثم زيادة الطول، بشرط أن تسمح السعة؛ ويختلف عن الكتابة فوق آخر عنصر التي تستبدل قيمة موجودة.", en: "Adding an element after the last used one at values[length] then incrementing length, provided capacity allows; unlike overwriting the last element, which replaces an existing value." }
+        },
+        {
+          term: { ar: "الإدراج", en: "Insert" },
+          def: { ar: "وضع عنصر في موضع محدد مع الإبقاء على من كان فيه وبعده، بإزاحة العناصر من آخر عنصر مستخدم باتجاه موضع الإدراج ثم كتابة القيمة وزيادة الطول.", en: "Placing an element at a chosen position while keeping the elements at and after it, shifting from the last used element toward the position, then writing and incrementing length." }
+        },
+        {
+          term: { ar: "الحذف", en: "Remove" },
+          def: { ar: "إزالة عنصر مع إبقاء البقية بترتيبها؛ تنتقل العناصر التالية موضعًا واحدًا نحو البداية لسد الفراغ ثم ينقص الطول بمقدار واحد.", en: "Deleting an element while keeping the rest in order; following elements move one position toward the start to close the gap, then length decreases by one." }
+        },
+        {
+          term: { ar: "المرور على العناصر", en: "Traversal" },
+          def: { ar: "قراءة عناصر القائمة واحدًا بعد الآخر بفهرس يبدأ من الصفر وينتهي قبل بلوغ length، من غير كتابة تعليمة مستقلة لكل موضع.", en: "Reading list elements one after another with an index running from zero to just before length, instead of a separate statement per position." }
+        }
+      ],
+      example: {
+        ar: "قائمة تضم [10, 20, 30] في مصفوفة سعتها خمسة وطولها ثلاثة: المرور على العناصر بشرط i أصغر من length يطبع 10 و20 و30، وحساب المجموع يبدأ total بالصفر فيصبح 10 ثم 30 ثم 60 بينما تظل عناصر المصفوفة في مواضعها. وتحديث values[1] = 40 يستبدل 20 بـ40 فتصبح العناصر [10, 40, 30] والطول ثلاثة كما هو. والإلحاق يضع 40 في values[length] أي الفهرس 3 ثم يزيد الطول إلى أربعة فتطبع القائمة [10, 20, 30, 40]؛ ولو كُتبت 40 فوق آخر عنصر بـvalues[length − 1] = 40 لضاعت 30 ولما تغير الطول. وإدراج 40 في الموضع 1 ينقل العناصر من النهاية نحو الموضع: ينتقل 30 إلى الفهرس 2 ثم 20 إلى الفهرس 1 ثم تُكتب 40 في الموضع الذي أصبح متاحًا ويزيد الطول، فتظهر قيم مؤقتة مكررة في أثناء النقل (30 في موضعين) ولا تستقر القائمة على [10, 40, 20, 30] إلا بعد كتابة القيمة وزيادة الطول؛ أما الكتابة المباشرة في الموضع 1 فتنتج [10, 40, 30] وقد اختفت 20 ولم يزد عدد العناصر. وحذف العنصر في الموضع 1 من [10, 20, 30, 40] ينقل 30 إلى الموضع 1 و40 إلى الموضع 2 ثم ينقص الطول إلى ثلاثة فتكون القائمة [10, 30, 40] ويبقى 40 القديم في الموضع الرابع من المصفوفة لكنه خارج القائمة، ولو أُهمل إنقاص الطول لظهر 40 مكررًا عند الطباعة.",
+        en: "A list holding [10, 20, 30] in an array of capacity five and length three: traversing with i < length prints 10, 20, 30, and summing starts total at zero, reaching 10, then 30, then 60 while the array's elements stay put. Updating values[1] = 40 replaces 20 with 40, giving [10, 40, 30] with length still three. Appending writes 40 at values[length], index 3, then raises length to four, printing [10, 20, 30, 40]; writing 40 over the last element with values[length − 1] = 40 would lose 30 without changing length. Inserting 40 at position 1 shifts elements from the end toward the position: 30 moves to index 2, then 20 to index 1, then 40 is written into the freed slot and length rises, with temporary duplicates visible mid-shift (30 in two slots); the list settles on [10, 40, 20, 30] only after the write and increment, whereas writing directly at position 1 yields [10, 40, 30], having lost 20 and added nothing. Removing the element at position 1 from [10, 20, 30, 40] moves 30 to position 1 and 40 to position 2, then decrements length to three, giving [10, 30, 40]; the old 40 remains in the array's fourth slot but outside the list, and skipping the decrement would print 40 twice."
+      },
+      mistakes: [
+        { ar: "قراءة عنصر بفهرس خارج حدود المصفوفة كطلب الموضع 3 من مصفوفة من ثلاثة عناصر، بدل الموضع 2؛ ويُكتشف الخطأ بـat التي ترفع out_of_range بدلًا من متابعة القراءة على أنها صحيحة.", en: "Reading an element past the array's bounds, such as asking for position 3 of a three-element array instead of position 2; at() catches it by raising out_of_range instead of letting the read pass as valid." },
+        { ar: "افتراض وجود موضع إضافي للكتابة دون فحص length < capacity، فتُكتب القيمة خارج المساحة المحجوزة.", en: "Assuming a free writable slot without checking length < capacity, writing the value outside the reserved space." },
+        { ar: "استعمال شرط المرور i أصغر من أو يساوي length فيمر بدورة إضافية بعد آخر عنصر مستخدم؛ والتصحيح i أصغر من length لأن عدد العناصر لا يساوي فهرس آخر عنصر.", en: "Using the traversal condition i ≤ length runs an extra cycle past the last used element; the fix is i < length since the element count differs from the last index." },
+        { ar: "في الإدراج: كتابة القيمة الجديدة في موضع الإدراج مباشرة دون نقل العناصر من النهاية، فيفقد العنصر الذي كان في الموضع (10 40 30 بدل 10 40 20 30) ولا يزيد عدد العناصر.", en: "In insertion, writing the new value directly at the insert position without shifting from the end loses the element that was there (10 40 30 instead of 10 40 20 30) and adds nothing." },
+        { ar: "نسيان زيادة الطول بعد الإلحاق أو إنقاصه بعد الحذف، فيبقى الطول غير صحيح ويظهر العنصر الأخير مكررًا عند الطباعة (10 30 40 40)، ويؤثر الخطأ في أي عملية لاحقة تعتمد على الطول.", en: "Forgetting to increment length after append or decrement it after removal leaves length wrong and prints the last element twice (10 30 40 40), and the error affects any later operation relying on length." },
+        { ar: "الخلط بين التحديث والإدراج: استعمال فهرس صحيح في إسناد قيمة فوق موضع موجود يجعله استبدالًا لا إدراجًا، لأن التحديث يستبدل قيمة أما الإدراج فيضيف عنصرًا ويزيد العدد.", en: "Confusing update with insert: assigning into a valid index overwrites an existing position and is a replacement, not an insertion, since update replaces a value while insertion adds an element and grows the count." }
+      ],
+      terminology: [
+        { ar: "المصفوفة", en: "Array" },
+        { ar: "الفهرس", en: "Index" },
+        { ar: "السعة", en: "Capacity" },
+        { ar: "طول القائمة", en: "List length" },
+        { ar: "المرور على العناصر", en: "Traversal" },
+        { ar: "الإلحاق", en: "Append" },
+        { ar: "الإدراج", en: "Insert" },
+        { ar: "الحذف", en: "Remove" }
+      ],
+      level: "easy"
+    },
+    strings: {
+      title: {
+        ar: "الفصل 7 · السلاسل النصية",
+        en: "Chapter 7 · Strings"
+      },
+      explanation: {
+        ar: "يتعامل موظف أمن المعلومات مع النصوص في كل يوم عمل: فاسم المستخدم نص، وكلمة المرور نص، وعنوان البريد الإلكتروني نص، وسطر سجل الأحداث في الخادم نص؛ وتعالج خوارزميات السلاسل النصية هذه البيانات حرفًا حرفًا، فهي تقيس الطول وتبحث عن محرف أو جزء وتقارن سلسلتين وتعدّ تكرار محرف. والسلسلة النصية نمط مهيكل يتميز بخاصيتين: الأولى أن ترتيب الحروف جزء من معناها فالسلسلة ab تختلف عن ba، والثانية أن لها حجمًا هو عدد أحرفها، ويدخل في الحروف كل محرف سواء أكان حرفًا هجائيًا أم رقمًا أم مسافة أم رمزًا؛ فاسم المستخدم ali_2024 سلسلة من ثمانية أحرف منها ثلاثة حروف هجائية ورمز الشرطة السفلية وأربعة أرقام. ويُحسب الطول بوظيفة الحجم، ويُوصل إلى الحرف بموقع يعطى لوظيفة الوصول بالموقع فترجع الحرف الموجود فيه؛ والفهرسة صفرية أي أن العد يبدأ من الصفر لا من الواحد، فيكون موقع أول حرف 0 وموقع آخر حرف هو حجم السلسلة ناقص 1، والموقع غير صحيح إذا كان أقل من 0 أو أكبر من حجم السلسلة أو مساويًا له؛ ومحاولة قراءة الموقع 8 من سلسلة حجمها ثمانية ترفع الخطأ IndexError: string index out of range، والتصحيح كتابة الموقع 7 أو الموقع السالب −1 الذي يُعدّ من آخر السلسلة. والتجوّل هو المرور على أحرف السلسلة حرفًا حرفًا من أولها إلى آخرها مع معالجة كل حرف عند الوصول إليه، ويُبنى من وظيفتي الحجم والوصول بالموقع، والمواقع الصحيحة تمتد من 0 إلى الحجم ناقص 1؛ وله صورتان: الأولى تمر الحلقة على الحروف مباشرة فيأخذ متغير الحلقة حرفًا جديدًا في كل دورة وتُفضَّل حين يكفي الحرف وحده، والثانية تمر الحلقة على المواقع وتُستخرج الحرف بموقعه وتُفضَّل حين يحتاج البرنامج إلى رقم الموقع نفسه؛ ومن تطبيقاته تقدير قوة كلمة المرور بالمرور على كل حرف وسؤال كلٍّ عن نوعه وزيادة العدّاد المناسب. ويحدد البحث عن محرف موقع أول ظهور له في السلسلة، وإذا لم يكن المحرف موجودًا أرجعت الوظيفة القيمة −1 لأنها لا تصلح موقعًا لأي حرف فلا تُفهم على أنها موقع حقيقي؛ وللبحث صيغة ثانية تأخذ موضع البداية معاملًا ثانيًا فتبدأ من قيمة البداية بدلًا من 0، وتفيد في إيجاد الظهور الثاني وما بعده كما في تحديد موقع النقطة الأولى والنقطة الثانية في عنوان شبكي؛ ويُبحث عن السلسلة الفرعية، وهي جزء متصل من سلسلة أطول، بالوظيفة نفسها فترجع موقع أول حرف منها أو −1. وللمقارنة صورتان: مقارنة التساوي التي تحدد هل تحمل السلسلتان الأحرف نفسها بالترتيب نفسه، وهي دقيقة على مستوى كل حرف فالحرف a يختلف عن A، وتظهر أهميتها في أمن المعلومات إذ قد يسجل المهاجم اسمًا يقلد حسابًا آخر بحرف كبير أو حركة؛ ولا تصلح في لغة الخوارزم العملية == للمقارنة بالمحتوى لأنها تقارن الصلات أي تسأل هل يشير المتغيران إلى الموضع نفسه، ويقابلها خطر استعمال is في بايثون لأن ناتجها مع السلاسل غير مضمون: قد تخزن الثوابت المتطابقة في موضع واحد فتعطي True، بينما سلسلة بُنيت أثناء التشغيل في موضع جديد تعطي False مع أن المحتوى متطابق. والمقارنة الترتيبية تحدد أي السلسلتين تسبق الأخرى بمقارنة الحرفين الأولين فإن تساويا انتقلت إلى الثانيين وهكذا، وترجع 1 إذا كانت الأولى أكبر و−1 إذا كانت أصغر و0 إذا تساويتا، وتُستعمل في ترتيب أسماء المستخدمين أبجديًا. والقص استخراج سلسلة فرعية بتحديد موقع البداية وموقع النهاية بصيغة s[بداية:نهاية]، ويدخل حرف البداية في الناتج أما حرف النهاية فلا يدخل، وعدد أحرف القص يساوي النهاية ناقص البداية؛ وإذا حُذفت البداية بدأ القص من أول السلسلة وإذا حُذفت النهاية امتد إلى آخرها، ويكثر استعماله مع البحث فيقسم عنوان البريد إلى اسم المستخدم والنطاق، ويُستعمل الموقع السالب لإخفاء رقم البطاقة وإظهار آخر أربعة أرقام فقط. وعكس السلسلة بناء سلسلة جديدة فيها الحروف نفسها بترتيب معكوس فيصير آخر حرف أولًا، ويُبنى بالتجوّل من موقع 0 إلى الحجم ناقص 1 مع وضع كل حرف جديد أمام ما بُني قبله، ولأن كل حرف يوضع في المقدمة يصل الحرف الأخير إلى أول السلسلة. والسلسلة المتناظرة سلسلة تُقرأ من اليسار ومن اليمين بالطريقة نفسها، ويمكن فحص تناظرها بعكسها ثم مقارنتها بالأصل، لكن الخوارزمية الأكفأ تستعمل مؤشرين: الأول يبدأ من الموقع 0 والثاني من آخر موقع، وفي كل دورة يُقارَن الحرفان فإن اختلفا فالسلسلة غير متناظرة ويتوقف الفحص، وإن تساويا اقترب المؤشران خطوة، وتنتهي الحلقة حين يلتقي المؤشران فلا يُفحص أي حرف مرتين. وأخيرًا يعدّ العدّ عدد مرات ظهور محرف في سلسلة بتهيئة البدء والعدد بالصفر ثم البحث عن المحرف؛ فإن لم يوجد كان الموقع −1 وانتهت الحلقة قبل أي زيادة، وإن وُجد زاد العدد واحدًا وصار موضع البداية الموقع الحالي زائد 1 ثم أُعيد البحث، وتحديث موضع البداية هو الذي يمنع عدّ الحرف نفسه مرتين ويضمن انتهاء الحلقة. ويمكن عدّ تكرار سلسلة فرعية بالطريقة نفسها، ويظهر فرق مهم: جعل البداية الموقع الحالي زائد 1 يعدّ الظهور المتداخل أي الظهور الذي يبدأ داخل ظهور سابق كما في عدّ aa في aaa فيعطي 2، أما الدالة الجاهزة count في بايثون فتعدّ الظهور غير المتداخل لأنها تتابع البحث بعد نهاية الجزء الذي وجدته فتعطي 1، وللحصول على عدّ غير متداخل بالخوارزمية يُكتب موضع البداية مساويًا للموقع زائد طول الجزء. وتُكتب خوارزميات الفصل بلغة بايثون لأنها تعمل مباشرة ويظهر ناتجها، ويُذكر مع الخوارزمية ما يقابلها من وظائف لغة الخوارزم حين تكون لها وظيفة مقابلة.",
+        en: "An information-security employee deals with text every working day: a username is text, so is a password, an email address, and a server log line; string algorithms process this data character by character, measuring length, searching for a character or a part, comparing two strings, and counting a character's occurrences. A string is a structured pattern with two properties: the order of its characters is part of its meaning — ab differs from ba — and it has a size, its character count, where every character counts whether a letter, a digit, a space or a symbol; the username ali_2024 is a string of eight characters: three letters, the underscore symbol and four digits. Length comes from the size function, and a character is reached by giving its position to the access-by-position function, which returns the character there; indexing is zero-based, so the first character sits at 0 and the last at size − 1, and a position is invalid if below 0, or greater than or equal to the string's size; reading position 8 of an eight-character string raises IndexError: string index out of range, and the fix is writing position 7 or the negative position −1, counted from the string's end. Traversal walks the string's characters one by one from first to last, processing each on arrival; it builds on the size and access functions, with valid positions spanning 0 to size − 1; it has two forms: looping directly over characters, where the loop variable takes a new character each cycle and which suits cases needing the character alone, and looping over positions, extracting each character by position, which suits cases needing the position number itself; one application rates password strength by visiting each character, asking its type, and incrementing the matching counter. Searching for a character yields the position of its first occurrence; when absent the function returns −1, since that value fits no character's position and cannot be mistaken for a real one; a second form takes a starting position as a second argument and searches from there instead of 0, useful for the second and later occurrences, as in locating the first and second dots of a network address; a substring, a contiguous part of a longer string, is searched the same way, returning the position of its first character or −1. Comparison has two faces: equality, deciding whether two strings hold the same characters in the same order, exact down to every character since a differs from A — vital in security, where an attacker may register a name mimicking another account with a capital letter or diacritic; and in the algorithm language the == operator cannot compare content because it compares references, asking whether both variables point to the same memory, mirrored in Python by the hazard of is, whose result with strings is not guaranteed: identical literals may share one memory slot and yield True, while a string built at runtime occupies a fresh slot and yields False despite identical content. Ordering comparison decides which string precedes the other by comparing first characters, moving to the second pair on a tie, returning 1 when the first is greater, −1 when smaller, and 0 when equal, and is used to sort usernames alphabetically. Slicing extracts a substring by start and end positions with s[start:end]; the start character is included and the end character excluded, and the slice's length equals end − start; omitting the start begins at the string's head and omitting the end extends to its tail; it pairs with searching to split an email into user and domain, and negative positions mask a card number, showing only its last four digits. Reversing builds a new string with the same characters in reverse, last character first, by traversing positions 0 to size − 1 and placing each new character before what was built; since every character goes to the front, the last one ends up first. A palindrome reads identically from both sides; it can be checked by reversing and comparing with the original, but the more efficient algorithm uses two pointers — one starting at position 0, the other at the last position — comparing the pair each cycle: any mismatch ends the check as non-palindromic, while a match steps both pointers inward, and the loop ends when they meet, so no character is checked twice. Finally, counting occurrences starts the position and count at zero, then searches for the character: if absent the position is −1 and the loop ends before any increment; if found the count rises by one, the start position becomes the current position plus 1, and the search repeats — updating the start is what prevents counting the same character twice and guarantees the loop ends. Substrings are counted the same way, revealing an important difference: starting at position plus 1 counts overlapping occurrences, ones beginning inside an earlier occurrence, as with aa inside aaa giving 2, whereas Python's built-in count counts only non-overlapping occurrences, continuing after the found part's end and giving 1; matching count in the algorithm uses start = position + len(sub). The chapter's algorithms are written in Python for its direct, visible results, with algorithm-language equivalents noted whenever a matching function exists."
+      },
+      objectives: [
+        { ar: "تعريف السلسلة النصية وطولها وموقع الحرف وتحديد الموقع الصحيح وغير الصحيح.", en: "Define a string, its length and a character's position, and tell valid positions from invalid ones." },
+        { ar: "التجوّل على الأحرف مباشرة وبالمواقع وبيان متى تُفضَّل كل صورة.", en: "Traverse characters directly and by position, stating when each form is preferred." },
+        { ar: "البحث عن محرف أو جزء وتفسير القيمة المُرجَعة عند عدم الوجود وصيغة البداية.", en: "Search for a character or substring, interpreting the not-found value and the start-position form." },
+        { ar: "التمييز بين مقارنة التساوي والمقارنة الترتيبية وخطر الاعتماد على is.", en: "Tell equality from ordering comparison and recognize the hazard of relying on is." },
+        { ar: "القص والعكس وفحص التناظر وعدّ التكرار وبيان الفرق بين العدّ المتداخل وغير المتداخل.", en: "Slice, reverse, palindrome-check and count occurrences, noting overlapping versus non-overlapping counting." }
+      ],
+      concepts: [
+        {
+          term: { ar: "السلسلة النصية", en: "String" },
+          def: { ar: "نمط مهيكل فيه مجموعة حروف مرتبة لكل حرف منها موقع ثابت، وترتيب الحروف جزء من المعنى، وحجمها عدد أحرفها.", en: "A structured pattern of ordered characters each with a fixed position, whose order is part of the meaning; its size is its character count." }
+        },
+        {
+          term: { ar: "الوصول بالموقع", en: "Access by position (indexing)" },
+          def: { ar: "إعطاء رقم موقع الحرف لترجع الحرف الموجود فيه؛ والفهرسة صفرية فأول موقع 0 وآخر موقع هو الحجم ناقص 1، ويكون الموقع غير صحيح إذا كان أقل من 0 أو مساويًا للحجم أو أكبر منه.", en: "Supplying a character's position number to get the character there; indexing is zero-based — first position 0, last size − 1 — and a position below 0 or at/above the size is invalid." }
+        },
+        {
+          term: { ar: "التجوّل", en: "Traversal" },
+          def: { ar: "المرور على أحرف السلسلة حرفًا حرفًا ومعالجة كل حرف عند الوصول إليه؛ بالحروف مباشرة أو بالمواقع من 0 إلى الحجم ناقص 1.", en: "Walking a string's characters one by one, processing each; either looping over characters directly or over positions 0 to size − 1." }
+        },
+        {
+          term: { ar: "السلسلة الفرعية", en: "Substring" },
+          def: { ar: "جزء متصل من سلسلة أطول؛ ويُبحث عنه بالوظيفة نفسها فترجع موقع أول حرف منه أو −1.", en: "A contiguous part of a longer string, searched with the same function, which returns its first character's position or −1." }
+        },
+        {
+          term: { ar: "القص", en: "Slicing" },
+          def: { ar: "استخراج سلسلة فرعية بصيغة s[بداية:نهاية]؛ يدخل حرف البداية ولا يدخل حرف النهاية، وعدد الأحرف الناتجة يساوي النهاية ناقص البداية.", en: "Extracting a substring with s[start:end]; the start character is included, the end excluded, and the result's length equals end − start." }
+        },
+        {
+          term: { ar: "المقارنة الترتيبية", en: "Lexicographic comparison" },
+          def: { ar: "تحديد أي السلسلتين تسبق الأخرى بمقارنة الحرفين الأولين ثم الثانيين وهكذا؛ ترجع 1 أو −1 أو 0.", en: "Deciding which string precedes by comparing first characters, then second ones, and so on; returns 1, −1 or 0." }
+        },
+        {
+          term: { ar: "السلسلة المتناظرة", en: "Palindrome" },
+          def: { ar: "سلسلة تُقرأ من اليسار ومن اليمين بالطريقة نفسها؛ ويُفحص تناظرها بمؤشرين يقتربان حتى يلتقيا متوقفين عند أول اختلاف.", en: "A string reading identically from both sides; checked by two pointers stepping toward each other until they meet, stopping at the first mismatch." }
+        },
+        {
+          term: { ar: "عدّ التكرار", en: "Counting occurrences" },
+          def: { ar: "حساب عدد مرات ظهور محرف أو جزء بإعادة البحث من موضع بداية جديد (الموقع + 1 للمتداخل، والموقع + الطول لغير المتداخل)، وذلك هو ما يضمن انتهاء الحلقة.", en: "Counting how often a character or part appears by re-searching from a new start (position + 1 for overlapping, position + length for non-overlapping), which is what guarantees the loop ends." }
+        }
+      ],
+      example: {
+        ar: "السلسلة user = \"ali_2024\" حجمها 8، فموقع أول حرف 0 وموقع آخر حرف 7 والمحاولة user[8] ترفع IndexError: string index out of range؛ ويُصحح بـuser[len(user) - 1] أو user[-1] فيطبع الحرف 4. والبحث: email = \"admin@company.sa\" يعطي email.find(\"@\") فالموقع 5، وemail.find(\"#\") فالقيمة −1 تدل على عدم الوجود؛ وبصيغة البداية يُحدد العنوان الشبكي ip = \"192.168.1.10\" موقع النقطة الأولى بـfirst = 3 ثم يبدأ البحث الثاني من first + 1 فتصير النقطة الثانية 7. والقص: card = \"4580123498761234\" يعطي card[0:4] = 4580 وcard[-4:] = 1234، فتُعرض البطاقة ************1234؛ ويُقسَّم البريد بـuser = email[:at] فتصير sara وdomain = email[at + 1:] فتصير company.sa. والعكس: word = \"salam\" يبني rev حرفًا حرفًا فيصل الحرف الأخير أولًا والناتج malas. والتناظر: is_palindrome(\"level\") ترجع True، وis_palindrome(\"admin\") تتوقف من الدورة الأولى لأن الحرف a لا يساوي الحرف n. والعدّ: count_char(\"s\", \"password\") ترجع 2 بعد دورتين ويعدّ موضع البداية إلى 3 ثم ينتهي البحث بـ−1، أما عدّ aa في aaa فيعطي 2 بالخوارزمية و1 بـcount() لأن الدالة الجاهزة تعدّ الظهور غير المتداخل فقط.",
+        en: "The string user = \"ali_2024\" has size 8, so the first character sits at 0, the last at 7, and user[8] raises IndexError: string index out of range; it is fixed with user[len(user) - 1] or user[-1], printing the character 4. Searching: email = \"admin@company.sa\" gives email.find(\"@\") at position 5 and email.find(\"#\") returns −1, marking absence; with the start form, the network address ip = \"192.168.1.10\" puts the first dot at first = 3, and the second search starts at first + 1, placing the second dot at 7. Slicing: card = \"4580123498761234\" gives card[0:4] = 4580 and card[-4:] = 1234, displaying the card as ************1234; the email splits with user = email[:at] yielding sara and domain = email[at + 1:] yielding company.sa. Reversing: word = \"salam\" builds rev character by character, the last character landing first, giving malas. Palindromes: is_palindrome(\"level\") returns True, while is_palindrome(\"admin\") stops in the first cycle since a differs from n. Counting: count_char(\"s\", \"password\") returns 2 after two cycles, the start position moving to 3 and the search ending at −1; counting aa in aaa gives 2 by the algorithm but 1 via count(), since the built-in counts only non-overlapping occurrences."
+      },
+      mistakes: [
+        { ar: "كتابة موقع آخر حرف مساويًا للطول (user[8] لسلسلة حجمها 8) فيرفع البرنامج IndexError: string index out of range؛ والتصحيح user[len(user) - 1] أو user[-1].", en: "Writing the last character's position equal to the length (user[8] for a size-8 string) raises IndexError: string index out of range; the fix is user[len(user) - 1] or user[-1]." },
+        { ar: "كتابة حد الحلقة range(len(code) + 1) فيطبع البرنامج الأحرف صحيحة ثم يتوقف عند الموقع المساوي للطول لأن آخر دورة تطلبه وهو خارج الحدود؛ والتصحيح range(len(code)).", en: "Writing the loop limit as range(len(code) + 1) prints the characters correctly then crashes at the position equal to the length, since the last cycle requests it; the fix is range(len(code))." },
+        { ar: "استعمال ناتج البحث شرطًا منطقيًا مباشرًا (if line.find(\"2024\")) لأن الموقع 0 يُعدّ قيمة خاطئة في الشرط فيُحكم بعدم الوجود مع أن الجزء موجود في أول السلسلة؛ والشرط الصحيح المقارنة بالقيمة −1.", en: "Using a search result directly as a condition (if line.find(\"2024\")): position 0 counts as falsy, so absence is wrongly concluded though the part leads the string; the correct condition compares against −1." },
+        { ar: "الاعتماد على is لمقارنة محتوى سلسلتين؛ فناتجها غير مضمون لأن بايثون قد تخزن الثوابت المتطابقة في موضع واحد فتعطي True، بينما سلسلة بُنيت أثناء التشغيل تعطي False مع تطابق المحتوى؛ والصحيح استعمال ==.", en: "Relying on is to compare two strings' content: its result is unguaranteed because Python may share one slot for identical literals giving True, while a runtime-built string gives False despite matching content; the fix is ==." },
+        { ar: "توقع أن card[0:3] يرجع أربعة أحرف؛ فعدد أحرف القص يساوي النهاية ناقص البداية فيظهر 458 بثلاثة أحرف، والتصحيح card[0:4].", en: "Expecting card[0:3] to return four characters: a slice's length equals end − start, yielding 458 with three characters; the fix is card[0:4]." },
+        { ar: "حذف تحديث موضع البداية (start = pos + 1) في خوارزمية العدّ، فيبدأ كل بحث من الموقع 0 ويجد الحرف نفسه في كل دورة فتدخل الخوارزمية في حلقة لا تنتهي بلا أي ناتج.", en: "Dropping the start-position update (start = pos + 1) in counting makes every search begin at 0, refind the same character each cycle, and loop forever with no output." }
+      ],
+      terminology: [
+        { ar: "السلسلة النصية", en: "String" },
+        { ar: "التجوّل", en: "Traversal" },
+        { ar: "السلسلة الفرعية", en: "Substring" },
+        { ar: "القص", en: "Slicing" },
+        { ar: "السلسلة المتناظرة", en: "Palindrome" },
+        { ar: "المقارنة الترتيبية", en: "Lexicographic comparison" },
+        { ar: "عدّ التكرار", en: "Counting occurrences" }
+      ],
+      level: "easy"
+    },
+    crypto: {
+      title: {
+        ar: "الفصل 8 · مقدمة في التشفير",
+        en: "Chapter 8 · Introduction to Cryptography"
+      },
+      explanation: {
+        ar: "مع اتساع اتصال الأنظمة والشبكات والأجهزة المحمولة صار أمن البيانات شرطًا للاستعمال الآمن لتقنية المعلومات، فتحمي التقنيات التشفيرية البيانات الحساسة أو عالية القيمة أو المعرضة للكشف أو التعديل غير المصرح بهما أثناء النقل والتخزين. وعلم التشفير فرع من الرياضيات يقوم على تحويل البيانات لتقديم خدمات أمنية، ويضم مبادئ أمن المعلومات ووسائله وطرقه، وخدماته خمس هي: السرية، ومصادقة الهوية، والتحقق من سلامة البيانات، ومصادقة المصدر، ودعم عدم الإنكار. والسرية عدم كشف المعلومات لغير المصرح لهم وتقدمها عملية التشفير، ويُسمى الكشف أو التعديل أو الاستبدال أو الاستعمال غير المصرح به لبيانات حساسة كالمفتاح السري اختراقًا. والتحقق من السلامة خدمة تتأكد أن البيانات لم تُغير دون تصريح منذ إنشائها أو نقلها أو تخزينها، ويقوم على سلامة البيانات أي ألا تُعدل أو تُحذف دون تصريح ودون اكتشاف، ومن وسائله المجموع الاختباري التشفيري، وهو قيمة رياضية تُنشأ بخوارزمية تشفيرية وتُلحق بالبيانات للتحقق لاحقًا من عدم تغيرها. ومصادقة الهوية ضمان هوية الكيان المتفاعل مع النظام، كخادم قواعد البيانات الذي يتحقق من هوية من أرسل الاستعلام، أما مصادقة المصدر فتضمن للمستقبل هوية الجهة التي صدرت عنها المعلومات. وعدم الإنكار حالة خاصة من مصادقة المصدر يُقدم فيها الضمان إلى طرف ثالث، ويعتمد على التوقيع الرقمي. وتُقدَّم هذه الخدمات بخوارزمية منشورة ومفتاح محمي: فالخوارزمية التشفيرية إجراء حسابي محدد يأخذ مدخلات متغيرة منها مفتاح عند الحاجة وينتج مخرجًا، ويُبنى عليها ما هو أشمل: الخوارزمية الأولية خوارزمية منخفضة المستوى تبنى عليها خوارزميات أعلى، والمخطط تحويلات محددة بلا لبس تقدم خدمة كإنشاء المفاتيح، والبروتوكول قواعد يتبعها كيانان أو أكثر تحدد ترتيب الرسائل وبنى البيانات المتبادلة. والمفتاح التشفيري معامل يحدد عمل الخوارزمية، فمن يعرفه يعيد العملية أو يعكسها ومن لا يعرفه لا يستطيع، ويُستعمل في تطبيق الحماية كالتشفير وتوليد التوقيع، وفي إزالتها أو فحصها كفك التشفير والتحقق من التوقيع؛ فالنص الواضح بيانات غير مشفرة مفهومة دون فك، والنص المشفر بيانات مشفرة، ويحوّل التشفير النص الواضح إلى مشفر وفك التشفير يعكسه، وفي معيار التشفير المتقدم AES المحدد في FIPS 197 يفك التشفيرَ المفتاحُ نفسه الذي شفّر. ويعتمد الأمان على سرية المفتاح لا على سرية الخوارزمية لأن مواصفاتها قد تكون منشورة، ولا تُستعمل الخوارزمية قبل إنشاء المفاتيح للأطراف، يدويًا بساع موثوق أو آليًا عبر بنية ثقة كالبنية التحتية للمفتاح العام، ويشترط الآلي مصادقة المصدر، ولا يُستعمل المفتاح لغرضين لأن ذلك قد يضعف أمان إحدى العمليتين أو كلتيهما. وتضمن المعايير التشفيرية التوافقية بين منتجات الكيانات المختلفة، ومستوى أمن مشتركًا خضع لتحليل عام طويل، والجودة بتحديد طريقة التنفيذ والاختبارات الذاتية والتوثيق، وأساسًا مشتركًا للاختبار والتقييم، وخفض التكلفة؛ ومنها معيار معالجة المعلومات الفيدرالي FIPS الإلزامي للجهة الفيدرالية عند الحاجة لحماية معلومات حساسة ويعتمده وزير التجارة، والمنشور الخاص SP غير الإلزامي إلا إذا ألزمت به جهة حكومية؛ وتُعد الخوارزمية معتمدة إذا حُددت في FIPS أو توصية من NIST أو في موضع آخر واعتُمدت بالإحالة إليهما. ودالة التجزئة خوارزمية أولية تحول مدخلًا بأي طول إلى قيمة بطول ثابت محدد مسبقًا تسمى قيمة التجزئة أو ملخص الرسالة، وخصيصتاها الاتجاه الواحد أي استحالة حسابيًا إيجاد مدخل لمخرج محدد فلا رجوع من القيمة إلى المدخل، ومقاومة التصادم أي استحالة حسابيًا إيجاد مدخلين مختلفين بالمخرج نفسه؛ وتُستعمل في رمز مصادقة الرسالة والتوقيع الرقمي واشتقاق المفاتيح وتوليد البتات العشوائية. وتختلف العائلات في المعيار وطول المخرج: عائلة SHA-1 محددة في FIPS 180 وتُخرج SHA-1 قيمة بطول 160 بتًا، وعائلة SHA-2 محددة في FIPS 180 أيضًا، وعائلة SHA-3 محددة في FIPS 202 وترمز أسماؤها إلى أطوال المخرجات فSHA-256 تعني 256 بتًا وSHA3-512 تعني 512 بتًا. وخوارزمية المفتاح المتماثل تستعمل مفتاحًا سريًا واحدًا لتطبيق الحماية وإزالتها أو فحصها، ويجب أن يبقى هذا المفتاح سريًا؛ ومثال صفاتها خوارزمية تشفير الكتل التي تحول سلاسل بتات بطول ثابت إلى سلاسل بالطول نفسه، وتُستعمل في التشفير للسرية والمصادقة لسلامة البيانات ومصدرها واشتقاق المفاتيح وتغليف المفاتيح وتوليد البتات العشوائية. ورمز مصادقة الرسالة MAC مجموع اختباري تشفيري يُحسب بوظيفة أمنية معتمدة ومفتاح متماثل، فلا يحسبه إلا مالك المفتاح، ويكشف التعديلات العرضية والمتعمدة. وتُنتج المفاتيح المتماثلة مشكلة كبيرة في كثرة العلاقات: فلكل زوج متواصل مفتاح، وبين أربعة كيانات ست علاقات زوجية تلزمها ستة مفاتيح، ولـ1000 كيان 499500 مفتاح على الأقل، مع مفاتيح إضافية لكل خوارزمية أو طول مفتاح أو غرض آخر. وتعرض خوارزمية المفتاح العام أو غير المتماثل الحل بمفتاحين مترابطين: مفتاح عام يرتبط فريدًا بكيان ويجوز نشره، ومفتاح خاص لا يُنشر ويستحيل حسابيًا استنتاج الخاص من العام؛ فالعام يُستعمل في التحقق من توقيع وُقّع بالخاص المقابل وتشفير بيانات يفكها الخاص وحساب سر مشترك في الاتفاق على المفتاح، والخاص في حساب العام المقابل وحساب توقيع يُتحقق منه بالعام وفك تشفير ما شُفر بالعام وحساب سر مشترك. وزوج المفاتيح إما ساكن طويل الأمد يوضع مفتاحه العام غالبًا في شهادة، وإما مؤقت قصير الأمد يُولد عند الحاجة ولا يوضع مفتاحه العام في شهادة. والتوقيع الرقمي نتيجة تحويل تشفيري يقدم إن نُفذ صحيحًا مصادقة المصدر وسلامة البيانات ودعم عدم إنكار الموقع، وعمليتاه توليد التوقيع بخوارزمية توقيع ومفتاح خاص ثم التحقق منه بالتوقيع ومفتاح عام، ومن خوارزمياته DSA المحددة في FIPS 186 وECDSA بالمنحنى الإهليلجي وRSA. والشهادة بيانات تحدد كيانًا فريدًا وتحتوي مفتاحه العام يوقّعها طرف موثوق فتربطهما، وقد تحدد طريقة استعمال المفتاح ومدة صلاحيته؛ وجهة إصدار الشهادات مسؤولة في البنية التحتية للمفتاح العام عن إصدار الشهادات وفرض الالتزام بالسياسة وإصدار قائمة الشهادات الملغاة، ويمكن التصديق المتبادل بأن توقع كل جهتي إصدار المفتاح العام للأخرى؛ ويعتمد الطرف المعتمِد على الشهادة وجهة إصدارها للتحقق من هوية صاحب الشهادة وصلاحية مفتاحه العام ومن امتلاكه المفتاح الخاص المقابل.",
+        en: "As systems, networks and mobile devices became widely connected, data security became a precondition for the safe use of information technology, with cryptographic techniques protecting sensitive, high-value or exposure-prone data from unauthorized disclosure or undetected modification during transport and storage. Cryptography — a branch of mathematics that transforms data to provide security services — embodies the principles, means and methods of information security, and offers five services: confidentiality, identity authentication, integrity verification, origin authentication and non-repudiation support. Confidentiality keeps information from unauthorized eyes and is delivered by encryption, while disclosure, modification, substitution or unauthorized use of sensitive data such as a secret key is called compromise. Integrity verification confirms data was not changed without authorization since its creation, transmission or storage, resting on data integrity — modification or deletion without authorization and without detection being excluded — and one of its instruments is the cryptographic checksum, a mathematical value produced by a cryptographic algorithm and attached to data for later verification of unchangedness. Identity authentication guarantees the identity of the entity interacting with the system, such as a database server validating whoever sent a query, while origin authentication guarantees to the receiver the identity of the party the information originated from. Non-repudiation is a special case of origin authentication providing assurance to a third party and relies on the digital signature. These services are delivered by a published algorithm and a protected key: a cryptographic algorithm is a computational procedure taking variable inputs — a key when needed — and producing output, built upon by higher constructs: a cryptographic primitive is a low-level algorithm underpinning higher ones, a scheme is an unambiguous set of transformations delivering a service such as key establishment, and a protocol is rules followed by two or more entities fixing message order and data structures. The cryptographic key is a parameter governing the algorithm's operation: whoever knows it redoes or reverses the operation, and whoever does not cannot; it is used to apply protection — encryption, signature generation — and to remove or check it — decryption, signature verification. Plaintext is data readable without decryption and ciphertext is encrypted data; encryption turns plaintext into ciphertext and decryption reverses it — in the Advanced Encryption Standard (AES), specified in FIPS 197, the same key that encrypted performs decryption. Security rests on the key's secrecy, not the algorithm's, since specifications may be published; the algorithm is never used before keys are established for the parties — manually via a trusted courier or automatically through a trust structure such as the public key infrastructure — with the automated route requiring origin authentication, and no key serves two purposes, lest one or both operations weaken. Cryptographic standards secure interoperability between products from different entities, a common security level that withstood long public analysis, quality through mandated implementation methods, self-tests and documentation, a shared basis for testing and evaluation, and cost reduction; among them the Federal Information Processing Standard (FIPS) is mandatory for federal agencies needing to protect sensitive information and is approved by the Secretary of Commerce, while a Special Publication (SP) is not mandatory unless a government body requires it; an algorithm counts as approved when specified in FIPS or a NIST recommendation, or elsewhere and approved by reference to them. A hash function is a primitive mapping an input of any length to a value of a fixed, predefined length called the hash value or message digest, with two properties: one-way — computationally infeasible to find an input for a given output, so no returning from value to input — and collision resistant — computationally infeasible to find two different inputs with the same output; it feeds message authentication codes, digital signatures, key derivation and random bit generation. Families differ in standard and output length: SHA-1, specified in FIPS 180, outputs 160 bits; SHA-2 also lives in FIPS 180; and SHA-3 is specified in FIPS 202, its names encoding output lengths — SHA-256 means 256 bits and SHA3-512 means 512 bits. A symmetric-key algorithm uses one secret key to apply protection and to remove or check it, and that key must stay secret; one example of its kind is the block cipher algorithm, transforming fixed-length bit strings into equal-length ones, and its uses span encryption for confidentiality, authentication for data integrity and origin, key derivation, key wrapping and random bit generation. A message authentication code (MAC) is a cryptographic checksum computed with an approved security function and a symmetric key, so only the key's owner computes it, detecting both accidental and deliberate modifications. Symmetric keys spawn a major problem as relationships multiply: each communicating pair needs a key, four entities create six pairwise relationships needing six keys, and 1,000 entities need at least 499,500 keys, plus extra keys per algorithm, key length or purpose. Public-key, or asymmetric, algorithms answer with two linked keys: a public key bound uniquely to an entity and freely published, and a private key never published, with deriving the private from the public computationally infeasible; the public key verifies signatures made with the corresponding private key, encrypts data the private key decrypts, and computes a shared secret in key agreement, while the private key computes its public counterpart, computes a signature verified by the public key, decrypts what the public key encrypted, and computes the shared secret. A key pair is either static, long-term, its public key usually placed in a certificate, or ephemeral, short-term, generated on demand with no certificate. A digital signature is the result of a cryptographic transformation providing, when correctly performed, origin authentication, data integrity and support for the signer's non-repudiation, through two operations: signature generation with a signing algorithm and a private key, and signature verification with the signature and a public key — carried by algorithms such as DSA specified in FIPS 186, its elliptic-curve counterpart ECDSA, and RSA. A certificate is data identifying a unique entity and containing its public key, signed by a trusted party to bind the two, and may state the key's permitted use and validity period; a certification authority issues certificates within the public key infrastructure, enforces the infrastructure's policy and issues the certificate revocation list, and two authorities may cross-certify by signing each other's public keys; the relying party trusts the certificate and its issuing authority to verify the holder's identity and public key validity and the holder's possession of the matching private key."
+      },
+      objectives: [
+        { ar: "تعداد خدمات الأمن الخمس والتمييز بين مصادقة الهوية ومصادقة المصدر وموقع عدم الإنكار.", en: "List the five security services and distinguish identity authentication, origin authentication and non-repudiation." },
+        { ar: "شرح الخوارزمية والمفتاح والنص الواضح والمشفر وبيان اعتماد الأمان على سرية المفتاح.", en: "Explain the algorithm, the key, plaintext and ciphertext, and why security rests on key secrecy." },
+        { ar: "إبراز فوائد المعايير التشفيرية والفرق بين FIPS وSP ومتى تُعد الخوارزمية معتمدة.", en: "Highlight the benefits of cryptographic standards, the FIPS/SP difference and when an algorithm is approved." },
+        { ar: "شرح دالة التجزئة وخصيصتيها وخطوات التحقق وعائلاتها وأطوال مخرجاتها.", en: "Explain the hash function, its two properties, the verification steps, its families and output lengths." },
+        { ar: "المقارنة بين خوارزميات المفتاح المتماثل وغير المتماثل وشرح MAC والتوقيع الرقمي والشهادات.", en: "Compare symmetric and asymmetric algorithms and explain MACs, digital signatures and certificates." }
+      ],
+      concepts: [
+        {
+          term: { ar: "علم التشفير", en: "Cryptography" },
+          def: { ar: "فرع من الرياضيات يحول البيانات لتقديم خدمات أمنية، ويضم مبادئ أمن المعلومات ووسائله وطرقه: السرية ومصادقة الهوية والتحقق من السلامة ومصادقة المصدر ودعم عدم الإنكار.", en: "A branch of mathematics transforming data to deliver security services, spanning principles, means and methods: confidentiality, identity authentication, integrity verification, origin authentication and non-repudiation support." }
+        },
+        {
+          term: { ar: "المفتاح التشفيري", en: "Cryptographic key" },
+          def: { ar: "معامل يحدد عمل الخوارزمية؛ من يعرفه يعيد العملية أو يعكسها ومن لا يعرفه لا يستطيع، ويُستعمل لتطبيق الحماية كالتشفير أو إزالتها وفحصها كفك التشفير.", en: "A parameter governing the algorithm; its holder redoes or reverses the operation and others cannot, used to apply protection such as encryption or remove and check it such as decryption." }
+        },
+        {
+          term: { ar: "النص الواضح والمشفر", en: "Plaintext & ciphertext" },
+          def: { ar: "الواضح بيانات غير مشفرة مفهومة دون فك تشفير، والمشفر بيانات مشفرة؛ ويحوّل التشفير الأول إلى الثاني ويعكس فك التشفير ذلك بمفتاح.", en: "Plaintext is readable without decryption and ciphertext is encrypted data; encryption turns the former into the latter and decryption reverses it with a key." }
+        },
+        {
+          term: { ar: "دالة التجزئة", en: "Hash function" },
+          def: { ar: "خوارزمية أولية تحول مدخلًا بأي طول إلى قيمة بطول ثابت؛ خاصيتاها الاتجاه الواحد ومقاومة التصادم، وناتجها قيمة التجزئة أو ملخص الرسالة.", en: "A primitive mapping any-length input to a fixed-length value; one-way and collision resistant, its output is the hash value or message digest." }
+        },
+        {
+          term: { ar: "خوارزمية المفتاح المتماثل", en: "Symmetric-key algorithm" },
+          def: { ar: "خوارزمية بمفتاح سري واحد لتطبيق الحماية وإزالتها أو فحصها؛ يلزم لكل علاقة مفتاح فريد، فتكثر المفاتيح بازدياد الكيانات.", en: "An algorithm with one secret key for applying protection and removing or checking it; every relationship needs a unique key, so keys multiply with entities." }
+        },
+        {
+          term: { ar: "رمز مصادقة الرسالة", en: "Message authentication code (MAC)" },
+          def: { ar: "مجموع اختباري تشفيري يُحسب بوظيفة أمنية معتمدة ومفتاح متماثل، فلا يحسبه إلا مالك المفتاح، ويكشف التعديلات العرضية والمتعمدة.", en: "A cryptographic checksum computed with an approved function and a symmetric key, computable only by the key's owner, detecting both accidental and deliberate modifications." }
+        },
+        {
+          term: { ar: "التوقيع الرقمي", en: "Digital signature" },
+          def: { ar: "تحويل تشفيري يقدم مصادقة المصدر وسلامة البيانات ودعم عدم إنكار الموقع؛ يُولَّد بمفتاح خاص ويُتحقق منه بالمفتاح العام المقابل.", en: "A cryptographic transform providing origin authentication, data integrity and non-repudiation support, generated with a private key and verified with the matching public key." }
+        },
+        {
+          term: { ar: "الشهادة والبنية التحتية للمفتاح العام", en: "Certificate & PKI" },
+          def: { ar: "الشهادة بيانات تحدد كيانًا وتحتوي مفتاحه العام يوقّعها طرف موثوق؛ وبنية المفتاح العام إطار لإصدار الشهادات وصيانتها وإلغائها بجهة إصدار تصدر قائمة الشهادات الملغاة.", en: "A certificate identifies an entity and holds its public key, signed by a trusted party; PKI is the framework for issuing, maintaining and revoking certificates, with a certification authority issuing the revocation list." }
+        }
+      ],
+      example: {
+        ar: "تُشفَّر رسالة بمفتاح فعندما تصل إلى من يملك المفتاح نفسه يفكها ويعيدها مفهومة، ومن يطّلع عليها دون المفتاح لا يفهمها فتبقى سرية؛ والتحويل التشفيري واحد في أساسه لكن الخدمة تختلف: إلحاق قيمة تشفيرية محسوبة بالبيانات يتيح للمستقبل التحقق من أنها لم تتغير فتُقدَّم خدمة السلامة. وتُحسب قيمة التجزئة H1 للبيانات M1 وتُحفظ أو تُرسل، وعند الاستلام تُحسب H2 للبيانات M2 بالدالة نفسها؛ فإن تحقق التساوي أمكن افتراض أن M1 لم تتغير. وSHA-256 تنتمي إلى عائلة SHA-2 المحددة في FIPS 180 وتُخرج 256 بتًا، وSHA3-256 تنتمي إلى عائلة SHA-3 المحددة في FIPS 202 وبطول مخرج 256 بتًا؛ أما SHA-1 فبيّنت الهجمات أنها أقل أمنًا مما ظُن في توليد التوقيعات فلم تعد مسموحة له وتبقى مقبولة في أكثر التطبيقات الأخرى كالتحقق من توقيعات قديمة بها. وفي المتماثل: بين أربعة كيانات ست علاقات زوجية فيلزم ستة مفاتيح على الأقل، ولـ1000 كيان 499500 مفتاح. وفي غير المتماثل: يولّد الموقع توقيعًا على البيانات بمفتاحه الخاص ويتحقق المستقبل بالمفتاح العام المقابل فإن نجح التحقق اطمأن إلى مصدر البيانات وسلامتها، ويُرجع الطرف المعتمد إلى شهادة المفتاح وجهة الإصدار التي وقّعتها ويتأكد أن الشهادة غير مدرجة في قائمة الشهادات الملغاة قبل اعتماده.",
+        en: "A message encrypted with a key is decrypted back to readable form by whoever holds the same key, while anyone without it sees nothing but confidentiality preserved; the cryptographic transform is one in principle though the service differs — attaching a computed cryptographic value to data lets the receiver verify unchangedness, delivering integrity. The hash value H1 is computed for data M1 and stored or sent; on receipt H2 is computed for M2 with the same function, and matching values license assuming M1 unchanged. SHA-256 belongs to SHA-2, specified in FIPS 180, outputting 256 bits, while SHA3-256 belongs to SHA-3, specified in FIPS 202, also 256 bits wide; SHA-1, however, proved less secure than believed for signature generation and is no longer permitted there, remaining acceptable in most other applications such as verifying legacy signatures. Symmetrically: four entities form six pairwise relationships needing at least six keys, and 1,000 entities need 499,500. Asymmetrically: a signer generates a signature with its private key and the receiver verifies it with the matching public key — successful verification gives confidence in origin and integrity — and before relying on a public key the party consults its certificate and issuing authority, confirming the certificate is absent from the revocation list."
+      },
+      mistakes: [
+        { ar: "الاعتماد على سرية الخوارزمية لحماية البيانات؛ فالأمان في سرية المفتاح لأن مواصفات الخوارزمية قد تكون منشورة ومن يعرف المفتاح يعيد العملية أو يعكسها.", en: "Relying on the algorithm's secrecy to protect data: security lives in the key's secrecy, since specifications may be published and whoever knows the key redoes or reverses the operation." },
+        { ar: "استعمال المفتاح نفسه لغرضين تشفيريين مختلفين، كاستعمال مفتاح توليد التوقيعات في إنشاء المفاتيح، لأن ذلك قد يضعف أمان إحدى العمليتين أو كلتيهما.", en: "Using one key for two different cryptographic purposes, such as a signature-generation key in key establishment, may weaken one or both operations." },
+        { ar: "الخلط بين مصادقة الهوية ومصادقة المصدر: الأولى لكيان يتفاعل مع النظام كالتحقق من مرسل استعلام قواعد البيانات، والثانية لهوية الجهة التي صدرت عنها المعلومات، وعدم الإنكار حالة خاصة منها تُقدم الضمان فيها إلى طرف ثالث.", en: "Confusing identity with origin authentication: the first concerns an entity interacting with the system, the second the party information originated from, and non-repudiation is a special case of the latter giving assurance to a third party." },
+        { ar: "الظن أن أي طرف يستطيع حساب رمز مصادقة الرسالة؛ فهو يُحسب بوظيفة أمنية معتمدة ومفتاح متماثل فلا يحسبه إلا مالك المفتاح.", en: "Assuming anyone can compute a MAC: it takes an approved security function and a symmetric key, so only the key's owner can." },
+        { ar: "الاستمرار في استعمال SHA-1 لتوليد التوقيعات الرقمية رغم أن الهجمات بيّنت أنها أقل أمنًا مما ظن في هذا الاستعمال.", en: "Continuing to use SHA-1 for signature generation despite attacks showing it weaker than believed for exactly that use." },
+        { ar: "اعتماد المفتاح العام من شهادة منتهية الصلاحية أو ملغاة؛ فيلزم فحص صلاحية الشهادة وجهة إصدارها والتأكد من أنها غير مدرجة في قائمة الشهادات الملغاة.", en: "Trusting a public key from an expired or revoked certificate; the certificate's validity and issuer must be checked and its absence from the revocation list confirmed." }
+      ],
+      terminology: [
+        { ar: "التشفير", en: "Encryption" },
+        { ar: "النص المشفر", en: "Ciphertext" },
+        { ar: "دالة التجزئة", en: "Hash function" },
+        { ar: "المفتاح المتماثل", en: "Symmetric key" },
+        { ar: "المفتاح العام", en: "Public key" },
+        { ar: "التوقيع الرقمي", en: "Digital signature" },
+        { ar: "البنية التحتية للمفتاح العام", en: "Public key infrastructure (PKI)" }
+      ],
+      level: "medium"
+    }
+  },
+  /* ---- 260210030802 · مفاهيم نظم التشغيل · ISE122 course book ---- */
+  "260210030802": {
+    intro: {
+      title: {
+        ar: "الفصل 1 · مقدمة في نظم التشغيل",
+        en: "Chapter 1 · Introduction to Operating Systems"
+      },
+      explanation: {
+        ar: "نظام التشغيل برنامج يستخدم الموارد المادية للحاسب — المعالج والذاكرة وأجهزة الإدخال والإخراج ووسائط التخزين — لتقديم الدعم اللازم لتشغيل برامج أخرى، فلا مهمة نهائية له منفردًا بل يهيئ البيئة التي تُنفَّذ فيها مهام المستخدم. وتشغّل هذه البيئة عمليات مستقلة عن بعضها، فيفرض النظام تفاعلًا منضبطًا بينها يمنع تصادمها على الموارد، ويتيح للمبرمج التعامل مع برنامج كل مهمة كحاوية مستقلة لا يتدخل في تفاصيل العتاد تحتها. ولأن أي برنامج مهما بسط يحتاج وقت المعالج ومساحة ذاكرة وربما تخزينًا وشبكة، يتولى النظام توزيع هذه الموارد وتحريرها عند الانتهاء، ويوفر الخدمات التي تعمل في الخلفية دون طلب مباشر من المستخدم. ولم يستقر هذا الدور منذ البداية: فالحواسيب الأولى عملت بلا نظام تشغيل، ثم ظهرت مكتبات إدخال وإخراج تسهّل الاستخدام، قبل أن يتشكل المفهوم الحديث لنظام يحوي الآليات الفعلية لإدارة الموارد وتجريد العتاد. وتختلف الأنظمة بحسب سياقها: متعددة المهام، وأحادية أو متعددة المستخدمين، ومكتبية، وخادمة، ومضمنة؛ ويُختار النظام بمعايير عملية — التوافق مع العتاد والبرامج، وسهولة الإدارة، وقوة الأمن بمعنى السرية والسلامة والإتاحة والمساءلة، وتوافر الدعم والتحديثات — لا بترجيح مطلق بين Linux وWindows وmacOS.",
+        en: "An operating system is a program that uses the computer's physical resources — processor, memory, input/output devices and storage media — to provide the support needed to run other programs; it has no final task of its own but prepares the environment in which the user's tasks execute. That environment runs independent processes, and the system imposes controlled interaction between them so they do not collide over resources, letting programmers treat each task's program as an isolated container that never touches hardware details below. Because any program, however simple, needs processor time, memory space, and possibly storage and networking, the system distributes those resources and frees them when work ends, and it provides background services that run without a direct user request. This role did not settle from the start: early computers ran without an operating system, then input/output libraries appeared to ease use, before the modern concept crystallized as a system holding the actual mechanisms for resource management and hardware abstraction. Systems differ by context — multitasking, single- or multi-user, desktop, server and embedded — and are chosen by practical criteria: compatibility with hardware and software, ease of administration, security strength in the sense of confidentiality, integrity, availability and accountability, and the availability of support and updates — not by an absolute verdict among Linux, Windows and macOS."
+      },
+      objectives: [
+        { ar: "تعريف نظام التشغيل وبيان علاقته بالبرامج والعتاد.", en: "Define the operating system and state its relation to programs and hardware." },
+        { ar: "توضيح كيف يوزع النظام الموارد المادية بين عمليات مستقلة تزامنيًا.", en: "Explain how the system shares physical resources among independent concurrent processes." },
+        { ar: "تتبع تطور نظام التشغيل من بيئة بلا نظام إلى المفهوم الحديث.", en: "Trace the OS evolution from environments without a system to the modern concept." },
+        { ar: "تعداد وظائف النظام الأساسية وتصنيف أنواعه بحسب السياق.", en: "List the system's core functions and classify its types by context." },
+        { ar: "تقييم معايير اختيار نظام التشغيل ومقارنة الأنظمة الشائعة بها.", en: "Evaluate OS selection criteria and compare common systems by them." }
+      ],
+      concepts: [
+        {
+          term: { ar: "نظام التشغيل", en: "Operating system" },
+          def: { ar: "برنامج يستخدم الموارد المادية للحاسب لتقديم الدعم اللازم لتشغيل برامج أخرى، فيدير العمليات ويفرض التفاعل المنضبط بينها ويجرد تفاصيل العتاد.", en: "A program that uses the computer's physical resources to support running other programs, managing processes, enforcing controlled interaction and abstracting hardware details." }
+        },
+        {
+          term: { ar: "الموارد المادية", en: "Physical resources" },
+          def: { ar: "المعالج والذاكرة ووسائط التخزين وأجهزة الإدخال والإخراج؛ تتقاسمها البرامج المتنافسة ويحتاج توزيعها وإدارتها إلى النظام.", en: "Processor, memory, storage media and I/O devices; competing programs share them, so their distribution and management fall to the system." }
+        },
+        {
+          term: { ar: "التفاعل المنضبط", en: "Controlled interaction" },
+          def: { ar: "قواعد يفرضها النظام على العمليات المستقلة تمنع تصادمها على الموارد وتسمح لها بالتقدم معًا دون تخريب عمل بعضها.", en: "Rules the system imposes on independent processes so they do not collide over resources and can progress together without corrupting each other's work." }
+        },
+        {
+          term: { ar: "تعدد المهام وتعدد المستخدمين", en: "Multitasking & multi-user" },
+          def: { ar: "قدرة النظام على خدمة أكثر من مهمة أو أكثر من مستخدم في وقت واحد بالمناوبة السريعة على المعالج والموارد.", en: "The system's ability to serve more than one task or user at once by rapidly rotating the processor and resources." }
+        },
+        {
+          term: { ar: "النظام الخادم", en: "Server OS" },
+          def: { ar: "نظام مضبوط لخدمة مستخدمين وأجهزة عبر الشبكة فيحتاج ثباتًا وإدارة موارد مشتركة وقدرة على استقبال طلبات متزامنة.", en: "A system tuned to serve users and devices across a network, needing stability, shared-resource management and concurrent request handling." }
+        },
+        {
+          term: { ar: "النظام المضمن", en: "Embedded OS" },
+          def: { ar: "نظام محدود الموارد يعمل داخل جهاز مخصص بمهمة ثابتة، فتُقاس جودته بالخفة والاعتمادية أكثر من تعدد الاستخدامات.", en: "A resource-limited system running inside a dedicated device with a fixed task, judged by lightness and reliability rather than general-purpose flexibility." }
+        }
+      ],
+      example: {
+        ar: "على حاسب واحد يفتح المستخدم محرر نصوص بينما يعمل ماسح للفيروسات في الخلفية ويستمع المتصفح لاتصال شبكي: ثلاث عمليات مستقلة تطلب المعالج والذاكرة وأجهزة الإدخال والإخراج. يبدل النظام بينها بانتظام فلا تحتكر أيها الحاسب، ويمنع وصول إحداها إلى ذاكرة الأخرى، ويقدم لكل برنامج واجهات جاهزة للقراءة والكتابة دون أن يعرف أين تقع البيانات فيزيائيًا. وعند إغلاق المحرر يحرر النظام موارده ويعيدها للمخزون. النتيجة تجربة تشغيل واحدة منسقة رغم تعدد البرامج وتنافسها؛ ولو غاب النظام لاحتاج كل برنامج أن يدير الأجهزة بنفسه ويتخبط في تعارض مع غيره.",
+        en: "On one computer the user opens a text editor while an antivirus scanner runs in the background and a browser listens on a network connection: three independent processes asking for processor time, memory and I/O devices. The system rotates between them so none monopolizes the machine, prevents each from reaching the other's memory, and gives every program ready interfaces for reading and writing without knowing where the data physically sits. When the editor closes, the system frees its resources back to the pool. The result is one coordinated experience despite the many competing programs; without a system every program would have to drive the hardware itself and stumble into conflict with the rest."
+      },
+      mistakes: [
+        { ar: "ظن أن لنظام التشغيل مهمة مستخدم نهائية كالتحرير أو الحساب؛ وظيفته تهيئة البيئة وإدارة الموارد وإتاحة الخدمات للبرامج.", en: "Believing the OS has a final end-user task like editing or calculating; its job is preparing the environment, managing resources and exposing services to programs." },
+        { ar: "تجاهل أن الموارد مادية محدودة تتقاسمها العمليات؛ فالتسابق عليها دون ضبط مصدر تعارض وتوقف، لا مسألة سرعة جهاز.", en: "Ignoring that physical resources are finite and shared; racing for them without control causes conflict and stalls, not just slowness." },
+        { ar: "افتراض أن البرنامج يخاطب العتاد مباشرة؛ البرامج تتعامل مع وسيط وتجريد يقدمه النظام ويحمي الأجهزة.", en: "Assuming programs talk to hardware directly; they deal with an intermediary abstraction the system provides, which protects the devices." },
+        { ar: "حصر وظائف النظام في تشغيل البرامج فقط وإغفال الخدمات الخلفية وتوزيع الموارد وخدمات الشبكات والتخزين.", en: "Reducing the OS to program launching while ignoring background services, resource distribution and networking/storage services." },
+        { ar: "الحكم على نظام تشغيل بترجيح مطلق بدل معايير السياق: التوافق وسهولة الإدارة والأمن والدعم والتحديثات.", en: "Judging an OS by absolute preference instead of context criteria: compatibility, administrative ease, security, support and updates." }
+      ],
+      terminology: [
+        { ar: "نظام التشغيل", en: "Operating system" },
+        { ar: "الموارد", en: "Resources" },
+        { ar: "تعدد المهام", en: "Multitasking" },
+        { ar: "متعدد المستخدمين", en: "Multi-user" },
+        { ar: "نظام خادم", en: "Server operating system" },
+        { ar: "نظام مضمن", en: "Embedded system" },
+        { ar: "تجريد العتاد", en: "Hardware abstraction" },
+        { ar: "العمليات المتزامنة", en: "Concurrent processes" }
+      ],
+      level: "easy"
+    },
+    tasks: {
+      title: {
+        ar: "الفصل 2 · مهام نظام التشغيل: النواة والواجهات",
+        en: "Chapter 2 · OS Tasks: Kernel & Interfaces"
+      },
+      explanation: {
+        ar: "يتكامل عتاد الحاسب مع نظام التشغيل عبر مكوناته الأساسية: فالنواة (Kernel) هي الجزء المحوري المسؤول عن إدارة الموارد والتحكم فيها — المعالج والذاكرة والأجهزة والملفات — وتتعامل مع كل جهاز عبر مشغّله (Driver) الذي يترجم الأوامر العامة إلى أوامر يفهمها ذلك الجهاز بعينه. ومن مهام النواة إدارة الملفات: حفظ البيانات على وسائط التخزين حفظًا دائمًا مع بيانات وصفية تصفها، فيمكن استدعاؤها لاحقًا بالاسم لا بالموقع الفيزيائي. ويقدم النظام للمبرمج واجهة برمجة التطبيقات (API) تجمع الدوال والثوابت التي يستعين بها بدل التعامل المباشر مع الموارد، ومن أمثلتها دوال فتح الملفات وقراءتها. ولحماية النظام يعمل كل برنامج عادة في وضع المستخدم بصلاحيات محدودة لا تلمس الأجهزة مباشرة، وينتقل إلى وضع النواة عند الحاجة إلى خدمة محمية عبر استدعاء النظام الذي يمرر العمل إلى النواة ثم يعيد النتيجة. وينجز المستخدم مهامه عبر واجهة رسومية أسهل في التعلم، أو واجهة سطر أوامر أقوى في الدقة والأتمتة؛ ولواجهات المهام الإدارية معايير اختيار: حجم المهمة، وتكرارها، وما إذا كانت تحتاج توثيقًا أو ربطًا بمهام مجدولة. أما بنية النواة فتختلف: فالنواة الأحادية تضم الخدمات كلها في كتلة واحدة تعمل في وضع النواة فتبلغ الكفاءة ذروتها لكن عطل جزء يهدد الكل؛ والنواة المصغرة تُبقي في وضع النواة الحد الأدنى الضروري — النقل والجدولة وإدارة الذاكرة — وتنقل ما عداه إلى وضع المستخدم فتكسب عزلًا أفضل عند الأعطال بخسارة كلفة التنقل بين الوضعين؛ والبنية الطبقية ترتب الخدمات في طبقات متتالية تُبنى الواحدة فوق الأخرى عبر واجهات مستقرة تسهّل التطوير والاختبار.",
+        en: "Hardware and the operating system integrate through its core components: the kernel is the central part responsible for managing and controlling resources — processor, memory, devices and files — and works with each device through its driver, which translates general commands into ones that specific device understands. File management is among the kernel's tasks: storing data on media durably along with descriptive metadata, so files are later recalled by name rather than by physical location. The system offers programmers an application programming interface collecting the functions and constants they use instead of touching resources directly, such as functions that open and read files. For protection, every program normally runs in user mode with limited privileges that cannot touch devices directly, and switches to kernel mode when it needs a protected service through a system call, which hands the work to the kernel and returns the result. Users accomplish tasks through a graphical interface that is easier to learn, or a command line that is stronger for precision and automation; admin-interface choice follows the task's size, repetition, and whether it needs documentation or scheduling. Kernel structure varies: a monolithic kernel gathers all services in one block running in kernel mode for peak efficiency, though one failing part threatens everything; a microkernel keeps only the bare essentials in kernel mode — communication, scheduling, memory management — and moves the rest to user mode, gaining better fault isolation at the cost of mode-switch overhead; a layered structure arranges services in successive layers built on stable interfaces, easing development and testing."
+      },
+      objectives: [
+        { ar: "تحديد موقع النواة من النظام وبيان دور مشغلات الأجهزة.", en: "Locate the kernel within the system and explain the role of device drivers." },
+        { ar: "شرح إدارة الملفات ودور البيانات الوصفية في الاستدعاء بالاسم.", en: "Explain file management and how metadata enables recall by name." },
+        { ar: "تفسير الفرق بين وضع المستخدم ووضع النواة ووظيفة استدعاء النظام.", en: "Interpret the difference between user mode and kernel mode and what a system call does." },
+        { ar: "الاختيار بين الواجهة الرسومية وسطر الأوامر وفق حجم المهمة وتكرارها وأتمتتها.", en: "Choose between GUI and CLI based on task size, repetition and automation." },
+        { ar: "المقارنة بين بنى النواة: الأحادية والمصغرة والطبقية.", en: "Compare kernel structures: monolithic, microkernel and layered." }
+      ],
+      concepts: [
+        {
+          term: { ar: "النواة", en: "Kernel" },
+          def: { ar: "الجزء الأساسي من نظام التشغيل المسؤول عن إدارة الموارد والتحكم فيها: المعالج والذاكرة والأجهزة والملفات.", en: "The core part of the OS responsible for managing and controlling resources: processor, memory, devices and files." }
+        },
+        {
+          term: { ar: "مشغّل الجهاز", en: "Device driver" },
+          def: { ar: "برنامج داخل النواة يترجم الأوامر العامة الموجهة للجهاز إلى أوامر يفهما هذا الطراز بعينه من الأجهزة.", en: "A kernel program translating general device commands into instructions that a specific device model understands." }
+        },
+        {
+          term: { ar: "إدارة الملفات", en: "File management" },
+          def: { ar: "حفظ البيانات على وسائط التخزين حفظًا دائمًا مع البيانات الوصفية التي تصفها، لاستعادتها بالاسم.", en: "Storing data durably on media with descriptive metadata, so it can be retrieved by name." }
+        },
+        {
+          term: { ar: "واجهة برمجة التطبيقات", en: "Application programming interface (API)" },
+          def: { ar: "مجموعة الدوال والثوابت التي يعتمد عليها البرنامج للطلب من النظام بدل التعامل المباشر مع الموارد.", en: "The set of functions and constants a program relies on to request system services instead of touching resources directly." }
+        },
+        {
+          term: { ar: "وضع المستخدم ووضع النواة", en: "User mode & kernel mode" },
+          def: { ar: "وضعان لتشغيل المعالج: وضع المستخدم محدود الصلاحيات للتطبيقات، ووضع النواة كامل الصلاحيات للخدمات المحمية.", en: "Two processor modes: limited-privilege user mode for applications, and full-privilege kernel mode for protected services." }
+        },
+        {
+          term: { ar: "استدعاء النظام", en: "System call" },
+          def: { ar: "الطلب المحمي الذي يرفعه برنامج من وضع المستخدم لتنفيذ خدمة داخل النواة، فينتقل المعالج إلى وضع النواة ثم يعود بالنتيجة.", en: "The protected request a user-mode program raises to run a kernel service, switching the processor into kernel mode and back with the result." }
+        },
+        {
+          term: { ar: "النواة المصغرة", en: "Microkernel" },
+          def: { ar: "بنية تُبقي في وضع النواة الحد الأدنى الضروري من الخدمات وتنقل ما عداها إلى وضع المستخدم، فتقوي العزل وتزيد كلفة التنقل.", en: "A structure keeping only minimal services in kernel mode and moving the rest to user mode, strengthening isolation while adding communication overhead." }
+        }
+      ],
+      example: {
+        ar: "حفظ ملف من محرر نصوص: يضغط المستخدم «حفظ» فينادي المحرر دالة من واجهة برمجة التطبيقات، وتتولى الدالة استدعاء النظام للكتابة، فينتقل المعالج إلى وضع النواة حيث تحدد النواة كتل التخزين وتأمر مشغّل القرص بكتابة البيانات، ثم يعود التنفيذ إلى وضع المستخدم ويطمئن المحرر إلى نجاح الحفظ. لا يكتب المحرر أي بيانات فيزيائية بنفسه ولا يعرف على أي مقاطع سُجلت؛ تبقى هذه التفاصيل داخل النواة ومشغلاتها. ولو جرت الكتابة مباشرة من التطبيق لتعارضت تطبيقات أخرى على الموضع نفسه بلا رقيب. وعلى الجانب الإداري نفسه: مهمة نسخ ملف مرة واحدة تكفي لها الواجهة الرسومية، أما تكرار النسخ كل ليلة فيلزمه أمر نصي يمكن جدولته.",
+        en: "Saving a file from a text editor: the user presses Save, the editor calls a function from the API, the function raises the write system call, the processor switches into kernel mode where the kernel picks storage blocks and instructs the disk driver to write the data, then execution returns to user mode and the editor is told the save succeeded. The editor writes nothing physical itself and knows nothing of the sectors used; those details stay inside the kernel and its drivers. Had applications written directly, other programs could collide over the same location unguarded. On the admin side equally: copying one file once suits the graphical interface, but repeating the copy every night calls for a command line that can be scheduled."
+      },
+      mistakes: [
+        { ar: "ظن أن البرامج تتعامل مع الأجهزة مباشرة؛ الوسيط — النواة ومشغّلاتها — هو ما يوحد الأوامر ويحمي الموارد.", en: "Assuming programs talk to devices directly; the kernel and its drivers are the intermediary that unifies commands and protects resources." },
+        { ar: "الاعتقاد بأن النواة المصغرة لا تدير الملفات والأجهزة إطلاقًا؛ الصواب أنها تديرها مع نقل مزيد من الخدمات خارج وضع النواة.", en: "Believing a microkernel does not manage files or devices at all; it does, while moving more services out of kernel mode." },
+        { ar: "الخلط بين النواة والواجهة الرسومية: جمال الواجهة لا يقيس قوة النظام؛ الأساس هو النواة وخدماتها.", en: "Confusing the kernel with the graphical shell: interface polish does not measure system strength; the kernel and its services do." },
+        { ar: "تنفيذ مهمة إدارية كبيرة متكررة يدويًا من الواجهة الرسومية بدل توثيقها وأتمتتها بسطر الأوامر.", en: "Doing a large, repetitive admin task by hand in the GUI instead of documenting and automating it through the command line." },
+        { ar: "تجاوز استدعاء النظام والوصول إلى مورد محمي من وضع المستخدم، فيرفض العتاد الطلب أو تصبح الوسيلة غير مضمونة.", en: "Bypassing system calls to reach a protected resource from user mode, so the hardware rejects the request or the path becomes unreliable." },
+        { ar: "المقارنة بين بنى النواة بلا ميزان: لكل بنية كلفة وعائد — كفاءة مقابل عزل وسهولة تطوير.", en: "Comparing kernel structures without a scale: each has costs and returns — efficiency against isolation and ease of development." }
+      ],
+      terminology: [
+        { ar: "النواة", en: "Kernel" },
+        { ar: "مشغّل الجهاز", en: "Device driver" },
+        { ar: "إدارة الملفات", en: "File management" },
+        { ar: "وضع المستخدم", en: "User mode" },
+        { ar: "وضع النواة", en: "Kernel mode" },
+        { ar: "استدعاء النظام", en: "System call" },
+        { ar: "واجهة برمجة التطبيقات", en: "Application programming interface" },
+        { ar: "الواجهة الرسومية", en: "Graphical user interface" },
+        { ar: "واجهة سطر الأوامر", en: "Command-line interface" },
+        { ar: "النواة المصغرة", en: "Microkernel" }
+      ],
+      level: "medium"
+    },
+    virtualization: {
+      title: {
+        ar: "الفصل 3 · الأجهزة الافتراضية",
+        en: "Chapter 3 · Virtual Machines"
+      },
+      explanation: {
+        ar: "الجهاز الافتراضي حاسب كامل يُبنى برمجيًا داخل حاسب حقيقي، وتقوم البيئة على طبقات متراكبة: العتاد الفيزيائي، ثم برنامج المحاكاة (Hypervisor) الذي يوزع الموارد على الأنظمة الضيفة (Guest) بينما يبقى النظام الأصلي هو المضيف (Host). يُنشأ الجهاز الجديد بتحديد اسمه وموضع ملفاته ونوع النظام ونسخته وصورة التثبيت، ثم توزع الموارد بموازنة: فتخصيص ذاكرة تتجاوز طاقة المضيف تجبره على المبادلة إلى القرص فتبطؤ البيئتان معًا، وقلة الأنوية الافتراضية تخنق الضيف رغم توافر الأنوية الفيزيائية. ويمكن تفعيل التثبيت غير المراقب، وبعد التثبيت تضاف إضافات الضيف (Guest Additions أو أدوات VMware) التي تنشط الحافظة المشتركة والسحب والإفلات والمجلدات المشتركة وتحسين العرض. ومن إدارة الجهاز: ضبط ترتيب الإقلاع، وحماية بيانات الدخول، وتشفير قرصه، وتوثيق وصفه. واللقطة (Snapshot) نسخة من حالة الجهاز يعاد إليها لاحقًا وتشمل الإعدادات والأقراص، وذاكرة نظام قيد التشغيل عند أخذ اللقطة، فتصلح لتجربة إعدادات أو تحديثات خطرة ثم التراجع عنها. ويمكن استنساخ الجهاز أو تصديره بصيغتي OVF وOVA لنقله أو أرشفته. أما أوضاع الشبكة فتحدد العلاقة بالعالم: NAT يمنح الضيف خروجًا بشبكة المضيف، وBridged يضعه ندًا في الشبكة الحقيقية، والوضعان الداخلي وHost-only يصلان الأجهزة الافتراضية ببعضها أو بالمضيف، وبهما مع الوضع غير الموصول يبقى الجهاز معزولًا. ويُستكمل العزل بنقل الملفات عبر المجلدات المشتركة بدل ربط الشبكات كلها ببعضها.",
+        en: "A virtual machine is a whole computer built in software inside a real one, and the environment rests on stacked layers: the physical hardware, then the hypervisor that distributes resources to the guest systems while the original system remains the host. A new machine is created by choosing its name, file location, guest OS type and version, and the installation image; then resources are balanced — allocating memory beyond the host's capacity forces the host to swap to disk and both environments crawl, and too few virtual cores strangle the guest despite spare physical cores. Unattended installation can be enabled, and afterwards Guest Additions (or VMware Tools) are installed to enable the shared clipboard, drag-and-drop, shared folders and better display. Managing the machine includes the boot order, securing sign-in credentials, encrypting its disk, and documenting its description. A snapshot is a copy of the machine's state to return to later, covering settings and disks plus the memory of a running machine at capture time, so risky settings or updates can be tried and rolled back. A machine can be cloned or exported as OVF/OVA for transfer or archiving. Network modes define the relation to the world: NAT lets the guest leave through the host's network, Bridged places it as a peer on the real network, and the internal and host-only modes connect virtual machines to each other or to the host, and with them plus the not-attached mode the machine stays isolated. Isolation is completed by moving files through shared folders instead of bridging whole networks together."
+      },
+      objectives: [
+        { ar: "شرح طبقات بيئة الافتراضية وموقع المدير المفسّر والمضيف والضيف.", en: "Explain the virtualization layers and where hypervisor, host and guest sit." },
+        { ar: "إنشاء جهاز افتراضي وتوزيع موارده بموازنة سليمة مع المضيف.", en: "Create a virtual machine and allocate its resources with sound host balancing." },
+        { ar: "تفعيل إضافات الضيف وربطها بوظائف التكامل بين البيئتين.", en: "Enable guest additions and connect them to integration features." },
+        { ar: "إدارة الجهاز عبر اللقطات والاستنساخ والتصدير وضبط أمانه.", en: "Manage the machine through snapshots, cloning, export and security setup." },
+        { ar: "الاختيار بين أوضاع الشبكة بحسب الحاجة إلى العزل أو التشارك.", en: "Choose network modes according to the need for isolation or sharing." }
+      ],
+      concepts: [
+        {
+          term: { ar: "المحاكاة الافتراضية", en: "Virtualization" },
+          def: { ar: "تشغيل حاسب كامل كبرنامج داخل حاسب آخر، فتنفصل مكونات النظام الضيف عن العتاد الفيزيائي عبر طبقة وسيطة.", en: "Running an entire computer as software inside another, separating the guest's components from physical hardware through an intermediate layer." }
+        },
+        {
+          term: { ar: "المدير المفسّر", en: "Hypervisor" },
+          def: { ar: "برنامج المحاكاة الذي يوزع العتاد الحقيقي على الأنظمة الضيفة ويخطط تشغيلها، ومنه VirtualBox وVMware Workstation.", en: "The virtualization program distributing real hardware among guests and scheduling them, such as VirtualBox or VMware Workstation." }
+        },
+        {
+          term: { ar: "المضيف والضيف", en: "Host & guest" },
+          def: { ar: "المضيف نظامك الأصلي على العتاد الحقيقي، والضيف نظام كامل يعمل داخل جهاز افتراضي تابع له.", en: "The host is your original system on real hardware; a guest is a full system running inside a virtual machine under it." }
+        },
+        {
+          term: { ar: "إضافات الضيف", en: "Guest additions" },
+          def: { ar: "حزم تُثبت داخل النظام الضيف فتنشط الحافظة المشتركة والسحب والإفلات والمجلدات المشتركة وتحسين شاشة العرض.", en: "Packages installed inside the guest to enable the shared clipboard, drag-and-drop, shared folders and better display." }
+        },
+        {
+          term: { ar: "اللقطة", en: "Snapshot" },
+          def: { ar: "نسخة من حالة الجهاز — إعدادات وأقراص، وذاكرة إن كان يعمل — يعاد إليها لاحقًا للتراجع عن تغيير خطِر.", en: "A copy of the machine's state — settings and disks, plus memory if running — restored later to roll back a risky change." }
+        },
+        {
+          term: { ar: "الاستنساخ والتصدير", en: "Cloning & export" },
+          def: { ar: "إنتاج نسخة كاملة مستقلة من الجهاز، أو حزمه بصيغة OVF/OVA قياسية لنقله بين المنصات وأرشفته.", en: "Producing a full independent copy of the machine, or packing it as a standard OVF/OVA file for moving between platforms and archiving." }
+        },
+        {
+          term: { ar: "المجلدات المشتركة", en: "Shared folders" },
+          def: { ar: "قناة منضبطة لنقل الملفات بين المضيف والضيف دون ربط أي منهما بشبكة الآخر كاملة.", en: "A controlled channel for moving files between host and guest without bridging either onto the other's network." }
+        }
+      ],
+      example: {
+        ar: "مختبر آمن لطالب أمن: ينشئ على حاسبه المحمول جهازين افتراضيين — أحدهما Linux والآخر Windows — ويصل بينهما بشبكة داخلية معزولة عن شبكة المنزل. في أحدهما يجهز خدمة، وفي الآخر يتدرب على فحصها وتجربة إعدادات خطرة إلى أن يفسد الشيء. قبل التجربة يأخذ لقطة سليمة، وبعد الإفساد يستعيدها في ثوانٍ فيعود النظام كما كان، والمضيف الذي يواصل عليه عمله لم يمسه فساد الشبكة ولا التغييرات الخاطئة. ولنقل التقرير بين البيئتين يستعمل مجلدًا مشتركًا محددًا بدل توصيل أي من الجهازين بشبكة المنزل الواسعة.",
+        en: "A safe lab for a security student: two virtual machines on one laptop — one Linux and one Windows — joined by an internal network isolated from the home network. On one a service is set up, on the other it is inspected and risky settings are tried until something breaks. A healthy snapshot is taken before the experiment; after the breakage it is restored in seconds and the system returns exactly as it was, while the host, where ordinary work continues, never met the broken network or the wrong changes. To move the report between environments a specific shared folder is used instead of wiring either machine onto the wide home network."
+      },
+      mistakes: [
+        { ar: "حجز جزء كبير من موارد المضيف للضيف (ذاكرة أو أنوية) فتتباطأ البيئتان لأن المضيف يلجأ إلى المبادلة على القرص.", en: "Allocating too much host capacity to the guest (memory or cores) slows both environments as the host falls back to disk swapping." },
+        { ar: "اعتبار شبكة الجسر (Bridged) وسيلة عزل؛ هي مدخل للأجهزة الافتراضية إلى الشبكة الحقيقية وبالعكس.", en: "Treating bridged networking as isolation; it is a doorway from the virtual machines onto the real network and back." },
+        { ar: "نسيان تثبيت إضافات الضيف ثم الاندهاش من غياب الحافظة المشتركة والسحب والإفلات.", en: "Forgetting guest additions, then wondering why the shared clipboard and drag-and-drop do not work." },
+        { ar: "الاتكال على لقطة قديمة كنسخة احتياطية دائمة مع مواصلة العمل عليها حتى تصبح بائتة عند الحاجة.", en: "Depending on an old snapshot as a permanent backup while working onward, so it turns stale exactly when needed." },
+        { ar: "ترك حماية بيانات الدخول وتشفير القرص على حالهما ثم تخزين بيانات حساسة داخل الأجهزة.", en: "Leaving sign-in protection and disk encryption untouched while storing sensitive data inside the machines." },
+        { ar: "مشاركة مجلد المضيف كاملًا مع الأجهزة الضيفة بدل مشاركة الأمثلة الضرورية فقط.", en: "Sharing the entire host folder with guests instead of only the samples actually required." }
+      ],
+      terminology: [
+        { ar: "الجهاز الافتراضي", en: "Virtual machine" },
+        { ar: "المدير المفسر", en: "Hypervisor" },
+        { ar: "المضيف", en: "Host" },
+        { ar: "الضيف", en: "Guest" },
+        { ar: "إضافات الضيف", en: "Guest additions" },
+        { ar: "اللقطة", en: "Snapshot" },
+        { ar: "الاستنساخ", en: "Clone" },
+        { ar: "أوضاع الشبكة", en: "Network modes" },
+        { ar: "المجلدات المشتركة", en: "Shared folders" }
+      ],
+      level: "easy"
+    },
+    processes: {
+      title: {
+        ar: "الفصل 4 · إدارة العمليات والخيوط",
+        en: "Chapter 4 · Process & Thread Management"
+      },
+      explanation: {
+        ar: "العملية برنامج قيد التنفيذ مع موارده: كوده وذاكرته وسجلاته وحالته، أما البرنامج المخزن على القرص فكيان ساكن لا يصير عملية إلا عند تشغيله. وتمر كل عملية بخمس حالات: جديدة لحظة إنشائها، وجاهزة تنتظر دورها على المعالج، وقيد التشغيل تملك المعالج فعلًا، ومنتظرة تحتاج حدثًا خارجيًا كإتمام قراءة أو كتابة فلا يخدمها المعالج، ومنتهية أنهت عملها وسجلت نتيجتها. ولا تنتقل العملية بين حالاتها بمبادرتها بل بقرار المجدول الذي يختار من الجاهزة ويبادل المعالج بينها. وعندما تتقدم عدة عمليات معًا يستحق التزامن (Concurrency) ضوابطه: فالتزامن بلا قواعد يفتح باب حالة السباق حين تعتمد النتيجة على أي العمليتين تصل أولًا إلى مورد مشترك فتتغير النتيجة بتغير الترتيب، ويُحمى الكود الذي يعالج المورد المشترك — وهو القسم الحرج — بقفل يسمح بعبور عملية واحدة في المرة: تطلبه وتنتظر حتى يتوفر، ثم تعمل وهي مالكته، ثم تفتحه فتتقدم التالية. أما الخيوط فوحدات تنفيذ داخل العملية الواحدة تشترك مع بقية خيوطها في الذاكرة والموارد، ولهذه المشاركة ميزة في خفة الإنشاء وسرعة تبادل البيانات، ولها خطر: لا حماية حقيقية بين الخيوط كما في فضاءات العمليات المنفصلة، وخطأ إحداها يهدد الجميع. وعلى مستوى النظام تدار العمليات بمعرفات: لكل عملية رقم هوية (PID) ورقم للأب (PPID)، وتقف أدوات مثل ps وtop على أعمدة أهمها: صاحب العملية، وحالتها S، ونسبة استهلاك المعالج، والزمن التراكمي، والأمر. وتُقرأ الظواهر من الحالة نفسها: فالعملية العاملة أو الجاهزة R، والمنتظرة S، وإذا كانت Z فهي زومبي: انتهى تنفيذها فعلًا لكن مدخلها لم يجمع لأن الأب لم يقرأ نتيجة نهايتها بعد؛ الزومبي لا يُقتل لأنه منتهٍ أصلًا، بل يُصلح برنامج الأب حتى يقرأ النتائج أو يُعاد تشغيله. ويقتضي التشخيص الآمن ترتيبًا لا يُقفز عنه: فهم شجرة العمليات أولًا، ثم البدء بالإشارة اللطيفة SIGTERM التي تتيح للبرنامج حفظ عمله وإغلاق ملفاته، ولا يُلجأ إلى SIGKILL القاطعة إلا عند فقدان الأمل في الاستجابة. ومن إشارات الإدارة أيضًا SIGINT التي يرسلها Ctrl+C من الطرفية لطلب المقاطعة المهذبة.",
+        en: "A process is a program in execution together with its resources: its code, memory, registers and state; the program stored on disk is a static artifact that only becomes a process when run. Each process passes through five states: new at creation, ready waiting for its processor turn, running while actually holding the processor, waiting for an external event such as a read or write to finish so the processor does not serve it, and terminated having finished and recorded its result. Transitions are not self-driven: the scheduler chooses among the ready and swaps the processor between them. When several processes advance together, concurrency demands discipline: rule-free concurrency opens the race condition where the outcome depends on which process reaches a shared resource first, changing with the order; the code handling the shared resource — the critical section — is guarded by a lock admitting one process at a time: it requests the lock and waits, works while owning it, then releases it for the next. Threads are execution units inside one process sharing memory and resources with its siblings — light to create and quick to exchange data, but with a hazard: no real protection between threads as between separate process address spaces, and one thread's fault threatens them all. At system level processes are identified: each has a process id (PID) and parent id (PPID), and tools like ps and top expose columns that matter: the owner, the state S, processor usage, accumulated time, and the command. States tell their stories: R for running or runnable, S for waiting, and Z means a zombie — execution finished yet its slot was not reaped because the parent has not read the termination result. A zombie cannot be killed because it is already dead; the fix is repairing the parent program so it reaps results, or restarting it. Safe diagnosis follows a fixed order: understand the process tree first, then start with the gentle SIGTERM that lets a program save its work and close its files, resorting to the cutting SIGKILL only when response is hopeless. Other administration signals include SIGINT, sent by Ctrl+C from the terminal as a polite interruption request."
+      },
+      objectives: [
+        { ar: "التمييز بين البرنامج المخزن والعملية القائمة وموارد العملية.", en: "Distinguish the stored program from the running process and its resources." },
+        { ar: "تعداد حالات العملية الخمس وتفسير انتقالاتها بقرار المجدول.", en: "Enumerate the five process states and explain transitions via scheduler decisions." },
+        { ar: "شرح حالة السباق ودور القسم الحرج والقفل في ضبط التزامن.", en: "Explain the race condition and the roles of the critical section and locks in taming concurrency." },
+        { ar: "مقارنة العمليات والخيوط وتقدير مخاطر اشتراك الخيوط في الذاكرة.", en: "Compare processes and threads and assess the hazards of shared memory between threads." },
+        { ar: "قراءة شجرة العمليات وأعمدتها وتشخيص الزومبي واختيار الإشارة المناسبة بالترتيب.", en: "Read the process tree and its columns, diagnose zombies and pick the right signal in order." }
+      ],
+      concepts: [
+        {
+          term: { ar: "العملية", en: "Process" },
+          def: { ar: "برنامج قيد التنفيذ مع موارده: الكود والذاكرة والسجلات والحالة، منفصل عن البرنامج المخزن الساكن.", en: "A program in execution with its resources — code, memory, registers and state — distinct from the static stored program." }
+        },
+        {
+          term: { ar: "حالات العملية", en: "Process states" },
+          def: { ar: "جديدة، وجاهزة، وقيد التشغيل، ومنتظرة لحدث خارجي، ومنتهية؛ والمجدول هو من يقرر الانتقالات بينها.", en: "New, ready, running, waiting on an external event, and terminated; the scheduler decides the transitions." }
+        },
+        {
+          term: { ar: "حالة السباق", en: "Race condition" },
+          def: { ar: "عيب تزامن تختلف فيه النتيجة بحسب أي العمليات يصل أولًا إلى مورد مشترك، فتتغير النتيجة بتغير الترتيب.", en: "A concurrency flaw where the outcome depends on which process reaches the shared resource first, changing with ordering." }
+        },
+        {
+          term: { ar: "القسم الحرج والقفل", en: "Critical section & lock" },
+          def: { ar: "مقطع كود يعالج موردًا مشتركًا لا يدخله إلا عملية واحدة في المرة؛ والقفل أداة تنظم الطلب والانتظار والفتح.", en: "A code span handling a shared resource that admits one process at a time; the lock structures requesting, waiting and releasing." }
+        },
+        {
+          term: { ar: "الخيط", en: "Thread" },
+          def: { ar: "وحدة تنفيذ داخل العملية تشترك مع بقية خيوطها في الذاكرة والموارد، فتخسر حماية الفضاءات المنفصلة.", en: "An execution unit inside a process sharing memory and resources with its sibling threads, losing the protection of separate address spaces." }
+        },
+        {
+          term: { ar: "الزومبي", en: "Zombie" },
+          def: { ar: "عملية انتهى تنفيذها وبقي مدخلها في الجدول لأن الأب لم يقرأ نتيجة نهايتها؛ لا تُقتل بل يُعالج الأب.", en: "A process that finished while its table entry remains because the parent has not read its result; it is not killed — the parent is fixed." }
+        },
+        {
+          term: { ar: "الإشارات", en: "Signals" },
+          def: { ar: "رسائل إدارة الإنهاء: SIGINT طلب مقاطعة من الطرفية، وSIGTERM إنهاء لطيف يسمح بالحفظ، وSIGKILL قطع فوري بلا فرصة.", en: "Termination-management messages: SIGINT a terminal interruption request, SIGTERM a gentle exit allowing saves, and SIGKILL an instant cut with no chance." }
+        }
+      ],
+      example: {
+        ar: "يفتح مشرف النظام طرفية على خادم يشكو من ثقل متقطع: يعرض top العملية الأكثر استهلاكًا للمعالج، ثم يتابع ps شجرة العمليات فيلاحظ عملية حالتها Z يشير أبيها إلى خدمة غير قارئة لنتائج أبنائها. لا يحاول قتل الزومبي — انتهى فعلًا — بل يفحص برنامج الخدمة ويصلحه أو يعيد تشغيله فيجمع أبناءه وتتحرر مداخلهم. وقبل أي إغلاق قسري لخدمة أخرى يعرف موقعها في الشجرة ووظيفتها، ثم يرسل SIGTERM أولًا ليتيح لها حفظ حالتها وإغلاق ملفاتها، ولا يستعمل SIGKILL إلا حيث لا فائدة من انتظار، مع تدوين السبب. هذا التدرج — قراءة ثم فهم ثم إشارة لطيفة ثم حازمة — هو عين الإدارة السليمة بخلاف العصف الذهني المعتاد.",
+        en: "An administrator opens a terminal on a server complaining of intermittent heaviness: top shows the top processor consumer, then ps reveals the process tree where a process in state Z has a parent that never reads its children's results. He does not try to kill the zombie — it already finished — but inspects the service program, fixes or restarts it so it reaps its children and their entries are freed. Before any forced shutdown of another service he learns its place in the tree and its role, then sends SIGTERM first, letting it save state and close files, reserving SIGKILL for cases beyond hope — and logging why. That ladder — read, understand, a gentle signal, then a firm one — is sound administration, unlike the usual panic."
+      },
+      mistakes: [
+        { ar: "الحكم على العملية من البرنامج المخزّن؛ البرنامج ساكن والعملية كائن حي بموارد وحالة.", en: "Judging the process by the stored program; the program is static while the process is a live object with resources and state." },
+        { ar: "افتراض أن خيوط العملية الواحدة محمية من بعضها كالعمليات المنفصلة؛ الذاكرة مشتركة فلا حدود صلبة بينها.", en: "Assuming sibling threads are protected from each other like separate processes; the memory is shared with no hard borders." },
+        { ar: "تشارك مورد دون قفل قسم حرج، فتكون النتيجة رهن صدفة الترتيب لا رهن منطق البرنامج.", en: "Sharing a resource without guarding the critical section, leaving results to ordering luck rather than program logic." },
+        { ar: "توجيه إشارة القتل الفوري قبل تجربة الإنهاء اللطيف، فيفقد البرنامج فرصة الحفظ وتنظيف أثره.", en: "Sending the instant kill before trying the gentle exit, robbing the program of its chance to save and clean up." },
+        { ar: "محاولة قتل زومبي؛ فهو منتهٍ أصلًا ولا يستجيب، والعلاج عند الأب الذي لم يقرأ نتائجه.", en: "Trying to kill a zombie; it is already dead and unresponsive, and the cure lies with the parent that never reaped its results." },
+        { ar: "البدء بتشخيص مباغت بلا فهم شجرة العمليات، فيُعزل جزء سليم ويبقى السبب الحقيقي.", en: "Rushing into action without understanding the process tree, disabling a healthy part while the real cause remains." }
+      ],
+      terminology: [
+        { ar: "العملية", en: "Process" },
+        { ar: "حالة العملية", en: "Process state" },
+        { ar: "حالة السباق", en: "Race condition" },
+        { ar: "القسم الحرج", en: "Critical section" },
+        { ar: "قفل الاستبعاد المتبادل", en: "Mutex" },
+        { ar: "الخيط", en: "Thread" },
+        { ar: "معرّف العملية", en: "Process ID (PID)" },
+        { ar: "العملية الزومبي", en: "Zombie process" },
+        { ar: "إشارة", en: "Signal" }
+      ],
+      level: "medium"
+    },
+    scheduling: {
+      title: {
+        ar: "الفصل 5 · جدولة المعالج والمقاطعات",
+        en: "Chapter 5 · CPU Scheduling & Interrupts"
+      },
+      explanation: {
+        ar: "المعالج ينفذ تعليمة واحدة في اللحظة الواحدة بينما العمليات الجاهزة أكثر من أن يخدمها جميعًا، فيتولى المجدول توزيع وقته وفق سياسة جدولة توازن بين الإنتاجية وزمن الاستجابة. وأبسط الصور انتظار مشغول: تدور العملية على فحص شرطها حتى يتحقق فتستهلك المعالج في غير عمل منتج، والصورة السليمة حجبُ العملية في طابور الانتظار حتى يقع الحدث. وتنظم العمليات في طابورين: طابور الجاهزة لمن يستعد للتنفيذ، وطابور الانتظار لمن ينتظر حدثًا خارجيًا؛ فتبدو كل عملية في إحدى ثلاث وضعيات إزاء المعالج: قابلة للتنفيذ، أو تعمل عليه، أو تنتظر. وتُستبق العملية الجارية عند انتهاء شريحتها أو ورود مقاطعة أقوى، فينتقل التنفيذ من سياقها إلى سياق غيرها بتبديل السياق: حفظ سجلاتها وعدّاد برنامجها واستعادة سياق التالية، وهو نقل بكلفة ظاهرة لأن الذاكرات المؤقتة تفرغ فيستغرق أول ما ينفذه السياق الجديد زمنًا أطول. وتُقسم المقاطعات إلى عتادية كنبضة المؤقت الدورية أو إشارة جهاز أنهى عمله، وبرمجية كالفخ الناتج عن استدعاء نظام أو خطأ تنفيذ. وعند وقوع المقاطعة تحفظ حالة العملية ويسلّم المعالج إلى معالج المقاطعة، ثم تعود العملية لاستكمال تنفيذها أو إلى طابور الجاهزين ليختار المجدول من جديد. وتُقاس السياسات بعدسات: الإنتاجية ما ينجز في وحدة الزمن، وزمن الاستجابة لخدمة التفاعلية، وزمن الانتظار في الطابور دون تنفيذ، وزمن الدوران من تقديم الطلب حتى اكتماله. ويتحدد أداء النظام بمورده المشبع: فحين يتجاوز مورد حدوده يصير اختناقًا يبطئ الجميع خلفه، ويكشف بحساب نسبة انشغال كل مورد ثم تحديد ما تجاوز المئة. ومثال ذلك خادم قبول وتسجيل يخدم 20 خطابًا في الدقيقة: الطابعة الوحيدة تحتاج لكل خطاب أربع ثوانٍ فيبلغ انشغالها 133% بينما المعالج 17% والقرص 10%، فالاختناق طابعة لا معالج، وعلاجها إضافة طابعة ثانية ترفع الطاقة إلى 30 خطابًا في الدقيقة. وأمام الموارد المشتركة قد يتكون أثر القافلة: تحتجز عملية موردًا فتُستبق قبل تحريره فيصطف خلفه الطلب ويستشري التبديل بعد التحرير. وفي الخوارزميات: الأولى بالورود تخدم بالترتيب فتكبل القصيرة خلف الطويلة عند أول عملية طويلة؛ والأقصر أولًا تقلل متوسطي الانتظار والدوران لأنها لا تترك القصيرة خلف الطويلة، لكنها تقدر الأزمنة من سلوك العمليات السابق فقد تخطئ؛ والتناوب الدائري يمنح كل عملية شريحة متساوية بالمناوبة فلا يحتكر أحد. والشريحة تُختار بين كلفتي التبديل والتأخير: القصيرة جدًا تذيب الوقت في التبديل — وبشريحة ملّي ثانية وكلفة تبديل مثلها يذهب نحو نصف وقت المعالج في التبديل — والطويلة جدًا تؤخر التفاعل فيسوء زمن الاستجابة. وتُضبط الأولويات في نمطين: ثابتة تُحدد يدويًا وتشيع في أنظمة الزمن الحقيقي، وديناميكية ينزل فيها استهلاك المستهلك ويرتفع مع انتظار التفاعلي فور عودته. وإن تأخرت عملية عالية الأولوية من أجل مورد يحتجزه منخفض الأولوية وقع انقلاب الأولوية، ويُعالج بوراثة الأولوية: تستعير المنخفضة أولوية المنتظرة العالية مؤقتًا حتى تحرر المورد فتتقدم.",
+        en: "The processor executes one instruction at a time while ready processes outnumber what it can serve at once, so the scheduler distributes its time under a scheduling policy balancing throughput and response time. The crudest picture is busy waiting: a process spins on its condition until true, burning the processor on nothing productive, whereas the sound picture blocks the process in the wait queue until the event occurs. Processes are organized in two queues: the ready queue of those set to run, and the wait queue of those awaiting an external event; so each process sits in one of three stances toward the processor: runnable, running, or waiting. A running process is preempted when its slice ends or a stronger interrupt arrives, moving execution from its context to another's through a context switch: saving its registers and program counter and restoring the next one's — a transfer with visible cost, since caches flush and the incoming context's first work runs slower. Interrupts divide into hardware ones, like the periodic timer pulse or a device reporting completion, and software ones, like the trap raised by a system call or an execution fault. When an interrupt fires, the process's state is saved and the processor is handed to the handler; the process then resumes or returns to the ready queue for the scheduler to choose again. Policies are judged through lenses: throughput, time to completion per unit time; response time for interactive service; waiting time in queue without execution; and turnaround time from submission to completion. System performance is set by its saturated resource: when one resource exceeds its limits it becomes a bottleneck slowing everything behind it, revealed by computing each resource's utilization and finding what passed one hundred percent. An admissions server handles twenty letters per minute: the lone printer needs four seconds per letter, reaching 133% utilization while the processor sits at 17% and the disk at 10%, so the bottleneck is a printer, not a processor, and the cure is a second printer raising capacity to thirty letters per minute. Around shared resources a convoy effect forms: a process holding a resource is preempted before releasing it, would-be users stack up behind it, and after release each grabs it briefly then rejoins the tail, with switching running rampant. Among algorithms: first-come-first-served serves by arrival and pins short jobs behind the first long one; shortest-job-first cuts both average waiting and turnaround by never leaving the short behind the long, yet it estimates durations from past behavior and can err; round robin grants each process an equal slice in turn so none monopolizes. The slice is chosen between switching cost and delay: too short dissolves time into switching — with a one-millisecond slice and equal switch cost, about half the processor time goes to switching — and too long delays interactivity, worsening response time. Priorities come in two modes: fixed values set by hand, common in hard real-time systems, and dynamic ones where a consumer's priority sinks with use while an awaiting interactive process rises when it returns. If a high-priority process waits on a resource held by a low-priority one, priority inversion occurs, cured by priority inheritance: the low process borrows the waiting high process's priority temporarily until it releases the resource and can proceed."
+      },
+      objectives: [
+        { ar: "تعريف الجدولة وطوابيرها وحالات العملية الثلاث إزاء المعالج.", en: "Define scheduling, its queues and the three processor stances of a process." },
+        { ar: "تتبع تبديل السياق وتفسير كلفته على الذاكرات المؤقتة.", en: "Trace a context switch and explain its cost on caches." },
+        { ar: "التمييز بين المقاطعات العتادية والبرمجية ووصف خطوات خدمتها.", en: "Distinguish hardware from software interrupts and describe their handling." },
+        { ar: "حساب مقاييس الجدولة ومقارنة FCFS وSJF والتناوب الدائري على مثال محسوب.", en: "Compute scheduling metrics and compare FCFS, SJF and round robin on a worked example." },
+        { ar: "تحليل الاختناق بنسب الانشغال وتفسير الأولويات والانقلاب والوراثة.", en: "Analyze bottlenecks via utilization and explain priorities, inversion and inheritance." }
+      ],
+      concepts: [
+        {
+          term: { ar: "المجدول", en: "Scheduler" },
+          def: { ar: "من يقرر أي عملية جاهزة تُمنح المعالج ومتى تُسحب منه، وفق سياسة الجدولة المعتمدة.", en: "The decider of which ready process gets the processor and when it is taken back, under the chosen scheduling policy." }
+        },
+        {
+          term: { ar: "الانتظار المشغول", en: "Busy waiting" },
+          def: { ar: "انتظار تستهلك فيه العملية المعالج في فحص الشرط بدل حجب نفسها في طابور الانتظار حتى يقع الحدث.", en: "Waiting in which the process burns the processor checking a condition instead of blocking in the wait queue until the event." }
+        },
+        {
+          term: { ar: "الشريحة الزمنية", en: "Time quantum" },
+          def: { ar: "المدة التي تعملها العملية في التناوب الدائري قبل استباقها؛ تُوازن بين كلفة التبديل وزمن الاستجابة.", en: "The stretch a process runs in round robin before preemption; balanced between switching cost and response time." }
+        },
+        {
+          term: { ar: "تبديل السياق", en: "Context switch" },
+          def: { ar: "حفظ سياق العملية المغادرة — سجلاتها وعدّاد برنامجها — واستعادة سياق التالية؛ نقل ذو كلفة لأنه يفرغ الذاكرات المؤقتة.", en: "Saving the departing process's context — its registers and program counter — and restoring the next's; a costly transfer that flushes caches." }
+        },
+        {
+          term: { ar: "المقاطعة", en: "Interrupt" },
+          def: { ar: "إشارة توقف المسار الجاري لخدمة حدث: عتادية كمؤقت أو جهاز أنهى عمله، وبرمجية كفخ استدعاء نظام أو خطأ تنفيذ.", en: "A signal halting the current path for an event: hardware like the timer or a finished device, software like a system-call trap or fault." }
+        },
+        {
+          term: { ar: "مقاييس الجدولة", en: "Scheduling metrics" },
+          def: { ar: "الإنتاجية، وزمن الاستجابة، وزمن الانتظار في الطابور، وزمن الدوران من التقديم حتى الاكتمال — عدسات تقييم أي سياسة.", en: "Throughput, response time, queue waiting time and turnaround from submission to completion — lenses for judging any policy." }
+        },
+        {
+          term: { ar: "الاختناق", en: "Bottleneck" },
+          def: { ar: "مورد واحد يتجاوز حده فيصير قيد أداء النظام كله وتنتظر العمليات في طابوره؛ يكشف بحساب نسب انشغال الموارد.", en: "A single resource exceeding its limits, becoming the cap on the whole system with processes queued behind it; revealed by utilization math." }
+        },
+        {
+          term: { ar: "انقلاب الأولوية ووراثتها", en: "Priority inversion & inheritance" },
+          def: { ar: "تأخر عالية الأولوية من أجل مورد يحتجزه منخفض؛ ويعالج بأن تستعير المنخفضة أولوية المنتظرة العالية مؤقتًا حتى تحرر المورد.", en: "A high-priority process delayed by a resource held by a low one; cured by letting the low process borrow the waiting high process's priority until release." }
+        }
+      ],
+      example: {
+        ar: "في معمل حاسبات كلية يستقبل الخادم ثلاثة طلبات وصلت معًا: تجميع مشروع برمجي 10 ثوانٍ، وطباعة كشف حضور ثانيتين، وحفظ تقرير 3 ثوانٍ. الأولى بالورود تنفذها بالوصول فينتظر الطلب الثاني عشر ثوانٍ والثالث اثنتي عشرة، بمتوسط انتظار 7.33 ثانية ودوران 12.33. والأقصر أولًا يقدم الثانيتين ثم الثلاث ثم العشر، فينزل متوسط الانتظار إلى 2.33 والدوران إلى 7.33 لكنه يتوسم الأزمنة من سلوك سابق. والتناوب الدائري بشريحة ثانيتين يمزج التنفيذ: ينتهي القصير في الثانية الرابعة، والثلاثي في التاسعة، والطويل في الخامسة عشرة، بمتوسط انتظار 4.33 ودوران 9.33 — وسط بين الاثنتين مع استجابة تفاعلية أفضل. ولو كان الخادم يطبع خطابات بمعدل أربع ثوانٍ للخطاب و20 خطابًا في الدقيقة، لأنشغل طابعه وحده بنسبة 133% وصار هو الاختناق، ولا يفيد ترقية المعالج شيئًا حتى تضاف طابعة ثانية ترفع الطاقة إلى 30 خطابًا في الدقيقة.",
+        en: "In a college computer lab the server receives three requests arriving together: a 10-second build, a 2-second attendance sheet print, and a 3-second report save. First-come-first-served runs them by arrival, so the second waits ten seconds and the third twelve, averaging 7.33 seconds waiting and 12.33 turnaround. Shortest-job-first runs the two, then the three, then the ten, dropping averages to 2.33 waiting and 7.33 turnaround — but it guesses durations from past behavior. Round robin with a two-second slice interleaves execution: the short finishes at second four, the three-second at nine, the long at fifteen, averaging 4.33 waiting and 9.33 turnaround — between the two, with better interactive response. And were the server printing letters at four seconds each for twenty letters a minute, its lone printer would saturate at 133% and become the bottleneck, where upgrading the processor changes nothing until a second printer raises capacity to thirty letters per minute."
+      },
+      mistakes: [
+        { ar: "معالجة الظاهر لا السبب: ترقية المعالج لمشكلة اختناقها الطابعة أو القرص، والصواب حساب نسب الانشغال وتحديد المورد الذي تجاوز الحد.", en: "Treating the symptom: upgrading a processor for a printer- or disk-bound bottleneck, where the fix is computing utilization and finding the over-limit resource." },
+        { ar: "الظن بأن الأقصر أولًا يعرف الأزمنة مسبقًا؛ هو يتوسمها من السلوك السابق فيخطئ وقد يقدم عملية طويلة ظنها قصيرة.", en: "Believing shortest-job-first knows durations upfront; it estimates from past behavior, can err, and may run a long job it misread as short." },
+        { ar: "اعتبار التناوب الدائري الأفضل في كل المقاييس؛ تقطيع العمل يؤخر انتهاء الطويلة (9.33 مقابل 7.33 في المثال).", en: "Assuming round robin wins every metric; chopping work delays long jobs (9.33 versus 7.33 in the example)." },
+        { ar: "اختيار شريحة قصيرة جدًا: كلفة التبديل تلتهم الوقت — بشريحة وكلفة متساويتين يذهب نحو نصف وقت المعالج في التبديل — أو طويلة جدًا فتسوء الاستجابة.", en: "Choosing a tiny slice so switching eats time — with equal slice and switch cost about half the processor goes to switching — or one so long that response suffers." },
+        { ar: "معاملة الأولوية الثابتة العالية كحق دائم في بيئة عامة، فتفتح باب حرمان الخدمة لمن دونها.", en: "Treating a high fixed priority as a permanent right in a general environment, opening the door to starving everyone below." },
+        { ar: "إغفال انقلاب الأولوية في نظم الأولويات، فيتعطل العمل العالي رغم أولويته بسبب مورد يحتجزه منخفض.", en: "Ignoring priority inversion, leaving high-priority work blocked despite its rank by a resource a low one holds." }
+      ],
+      terminology: [
+        { ar: "المجدول", en: "Scheduler" },
+        { ar: "الشريحة الزمنية", en: "Time quantum" },
+        { ar: "التناوب الدائري", en: "Round robin" },
+        { ar: "الاستباق", en: "Preemption" },
+        { ar: "تبديل السياق", en: "Context switch" },
+        { ar: "المقاطعة", en: "Interrupt" },
+        { ar: "زمن الانتظار", en: "Waiting time" },
+        { ar: "زمن الدوران", en: "Turnaround time" },
+        { ar: "الاختناق", en: "Bottleneck" },
+        { ar: "وراثة الأولوية", en: "Priority inheritance" }
+      ],
+      level: "medium"
+    },
+    memory: {
+      title: {
+        ar: "الفصل 6 · إدارة الذاكرة",
+        en: "Chapter 6 · Memory Management"
+      },
+      explanation: {
+        ar: "لكل عملية فضاء عناوين يخصها يبدأ من الصفر ولا تتجاوز العملية حدوده، ويترجم العتاد عناوينه الافتراضية إلى مواضع حقيقية في شرائح الذاكرة، فلا ترى عملية بيانات جارتها حتى لو انهارت الأخيرة. ويواجه التخصيص مشكلتي تجزئة: الداخلية حين تُمنح العملية كتلة أكبر مما طلبت فيضيع الفرق داخلها، والخارجية حين تتفتت الفراغات بين الكتل المحجوزة فلا يتسع فراغ منها لطلب كبير وإن كفى مجموعها. وتعالج الذاكرة الافتراضية ضيق الذاكرة الفيزيائية بجعل القرص امتدادًا لها: يُقسَّم فضاء العملية إلى صفحات ثابتة الحجم تسكن إطارات مماثلة في الذاكرة أو في منطقة المبادلة على القرص، ويربط جدول الصفحات رقم كل صفحة بإطارها ويحمل بت صلاحية يبين أهي مقيمة الآن أم على القرص. وتحسب الترجمة كما في مثال الكتاب: طلب قراءة العنوان الافتراضي 8196 في نظام حجم صفحاته 4096 بايت؛ رقم الصفحة ناتج القسمة الصحيحة فيساوي 2 والإزاحة الفرق فتساوي 4، فإذا ربط الجدول الصفحة 2 بالإطار 5 كان العنوان الفيزيائي 5×4096+4 أي 20484، وهكذا يرتبط ما يراه المبرمج بالموقع الحقيقي في الشرائح. وإذا كانت الصفحة المطلوبة على القرص وقع خطأ الصفحة: يوقف العتاد التنفيذ ويرفع فخًا إلى النواة تحفظ فيه موضع الطلب، فتجلب النواة الصفحة إلى إطار شاغر — بعد استبدال صفحة إن لزم — وتحدّث جدول الصفحات وتعيد التعليمة نفسها فتنجح. فخطأ الصفحة آلية طبيعية في صميم الذاكرة الافتراضية لا عرض فساد. والأداء رهن سياسة الاستبدال: فإقصاء صفحات ما زالت مطلوبة يستدعي جلبًا متكررًا حتى يقضي النظام معظم وقته في النقل بدل التنفيذ، وهو الثريسنغ الذي يقرأ من المؤشرات: سي/سو في vmstat يعبران عن حركة الصفحات من وإلى المبادلة، وfree و/proc/meminfo يكشفان المتاح والمستهلك. وإذا اشتد الضغط ولم يجد التخصيص مخرجًا قتل النظام أكبر المستهلكين. والمعالجة تبدأ بالتشخيص: هل المستهلك حقيقي أم صفحات غائبة تتقافز؟ ثم الاختيار بين كبح الاستهلاك وتوسيع الذاكرة أو ضبط المبادلة.",
+        en: "Every process owns an address space starting from zero, which it cannot leave, and the hardware translates its virtual addresses into real locations in memory chips, so no process sees a neighbor's data even if that neighbor crashes. Allocation faces two fragmentation troubles: internal, when a process receives a block larger than requested and the excess is lost inside it; and external, when gaps between reserved blocks fragment so no single gap fits a large request though their sum would. Virtual memory addresses physical scarcity by making the disk an extension: a process's space is divided into fixed-size pages living in matching frames in memory or in the swap area on disk, with the page table linking each page number to its frame and carrying a validity bit showing whether it currently resides. Translation follows the book's example: a request to read virtual address 8196 on a system with 4096-byte pages; the page number is integer division, 2, and the offset the remainder, 4; if the table maps page 2 to frame 5 the physical address is 5×4096+4, that is 20484 — linking what the programmer sees to the real location in the chips. If the requested page is on disk, a page fault occurs: the hardware halts execution and raises a trap to the kernel, which saves the request site, brings the page into a free frame — replacing one if needed — updates the page table and re-runs the same instruction, which now succeeds. The fault is a natural mechanism at the heart of virtual memory, not evidence of corruption. Performance hinges on the replacement policy: evicting pages still needed invites repeated fetching until the system spends most of its time in transfer rather than execution — thrashing, read from the indicators: si and so in vmstat express page traffic to and from swap, and free with /proc/meminfo reveal what is available and consumed. If pressure peaks with no way out, the system kills its largest consumers. Treatment starts with diagnosis: is the consumer real or galloping missing pages? Then the choice between curbing consumption and expanding memory or tuning swap."
+      },
+      objectives: [
+        { ar: "شرح فضاء العنونة والحماية بين العمليات.", en: "Explain the address space and protection between processes." },
+        { ar: "التمييز بين التجزئة الداخلية والخارجية.", en: "Distinguish internal from external fragmentation." },
+        { ar: "تتبع ترجمة عنوان افتراضي عبر جدول الصفحات حسابيًا.", en: "Trace a virtual-to-physical translation through the page table arithmetically." },
+        { ar: "تفسير خطأ الصفحة وخطوات خدمته وعلاقته بسياسة الاستبدال.", en: "Explain a page fault, its handling steps and its relation to replacement policy." },
+        { ar: "ربط ضغط الذاكرة والثريسنغ بأدوات المراقبة وقرار المعالجة.", en: "Connect memory pressure and thrashing to monitoring tools and treatment decisions." }
+      ],
+      concepts: [
+        {
+          term: { ar: "فضاء العنونة", en: "Address space" },
+          def: { ar: "مجال العناوين الافتراضية الذي يخص كل عملية ويترجمه العتاد إلى مواضع في الذاكرة، فلا تتجاوز العملية حدوده.", en: "The virtual range belonging to each process, translated by hardware into memory locations, never left by the process." }
+        },
+        {
+          term: { ar: "التجزئة الداخلية والخارجية", en: "Internal & external fragmentation" },
+          def: { ar: "الداخلية ضياع داخل كتلة أكبر من الطلب، والخارجية تفتت الفراغات فلا يتسع فراغ منها لطلب كبير وإن كفى مجموعها.", en: "Internal is waste inside an over-sized block; external is gaps too fragmented for a large request though their sum suffices." }
+        },
+        {
+          term: { ar: "الذاكرة الافتراضية", en: "Virtual memory" },
+          def: { ar: "جعل المتاح أكبر من الذاكن الفيزيائية باستعارة القرص امتدادًا تُخزن فيه الصفحات غير المقيمة.", en: "Making available space exceed physical memory by borrowing the disk as an extension for non-resident pages." }
+        },
+        {
+          term: { ar: "الترحيل إلى الصفحات", en: "Paging" },
+          def: { ar: "تقسيم فضاء العملية إلى صفحات ثابتة الحجم تُخزن في إطارات مماثلة، ويربط جدول الصفحات أرقامها بإطاراتها وبت الصلاحية.", en: "Dividing a process's space into fixed-size pages stored in matching frames, with the page table linking numbers, frames and validity." }
+        },
+        {
+          term: { ar: "خطأ الصفحة", en: "Page fault" },
+          def: { ar: "حدث طبيعي في الذاكرة الافتراضية: المطلوب على القرص فيوقف التنفيذ ويُجلب إلى إطار وتُحدَّث الجدولة ثم تُعاد التعليمة.", en: "A natural virtual-memory event: the target is on disk, so execution halts, the page is fetched, the table updated, and the instruction reruns." }
+        },
+        {
+          term: { ar: "الثريسنغ", en: "Thrashing" },
+          def: { ar: "حالة استبدال سيئ يقضي فيها النظام معظم وقته في جلب الصفحات ونقلها بدل تنفيذ العمليات.", en: "A bad-replacement state where the system spends most time fetching and moving pages rather than executing." }
+        },
+        {
+          term: { ar: "المبادلة", en: "Swap" },
+          def: { ar: "منطقة على القرص تحفظ صفحات العمليات غير المقيمة، وحركتها تُقرأ من مؤشري سي و سو في أدوات النظام.", en: "A disk region holding non-resident pages whose traffic shows as the si/so indicators in system tools." }
+        }
+      ],
+      example: {
+        ar: "برنامج يطلب قراءة العنوان الافتراضي 8196، والصفحات 4096 بايت: رقم الصفحة 2 والإزاحة 4، والجدول يربط الصفحة 2 بالإطار 5 فيهيأ العتاد العنوان 20484 = 5×4096+4. فإذا طلب البرنامج لاحقًا صفحة يعلم جدولها أنها على القرص، توقف التنفيذ وسجل مرجع الصفحة ثم جُلبت من المبادلة إلى إطار حر وعُدل الجدول، وأعيدت التعليمة فنجحت — قراءة عادية تمامًا رغم رحلة القرص. ولو تكرر الجلب لصفحات قريبة الاستخدام كثيرًا حتى صار سي وسو في vmstat يرتفعان باستمرار، فالسياسة ترمي ما يحتاجه النظام وتستدعيه من جديد؛ عندها لا ينقذ التوسيع عشوائيًا بل تُكبَح العمليات المتنفخة ويُضبط حجم المبادلة مع متابعة المستهلكين.",
+        en: "A program requests to read virtual address 8196 with 4096-byte pages: page 2 and offset 4, and with the table mapping page 2 to frame 5 the hardware forms address 20484 = 5×4096+4. If the program later asks for a page its table knows is on disk, execution halts, the page reference is saved, the page is fetched from swap into a free frame, the table adjusted, and the instruction re-run — succeeding as a perfectly ordinary read despite the disk trip. And were fetching to repeat for nearby pages until si and so in vmstat climb steadily, policy would be discarding what the system needs and pulling it back; then the rescue is not random expansion but curbing bloated processes and tuning swap while watching consumers."
+      },
+      mistakes: [
+        { ar: "التعامل مع العنوان الافتراضي كأنه فيزيائي، وحساب الموقع الحقيقي دون المرور على جدول الصفحات ووضع الصفحة.", en: "Treating the virtual address as physical and computing the real location without consulting the page table and page state." },
+        { ar: "عدّ خطأ الصفحة خللًا يستدعي الإصلاح؛ وهو آلية طبيعية لصميم الذاكرة الافتراضية.", en: "Counting a page fault as a fault to fix; it is a natural mechanism at the core of virtual memory." },
+        { ar: "إغفال بت الصلاحية، فيُفسَّر غياب الصفحة عن الذاكرة كأنها مقيمة فيضطرب الفهم.", en: "Overlooking the validity bit, misreading a disk-resident page as resident and muddling the whole picture." },
+        { ar: "استبدال عشوائي يقصي صفحات مطلوبة فيشتد الجلب المتكرر حتى الثريسنغ.", en: "Random replacement evicting still-needed pages until repeated fetching escalates into thrashing." },
+        { ar: "تفسير ثقل النظام كعطل عتاد بينما مؤشرات المبادلة تقول نقص ذاكرة أو ضغطًا من عمليات متنفخة.", en: "Reading system heaviness as a hardware fault while swap indicators say memory scarcity or bloated processes." },
+        { ar: "القفز إلى ترقية الذاكرة قبل قياس: من الأكبر استهلاكًا، وهل الاستهلاك حقيقي أم تذبذب صفحات؟", en: "Jumping to a memory upgrade before measuring: who consumes most, and is it real demand or page churn?" }
+      ],
+      terminology: [
+        { ar: "فضاء العنونة", en: "Address space" },
+        { ar: "الذاكرة الافتراضية", en: "Virtual memory" },
+        { ar: "الصفحة", en: "Page" },
+        { ar: "الإطار", en: "Frame" },
+        { ar: "جدول الصفحات", en: "Page table" },
+        { ar: "خطأ الصفحة", en: "Page fault" },
+        { ar: "المبادلة", en: "Swap" },
+        { ar: "الثريسنغ", en: "Thrashing" },
+        { ar: "التجزئة", en: "Fragmentation" }
+      ],
+      level: "medium"
+    },
+    filesystems: {
+      title: {
+        ar: "الفصل 7 · نظم الملفات",
+        en: "Chapter 7 · File Systems"
+      },
+      explanation: {
+        ar: "يتولى نظام الملفات تنظيم التخزين على الوسائط: للملف اسم يحفظ في مجلد، وبيانات وصفية تحفظ في حرز مستقل يشمل النوع والصلاحيات والمالك والمجموعة والحجم وتواريخ الإنشاء والتعديل وقوائم التحكم بالوصول؛ فاسم الملف نفسه ليس داخل الحرز بل في المجلد. والمجلدات في حقيقتها جداول تربط الأسماء بأرقام الأحراز، فتصل بالاسم إلى الصفات ثم إلى المحتوى. وتُمثَّل المواقع بالمسارات: الجذر يبدأ بـ/ وحده، والمسار المطلق يبدأ منه فيصح أيًا كان موقعك، والنسبي يبدأ من موقعك الحالي وتعمله اختصارات النقطة للمجلد نفسه والنقطتان للأعلى؛ ومسار نسبي مبني على افتراض خاطئ قد يقود أداة أرشفة إلى تدوين مسار غير متوقع عند الفك. ويُدار فضاء التخزين بمخزونين من الخصائص: أحراز حرة وكتل حرة تخصص للملفات الجديدة وتعاد عند الحذف، فلا تتشارك كتلتان ملفين. وعند المشاركة تبرز الملكية والصلاحيات وقواعد اللصق المؤقت التي تكبح الحذف العشوائي في المجلدات العامة. وتختلف الأنظمة في قدراتها وحدودها: فFAT32 يقف عند 4 جيغابايت للملف و8 تيرابايت للقسم ولا يدون التغييرات، وNTFS يبلغ 2 تيرابايت للملف و256 تيرابايت للقسم ويدعم التدوين، وext4 لعائلة Linux يرفع الملف إلى 16 تيرابايت والقسم إلى ما يعادل إكسابايت مع تدوين وتجزئة كتل ومجاميع تحقق. ومعنى التدوين أن يُسجل التغيير المزمَع في منطقة تدوين قبل تطبيقه فيُستكمل أو يُلغى عند انقطاع مفاجئ فتبقى البنية متسقة. وتمتد المشاركة شبكيًا بأنظمة مثل SMB/CIFS لبيئات ويندوز وNFS لبيئات يونكس. ويُقلَّص الحجم بالضغط: بلا فقدان يستعيد الأصل تمامًا، ومع فقدان يقايض الدقة بمساحة أكبر؛ وملف 15738 بايتًا ينزل بـgzip إلى 3230 نحو خُمسه، وبbzip2 إلى 2792 لكنها أبطأ — ولا يُضغط مضغوط جيدًا بلا جدوى. وتجمع الأرشفة ملفات كثيرة في وعاء واحد قبل الضغط. وللنسخ الاحتياطي ما يكفي: النسخة الكاملة أو التزايدية التي تمسك ما تغير فقط، وrsync لعكس شجرة متطابقة.",
+        en: "The file system organizes storage on media: a file's name is kept in a directory, and its metadata in a separate inode covering type, permissions, owner, group, size, creation and modification times and access-control lists; the name itself lives in the directory, not the inode. Directories are in truth tables mapping names to inode numbers, reaching via a name to the attributes and then to the content. Locations are expressed as paths: the root is / alone; an absolute path starts there and works wherever you are, while a relative one starts from the current location using shortcuts — the single dot for the directory itself and the double dot for its parent; a relative path built on a wrong assumption can lead an archiving tool to record an unexpected path on extraction. Storage space is managed through two pools: free inodes and free blocks allocated to new files and returned on deletion, with no block ever shared between two files. Where sharing matters, ownership, permissions and the sticky-bit rule stand out, curbing careless deletion in public directories. Systems differ in capability and limits: FAT32 stops at 4 gigabytes per file and 8 terabytes per partition with no journaling; NTFS reaches 2 terabytes per file and 256 terabytes per partition with journaling; ext4 for the Linux family lifts files to 16 terabytes and partitions to the exabyte range with journaling, block grouping and checksums. Journaling records an intended change in a journal area before applying it, so an abrupt power loss either rolls it forward or back and the structure stays consistent. Sharing extends over networks through systems like SMB/CIFS for Windows environments and NFS for Unix ones. Size is reduced by compression: lossless restores the original exactly, lossy trades precision for more space; a 15738-byte file drops with gzip to 3230, about a fifth, and with bzip2 to 2792 though slower — and compressing the already-compressed wins nothing. Archiving gathers many files into one container before compression. Backups do what suffices: a full copy or an incremental one catching only what changed, and rsync to mirror a matching tree."
+      },
+      objectives: [
+        { ar: "شرح بنية الملف والبيانات الوصفية وعلاقة المجلد بالأحراز.", en: "Explain file structure, metadata and how directories relate to inodes." },
+        { ar: "التمييز بين المسارات المطلقة والنسبية وتفادي أخطاء الأدوات.", en: "Distinguish absolute and relative paths and avoid tooling pitfalls." },
+        { ar: "المقارنة بين نظم الملفات الشائعة وحدودها ودعم التدوين.", en: "Compare common file systems, their limits and journaling support." },
+        { ar: "اختيار ضغط بلا فقدان أو مع فقدان بحسب الغرض وبقراءة الفائدة.", en: "Choose lossless or lossy compression by purpose and read its benefit." },
+        { ar: "شرح الأرشفة والنسخ الاحتياطي التزايدي والعكس المطابق.", en: "Explain archiving, incremental backup and mirroring." }
+      ],
+      concepts: [
+        {
+          term: { ar: "البيانات الوصفية والحرز", en: "Metadata & inode" },
+          def: { ar: "صفات الملف — النوع والصلاحيات والمالك والحجم والتواريخ — تحفظ في حرز؛ والاسم ليس منها بل في المجلد.", en: "A file's attributes — type, permissions, owner, size, dates — kept in an inode; the name is not among them but in the directory." }
+        },
+        {
+          term: { ar: "المجلد", en: "Directory" },
+          def: { ar: "جدول يربط أسماء الملفات والمجلدات بأرقام الأحراز، فيصل بالاسم إلى الصفات ثم إلى المحتوى.", en: "A table mapping file and folder names to inode numbers, connecting a name to attributes and then content." }
+        },
+        {
+          term: { ar: "المسار المطلق والنسبي", en: "Absolute & relative paths" },
+          def: { ar: "المطلق يبدأ من الجذر فيصح من أي موقع، والنسبي يبدأ من موقعك الحالي بالنقطة والنقطتين للتنقل داخل الشجرة.", en: "Absolute starts at the root and works from anywhere; relative starts at your current location using dot and double-dot to move in the tree." }
+        },
+        {
+          term: { ar: "التدوين", en: "Journaling" },
+          def: { ar: "تسجيل التغيير المزمَع قبل تطبيقه، فيُستكمل أو يلغى عند انقطاع مفاجئ وتبقى بنية التخزين متسقة.", en: "Recording an intended change before applying it, so an abrupt loss rolls it forward or back, keeping storage structure consistent." }
+        },
+        {
+          term: { ar: "الضغط بلا فقدان ومع فقدان", en: "Lossless & lossy compression" },
+          def: { ar: "بلا فقدان يستعيد الأصل تمامًا فيصلح لكل البيانات، ومع فقدان يقلص أكثر مقابل دقة أقل ويصلح للوسائط.", en: "Lossless restores the exact original and suits all data; lossy shrinks more by trading precision, suited to media." }
+        },
+        {
+          term: { ar: "الأرشفة", en: "Archiving" },
+          def: { ar: "جمع ملفات كثيرة في وعاء واحد يحفظ أسماءها ومساراتها قبل الضغط أو النقل.", en: "Gathering many files into one container preserving their names and paths before compression or transfer." }
+        },
+        {
+          term: { ar: "النسخ الاحتياطي التزايدي", en: "Incremental backup" },
+          def: { ar: "نسخ ما تغير منذ آخر نسخة فقط، تكملةً لنسخة كاملة أساس؛ وتُعكس الشجرة بـrsync عند الحاجة.", en: "Copying only what changed since the last run atop a baseline full copy; rsync mirrors the tree when matching is needed." }
+        }
+      ],
+      example: {
+        ar: "تقرير بحثي حجمه 15738 بايتًا: ضغطه بـgzip يهبط به إلى 3230 بايتًا أي نحو خُمس حجمه، وbzip2 يبلغ 2792 أضيق لكن أبطأ — فيُختار gzip للاستعمال اليومي السريع وbzip2 للتخزين البعيد القليل الحركة. وقبل إرساله بين نظامين يُجمع في قوس من داخل مجلد المشروع بمسار نسبي لا من جذر القرص، حتى يُفك في الوجهة داخل مجلد نظيف بلا هيكل مفاجئ. ولحفظ إصداراته تُبني سلسلة نسخ تزايدية تمسك كل ليلة ما تغير فقط، ويراجع rsync الشجرة المطابقة للمجلد المؤرشف. أما لو أنشئ خادم ملفات للتدريب فتحسم المواصفات النظام: فمشاركة ملفات تصل قيمتها التيرابايتات لا تصلح مع FAT32، وNTFS وext4 — مع التدوين — خيارا بيئة الإنتاج.",
+        en: "A research report of 15738 bytes: gzip drops it to 3230, about a fifth, and bzip2 reaches 2792 but slower — so gzip suits fast daily use and bzip2 the rarely-touched remote store. Before sending it across systems it is gathered into an archive from inside the project folder with a relative path, not from the disk root, so extraction lands in a clean folder without surprise structure. To keep its versions, an incremental backup chain catches only nightly changes, and rsync reviews the tree mirroring the archived folder. Had a training file server been established, requirements would settle the system: sharing files worth terabytes rules out FAT32, and NTFS with ext4 — both journaling — are the production choices."
+      },
+      mistakes: [
+        { ar: "ظن الاسم محفوظًا في الحرز؛ الاسم في المجلد والحرز يحمل الصفات وحدها.", en: "Believing the name sits in the inode; it lives in the directory while the inode carries attributes only." },
+        { ar: "ضغط ملف مضغوط جيدًا مرة أخرى لاهتمام بلا جدوى، وأرشفة بلا مكسب تضيع الوقت بلا فائدة.", en: "Recompressing an already well-compressed file with no benefit, wasting time on archives that gain nothing." },
+        { ar: "اختيار الضغط مع الفقدان لملفات نصية أو برمجية فيضيع الأصل بلا استرجاع.", en: "Choosing lossy compression for text or code files, losing the original beyond recovery." },
+        { ar: "إنشاء قوس من الجذر بمسارات مطلقة فيتفرخ على نظام الوجهة هيكل غير متوقع.", en: "Archiving from the root with absolute paths, spawning unexpected structure on the receiving system." },
+        { ar: "اعتماد نظام ملفات دون فحص حدوده حاجةً؛ فمشاركة ملفات تيرابايتية لا تصلح مع حدود FAT32.", en: "Adopting a file system without checking its limits against need; terabyte shares do not fit FAT32's ceilings." },
+        { ar: "نسخ احتياطي كامل يوميًا مع فضاء ضيق بينما التزايدي يكفي ويكمل بأمان فوق أساس صحيح.", en: "Running full daily backups into tight space when increments suffice and safely stack atop a correct baseline." }
+      ],
+      terminology: [
+        { ar: "نظام الملفات", en: "File system" },
+        { ar: "البيانات الوصفية", en: "Metadata" },
+        { ar: "الحرز", en: "Inode" },
+        { ar: "المجلد", en: "Directory" },
+        { ar: "المسار المطلق", en: "Absolute path" },
+        { ar: "المسار النسبي", en: "Relative path" },
+        { ar: "التدوين", en: "Journaling" },
+        { ar: "الضغط", en: "Compression" },
+        { ar: "الأرشفة", en: "Archiving" },
+        { ar: "النسخ الاحتياطي", en: "Backup" }
+      ],
+      level: "medium"
+    },
+    linux: {
+      title: {
+        ar: "الفصل 8 · الطرفية: سطر أوامر Linux",
+        en: "Chapter 8 · The Linux Terminal"
+      },
+      explanation: {
+        ar: "الطرفية نافذة تعرض واجهة نصية لتنفيذ الأوامر، يتلقاها الغلاف (Shell) ويفسرها ويتابع تشغيلها، والمحاكيات مثل gnome-terminal وkonsole تؤدي دور المحاكي الطرفي، ومن أشهر الأغلفة bash. وتسبق كل أمر مطالبة تعرض المستخدم واسم الجهاز والمجلد الحالي، وتنتهي بـ$ للمستخدم العادي أو# للمستخدم الجذر — فرق يشير إلى صلاحيات واسعة تفرض حذرًا مضاعفًا. ويتذكر الغلاف ما جرى في الجلسة: يعرضه history، ويعيد تنفيذ أمر برقمه، ويستطيع script أن يدون الجلسة كاملة للمراجعة أو التوثيق. ويبدأ الانتقال المنضبط بمعرفة الموقع: pwd يكشف المسار الحالي قبل أي خطوة. وls يعرض المحتوى، وله خيارات تصنع الفرق: -a لإظهار المخفي و-l للصيغة المطولة و-h بأحجام مقروءة و-t للترتيب الأحدث و-r لعكس الترتيب؛ والصيغة المطولة تكشف النوع والصلاحيات والمالك والحجم وتاريخ التعديل. وتقرأ المسارات قسمين: مطلق يبدأ من الجذر / وينطبق من أي موقع، ونسبي يبدأ من موقعك الحالي، وتفيد النقطة للمجلد نفسه والنقطتان للأعلى وcd ~ للبيت وcd - للعودة إلى آخر موقع. وتحسب Linux حالة الأحرف: Report.txt وreport.txt ملفان مختلفان. وتنجز المهام بأوامر أساسية: mkdir لإنشاء مجلد وtouch لملف فارغ، وcp للنسخ بخيارات مهمة: -a يحفظ الصفات والصلاحيات و-r يعمق في المجلدات و-i يسأل قبل الكتابة فوق موجود و-u ينسخ الأحدث فقط و-v يعلن ما يفعل؛ وmv للنقل أو إعادة التسمية؛ وrm للحذف مع -i لسؤال التأكيد، وrmdir للفراغ وحده بينما rm -r للشجرة كاملة. ويُسنّ الاحتياط قبل الحذف: يتأكد الموقع بـpwd ويُعرض المحتوى بـls ثم يُنظر في صيغة الحذف نفسها، فالنقلة المتهورة واحدة تكفي لمحو عمل أسابيع.",
+        en: "The terminal is a window showing a text interface for running commands, which the shell receives, interprets and tracks; emulators like gnome-terminal and konsole play the terminal-emulator role, and bash is among the best-known shells. Every command is preceded by a prompt showing the user, machine name and current directory, ending in $ for an ordinary user or # for root — a distinction flagging wide privileges that demand double care. The shell remembers the session: history shows it, a number reruns a command, and script can record the whole session for review or documentation. Disciplined navigation starts with knowing where you stand: pwd reveals the current path before any step. ls lists content, and its options make the difference: -a shows hidden entries, -l the long format, -h readable sizes, -t sorts newest first and -r reverses; the long format reveals type, permissions, owner, size and modification time. Paths come in two kinds: absolute, starting from the root / and valid anywhere; and relative, starting from your current spot, with the dot for the directory itself, the double dot for its parent, cd ~ for home and cd - back to the last location. Linux is case-sensitive: Report.txt and report.txt are different files. Tasks are done with fundamental commands: mkdir for a folder and touch for an empty file; cp for copying with options that matter — -a preserves attributes and permissions, -r recurses into folders, -i asks before overwriting, -u copies only newer files and -v announces actions; mv for moving or renaming; rm for deletion with -i asking confirmation, rmdir only for empty folders while rm -r handles a whole tree. Caution precedes deletion: confirm where you are with pwd, display content with ls, then examine the deletion form — one reckless keystroke is enough to erase weeks of work."
+      },
+      objectives: [
+        { ar: "شرح دور الغلاف والمحاكي الطرفي وقراءة دلالة المطالبة وعلامة الصلاحيات.", en: "Explain the shell and terminal emulator and read the prompt and its privilege mark." },
+        { ar: "استعمال التنقل والتحقق من الموقع قبل كل خطوة وبعدها.", en: "Use navigation while verifying location before and after each step." },
+        { ar: "التمييز بين المسار المطلق والنسبي واستعمال الرموز الاختصارية.", en: "Distinguish absolute from relative paths and use the shortcut symbols." },
+        { ar: "استعمال أوامر إنشاء الملفات ونسخها ونقلها بخياراتها المهمة.", en: "Use file creation, copy and move commands with their important options." },
+        { ar: "تنفيذ الحذف المنضبط بشروطه واحتياطاته.", en: "Carry out disciplined deletion with its conditions and precautions." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الغلاف", en: "Shell" },
+          def: { ar: "البرنامج الذي يتلقى الأوامر النصية ويفسرها ويشغّلها ويتابع نتائجها، ومن أشهره bash.", en: "The program receiving text commands, interpreting and running them and tracking results, with bash among the best known." }
+        },
+        {
+          term: { ar: "المحاكي الطرفي", en: "Terminal emulator" },
+          def: { ar: "نافذة تقدم واجهة الطرفية النصية داخل الواجهة الرسومية، مثل gnome-terminal وkonsole، فيعمل الغلاف داخلها.", en: "A window providing the text terminal inside the graphical interface, like gnome-terminal or konsole, hosting the shell." }
+        },
+        {
+          term: { ar: "المطالبة", en: "Prompt" },
+          def: { ar: "سطر يسبق الأوامر ويظهر المستخدم والجهاز والمجلد الحالي وينتهي بـ$ للمستخدم العادي أو# للجذر.", en: "The line preceding commands showing user, machine and current folder, ending in $ for a user or # for root." }
+        },
+        {
+          term: { ar: "المسار المطلق والنسبي", en: "Absolute & relative paths" },
+          def: { ar: "المطلق من الجذر فيصح من أي موقع، والنسبي من الموقع الحالي مع نقطة للمجلد ونقطتين للأعلى.", en: "Absolute from the root, valid anywhere; relative from the current spot with dot and double-dot for folder and parent." }
+        },
+        {
+          term: { ar: "خيارات الأوامر", en: "Command options" },
+          def: { ar: "لواحق تعدل عمل الأمر: في النسخ -a الصفات و-r التعميق و-i السؤال و-u الأحدث و-v الإعلان.", en: "Suffixes modifying a command's behavior: in copy, -a attributes, -r recursion, -i asking, -u newer-only and -v announcements." }
+        },
+        {
+          term: { ar: "الصيغة المطولة", en: "Long format" },
+          def: { ar: "عرض يسرده ls مع -l فيبين النوع والصلاحيات والمالك والحجم وتاريخ التعديل لكل عنصر.", en: "The listing ls shows with -l, revealing type, permissions, owner, size and modification time per entry." }
+        },
+        {
+          term: { ar: "سجل الأوامر", en: "Command history" },
+          def: { ar: "ذاكرة الجلسة التي يعرضها history ويعاد بها تنفيذ أمر برقمه، ويمكن تدوين الجلسة كلها بأداة script.", en: "The session memory shown by history, rerunning a command by number, with the whole session recordable via script." }
+        }
+      ],
+      example: {
+        ar: "طالب ينظم مشروعًا من الطرفية: يتأكد أولًا بـpwd فيجد نفسه في مجلد البيت، ثم ls ليرى ما حوله، وينشئ المشروع mkdir project ويدخله cd project حيث يعرض pwd تأكيد الموقع الجديد؛ وبداخله مجلدان mkdir data docs. ينسخ مسودة قديمة cp -a ../draft.txt data/ ليحفظ صفات الأصل قبل التعديل، ثم يعيد تسميتها mv data/draft.txt data/notes.txt. وقبل حذف ملف تجريبي يتأكد pwd ثم ls data ليرى أن الملف أمامه فعلًا، ثم rm -i data/test.tmp فيسأله النظام فيؤكد. وعند تنظيف مجلد فرعي كامل يتردد أكثر: يعرض محتواه أولًا ثم يحذفه rm -r بعد أن يصير الحالي هو المجلد الأب لا الجذر. وفي آخر الجلسة يستعرض history ليراجع أوامره ثم يوثق سير العمل.",
+        en: "A student organizes a project from the terminal: first pwd confirms the home folder, then ls shows the surroundings; the project is made with mkdir project and entered with cd project, where pwd confirms the new location; inside it two folders appear, mkdir data docs. An older draft is copied with cp -a ../draft.txt data/ to preserve attributes before edits, then renamed with mv data/draft.txt data/notes.txt. Before deleting a test file, pwd is checked, ls data shows the file actually in front, and rm -i data/test.tmp asks and is confirmed. Cleaning a whole subfolder calls for more hesitation: its content is displayed first, then deleted with rm -r only after the current location is the parent folder, never the root. At the session's end history reviews the commands and the work is documented."
+      },
+      mistakes: [
+        { ar: "الحذف من غير تحقق مسبق: بلا pwd يعرف الموقع وبلا ls يرى الهدف؛ ومن هنا تقع أشهر كوارث rm -r.", en: "Deleting without prior checks: no pwd for location, no ls for the target; that is where the classic rm -r disasters are born." },
+        { ar: "ظن أن الأسماء غير حساسة لحالة الأحرف؛ في Linux يختلف report.txt عن Report.txt.", en: "Assuming names ignore letter case; on Linux report.txt differs from Report.txt." },
+        { ar: "الخلط بين المحاكي والغلاف: النافذة تعرض والغلاف يفسر الأوامر ويشغلها.", en: "Mixing up the emulator and the shell: the window displays while the shell interprets and runs commands." },
+        { ar: "العمل من مطالبة الجذر # بلا حاجة، فتصير كل الأوامر واسعة الصلاحيات بلا شبكة أمان.", en: "Working from a root prompt # without need, making every command wide-privileged with no safety net." },
+        { ar: "إسقاط خيارات النسخ المهمة: نسخ بلا -a يفقد الصفات، وبلا -r يتوقف عند المجلدات.", en: "Dropping important copy options: without -a attributes are lost, without -r folders stop the copy." },
+        { ar: "تدوين الجلسات أو حفظ الأوامر بلا مراجعة، فتبقى أخطاء الماضي جاهزة لإعادة التنفيذ.", en: "Recording sessions or saving commands without review, leaving past mistakes primed for reexecution." }
+      ],
+      terminology: [
+        { ar: "الطرفية", en: "Terminal" },
+        { ar: "المحاكي الطرفي", en: "Terminal emulator" },
+        { ar: "الغلاف", en: "Shell" },
+        { ar: "باش", en: "Bash" },
+        { ar: "المطالبة", en: "Prompt" },
+        { ar: "المسار المطلق", en: "Absolute path" },
+        { ar: "المسار النسبي", en: "Relative path" },
+        { ar: "الصيغة المطولة", en: "Long format" },
+        { ar: "سجل الأوامر", en: "Command history" }
+      ],
+      level: "easy"
+    }
+  },
+
+  /* ---- 260210031102 · مبادئ التصميم في الأمن السيبراني · ISE123D course book ---- */
+  "260210031102": {
+    intro: {
+      title: {
+        ar: "الفصل 1 · مقدمة في مبادئ التصميم الأمني",
+        en: "Chapter 1 · Introduction to Security Design Principles"
+      },
+      explanation: {
+        ar: "التصميم الأمني هو بناء الحماية في بنية النظام نفسه منذ المراحل الأولى، لا إلحاقها بعد اكتمال البناء: فكل قرار معماري — كيف تُخزَّن البيانات، ومن يصل إليها، وكيف تتعامل المكونات مع الفشل — إما يضيّق الخسائر المحتملة أو يوسّعها. وتظهر أهمية ذلك عمليًا في كلفة معالجة الأخطاء الأمنية بعد التنفيذ، وفي الثقة التي يكتسبها النظام بإثبات أنه يحمي بيانات مستخدميه، وفي الوفاء بالمتطلبات التنظيمية. وتعمل المبادئ الأساسية كمنظومة واحدة لا كخيارات متفرقة: الدفاع في العمق حتى لا يسقط النظام بسقوط ضابط واحد، وأقل الصلاحيات والفصل بين المهام لاحتواء أثر أي اختراق، والثقة الصفرية التي لا تمنح أي عنصر تسهيلات دائمة بحكم موقعه داخليًا، والفشل الآمن الذي يرفض عند الالتباس بدل أن يخمّن، والخصوصية في التصميم التي لا تجمع من بيانات المستخدمين إلا ما تستلزمه الغاية المعلنة. ويبقى أمام هذه المبادئ تحديات دائمة: تطور أساليب المهاجمين، وتعقيد الأنظمة وتشابك مكوناتها، والموازنة بين الصلابة وسهولة الاستخدام؛ فإن أُهملت الأخيرة تحايل المستخدمون على الضوابط ذاتها.",
+        en: "Security design means building protection into the system's own structure from the earliest stages, not attaching it after construction: every architectural decision — how data is stored, who may reach it, and how components behave on failure — either narrows potential losses or widens them. Its importance shows in the cost of fixing security flaws after deployment, in the trust a system earns by proving it protects its users' data, and in meeting regulatory requirements. The core principles work as one system, not as scattered options: defense in depth so the system does not fall with a single control, least privilege and separation of duties to contain the impact of any breach, zero trust that grants no element permanent conveniences for being internal, fail-safe behavior that denies when ambiguous instead of guessing, and privacy by design that collects nothing beyond the stated purpose. Against these principles stand enduring challenges: attackers' evolving methods, system complexity and interwoven components, and the balance between rigor and usability — neglect the latter and users bypass the controls themselves."
+      },
+      objectives: [
+        { ar: "تعريف التصميم الأمني وتمييزه عن إضافة الضوابط بعد اكتمال البناء.", en: "Define security design and distinguish it from adding controls after construction." },
+        { ar: "تعليل أهمية التصميم الأمني من جهة الكلفة والثقة والامتثال.", en: "Justify the importance of security design in terms of cost, trust and compliance." },
+        { ar: "تعداد المبادئ الأساسية وربط كل مبدأ بالخسارة التي يمنعها.", en: "List the core principles and link each to the loss it prevents." },
+        { ar: "تفسير الافتراض بالاختراق والفشل الآمن عند تصميم خدمة.", en: "Explain assuming breach and fail-safe behavior when designing a service." },
+        { ar: "مناقشة التحديات المعاصرة والموازنة بين الأمن وسهولة الاستخدام.", en: "Discuss modern challenges and the balance between security and usability." }
+      ],
+      concepts: [
+        {
+          term: { ar: "التصميم الأمني", en: "Security design" },
+          def: { ar: "بناء الحماية في بنية النظام وقراراته المعمارية منذ البداية بحيث يصعب الاختراق ويُحتوى أثره إن وقع.", en: "Building protection into a system's structure and architectural decisions from the start, so intrusion is hard and its impact is contained if it happens." }
+        },
+        {
+          term: { ar: "السرية والتكامل والتوافر", en: "Confidentiality, integrity and availability" },
+          def: { ar: "الخصائص الثلاث التي يقاس بها أمن المعلومة: عدم كشفها لغير المصرح، وعدم تغييرها بغير حق، ووصولها عند الحاجة.", en: "The three properties by which information security is measured: no unauthorized disclosure, no unauthorized change, and reachability when needed." }
+        },
+        {
+          term: { ar: "الدفاع في العمق", en: "Defense in depth" },
+          def: { ar: "طبقات متتابعة من الضوابط التقنية والإدارية والبشرية بحيث لا يعتمد الأمن على ضابط واحد مهما قوي.", en: "Successive layers of technical, administrative and human controls so security never rests on one control, however strong." }
+        },
+        {
+          term: { ar: "أقل الصلاحيات", en: "Least privilege" },
+          def: { ar: "منح كل مستخدم وبرنامج أدنى صلاحيات تكفي مهمته، فحتى لو اختُرق الحساب ظل الضرر محدودًا بحدوده.", en: "Granting every user and program the minimum privileges their task needs, so even a compromised account keeps damage within those bounds." }
+        },
+        {
+          term: { ar: "الفصل بين المهام", en: "Separation of duties" },
+          def: { ar: "توزيع خطوات العمل الحساسة على أكثر من جهة بحيث لا يستطيع فرد واحد إتمام عملية حرجة منفردًا.", en: "Splitting sensitive workflow steps across parties so no single individual can complete a critical operation alone." }
+        },
+        {
+          term: { ar: "الثقة الصفرية", en: "Zero trust" },
+          def: { ar: "نهج لا يفترض أمانًا بحكم الموقع، بل يتحقق من كل طلب قبل تنفيذه سواء جاء من داخل الشبكة أو خارجها.", en: "An approach that assumes no safety from location, verifying every request before acting whether it comes from inside the network or outside." }
+        },
+        {
+          term: { ar: "الفشل الآمن", en: "Fail-safe" },
+          def: { ar: "أن يختار النظام عند الالتباس أو العطل الخيار الأكثر أمانًا — كالرفض وإغلاق الوصول — بدل الاستمرار على حساب الحماية.", en: "Behaving, on ambiguity or failure, in the safest way — denying and closing access rather than continuing at security's expense." }
+        }
+      ],
+      example: {
+        ar: "فريق يبني بوابة تسجيل جامعية: بدل أن تمنح واجهة العرض حسابًا واحدًا واسعًا على قاعدة البيانات، تُفصل المسؤوليات فتحصل خدمة العرض على قراءة الجداول الدراسية فقط، وخدمة التسجيل على كتابة محدودة بعد تحقق كامل، وتضاف طبقة تحقق ثانية عند تعديل الدرجات لأنها العملية الأشد حساسية. ويعامل النظام كل طلب داخلي كطلب قادم من خارج الثقة فيتحقق من الجلسة والصلاحية قبل التنفيذ، ويختار عند تعذر التحقق رفض العملية وتسجيلها بدل متابعتها، ولا يجمع في نموذج التسجيل إلا البيانات التي تستلزمها الغاية المعلنة. وحين راجع الفريق قراراته موثقة وجد أن كل مبدأ أغلق منفذ خسارة محددًا: صلاحيات واسعة كانت ستكشف سجلات الطلاب، وتحققًا منخفضًا كان سيسهّل تعديل الدرجات، وبيانات زائدة كانت ستضاعف مسؤولية الحماية بلا سبب.",
+        en: "A team builds a university registration portal: instead of giving the display interface one wide database account, duties are separated — the display service reads academic tables only, the registration service writes in a limited way after full verification, and a second verification layer guards grade changes as the most sensitive operation. Every internal request is treated as coming from outside trust: session and permission are checked before execution, and when verification fails the system denies and logs the operation instead of proceeding; the registration form collects only the data its stated purpose requires. Reviewing its documented decisions, the team sees each principle closed a specific loss path: wide privileges would have exposed student records, weak verification would have eased grade tampering, and excess data would have doubled protection duties for nothing."
+      },
+      mistakes: [
+        { ar: "تأجيل القرارات الأمنية إلى ما بعد اكتمال البناء فتصير ترقيعًا مكلفًا يقاوم التصميم القائم.", en: "Postponing security decisions until construction is done, making them costly patches fighting the existing design." },
+        { ar: "الاعتماد على الإخفاء — إخفاء الخوارزمية أو أسماء الأنظمة — ضابطًا أساسيًا بدل بناء حماية حقيقية.", en: "Relying on obscurity — hiding algorithms or system names — as the main control instead of real protection." },
+        { ar: "تطبيق مبدأ واحد معزولًا وإغفال بقية المبادئ، فيظن الفريق أن الصلاحيات الضيقة تغني عن الدفاع في العمق.", en: "Applying one principle in isolation and ignoring the rest, as if narrow privileges removed the need for defense in depth." },
+        { ar: "إهمال العنصر البشري والعمليات، فتُبنى الضوابط التقنية المحكمة وينسى تدريب من يستخدمها.", en: "Neglecting people and process, building tight technical controls while forgetting to train those who use them." },
+        { ar: "المبالغة في التشديد حتى تضيق سبل العمل المشروع، فيلتف المستخدمون على الضوابط ويبحثوا عن مخارج جانبية.", en: "Over-hardening until legitimate work chokes, pushing users to bypass controls and find side channels." }
+      ],
+      terminology: [
+        { ar: "التصميم الأمني", en: "Security Design" },
+        { ar: "السرية", en: "Confidentiality" },
+        { ar: "التكامل", en: "Integrity" },
+        { ar: "التوافر", en: "Availability" },
+        { ar: "الدفاع في العمق", en: "Defense in Depth" },
+        { ar: "أقل الصلاحيات", en: "Least Privilege" },
+        { ar: "الفصل بين المهام", en: "Separation of Duties" },
+        { ar: "الثقة الصفرية", en: "Zero Trust" },
+        { ar: "الفشل الآمن", en: "Fail-Safe" }
+      ],
+      level: "easy"
+    },
+
+    components: {
+      title: {
+        ar: "الفصل 2 · مكونات التصميم الأمني",
+        en: "Chapter 2 · Security Design Components"
+      },
+      explanation: {
+        ar: "لا تنهض حماية النظام من ضوابط متناثرة تُلحق بكل مكون على حدة، بل من تفاعل مكونات منضبطة عبر هندسة تعكس احتياجات الحماية؛ فالأمن خاصية ناشئة من العلاقة بين المستخدمين والهويات والقرارات والموارد، ولا تكفي جودة الأجزاء منفردة لإنتاجها. وتمتد هذه السلسلة من المصادقة التي تثبت الهوية وتربطها بمنشئها الموثوق، إلى التخويل الذي يقرر ما يُسمح لهذه الهوية بفعله على مورد بعينه، ثم إلى المساءلة التي تربط كل فعل بفاعله عبر سجلات تدقيق لا تغيب عنها واقعة. وإلى جانب سلسلة الوصول يعمل التشفير على حماية البيانات أثناء النقل وفي السكون، بينما يحفظ تكامل البيانات سلامتها فيكشف أي عبث بها عبر أدوات تشفير الاختزال والتوقيعات الرقمية. وتُربط هذه المكونات بنماذج تحكم بالوصول بحسب الحاجة: صلاحيات تقديرية يوزعها المالك، أو قوائم مرجعية مركزية، أو صلاحيات مبنية على الأدوار، مع بقاء الدفاع في العمق ممارسة تشبك هذه الطبقات عبر المكونات لا فكرة نظرية معلقة.",
+        en: "A system's protection does not rise from scattered controls attached to each component alone, but from disciplined components interacting through an architecture that reflects protection needs; security is an emergent property of the relationships among users, identities, decisions and resources, and good parts alone do not produce it. The chain extends from authentication that proves identity and ties it to a trusted source, to authorization deciding what that identity may do with a given resource, to accountability linking every action to its actor through audit records that miss no event. Alongside the access chain, encryption protects data in transit and at rest, while data integrity preserves soundness and reveals tampering through hash functions and digital signatures. These components connect through access-control models suited to the need: discretionary permissions distributed by owners, centralized reference lists, or role-based privileges — with defense in depth remaining a practice that interweaves these layers across components, not a detached idea."
+      },
+      objectives: [
+        { ar: "شرح الأمن خاصية ناشئة من تفاعل المكونات لا من جودة كل جزء منفردًا.", en: "Explain security as an emergent property of component interaction rather than of each part alone." },
+        { ar: "تتبع سلسلة الوصول: مصادقة ثم تخويل ثم مساءلة.", en: "Trace the access chain: authentication, then authorization, then accountability." },
+        { ar: "بيان دور التشفير في حماية البيانات نقلًا وفي السكون.", en: "State encryption's role in protecting data in transit and at rest." },
+        { ar: "توضيح كيف يكشف تكامل البيانات أي تغيير غير مصرح به.", en: "Explain how data integrity reveals unauthorized change." },
+        { ar: "المقارنة بين نماذج التحكم بالوصول بحسب طبيعة الحاجة.", en: "Compare access-control models according to the nature of the need." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الخاصية الناشئة", en: "Emergent property" },
+          def: { ar: "صفة تنتج عن تفاعل أجزاء النظام عبر هندسة منضبطة، ولا توجد في أي جزء منها منفردًا؛ والأمن أبرز مثال عليها.", en: "A quality arising from the interaction of a system's parts through a disciplined architecture, absent from any part alone; security is its clearest example." }
+        },
+        {
+          term: { ar: "المصادقة", en: "Authentication" },
+          def: { ar: "إثبات أن المستخدم أو الجهاز هو من يدّعي أنه هو، عبر ما يعرفه أو يملكه أو صفة فيه، قبل أي تفويض.", en: "Proving a user or device is who it claims to be — via what it knows, holds or is — before any authorization." }
+        },
+        {
+          term: { ar: "التخويل", en: "Authorization" },
+          def: { ar: "قرار يحدد ما يُسمح للهوية المثبتة بفعله على مورد بعينه وما لا يُسمح، فلا يكفي إثبات الهوية للوصول.", en: "The decision defining what a proven identity may and may not do with a given resource; proving identity alone never grants access." }
+        },
+        {
+          term: { ar: "المساءلة وسجل التدقيق", en: "Accountability and audit log" },
+          def: { ar: "ربط كل واقعة بفاعلها عبر سجل محمي غير قابل للتحرير، فيسأل من أخطأ أو تجاوز، وتُراجع القرارات لاحقًا.", en: "Tying every event to its actor through a protected, uneditable record, so whoever errs or oversteps answers for it and decisions can be reviewed later." }
+        },
+        {
+          term: { ar: "التشفير", en: "Encryption" },
+          def: { ar: "تحويل البيانات إلى صورة لا تُقرأ إلا بمفتاحها، فيجري نقله وتخزينه دون أن ينفع اعتراضه أو الوصول إليه.", en: "Turning data into a form readable only with its key, so transport and storage survive interception or access attempts." }
+        },
+        {
+          term: { ar: "تكامل البيانات", en: "Data integrity" },
+          def: { ar: "ضمان أن البيانات لم تتغير بغير إذن، وتُكشف محاولات العبث بأداة تشفير الاختزال أو بالتوقيع الرقمي.", en: "Ensuring data has not changed without permission, with tampering exposed by a hash function or digital signature." }
+        },
+        {
+          term: { ar: "نماذج التحكم بالوصول", en: "Access-control models" },
+          def: { ar: "طرائق تنظيم الأذونات: تقديرية يوزعها المالك، أو قوائم مرجعية مركزية تربط الهويات بالموارد، أو أدوار تجمع الصلاحيات لمن يحمل الدور.", en: "Ways of organizing permissions: discretionary grants from the owner, centralized reference lists binding identities to resources, or roles bundling privileges for whoever holds them." }
+        }
+      ],
+      example: {
+        ar: "داخل بوابة الجامعة يجرب موظف تعديل درجة: أولًا تتحقق المصادقة من هويته عبر دخول موحد، فتُصدر الجهة الموثوقة هويته إلى بوابة الوصول. عندها تقف نقطة القرار أمام الطلب وتسأل: هل دور هذا الموظف يسمح بتعديل درجات هذا المقرر تحديدًا؟ فيسمح القرار أو يرفض قبل أن يلمس الطلب قاعدة البيانات. وإن مضى التعديل إلى التنفيذ سُجلت الواقعة في سجل التدقيق: من عدّل، ومتى، وما القيمة قبل وبعد، وكيف التحقق من الصلاحية. ورحلة الطلب كلها محمية أثناء النقل، وقاعدة البيانات تحفظ سجلاتها بختم تكامل يكشف أي تلاعب لاحق، فتكتمل السلسلة: مصادقة ثم تخويل ثم مساءلة، مدعومة بتشفير وتكامل بيانات.",
+        en: "In a university portal an employee attempts to edit a grade: authentication first proves identity through single sign-on, and the trusted source issues that identity to the access gateway. There the decision point questions the request: does this employee's role permit editing grades in this particular course? The decision allows or denies before the request ever touches the database. If the edit proceeds, the event lands in the audit log: who changed, when, the value before and after, and how permission was verified. The whole journey is protected in transit, and the database seals its records with an integrity stamp that reveals later tampering — completing the chain: authentication, authorization, accountability, backed by encryption and data integrity."
+      },
+      mistakes: [
+        { ar: "الاكتفاء بالمصادقة دون تخويل منضبط: كل من أثبت هويته وجد الطريق مفتوحًا إلى ما لا يخصه.", en: "Stopping at authentication without disciplined authorization: anyone who proves identity finds the way open to what is not theirs." },
+        { ar: "إهمال المساءلة أو ترك سجلات التدقيق قابلة للتحرير والحذف، فيضيع دليل ما وقع ومن فعله.", en: "Neglecting accountability or leaving audit logs editable and deletable, losing evidence of what happened and who did it." },
+        { ar: "حماية البيانات أثناء النقل وإغفالها في السكون أو العكس، فتبقى نسخة مكشوفة تهدم الحماية كلها.", en: "Protecting data in transit while forgetting it at rest, or the reverse, leaving one exposed copy that undoes the whole protection." },
+        { ar: "الخلط بين منع العبث وكشفه؛ فالتوقيع الرقمي يكشف التغيير ولا يمنع وصول من يملك الملف فيزيائيًا.", en: "Confusing tamper prevention with detection; a digital signature reveals change but does not stop whoever physically holds the file." },
+        { ar: "حفظ كلمات المرور بصورة قابلة للاسترجاع أو بتجزئة بلا ملح، فتسقط أهم بيانات المصادقة عند أي تسريب.", en: "Storing passwords recoverably or hashed without salt, so the most critical authentication data falls with any leak." },
+        { ar: "بناء كل الضوابط في طبقة واحدة — البوابة مثلًا — فتصير نقطة الفشل الوحيدة في سلسلة الوصول.", en: "Building all controls into one layer — the gateway, say — turning it into the single point of failure of the access chain." }
+      ],
+      terminology: [
+        { ar: "الخاصية الناشئة", en: "Emergent Property" },
+        { ar: "المصادقة", en: "Authentication" },
+        { ar: "التخويل", en: "Authorization" },
+        { ar: "المساءلة", en: "Accountability" },
+        { ar: "سجل التدقيق", en: "Audit Log" },
+        { ar: "التشفير في السكون", en: "Encryption at Rest" },
+        { ar: "دالة تجزئة آمنة", en: "Secure Hash Function" },
+        { ar: "التوقيع الرقمي", en: "Digital Signature" },
+        { ar: "قائمة مرجعية للوصول", en: "Access Reference List" }
+      ],
+      level: "easy"
+    },
+
+    threats: {
+      title: {
+        ar: "الفصل 3 · نماذج التهديد وتحليل المخاطر وصمود النظم",
+        en: "Chapter 3 · Threat Modeling, Risk Analysis and System Resilience"
+      },
+      explanation: {
+        ar: "لا يكفي أن نعرف أن الهجمات تقع، بل أن نعرف أي خسارة تنتظر أي أصل من أي مصدر وبأي ثغرة: يبدأ تحليل الخطر بتفكيكه إلى عناصره — الأصل الذي يستحق الحماية، والتهديد الذي يستهدفه، والثغرة التي تتيح الوصول إليه، والأثر المترتب على ذلك — فتُبنى القرارات على تصور واضح لا على انطباع عام. وتقدم أدوات منظمة هذا التصور: نموذج التهديد يصف النظام وحدود الثقة ونقاط الاتصال ثم يستنطق ما قد يسوء، وتصنيف سترايد يستعرض الخصائص الست فيسمي كل تهديد بحسب خاصية النظام التي ينتهكها، وتقييم دريد يمنح كل تهديد درجة نسبية وفق الضرر المحتمل وسهولة التكرار وسهولة الاستغلال ومدى الوصول واحتمال الكشف، وشجرة الهجوم ترسم مسارات المهاجم الممكنة فيظهر أخصرها وأخطرها. ولا ينتهي التحليل عند تسمية التهديدات بل يصل إلى قرار مناسب لكل مخاطرة وضمانات تمنح النظام صمودًا في مواجهتها، مع إبقاء عين على الخطر المتبقي بعد المعالجة؛ فهو ما يجب أن يُدار ويُراقب لا أن يُنسى.",
+        en: "Knowing that attacks happen is not enough — the design must know which loss awaits which asset, from which source, through which vulnerability: risk analysis decomposes the hazard into its elements — the asset worth protecting, the threat targeting it, the vulnerability enabling access, and the resulting impact — so decisions rest on a clear picture rather than a general impression. Organized tools provide that picture: threat modeling describes the system, its trust boundaries and connection points and then interrogates what could go wrong; STRIDE classification walks the six properties and names each threat by the property it violates; DREAD scoring gives each threat a relative grade across potential damage, reproducibility, exploitability, reach and discoverability; and an attack tree maps the attacker's possible paths, surfacing the shortest and deadliest. Analysis does not end at naming threats: it reaches a decision for every risk and safeguards that make the system resilient against them, while keeping watch on the residual risk after treatment — the risk to be managed and monitored, never forgotten."
+      },
+      objectives: [
+        { ar: "تفكيك الخسارة إلى أصل وتهديد وثغرة وأثر مترتب.", en: "Decompose loss into asset, threat, vulnerability and resulting impact." },
+        { ar: "بناء نموذج تهديد لنظام بسيط: الحدود ونقاط الاتصال وما قد يسوء.", en: "Build a threat model for a simple system: boundaries, connection points and what could go wrong." },
+        { ar: "تصنيف التهديدات بسترايد حسب خاصية النظام المنتهَكة.", en: "Classify threats with STRIDE by the violated system property." },
+        { ar: "تقدير شدة التهديدات بأسلوب دريد ومقارنتها لترتيب المعالجة.", en: "Grade threats with DREAD and compare them to order treatment." },
+        { ar: "رسم شجرة هجوم وتحديد أخصر مسارات المهاجم وأخطرها.", en: "Draw an attack tree and identify the attacker's shortest and deadliest paths." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الأصل", en: "Asset" },
+          def: { ar: "ما يستحق الحماية فعلًا: بيانات أو خدمة أو سمعة أو قدرة تشغيلية؛ فتحديد الأصول يسبق كل تحليل.", en: "What actually deserves protection: data, service, reputation or operating capability; identifying assets precedes all analysis." }
+        },
+        {
+          term: { ar: "التهديد", en: "Threat" },
+          def: { ar: "ما يمكنه إيقاع الأذى بالأصل عمدًا أو نتيجة إهمال، كالمهاجم الخارجي أو الداخلي أو حتى حدث طبيعي.", en: "Whatever can harm an asset, deliberately or through neglect — an external attacker, an insider, even a natural event." }
+        },
+        {
+          term: { ar: "الثغرة", en: "Vulnerability" },
+          def: { ar: "نقطة ضعف تمنح التهديد منفذًا إلى الأصل: إعداد خاطئ أو برمجية ناقصة التحقق أو ممارسة تشغيلية متراخية.", en: "A weakness giving a threat a gateway to the asset: a misconfiguration, an under-validated piece of software or a lax operational practice." }
+        },
+        {
+          term: { ar: "المخاطرة والخسارة", en: "Risk and loss" },
+          def: { ar: "اجتماع تهديد بثغرة على أصل فينتج أثر محتمل؛ وحجم الخسارة هو ما يحدد أولوية المعالجة لا عدد التهديدات.", en: "A threat meeting a vulnerability on an asset, producing potential impact; the size of the loss, not the count of threats, sets treatment priority." }
+        },
+        {
+          term: { ar: "نموذج التهديد", en: "Threat model" },
+          def: { ar: "وصف منظم للنظام وحدود الثقة ونقاط الاتصال ومسارات البيانات، يُستنطق منه ما قد يسوء قبل التنفيذ لا بعده.", en: "An organized description of the system, trust boundaries, connection points and data paths, interrogated for what could go wrong before implementation, not after." }
+        },
+        {
+          term: { ar: "تصنيف سترايد", en: "STRIDE" },
+          def: { ar: "ست خصائص ينتهكها التهديد: انتحال الهوية، العبث بالبيانات، إنكار الفعل، كشف المعلومات، حجب الخدمة، ورفع الصلاحيات.", en: "Six properties a threat can violate: spoofing, tampering, repudiation, information disclosure, denial of service and elevation of privilege." }
+        },
+        {
+          term: { ar: "تقييم دريد", en: "DREAD" },
+          def: { ar: "درجة نسبية لكل تهديد من خمس زوايا: الضرر، والتكرار، والاستغلال، والوصول، والكشف؛ ترتب المعالجة دون ادعاء دقة مطلقة.", en: "A relative grade per threat across five angles — damage, reproducibility, exploitability, reach and discoverability — ordering treatment without claiming absolute precision." }
+        },
+        {
+          term: { ar: "شجرة الهجوم", en: "Attack tree" },
+          def: { ar: "تمثيل شجري لغاية المهاجم تتفرع فيه السبل الممكنة للوصول إليها، فتظهر المسارات الأقصر والأرخص عليه.", en: "A tree representation of the attacker's goal branching into possible paths, revealing the shortest and cheapest routes to it." }
+        },
+        {
+          term: { ar: "المخاطر المتبقية", en: "Residual risk" },
+          def: { ar: "ما يبقى بعد تطبيق الضوابط؛ يُوثق ويقبل صراحة أو تعالج مكوناته ويظل تحت المراقبة.", en: "What remains after controls are applied; documented and explicitly accepted, or further treated, and always monitored." }
+        }
+      ],
+      example: {
+        ar: "فريق أمن في تطبيق تحويلات مالية يرسم نموذجه: الأصل هو قاعدة الحسابات وسجل التحويلات، والمصادر تشمل مهاجمًا خارجيًا وموظفًا داخليًا، ونقاط الاتصال هي تطبيق الجوال وواجهة الويب ولوحة الموظفين. بسترايد يسمي التهديدات: انتحال جلسة موظف (Spoofing)، وتعديل مبلغ التحويل قبل الإرسال (Tampering)، وإنكار إجراء تحويل (Repudiation)، وتسرب أرقام الحسابات (Information disclosure)، وإغراق الواجهة (Denial of service)، وترقية صلاحيات مستخدم عادي (Elevation). تجمع دريد درجاتها فتظهر ثغرة انتحال الجلسة الأعلى ضررًا لسهولة إعادة استخدام رمز مسروق، وترسم شجرة الهجوم مسارين لتحويل غير مصرح به: سرقة جلسة الموظف أو استغلال واجهة قديمة بلا تحقق ثانٍ. القرار: تحقق ثانٍ للتحويلات الكبيرة، وحدود يومية للمبالغ، وإيقاف الواجهة القديمة، مع توثيق خطر متبقٍ منخفض من إعادة استخدام الرموز يُراقب سلوكيًا.",
+        en: "A security team at a money-transfer app drafts its model: the assets are the accounts database and the transfer ledger, sources include an external attacker and an insider, and connection points are the mobile app, the web interface and the staff console. STRIDE names the threats: spoofing a staff session, tampering with a transfer amount before submission, repudiation of an executed transfer, disclosure of account numbers, denial of service on the interface, and elevation from an ordinary user account. DREAD totals reveal the session-spoofing flaw as the gravest for how easily a stolen token is reused, and the attack tree draws two paths to an unauthorized transfer: hijacking a staff session or exploiting the old interface with no second check. The decisions follow: a second verification for large transfers, daily amount limits, shutting the old interface down — and a documented low residual risk from token reuse kept under behavioral monitoring."
+      },
+      mistakes: [
+        { ar: "تحليل تهديدات عام مقتضب بلا أصول محددة ولا نقاط اتصال مرسومة، فلا ينتج عنه قرار قابل للتنفيذ.", en: "A vague threat analysis with no identified assets or drawn connection points, yielding no actionable decision." },
+        { ar: "إغفال العنصر البشري والتهديدات الداخلية، مع أنهما مصدر متكرر للخسائر.", en: "Ignoring people and insider threats although they are a recurring source of loss." },
+        { ar: "الخلط بين التهديد والثغرة وبين المخاطرة والأثر، فيختل ترتيب الأولويات كله.", en: "Confusing threat with vulnerability and risk with impact, derailing the whole priority order." },
+        { ar: "الاكتفاء بتسمية التهديدات بلا قرار لكل مخاطرة وبلا ضوابط تلزم الفريق.", en: "Naming threats without a decision per risk and without controls that bind the team." },
+        { ar: "إجراء التحليل مرة واحدة وتجميده رغم تغير النظام وواجهاته وبياناته.", en: "Performing the analysis once and freezing it while the system, its interfaces and data change." },
+        { ar: "ترتيب الإصلاحات بالانطباع أو بالضجيج الإعلامي بدل الدرجة المحسوبة وحجم الخسارة.", en: "Ordering fixes by impression or news noise instead of computed score and loss size." }
+      ],
+      terminology: [
+        { ar: "الأصل", en: "Asset" },
+        { ar: "التهديد", en: "Threat" },
+        { ar: "الثغرة", en: "Vulnerability" },
+        { ar: "المخاطرة", en: "Risk" },
+        { ar: "نموذج التهديد", en: "Threat Model" },
+        { ar: "تصنيف سترايد", en: "STRIDE" },
+        { ar: "تقييم دريد", en: "DREAD" },
+        { ar: "شجرة الهجوم", en: "Attack Tree" },
+        { ar: "المخاطر المتبقية", en: "Residual Risk" }
+      ],
+      level: "medium"
+    },
+
+    resilience: {
+      title: {
+        ar: "الفصل 4 · مبادئ التصميم المقاومة للهجمات السيبرانية",
+        en: "Chapter 4 · Attack-Resistant Design Principles"
+      },
+      explanation: {
+        ar: "لكل خسارة يمكن تصورها ترتيب معالجة يجب أن يُحترم: القضاء على الخسارة أصلًا حين يمكن — بإزالة الوظيفة الخطرة أو البيانات غير اللازمة — أقوى من أي ضابط يلحق بعدها، فإن تعذر ذلك نزلنا إلى تقليل الخسارة بقرارات تقلص أثر الواقعة حتى تحتويها. ثم تأتي الضوابط الهندسية التي تفرض السياسة في صميم البنية، وتليها الرؤية والمراقبة التي تكشف ما تسلل فتكسب وقت الاستجابة، وتُختم بالضوابط الإدارية والإجراءات والتدريب التي تسند ما بُني. ومن هنا تتفرع القرارات العملية: إغلاق كل وظيفة لا تحتاجها الخدمة، فما لا يعمل لا يُستغل؛ وتقليص سطح الهجوم فلا تُعرض إلا نقاط الاتصال الضرورية؛ والتحصين والإعدادات الافتراضية الآمنة التي تجعل الطريق الأسوأ غير متاح ابتداءً؛ والحواجز والعزل الذي يفصل المكونات الحساسة عن غيرها بحيث لا تنتقل العدوى بينها؛ وضمانات توافر وموثوقية تواجه الفشل والتخريب بالتكرار والاحتياط والتوزيع بدل أن تتفرج على الخدمة وهي تسقط.",
+        en: "Every conceivable loss has an order of treatment that must be respected: eliminating it outright when possible — removing the dangerous function or unneeded data — beats any control added later; failing that, we descend to reducing the loss with decisions that shrink an event's impact until it is contained. Next come engineering controls embedding policy into the structure itself, then visibility and monitoring that expose whatever slipped through and buy response time, sealed by administrative controls, procedures and training that shore up what was built. Practical decisions branch from there: closing every function the service does not need, since what does not run cannot be exploited; shrinking the attack surface so only necessary connection points are exposed; hardening and secure defaults that make the worst path unavailable from the start; barriers and isolation separating sensitive components from the rest so contagion cannot spread between them; and availability and reliability guarantees meeting failure and sabotage with redundancy, backups and distribution instead of watching the service fall."
+      },
+      objectives: [
+        { ar: "ترتيب بدائل التصميم بحسب قوتها: القضاء ثم التقليل فالضوابط فالرؤية فالإجراءات.", en: "Order design alternatives by strength: elimination, reduction, controls, visibility, procedures." },
+        { ar: "تطبيق مبدأ أقل وظيفة وإغلاق كل ما لا تحتاجه الخدمة.", en: "Apply least functionality and close everything the service does not need." },
+        { ar: "تقليص سطح الهجوم وتعداد نقاط الاتصال وحدود الثقة.", en: "Shrink the attack surface and enumerate connection points and trust boundaries." },
+        { ar: "تصميم حواجز وعزل بين المكونات الحساسة وغيرها.", en: "Design barriers and isolation between sensitive components and the rest." },
+        { ar: "بناء ضمانات توافر وموثوقية: تكرار واحتياط واستجابة للفشل.", en: "Build availability and reliability guarantees: redundancy, backups and failure response." }
+      ],
+      concepts: [
+        {
+          term: { ar: "القضاء على الخسارة", en: "Loss elimination" },
+          def: { ar: "إزالة السبب نفسه: لا نحتفظ بالبيانات التي لا تلزم ولا الوظيفة الخطرة التي لا تُستعمل، فلا تبقى خسارة تُدار.", en: "Removing the cause itself: data that is not needed and dangerous functions that go unused are dropped, leaving no loss to manage." }
+        },
+        {
+          term: { ar: "تقليل الخسارة", en: "Loss reduction" },
+          def: { ar: "حين يتعذر القضاء تقلص القرارات حجم الأثر المحتمل وتحدده بحدود ضيقة يمكن احتمالها.", en: "When elimination is impossible, decisions shrink the potential impact and bound it within tolerable limits." }
+        },
+        {
+          term: { ar: "أقل وظيفة", en: "Least functionality" },
+          def: { ar: "ألا تعمل الخدمة إلا بما تحتاجه مهمتها فعلًا؛ فكل خدمة أو منفذ أو حساب إضافي باب مفتوح لا حاجة له.", en: "A service runs only what its task truly needs; every extra service, port or account is an unneeded open door." }
+        },
+        {
+          term: { ar: "سطح الهجوم", en: "Attack surface" },
+          def: { ar: "مجموع نقاط الاتصال والواجهات والحسابات التي يمكن لمهاجم أن يجربها؛ تقليصه قرار تصميم لا مهمة تشغيل.", en: "The sum of connection points, interfaces and accounts an attacker can try; shrinking it is a design decision, not an operational chore." }
+        },
+        {
+          term: { ar: "التحصين والإعدادات الافتراضية الآمنة", en: "Hardening and secure defaults" },
+          def: { ar: "ضبط المكونات على أضيق حالاتها المقبولة: تعطيل غير اللازم، وتغيير الافتراضي الضعيف، وإغلاق المسارات الخطرة من الأصل.", en: "Tuning components to their narrowest acceptable state: disabling the unneeded, replacing weak defaults, closing dangerous paths from the outset." }
+        },
+        {
+          term: { ar: "الحواجز والعزل", en: "Barriers and isolation" },
+          def: { ar: "فصل المكونات في نطاقات مستقلة بحيث يبقى اختراق إحداها محصورًا فيها ولا يمتد إلى ما هو أشد حساسية.", en: "Separating components into independent zones so a breach of one stays confined and never reaches the more sensitive." }
+        },
+        {
+          term: { ar: "التوافر", en: "Availability" },
+          def: { ar: "بقاء الخدمة متاحة عند الحاجة حتى في وجه الفشل أو الضغط أو التخريب، بتصميم يصمد لا بأمنيات.", en: "The service staying reachable when needed even under failure, load or sabotage — by design that endures, not by wishful thinking." }
+        },
+        {
+          term: { ar: "الموثوقية والاحتياط", en: "Reliability and redundancy" },
+          def: { ar: "تكرار المكونات ونسخ البيانات واختبار الاستعادة بحيث لا تحمل نسخة واحدة مصير العمل كله.", en: "Duplicating components, copying data and testing restoration so no single copy carries the fate of the whole operation." }
+        }
+      ],
+      example: {
+        ar: "متجر إلكتروني صغير يعيد فريق تقنيته أمنيًا بالترتيب: أولًا القضاء — أُزيلت ميزة استقبال بطاقات الدفع القديمة واستغني عن تخزين بياناتها فاختفت خسارتها كلها. ثم التقليل — حُدد مبلغ أدنى للطلبات المشبوهة وربطت التحويلات بقائمة متاجر موثوقة. ثم الضوابط الهندسية — أُغلقت كل الخدمات والمنافذ غير المستخدمة، وحُصر الوصول إلى قاعدة البيانات في شبكة داخلية لا تصلها الإنترنت مباشرة، فوُضعت واجهة العرض والدفع معزولتين عن قاعدة البيانات بحاجز يمر عبره التطبيق فقط. ثم الرؤية — شُغلت مراقبة للسجلات وتنبيهات للسلوك غير المعتاد. وأخيرًا الإجراءات — صورة نظام قياسية مفحوصة تُنشر بها الخوادم، ونسخ احتياطية تُحفظ بعيدًا وتُختبر استعادتها دوريًا لضمان التوافر.",
+        en: "A small online store rebuilds its security in order: elimination first — the outdated card-processing feature was removed and its stored data dropped, erasing that entire loss. Reduction next — suspicious orders got a minimum threshold and transfers were tied to a list of trusted merchants. Then engineering controls — every unused service and port was closed, and database access was confined to an internal network unreachable from the internet, leaving the display and payment faces isolated behind a barrier crossed only by the application. Visibility followed — log monitoring and unusual-behavior alerts were switched on. Finally procedures — servers deploy from one audited standard image, and backups stored offsite have their restoration tested regularly to keep availability real."
+      },
+      mistakes: [
+        { ar: "الاعتماد على ضابط واحد بالغ القوة بدل ترتيب البدائل: جدار ناري واحد لا يقاوم خسارة متعددة الأوجه.", en: "Relying on one overwhelmingly strong control instead of the ordered alternatives: a single firewall cannot resist a multi-sided loss." },
+        { ar: "إبقاء خدمات ووظائف وحسابات لا تحتاجها الخدمة، فكل إضافتها باب جديد يقفله التصميم المتين.", en: "Keeping services, functions and accounts the service does not need, each extra one a new door solid design would have sealed." },
+        { ar: "ترك الإعدادات الافتراضية الضعيفة أو بيانات اعتماد المصنع في هذه الأجهزة أو الأنظمة.", en: "Leaving weak defaults or factory credentials on devices and systems." },
+        { ar: "وضع كل المكونات في نطاق واحد؛ فيكفي سقوط طرف واحد حتى تنتشر الخسارة للأصل الثمين.", en: "Putting every component in one zone; a single fallen endpoint spreads the loss to the precious asset." },
+        { ar: "نسخ احتياطية لا تُختبر استعادتها أو تُحفظ في المكان نفسه، فلا تنفع عند الحاجة.", en: "Backups never test-restored or kept in the same place, useless when the moment comes." },
+        { ar: "إغفال المراقبة والرؤية، فتمر الهجمات بلا كشف حتى يترسخ الضرر.", en: "Neglecting monitoring and visibility, letting attacks pass undetected until damage sets in." },
+        { ar: "افتراض أن الفشل لن يقع، وبناء الخدمة بلا أي ضمان تكرار أو استجابة.", en: "Assuming failure will not happen and building with no redundancy or response guarantee." }
+      ],
+      terminology: [
+        { ar: "القضاء على الخسارة", en: "Loss Elimination" },
+        { ar: "تقليل الخسارة", en: "Loss Reduction" },
+        { ar: "أقل وظيفة", en: "Least Functionality" },
+        { ar: "سطح الهجوم", en: "Attack Surface" },
+        { ar: "التحصين", en: "Hardening" },
+        { ar: "الإعدادات الافتراضية الآمنة", en: "Secure Defaults" },
+        { ar: "الحواجز والعزل", en: "Barriers and Isolation" },
+        { ar: "التوافر", en: "Availability" },
+        { ar: "الموثوقية", en: "Reliability" }
+      ],
+      level: "medium"
+    },
+
+    software: {
+      title: {
+        ar: "الفصل 5 · أمان البرمجيات وواجهات المستخدم وإدارة الأخطاء",
+        en: "Chapter 5 · Software Security, User Interfaces and Error Handling"
+      },
+      explanation: {
+        ar: "الأمن في البرمجيات قرار يُتخذ على امتداد دورة تطويرها لا فحص يلحق في آخرها: مراجعة التصميم الأمني تقيّم البدائل المعمارية قبل التنفيذ وتختار ما يعزل المكونات الحساسة، مثل فصل وصول قاعدة البيانات عن واجهة العرض بحيث لا تملك الواجهة إلا ما يخصها. وتُوثق قرارات التصميم مربوطة بمتطلبات النظام وتعريفات الواجهات ونتائج التحليل وطرق التحقق، فيظل أثر كل قرار واضحًا لمن يراجع لاحقًا. وعلى مستوى التنفيذ تعمل أقل الصلاحيات داخل المكونات نفسها؛ ومن أكثر الأخطاء شيوعًا أن يُمنح حساب التطبيق صلاحيات مالك قاعدة البيانات كاملة، فيكفي أن تسقط نقطة واحدة ليملك المهاجم كل شيء، والعلاج أن يقتصر الحساب على القراءة أو الكتابة في الجداول التي تلزمه فقط. وتُدار الأسرار البرمجية — كلمات المرور والمفاتيح — خارج الشفرة المصدرية ومنفصلة عن المستودعات، وأعمالًا بالخصوصية في التنفيذ لا يُطلب من المستخدم إلا ما تستلزمه الغاية المعلنة. أما الواجهة فهي أكثر ما يلامس المستخدم خطرًا: تحقق من المدخلات قبل الاعتماد عليها، وترميز للمخرجات يمتص محاولات حقن الشيفرات، ورسائل خطأ تصف التعذر دون أن تفصح عن تفاصيل النظام، وجلسات تنتهي بموعدها. وتكتمل الصورة بإدارة الأخطاء: تسجيل ومراقبة يكشفان الحوادث مبكرًا مع حفظ خصوصية بيانات السجل، ومسار واضح للتعامل مع الحادثة إذا وقعت.",
+        en: "Security in software is a decision taken along the whole development lifecycle, not a check appended at its end: a security design review evaluates architectural alternatives before implementation and chooses what isolates sensitive components — separating database access from the display interface so the interface holds only what is its own. Design decisions are documented and tied to system requirements, interface definitions, analysis results and verification methods, keeping each decision's effect clear for later reviewers. At implementation level least privilege works inside the components themselves; among the most common errors is granting the application account full database-owner rights, so one fallen point hands the attacker everything — the cure is limiting the account to reading or writing only the tables it needs. Program secrets — passwords and keys — are managed outside the source code and away from repositories, and privacy in implementation asks users for nothing beyond the stated purpose. The interface is where the user meets the most risk: inputs are validated before being trusted, outputs are encoded to absorb code-injection attempts, error messages describe the failure without revealing system detail, and sessions expire on schedule. Error handling completes the picture: logging and monitoring that surface incidents early while respecting log-data privacy, and a clear path for responding when an incident lands."
+      },
+      objectives: [
+        { ar: "شرح دور مراجعة التصميم الأمني قبل التنفيذ واختيار البدائل الأكثر عزلًا.", en: "Explain the role of security design review before implementation and choosing the most isolating alternatives." },
+        { ar: "توثيق قرارات التصميم مربوطة بمتطلباتها ونتائج تحليلها وطرق التحقق منها.", en: "Document design decisions tied to their requirements, analysis results and verification methods." },
+        { ar: "تطبيق أقل الصلاحيات على حسابات المكونات والخدمات.", en: "Apply least privilege to component and service accounts." },
+        { ar: "إدارة الأسرار البرمجية خارج الشفرة المصدرية والمستودعات.", en: "Manage program secrets outside source code and repositories." },
+        { ar: "تصميم واجهة مستخدم آمنة: تحقق وترميز ورسائل خطأ وجلسات.", en: "Design a secure user interface: validation, encoding, error messages and sessions." },
+        { ar: "بناء مسار لإدارة الأخطاء من التسجيل حتى معالجة الحوادث.", en: "Build an error-management path from logging to incident handling." }
+      ],
+      concepts: [
+        {
+          term: { ar: "مراجعة التصميم الأمني", en: "Security design review" },
+          def: { ar: "فحص منهجي للبدائل المعمارية قبل كتابة الشيفرة، يختار ما يقلص الخسائر ويرفض ما يوسعها ولو كان أسهل تنفيذًا.", en: "A systematic examination of architectural alternatives before coding, choosing what narrows losses and rejecting what widens them even if easier to build." }
+        },
+        {
+          term: { ar: "توثيق قرارات التصميم", en: "Design decision records" },
+          def: { ar: "تدوين القرار وسببه وربطه بالمقتضيات ونتائج التحليل وطريقة التحقق، فيصمد القرار أمام المراجعات ويتحسن لاحقًا.", en: "Recording the decision, its reason and its links to requirements, analysis results and verification, so it withstands reviews and improves later." }
+        },
+        {
+          term: { ar: "صلاحيات حساب التطبيق", en: "Application account privileges" },
+          def: { ar: "ما يُسمح لخدمة النظام بفعله في البيانات؛ تكون بحدها الأدنى: قراءة أو كتابة في الجداول المطلوبة فقط لا ملكية كاملة.", en: "What a system service may do with data; kept minimal: reading or writing only the required tables, never full ownership." }
+        },
+        {
+          term: { ar: "الأسرار البرمجية", en: "Program secrets" },
+          def: { ar: "كلمات المرور والمفاتيح ورموز الوصول؛ تُحفظ وتُدار خارج الشفرة وخارج المستودعات، وتدور عند الاشتباه.", en: "Passwords, keys and access tokens; stored and managed outside code and repositories, and rotated on suspicion." }
+        },
+        {
+          term: { ar: "تحقق المدخلات", en: "Input validation" },
+          def: { ar: "التأكد من مطابقة ما يصل من المستخدم للشكل والمجال والحدود المسموحة قبل الاعتماد عليه في أي معالجة.", en: "Confirming what arrives from the user matches the allowed shape, range and limits before it is trusted in any processing." }
+        },
+        {
+          term: { ar: "ترميز المخرجات", en: "Output encoding" },
+          def: { ar: "تحويل النص قبل عرضه بحيث يُفهم كبيانات لا كشيفرة، فلا ينفذ ما يحاول مهاجم حقنه في الصفحة.", en: "Transforming text before display so it is read as data, not code, and nothing an attacker injected into the page executes." }
+        },
+        {
+          term: { ar: "رسائل الخطأ الآمنة", en: "Safe error messages" },
+          def: { ar: "تصف للمستخدم أن العملية تعذرت وتحيل لرمز مرجعي، مع حفظ التفاصيل التقنية في السجلات لا في الشاشة.", en: "Telling the user the operation failed with a reference code, keeping technical detail in the logs rather than on screen." }
+        },
+        {
+          term: { ar: "إدارة الجلسات", en: "Session management" },
+          def: { ar: "إصدار معرف جلسة عشوائي وحمايته، وانتهاؤه بانتهاء المهلة أو تسجيل الخروج أو تغير الصلاحية.", en: "Issuing a random session identifier, shielding it, and expiring it on timeout, logout or privilege change." }
+        },
+        {
+          term: { ar: "التسجيل والاستجابة للحوادث", en: "Logging and incident response" },
+          def: { ar: "تسجيل الوقائع المهمة دون أسرار أو بيانات شخصية زائدة، مع خطة واضحة: كشف ثم احتواء ثم استئصال ثم استخلاص الدروس.", en: "Recording meaningful events without secrets or excess personal data, with a clear plan: detect, contain, eradicate, then learn." }
+        }
+      ],
+      example: {
+        ar: "تطبيق توظيف يعرض الوظائف ويستقبل الطلبات: في مراجعة التصميم اختير بديل يفصل أشد ما يمكن: خدمة العرض تعمل على قاعدة قراءة فقط، فلا تستطيع الكتابة حتى لو أُدخل فيها عيب. نموذج التقديم لا يسأل عن رقم الهوية الوطنية لأن الغاية لا تستلزمه، ورسائل الأخطاء تقول «تعذر إتمام الطلب، الرمز 4027» وتترك تفاصيل الاستعلام للسجلات. وأثناء تدقيق لاحق اكتُشف أن حساب الخدمة رُقي مؤقتًا لمعالجة مشكلة ترحيل قديمة فبقي مالكًا للقاعدة؛ أُعيد إلى صلاحيات قراءة وكتابة محدودة بجداول الطلبات، ووُثق القرار في سجل القرارات مع تاريخه وسببه. المفاتيح جمعت في مدير أسرار يُدار خارج المستودع، والجلسات تنتهي بعد خمول، وكل حادثة دخول فاشل متكرر تظهر في المراقبة مع مسار استجابة مكتوب.",
+        en: "A hiring app lists jobs and receives applications: the design review chose the most separating alternative — the display service runs on a read-only database, so it cannot write even if a flaw is introduced. The application form never asks for a national identity number because the purpose does not require it, and error messages say «The request could not be completed, reference 4027» while query detail stays in the logs. A later audit found the service account had been temporarily elevated for an old migration and left as database owner; it was returned to read-write privileges limited to the applications tables, and the decision was recorded with its date and reason. Keys were consolidated in a secrets manager kept outside the repository, sessions expire after inactivity, and bursts of failed logins surface in monitoring alongside a written response path."
+      },
+      mistakes: [
+        { ar: "منح حساب التطبيق صلاحيات مالك قاعدة البيانات مؤقتًا لأمر عارض ثم نسيانها مفتوحة.", en: "Granting the application database-owner rights temporarily for one errand and forgetting them open." },
+        { ar: "حفظ الأسرار — كلمات المرور ومفاتيح الواجهات — في الشيفرة أو المستودع نفسه.", en: "Keeping secrets — passwords and API keys — inside the code or the repository itself." },
+        { ar: "رسائل خطأ تفصح عن بنية النظام أو نص الاستعلامات، فتفتح للمهاجم بابًا للتجربة.", en: "Error messages exposing system structure or query text, opening an attacker's practice door." },
+        { ar: "نسيان ترميز المخرجات فتُعرض مدخلات المستخدم كما هي وتنفذ الشيفرة المحقونة في المتصفح.", en: "Forgetting output encoding, so user input is displayed raw and injected code runs in the browser." },
+        { ar: "جلسات بلا انتهاء أو بلا تجديد آمن بعد تغير الدور، فتبقى صلاحية قديمة صالحة للعمل.", en: "Sessions that never expire or never renew safely after a role change, leaving stale privileges alive." },
+        { ar: "جمع بيانات شخصية احتياطية بلا غاية معلنة، فيتنامى عبء الحماية والمسؤولية بلا داعٍ.", en: "Collecting extra personal data for the future with no stated purpose, needlessly growing the burden of protection and liability." },
+        { ar: "تسجيل الأسرار أو البيانات الشخصية كاملة في ملفات السجلات، فيصير السجل نفسه مصدر خسارة.", en: "Logging secrets or full personal data, turning the log itself into a loss source." }
+      ],
+      terminology: [
+        { ar: "مراجعة التصميم الأمني", en: "Security Design Review" },
+        { ar: "توثيق قرارات التصميم", en: "Design Decision Records" },
+        { ar: "الأسرار البرمجية", en: "Program Secrets" },
+        { ar: "تحقق المدخلات", en: "Input Validation" },
+        { ar: "ترميز المخرجات", en: "Output Encoding" },
+        { ar: "حقن الشيفرة", en: "Code Injection" },
+        { ar: "إدارة الجلسات", en: "Session Management" },
+        { ar: "التسجيل والمراقبة", en: "Logging and Monitoring" },
+        { ar: "الاستجابة للحوادث", en: "Incident Response" }
+      ],
+      level: "medium"
+    },
+
+    testing: {
+      title: {
+        ar: "الفصل 6 · الاختبار الآمن والامتثال وتحسين التصميم",
+        en: "Chapter 6 · Security Testing, Compliance and Design Improvement"
+      },
+      explanation: {
+        ar: "الاختبار الوظيفي يجيب: هل يفعل النظام ما وُعد به؟ أما الاختبار الأمني فيجيب سؤالًا آخر: كيف يفشل النظام حين يُقصد به السوء؟ ولا يكفي أحدهما عن الآخر، ولا يصح اعتبار غياب ثغرة مكتشفة إثباتًا للسلامة؛ فالاختبار يكشف عينات من الفشل ولا يبرهن على الخلو منه. ويجري اختبار الاختراق ضمن قواعد اشتباك مكتوبة تحدد ما يُختبر وما يُمنع ومواعيد العمل وقنوات الاتصال عند اكتشاف خطر جسيم، وبصيغ ثلاث بحسب المعرفة الممنوحة: صندوق أسود بلا معرفة مسبقة، وأبيض بمعرفة كاملة، ورمادي بمعرفة جزئية، مع موازنة بين الفحص الآلي السريع الواسع والتحليل اليدوي العميق الذي يلتقط ما لا تلحقه الأدوات. وإلى جانب الاختبار يقف الامتثال بوصفه حدًا أدنى لا سقفًا: معيار ISO/IEC 27001:2022 بأربعة محاور وثلاثة وتسعين ضابطًا، وضوابط الهيئة الوطنية للأمن السيبراني ECC-2:2024 بمكوناتها الأربعة ومئة وثمانية ضوابط، تضبط النطاق وتحفظ أدلة الالتزام. وحين تظهر النتائج تفصل المراجعة بين فجوة في التصميم نفسه وفجوة في تشغيله، ويُصاغ تقرير تحليل النظام للمصممين لا للمهاجمين: يشرح الخلل المعماري وأثره وسبيل إصلاحه، ويُصنف بخطورة تجمع حجم الخسارة مع مدى وصول مصدر التهديد، ثم يُرتَّب الإصلاح بأولوية تجمع الأثر على الأصول وقابلية الاستغلال والسياق والضوابط المحيطة. ولا يكتمل المسار إلا بتحليل السبب الجذري حتى لا يعود الخلل بثوب آخر، وبضوابط تعويضية واستثناءات موثقة عند تعذر الإصلاح الفوري، ثم إعادة اختبار ومقاييس فعالية تتعلم منها المؤسسة ويصير كل اختبار الجولة التالية أذكى.",
+        en: "Functional testing answers: does the system do what it promised? Security testing asks another question: how does the system fail when malice is intended? Neither substitutes for the other, and finding no vulnerability proves nothing; testing samples failure, it does not prove absence. Penetration testing runs under written rules of engagement defining what is tested, what is forbidden, working hours and contact channels for discovering grave danger, in three forms according to granted knowledge: black box with none, white box with full, gray box with partial — balancing rapid wide automated scanning against deep manual analysis that catches what tools miss. Beside testing stands compliance as a floor, not a ceiling: ISO/IEC 27001:2022 with its four themes and ninety-three controls, and the Saudi NCA ECC-2:2024 with four components and one hundred and eight controls, setting scope and preserving evidence of adherence. When results arrive, the review separates a design gap from an operational gap, and the system analysis report is written for designers, not attackers: explaining the architectural flaw, its impact and its cure, classified by a severity joining loss size with the threat source's reach, then ordered by a priority joining asset impact, exploitability, context and surrounding controls. The path completes only with root-cause analysis so the flaw does not return in another guise, compensating controls and documented exceptions where immediate repair is impossible, then retesting and effectiveness metrics that make the next round of testing smarter.",
+      },
+      objectives: [
+        { ar: "التمييز بين الاختبار الوظيفي والاختبار الأمني وحدود كل منهما.", en: "Distinguish functional from security testing and the limits of each." },
+        { ar: "صياغة قواعد اشتباك واضحة لاختبار اختراق مأذون.", en: "Draft clear rules of engagement for authorized penetration testing." },
+        { ar: "المقارنة بين صناديق الاختبار الثلاثة وبين الفحص الآلي واليدوي.", en: "Compare the three testing boxes and automated versus manual scanning." },
+        { ar: "بيان دور أطر الامتثال في ضبط الحد الأدنى للضوابط وحفظ الأدلة.", en: "Explain compliance frameworks' role in setting minimum controls and preserving evidence." },
+        { ar: "كتابة تقرير تحليل نظام موجه للمصممين مع تصنيف الخطورة.", en: "Write a designer-oriented system analysis report with severity classification." },
+        { ar: "ترتيب الإصلاحات بالأثر والاستغلال والسياق ومعالجة السبب الجذري.", en: "Order fixes by impact, exploitability and context, treating root causes." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الاختبار الأمني", en: "Security testing" },
+          def: { ar: "تقصي أنماط فشل النظام أمام قصد السوء، مكمّلًا للاختبار الوظيفي لا بديلًا عنه، ويكشف عينات لا برهان غياب.", en: "Probing how a system fails against intent to harm — a complement to functional testing, revealing samples rather than proving absence." }
+        },
+        {
+          term: { ar: "قواعد الاشتباك", en: "Rules of engagement" },
+          def: { ar: "وثيقة تسبق أي اختراق: النطاق وما يُمنع والمواعيد وقنوات التصعيد عند اكتشاف خطر حقيقي أثناء الاختبار.", en: "A document preceding any penetration test: scope, prohibitions, timing and escalation channels for real dangers found mid-test." }
+        },
+        {
+          term: { ar: "صناديق الاختبار الثلاثة", en: "The three testing boxes" },
+          def: { ar: "أسود بلا معرفة مسبقة بالنظام، وأبيض بمعرفة كاملة يفتح أعمق الفجوات، ورمادي بمعرفة جزئية يوازن بينهما.", en: "Black with no prior knowledge, white with full knowledge reaching the deepest gaps, and gray with partial knowledge balancing the two." }
+        },
+        {
+          term: { ar: "الفحص الآلي والتحليل اليدوي", en: "Automated scanning and manual analysis" },
+          def: { ar: "الآلي يغطي الواسع بسرعة ويعيد النتائج، واليدوي يعمق في المنطق وسياق الأعمال حيث تختبئ أخطر الثغرات.", en: "Automation covers breadth quickly and reproducibly; manual work dives into logic and business context where the gravest flaws hide." }
+        },
+        {
+          term: { ar: "الامتثال", en: "Compliance" },
+          def: { ar: "الالتزام بحد أدنى موثق من الضوابط — كمعيار ISO/IEC 27001:2022 وضوابط ECC-2:2024 — يحدد النطاق ويحفظ أدلة الجاهزية.", en: "Adhering to a documented minimum of controls — ISO/IEC 27001:2022 or ECC-2:2024 — defining scope and keeping evidence of readiness." }
+        },
+        {
+          term: { ar: "فجوة التصميم والفجوة التشغيلية", en: "Design vs. operational gap" },
+          def: { ar: "الأولى خلل في البنية والقرارات نفسها، والثانية تنفيذ سليم لتصميم سليم أهمل في التشغيل؛ ولكل فجوة إصلاح مختلف.", en: "The first is a flaw in the structure and its decisions; the second is a sound design neglected in operation — each needs a different fix." }
+        },
+        {
+          term: { ar: "تصنيف الخطورة", en: "Severity classification" },
+          def: { ar: "درجة تجمع حجم الخسارة المتوقعة مع مدى وصول مصدر التهديد، فترتب النتائج بما يعكس خطرها الفعلي لا ضجيجها.", en: "A grade joining expected loss size with the threat source's reach, ranking findings by real danger rather than noise." }
+        },
+        {
+          term: { ar: "ترتيب أولويات الإصلاح", en: "Remediation prioritization" },
+          def: { ar: "قرار يجمع الأثر على الأصول وقابلية الاستغلال والسياق والضوابط المحيطة، فيقدم ما يقي من الخسارة الكبرى أولًا.", en: "A decision joining asset impact, exploitability, context and surrounding controls, advancing what prevents the greatest loss first." }
+        },
+        {
+          term: { ar: "تحليل السبب الجذري والضوابط التعويضية", en: "Root-cause analysis and compensating controls" },
+          def: { ar: "بلوغ أصل الخلل لا عرَضه، مع ضابط بديل موثق ومؤقت عند تعذر الإصلاح الفوري، ثم إعادة اختبار بعد المعالجة.", en: "Reaching the flaw's origin rather than its symptom, with a documented temporary alternative control when immediate repair is impossible, then retesting after treatment." }
+        }
+      ],
+      example: {
+        ar: "متجر إلكتروني يستأجر فريق اختبار بصندوق رمادي أسبوعًا واحدًا وبقواعد اشتباك تمنع المساس ببيانات العملاء الحقيقية. يكتشف الفريق أن حقل البحث يسمح بحقن استعلامات يصل إلى قاعدة البيانات، ويصوغ تقرير تحليل النظام للمصممين: الخلل في بناء الاستعلام بدمج نص المستخدم مباشرة، والأثر محتمل على قاعدة العملاء كاملة. تصنف النتيجة عالية الخطورة لأن حجم الخسارة كبير ووصول المهاجم من الإنترنت مفتوح بلا قيود، فتصدر الأولوية الأولى من مصفوفة الترتيب: أثر عالٍ واستغلال سهل وسياق مكشوف. الإصلاح يعالج الجذر — استعلامات معلمة لا تجمع النص — لا العرَض وحده، ويُثبّت ضابط تعويضي مؤقت موثق بتاريخ انتهاء: مرشح فحص على مدخلات البحث حتى اكتمال النشر. بعد الإصلاح يُعاد الاختبار، وتُقاس الفعالية بزمن المعالجة ومعدل تكرار الفئة نفسها، فتعود النتيجة إلى خط التطوير درسًا.",
+        en: "An online store hires a gray-box team for one week under rules of engagement forbidding any touch of real customer data. The team finds the search field allows query injection reaching the database, and drafts the system analysis report for designers: the flaw is building the query by joining user text directly, with potential impact on the entire customer database. The finding is classified high severity because the loss size is great and the attacker's reach from the internet is open and unlimited, so the first priority issues from the ordering matrix: high impact, easy exploitation, exposed context. The fix treats the root — parameterized queries that never join text — not the symptom alone, backed by a documented temporary compensating control with an expiry date: an input-filtering guard on search until deployment completes. Retesting follows the fix, and effectiveness is measured by remediation time and recurrence of the same flaw class — feeding the result back to the development line as a lesson."
+      },
+      mistakes: [
+        { ar: "الاكتفاء بالاختبار الوظيفي والظن أن نجاح كل الوظائف يعني أمنًا محققًا.", en: "Stopping at functional testing and assuming that passing features means achieved security." },
+        { ar: "تنفيذ اختبار اختراق بلا إذن مكتوب وبلا قواعد اشتباك تحمي النطاق والبيانات الحقيقية.", en: "Running penetration tests without written authorization and rules protecting scope and real data." },
+        { ar: "قراءة عدم اكتشاف ثغرات إثباتًا للسلامة، فيرتاح الفريق إلى نتيجة هي في الحقيقة تضييق بحث.", en: "Reading no findings as proof of safety, resting on a result that truly narrows the search." },
+        { ar: "تقرير موجّه للمهاجم يفيض بتفاصيل الاستغلال ولا يقول للمصمم ما يعالج وما يوثق.", en: "An attacker-oriented report overflowing with exploitation detail, telling the designer nothing to fix or record." },
+        { ar: "إصلاح العرَض دون بلوغ السبب الجذري، فيعود الخلل ذاته بثوب جديد بعد حين.", en: "Fixing the symptom without reaching the root cause, so the same flaw returns in new clothes." },
+        { ar: "استثناءات غير موثقة أو ضوابط تعويضية بلا تاريخ انتهاء تتحول إلى دَين أمني متراكم.", en: "Undocumented exceptions or compensating controls without expiry, turning into accumulating security debt." },
+        { ar: "معاملة الامتثال غاية ورقية تُملأ أدلتها مرة، لا حدًا أدنى يدفع التحسين المستمر.", en: "Treating compliance as a paper goal filled once, not a floor driving continuous improvement." }
+      ],
+      terminology: [
+        { ar: "الاختبار الأمني", en: "Security Testing" },
+        { ar: "اختبار الاختراق", en: "Penetration Testing" },
+        { ar: "قواعد الاشتباك", en: "Rules of Engagement" },
+        { ar: "اختبار الصندوق", en: "Box Testing" },
+        { ar: "الامتثال", en: "Compliance" },
+        { ar: "فجوة التصميم", en: "Design Gap" },
+        { ar: "تصنيف الخطورة", en: "Severity Classification" },
+        { ar: "ترتيب أولويات الإصلاح", en: "Remediation Prioritization" },
+        { ar: "تحليل السبب الجذري", en: "Root-Cause Analysis" }
+      ],
+      level: "medium"
+    },
+
+    modern: {
+      title: {
+        ar: "الفصل 7 · مبادئ التصميم في بيئات الحوسبة الحديثة",
+        en: "Chapter 7 · Design Principles in Modern Computing Environments"
+      },
+      explanation: {
+        ar: "تعبر المبادئ الكلاسيكية إلى البيئات الحديثة دون أن تتغير، لكن مواضع تطبيقها تتبدل: في السحابة ينتقل الضابط من حماية الخادم إلى الهوية والمسؤولية المشتركة؛ فمن يفهم نموذج الخدمة يعرف أين تنتهي مسؤوليته وأين تبدأ مسؤولية المزود، ويبني على ذلك إدارة الهويات والتحقق متعدد العوامل، وتدوير المفاتيح على مستوياتها، وسد أخطاء الإعداد التي تنشأ في بيئة يسهل توسيعها خطأً، ومراقبة الحركة بين المكونات حتى لا تنتقل الهجمة من جزء إلى آخر. وفي التطوير الحديث يدخل الأمن مبكرًا في خط الإنتاج نفسه: فحص الشيفرة وبنيتها قبل الدمج، وفحص البرمجيات الثابتة، ووصف البنية التحتية كشيفرة تُراجع كما تُراجع البرمجيات لا تُصان يدويًا خارج الأنظار. وفي إنترنت الأشياء يبدأ التصميم من هوية الجهاز: العنوان المادي يقبل التزوير والانتحال، بينما تمنح المصادقة المعتمدة على الشهادة كل جهاز هوية موقعة لا تُقلد، ويضاف إليها تحديث لا يقبل إلا ما وقعه المزود، وحماية مادية على الجهاز نفسه، وعزل الشبكات بحيث لا يحمل جهاز مخترق العدوى إلى الشبكة كلها، وسجل جرد يعرف كل جهاز متى ذهب أو تقادم. ومع أنظمة الذكاء الاصطناعي تظهر مخاطر خاصة: بيانات تدريب قد تسممها نماذج مدسوسة تغير توصيف العينات، وسلوك يتغير تدريجيًا فيتهرب من الكشف، وقيمة النموذج نفسه تجعله هدفًا وجب حمايته؛ ويعالجها التحقق من مصادر البيانات، والمراقبة السلوكية للمخرجات، ولا يكتمل شيء دون خطوة تقييم منظمة لأي تقنية ناشئة قبل التبني: تحديد النطاق، والأصول المتأثرة، والمخاطر درجاتها، والضوابط المقترحة ومسؤولها، ثم قرار التبني النهائي مكتوبًا.",
+        en: "The classic principles cross into modern environments unchanged, but where they apply shifts: in the cloud the control moves from server protection to identity and shared responsibility; whoever understands the service model knows where their duty ends and the provider's begins, and builds on that identity management, multi-factor verification, key rotation at its proper levels, sealing misconfigurations born in an environment easy to widen by mistake, and watching movement between components so an intrusion cannot travel from one part to another. In modern development, security enters the production line early: code and structure checked before merge, dependencies scanned, and infrastructure described as code that is reviewed like software rather than maintained by hand out of sight. In the Internet of Things design begins with device identity: the physical address is spoofable and impersonable, while certificate-based authentication grants every device a signed identity that cannot be cloned; added to it are updates accepting only what the vendor signed, physical protection on the device itself, network isolation so one compromised device spreads no contagion to the whole network, and an inventory aware of when a device left or aged out. With artificial intelligence systems special risks appear: tainted training data where planted samples flip labels, gradually drifting behavior evading detection, and the model's own value making it a target that must be protected; source verification and behavioral monitoring of outputs address these, and nothing completes without an organized evaluation of any emerging technology before adoption: scope, affected assets, risks and their grades, proposed controls and their owner, then a written adoption decision. Comparison reveals each environment restates the same principles: defense in depth there is layers of identity, network and monitoring; least privilege here is the bound of what a component may do."
+      },
+      objectives: [
+        { ar: "شرح نموذج المسؤولية المشتركة وتحديد أين تنتهي مسؤولية كل طرف سحابيًا.", en: "Explain shared responsibility and where each party's duty ends in the cloud." },
+        { ar: "تطبيق الهوية والتحقق متعدد العوامل وإدارة المفاتيح والمراقبة في السحابة.", en: "Apply identity, multi-factor verification, key management and monitoring in the cloud." },
+        { ar: "بيان كيف يدخل الفحص المبكر خط التطوير عبر DevSecOps والبنية التحتية كشيفرة.", en: "Show how early checks enter the pipeline via DevSecOps and infrastructure as code." },
+        { ar: "تصميم هوية أجهزة إنترنت الأشياء وتحديثها وعزلها وجردها.", en: "Design IoT device identity, updates, isolation and inventory." },
+        { ar: "تحليل المخاطر الخاصة بالذكاء الاصطناعي: تسميم البيانات والسلوك المراوغ.", en: "Analyze AI-specific risks: data poisoning and evasive behavior." },
+        { ar: "تنفيذ خطوات منظمة لتقييم تبني أي تقنية ناشئة قبل اعتمادها.", en: "Follow organized steps to evaluate any emerging technology before adoption." }
+      ],
+      concepts: [
+        {
+          term: { ar: "المسؤولية المشتركة", en: "Shared responsibility" },
+          def: { ar: "توزيع الواجبات بين مزود السحابة والمستأجر بحسب نموذج الخدمة؛ فالعميل يبقى مسؤولًا عن بياناته وهوياته وإعداداته.", en: "Duties divided between cloud provider and tenant by service model; the customer stays responsible for their data, identities and configuration." }
+        },
+        {
+          term: { ar: "التحقق متعدد العوامل", en: "Multi-factor verification" },
+          def: { ar: "طلب أكثر من دليل هوية عند الدخول حتى لا تكفي كلمة مرور مسروقة وحدها، وهو الحد الأدنى في بيئات تدار عن بعد.", en: "Requiring more than one identity proof at sign-in so a stolen password alone is never enough — the baseline in remotely managed environments." }
+        },
+        {
+          term: { ar: "إدارة المفاتيح", en: "Key management" },
+          def: { ar: "تدوير مفاتيح التشفير على مستوياتها وضبط من يملكها من المزود وحده أو من العميل وحده بحسب حساسية البيانات.", en: "Rotating encryption keys at their levels and setting who holds them — provider alone or customer alone — according to data sensitivity." }
+        },
+        {
+          term: { ar: "البنية التحتية كشيفرة", en: "Infrastructure as code" },
+          def: { ar: "وصف الخوادم والشبكات والإعدادات في ملفات مراجعة تُختبر وتنشر آليًا، فلا تبقى تغييرات خفية خارج الأنظار.", en: "Describing servers, networks and settings in reviewed files tested and deployed automatically, leaving no hidden changes out of sight." }
+        },
+        {
+          term: { ar: "DevSecOps", en: "DevSecOps" },
+          def: { ar: "دمج الفحص الأمني في خط الإنتاج نفسه: كل تغيير يمر بنقاط تحقق قبل الدمج والنشر لا بعدهما.", en: "Embedding security checks in the pipeline itself: every change passes checkpoints before merge and deployment, not after." }
+        },
+        {
+          term: { ar: "هوية جهاز إنترنت الأشياء", en: "IoT device identity" },
+          def: { ar: "هوية موقعة بالشهادة لكل جهاز عوض عنوان مادي قابل للتزوير؛ فتثبت الشبكة أن المتصل هو الجهاز فعلًا.", en: "A certificate-signed identity per device instead of a spoofable physical address, letting the network prove the caller really is that device." }
+        },
+        {
+          term: { ar: "التحديث الآمن الموقّع", en: "Signed secure update" },
+          def: { ar: "لا يقبل الجهاز تحديثًا إلا إذا حمل توقيع المزود، فلا تُزرع فيه نسخة مغشوشة عبر قناة التحديث ذاتها.", en: "The device accepts updates only bearing the vendor's signature, so no forged build enters through the update channel itself." }
+        },
+        {
+          term: { ar: "تسميم بيانات التدريب", en: "Training-data poisoning" },
+          def: { ar: "إدخال نماذج مدسوسة إلى بيانات يتدرب عليها الذكاء فيصير تصنيفه مختلًا عمدًا رغم سلامة أدائه على ما عداها.", en: "Planting doctored samples into training data so the model misclassifies on purpose while still performing well elsewhere." }
+        },
+        {
+          term: { ar: "السلوك المراوغ التدريجي", en: "Gradual evasive behavior" },
+          def: { ar: "تغير بطيء مقصود في سلوك النظام أو المخرجات يتسلل تحت عتبات الكشف حتى يتطبع الوضع الجديد بوصفه سويًا.", en: "A deliberate slow drift in system behavior or outputs slipping under detection thresholds until the new state reads as normal." }
+        },
+        {
+          term: { ar: "تقييم تبني التقنيات الناشئة", en: "Emerging-technology adoption review" },
+          def: { ar: "خطوة منظمة قبل التبني: النطاق، والأصول المتأثرة، والمخاطر ودرجاتها، والضوابط المقترحة ومسؤولها، ثم قرار مكتوب.", en: "An organized pre-adoption step: scope, affected assets, risks and grades, proposed controls and their owner, then a written decision." }
+        }
+      ],
+      example: {
+        ar: "مستشفى يحدث أنظمته على جبهتين. في جبهة الأجهزة: كاميرات وحساسات كانت كلها على شبكة واحدة بكلمات مرور افتراضية؛ فاستبدلت البيانات الافتراضية، ومُنح كل جهاز شهادة هوية بدل الاعتماد على عنوانه المادي، ووضعت الأجهزة في شبكة معزولة لا تصل منها إلى سجلات المرضى، وصار التحديث لا يُثبَّت إلا وهو موقّع من المزود، وأُنشئ سجل جرد يراقب ذهاب كل جهاز وتقادمه. وفي جبهة السحابة: نُقلت السجلات الصحية إلى خدمة سحابية بمسؤولية مشتركة موثقة الحدود، وفُعّل التحقق متعدد العوامل للأطباء، ودُوّرت مفاتيح التشفير مع بقاء مفتاح البيانات الحساسة بيد المستشفى وحده، ووُصفت الشبكات كشيفرة تُراجع قبل كل نشر. وقبل تبني مساعد ذكاء اصطناعي اقترح للفرز، جرى تقييم مكتوب: النطاق، والأصول المتأثرة، ومخاطر تسميم بيانات التدريب وسلوك المخرجات المراوغ ودرجاتهما، والضوابط المقترحة ومسؤولها، ثم قرار تجريبي محدود المدة مع مراقبة سلوكية للمخرجات.",
+        en: "A hospital modernizes on two fronts. On the device front, cameras and sensors that all shared one network with default passwords: defaults were replaced, every device received a certificate identity instead of relying on its physical address, devices were placed on an isolated network that cannot reach patient records, updates install only when vendor-signed, and an inventory watches for every device's departure or aging. On the cloud front, health records moved to a service with a documented shared-responsibility boundary, multi-factor verification was enabled for physicians, encryption keys were rotated with the sensitive data key held by the hospital alone, and networks were described as reviewed code before every deployment. Before adopting an AI triage assistant, a written evaluation ran: scope, affected assets, the risks of training-data poisoning and evasive output drift with their grades, proposed controls and their owner — then a limited-duration pilot with behavioral monitoring of outputs."
+      },
+      mistakes: [
+        { ar: "إسقاط كل المسؤولية على مزود السحابة والظن أن الانتقال إليها يعني الأمن بذاته.", en: "Dropping all responsibility on the cloud provider and assuming that moving there means security by itself." },
+        { ar: "مفاتيح غير مدوّرة أو مخزنة في أماكن مكشوفة، فيصير أعظم أسرار المؤسسة أضعف حلقاتها.", en: "Keys unrotated or stored in exposed places, making the organization's greatest secret its weakest link." },
+        { ar: "ترك بيانات اعتماد افتراضية على أجهزة إنترنت الأشياء أو تحديث بلا توقيع يقبل كل وافد.", en: "Leaving default credentials on IoT devices or accepting unsigned updates from any comer." },
+        { ar: "وصل أجهزة الاستشعار والكاميرات بالشبكة الرئيسية نفسها بلا عزل يكبح انتقال العدوى.", en: "Wiring sensors and cameras onto the same main network with no isolation to curb contagion." },
+        { ar: "تدريب نماذج الذكاء على مصادر بلا التحقق من نقاء بياناتها ومصدرها واكتمال تصنيفها.", en: "Training AI models on sources with no verification of data cleanliness, origin and labeling soundness." },
+        { ar: "الوثوق بمخرجات الذكاء الاصطناعي بلا مراقبة سلوكية ولا فصل بين ما يُقترح وما يُنفذ.", en: "Trusting AI outputs without behavioral monitoring or separation between what is suggested and what is executed." },
+        { ar: "تبني تقنية ناشئة بحماس بلا تقييم موثق لنطاقها ومخاطرها وضوابطها وقرار مكتوب.", en: "Adopting an emerging technology enthusiastically without documented scope, risks, controls and a written decision." }
+      ],
+      terminology: [
+        { ar: "الحوسبة السحابية", en: "Cloud Computing" },
+        { ar: "المسؤولية المشتركة", en: "Shared Responsibility" },
+        { ar: "التحقق متعدد العوامل", en: "Multi-Factor Verification" },
+        { ar: "إدارة المفاتيح", en: "Key Management" },
+        { ar: "البنية التحتية كشيفرة", en: "Infrastructure as Code" },
+        { ar: "DevSecOps", en: "DevSecOps" },
+        { ar: "إنترنت الأشياء", en: "Internet of Things" },
+        { ar: "تسميم بيانات التدريب", en: "Training-Data Poisoning" },
+        { ar: "السلوك المراوغ", en: "Evasive Behavior" }
+      ],
+      level: "medium"
+    }
+  },
+  /* ---- 260210031002 · مكونات أنظمة تقنية المعلومات · ISE124 course book ---- */
+  "260210031002": {
+    systems: {
+      title: {
+        ar: "الفصل 1 · نظم المعلومات ومكوناتها",
+        en: "Chapter 1 · Information Systems and Their Components"
+      },
+      explanation: {
+        ar: "نظام المعلومات مكونات مترابطة تجمع البيانات والمعلومات والمنتجات الرقمية وتعالجها وتخزنها وتوزعها لدعم القرار والتنسيق والرقابة والتحليل في المنظمة، وهو أوسع من الحاسب ذاته: خمسة مكونات متفاعلة هي العتاد والبرمجيات والبيانات والإجراءات والأفراد، تنتظم عبر عناصر ستة — البيئة والمدخلات والمعالجة والمخرجات والرقابة والتغذية الراجعة — وتؤدي خمس عمليات متتابعة من التقاط البيانات حتى نشر المخرجات. وتُصنف النظم بحسب مستوى الإدارة المستفيدة إلى تنفيذي ودعم قرار وإداري ومعالجة معاملات، يديرها ويدمجها نظام تخطيط موارد المؤسسة بوصفه نظامًا برمجيًا لا نوعًا خامسًا. وتحكم بناء النظم وتشغيلها أطرٌ ومنهجيات — أجايل والشلال وCOBIT وITIL وماكنزي 7-S وSFIA — تقابلها معايير صناعية ملزمة مثل ISO/IEC 27001 وFISMA، ويلزم متخصص النظم سلوك أخلاقي وحماية للبيانات الحساسة، وتتطلب هذه المهنة كفايات ومعارف وشهادات مستمرة التجديد.",
+        en: "An information system is a set of interrelated components that collect, process, store and distribute data, information and digital products to support decision making, coordination, control and analysis — far broader than a computer: five interacting components (hardware, software, data, procedures and people) organized through six elements — environment, input, processing, output, control and feedback — performing five successive operations from data capture to dissemination. Systems are classified by the management level they serve into executive, decision-support, management and transaction-processing systems, integrated and managed by enterprise resource planning as software rather than a fifth type. Frameworks and methodologies — Agile, Waterfall, COBIT, ITIL, McKinsey 7-S and SFIA — govern building and operating them, matched by industry standards such as ISO/IEC 27001 and FISMA; the field demands ethical conduct and protection of sensitive data, and expects competencies, knowledge and certifications kept current."
+      },
+      objectives: [
+        { ar: "تعريف نظام المعلومات وتمييزه عن الحاسب الآلي.", en: "Define an information system and distinguish it from a computer." },
+        { ar: "تعداد المكونات الخمسة والعناصر الستة والعمليات الخمس لنظام المعلومات.", en: "List the five components, six elements and five operations of an information system." },
+        { ar: "المقارنة بين الأنواع الأربعة للنظم بحسب الفئة المستخدمة والغرض.", en: "Compare the four system types by user group and purpose." },
+        { ar: "التمييز بين إطار العمل والمعيار الصناعي مع مثال لكل منهما.", en: "Distinguish a framework from an industry standard with an example of each." },
+        { ar: "بيان موقع نظام تخطيط موارد المؤسسة من الأنواع الأربعة.", en: "Position enterprise resource planning relative to the four system types." }
+      ],
+      concepts: [
+        {
+          term: { ar: "نظام المعلومات", en: "Information System" },
+          def: { ar: "مكونات مترابطة تجمع البيانات والمعلومات والمنتجات الرقمية وتعالجها وتخزنها وتوزعها، لدعم القرار والتنسيق والرقابة والتحليل وتيسير عمليات المنظمة.", en: "Interrelated components that collect, process, store and distribute data, information and digital products to support decisions, coordination, control and analysis in an organization." }
+        },
+        {
+          term: { ar: "البيانات والمعلومات", en: "Data and Information" },
+          def: { ar: "البيانات حقائق وأرقام خام لا معنى لها بذاتها، ولا تصير معلومات إلا بعد معالجتها ليكتسب لها سياق ومعنى يخدم القرار.", en: "Data are raw facts and figures meaningless on their own; they become information only after processing gives them context and meaning that serves decisions." }
+        },
+        {
+          term: { ar: "المكونات الخمسة", en: "The Five Components" },
+          def: { ar: "العتاد الملموس، والبرمجيات التي تشغله، والبيانات التي يعالجها، والإجراءات التي تضبط استعماله، والأفراد الذين يستعملونه ويطورونه.", en: "Tangible hardware, the software that runs it, the data it processes, the procedures governing its use, and the people who use and develop it." }
+        },
+        {
+          term: { ar: "أنواع نظم المعلومات", en: "Types of Information Systems" },
+          def: { ar: "أربعة أنواع تخدم مستويات الإدارة: التنفيذي للإدارة العليا، ودعم القرار لكبار المديرين، والإداري للإدارة الوسطى، ومعالجة المعاملات لموظفي الخط الأمامي.", en: "Four types serving management levels: executive for top management, decision support for senior managers, management information for middle management, and transaction processing for frontline staff." }
+        },
+        {
+          term: { ar: "نظام تخطيط موارد المؤسسة", en: "Enterprise Resource Planning" },
+          def: { ar: "نظام برمجي يدير أنواع النظم الأربعة ويدمج العمليات عبر المنظمة كلها، فلا يخدم مستوى إداريًا واحدًا وليس نوعًا خامسًا.", en: "Software that manages the four system types and integrates operations across the whole organization; it serves no single management level and is no fifth type." }
+        },
+        {
+          term: { ar: "عناصر النظام وعملياته", en: "System Elements and Operations" },
+          def: { ar: "ستة عناصر هي البيئة والمدخلات والمعالجة والمخرجات والرقابة والتغذية الراجعة، وخمس عمليات: التقاط البيانات ومعالجتها وتخزينها واسترجاعها ونشرها.", en: "Six elements — environment, input, processing, output, control and feedback — and five operations: data capture, processing, storage, retrieval and dissemination." }
+        },
+        {
+          term: { ar: "إطار العمل والمعيار", en: "Framework and Standard" },
+          def: { ar: "الإطار إرشادات وأفضل ممارسات توجه التطوير والإدارة كأجايل وCOBIT، والمعيار متطلب واسع الاستعمال يعزز الجودة والتوافق مثل ISO/IEC 27001.", en: "A framework is guidance and best practice steering development and management, such as Agile and COBIT; a standard is a widely used requirement ensuring quality and interoperability, such as ISO/IEC 27001." }
+        },
+        {
+          term: { ar: "الكفايات المهنية", en: "Professional Competencies" },
+          def: { ar: "قدرات موظف التقنية المجمعة في نموذج كفايات: الفعالية الشخصية والأكاديمية ومكان العمل والتقنية والخاصة بالمهنة والإدارية.", en: "A technology worker's abilities gathered in a competency model: personal effectiveness, academic, workplace, technical, industry-wide and managerial." }
+        }
+      ],
+      example: {
+        ar: "في قرية باثانامثيتا بولاية كيرالا الهندية محدودة الموارد، صعب الحصول على الرعاية الصحية أثناء كوفيد فصمم باحثون تطبيقًا محمولًا للإبلاغ عن الأعراض والرعاية عن بُعد والتقييم لحماية كبار السن، فاستعمله نحو ستين في المئة منهم فتحسنت الرعاية. ويُقرأ هذا المثال بمنظور مكونات النظام الخمسة: الهواتف والشبكة عتاد، والتطبيق برمجي، وسجلات الأعراض بيانات، وسياسات الإبلاغ والتصعيد إجراءات، والأطباء وسكان القرية أفراد — ومعالجة البيانات المدخلة وتحويلها إلى تنبيهات رعاية عملية هي جوهر عمل النظام.",
+        en: "In the resource-limited village of Pathanamthitta in Kerala, India, access to health care was hard during COVID-19, so researchers built a mobile app for symptom reporting, remote care and assessment to protect the elderly; about sixty percent of them used it and care improved. The case reads through the five components: phones and the network are hardware, the app is software, symptom records are data, reporting and escalation policies are procedures, and physicians and villagers are people — while turning entered data into actionable care alerts is the very work of the system."
+      },
+      mistakes: [
+        { ar: "عدّ نظام المعلومات مرادفًا للحاسب؛ والصواب أنه مكونات مترابطة تخدم أهدافًا تنظيمية كدعم القرار والرقابة.", en: "Treating an information system as a synonym for a computer; in fact it is interrelated components serving organizational goals such as decisions and control." },
+        { ar: "عدّ كشف المبيعات الخام معلومة؛ والصواب أنه بيانات لا تصير معلومة إلا بمعالجتها لتعطي سياقًا ومعنى.", en: "Calling a raw sales report information; it is data that becomes information only when processed into context and meaning." },
+        { ar: "عدّ نظام تخطيط موارد المؤسسة مستوى خامسًا فوق الإدارة العليا؛ والصواب أنه نظام برمجي يدير الأنواع الأربعة.", en: "Counting ERP as a fifth level above top management; it is software that manages the four types." },
+        { ar: "الخلط بين إطار العمل والمعيار؛ فالإطار إرشادات توجه التطوير والإدارة والمعيار متطلب واسع الاستعمال.", en: "Confusing frameworks with standards; a framework guides development and management while a standard is a widely used requirement." },
+        { ar: "الظن أن الويب 2.0 تطور تقني بعينه؛ والصواب أنه تحول في استعمال الإنترنت ومشاركة المستخدمين.", en: "Believing Web 2.0 was a specific technical evolution; it was a shift in how the internet is used and users contribute." }
+      ],
+      terminology: [
+        { ar: "نظام المعلومات", en: "Information System" },
+        { ar: "العتاد", en: "Hardware" },
+        { ar: "البرمجيات", en: "Software" },
+        { ar: "الإجراءات", en: "Procedures" },
+        { ar: "نظام معالجة المعاملات", en: "Transaction Processing System" },
+        { ar: "نظام دعم القرار", en: "Decision Support System" },
+        { ar: "نظام تخطيط موارد المؤسسة", en: "Enterprise Resource Planning" },
+        { ar: "التغذية الراجعة", en: "Feedback" },
+        { ar: "إطار العمل", en: "Framework" }
+      ],
+      level: "easy"
+    },
+
+    components: {
+      title: {
+        ar: "الفصل 2 · مكونات الأجهزة والبرمجيات",
+        en: "Chapter 2 · Hardware and Software Components"
+      },
+      explanation: {
+        ar: "يتكون الحاسب من كيانين متكاملين: كيان مادي ملموس يجمع الأجزاء التي يُبنى منها الجهاز ويُدخل البيانات ويعالجها ويخزنها ويُخرجها، وكيان برمجي يمكّن هذا العتاد من أداء مهامه؛ فبدون البرمجيات لا ينجز الجهاز أي عمل للمستخدم. وتتوزع وظائف الكيان المادي بين المعالج بعناصره الثلاثة — وحدة الحساب والمنطق ووحدة السيطرة والمسجلات — وأنواع الذاكرة التي تختلف في دوامها: ذاكرة وصول عشوائي مؤقتة تفقد محتواها بانقطاع التيار، وذاكرة قراءة فقط ثابتة تحفظ برامج فحص المكونات عند الإقلاع، وقرص صلب دائم يحمل الملفات ونظام التشغيل. وتتصل بالمكونات وحدات إدخال وإخراج مباشرة أو عبر بطاقات متخصصة كبطاقة الشاشة وبطاقة الصوت، بينما يقف الكيان البرمجي ثلاث طبقات: نظام التشغيل الذي يدير الملفات والتخزين والأجهزة الملحقة وينفذ التطبيقات، والبرامج التطبيقية التي تخدم أهدافًا محددة، والبرمجيات الوسيطة التي تصل العتاد بنظام التشغيل.",
+        en: "A computer consists of two integrated halves: a tangible physical half gathering the parts the machine is built from, entering, processing, storing and outputting data; and a software half enabling that hardware to perform its tasks — without software the machine does nothing for the user. Physical functions spread across the processor with its three parts — arithmetic-logic unit, control unit and registers — and memory types differing in permanence: volatile RAM losing its content when power is cut, permanent ROM holding startup component-check programs, and a persistent hard disk carrying files and the operating system. Components connect through input and output units directly or via specialized cards such as the graphics and sound cards, while the software half stands in three layers: the operating system managing files, storage and peripherals and executing applications, application software serving specific purposes, and middleware linking hardware to the operating system."
+      },
+      objectives: [
+        { ar: "تمييز الكيان المادي من الكيان البرمجي في الحاسب.", en: "Distinguish the physical half of a computer from the software half." },
+        { ar: "شرح أجزاء المعالج الثلاثة وتوزيع أدوارها.", en: "Explain the processor's three parts and their divided roles." },
+        { ar: "المقارنة بين ذاكرة الوصول العشوائي وذاكرة القراءة فقط والقرص الصلب من جهة الدوام.", en: "Compare RAM, ROM and the hard disk in terms of permanence." },
+        { ar: "تصنيف وحدات الإدخال والإخراج والبطاقات الداخلية بحسب اتجاه انتقال البيانات.", en: "Classify input and output units and internal cards by data-flow direction." },
+        { ar: "تمييز نظام التشغيل والبرامج التطبيقية والبرمجيات الوسيطة.", en: "Distinguish the operating system, application software and middleware." }
+      ],
+      concepts: [
+        {
+          term: { ar: "المعالج", en: "Processor" },
+          def: { ar: "قلب الجهاز والعقل المدبر له، ويُثبت في اللوحة الأم وتوضع فوقه مروحة تبريد، ويتكون من وحدة الحساب والمنطق ووحدة السيطرة والمسجلات.", en: "The machine's heart and mastermind, mounted on the motherboard under a cooling fan, composed of the arithmetic-logic unit, control unit and registers." }
+        },
+        {
+          term: { ar: "ذاكرة الوصول العشوائي", en: "RAM (Random Access Memory)" },
+          def: { ar: "قطعة إلكترونية على اللوحة الأم تخزن البيانات الجاري معالجتها، وتُمسح بانقطاع التيار فتُسمى الذاكرة المؤقتة ويمكن زيادتها بقطع إضافية.", en: "A board-mounted chip holding data being processed, wiped when power is cut — hence temporary memory — and expandable with extra modules." }
+        },
+        {
+          term: { ar: "ذاكرة القراءة فقط", en: "ROM (Read Only Memory)" },
+          def: { ar: "ذاكرة دائمة تحفظ برامج فحص المكونات المادية وتهيئتها عند بدء التشغيل، ولا تضيع بياناتها بانقطاع التيار وتتغير بوسائل خاصة فقط.", en: "Permanent memory holding the component-check and setup programs run at startup; its data survives power loss and changes only by special means." }
+        },
+        {
+          term: { ar: "التخزين الدائم", en: "Persistent Storage" },
+          def: { ar: "القرص الصلب الذي تُخزن فيه جميع الملفات وبرامج نظام التشغيل والبرامج الخدمية، ولا يمكن الاحتفاظ بالمعلومات مدة أطول من جلسة التشغيل دونه.", en: "The hard disk holding all files, operating-system and utility programs; without it, information cannot survive beyond a single working session." }
+        },
+        {
+          term: { ar: "وحدات الإدخال والإخراج", en: "Input and Output Units" },
+          def: { ar: "أجهزة تُدخل البيانات أو تُخرج النتائج، كالفأرة ولوحة المفاتيح والماسح والكاميرا في الإدخال، والشاشة والطابعة والراسم والسماعات في الإخراج.", en: "Devices entering data or outputting results: input such as mouse, keyboard, scanner and camera; output such as screen, printer, plotter and speakers." }
+        },
+        {
+          term: { ar: "نظام التشغيل", en: "Operating System" },
+          def: { ar: "الطبقة البرمجية التي تتحكم في الملفات وأجهزة التخزين والأجهزة الملحقة، وتنفذ البرامج التطبيقية وتدير عمليات وحدات الحاسب وتسّهل الأوامر للمستخدم.", en: "The software layer controlling files, storage devices and peripherals, executing applications, managing machine operations and easing commands for the user." }
+        },
+        {
+          term: { ar: "البرامج التطبيقية", en: "Application Software" },
+          def: { ar: "برامج تخدم هدفًا معينًا أُنشئت من أجله، كمعالجة النصوص وقواعد البيانات والرسوم والتصميم، ولا تعمل مستقلة عن نظام التشغيل الذي ينفذها.", en: "Programs serving the specific purpose they were created for — word processing, databases, graphics, design — and never running independently of the executing operating system." }
+        },
+        {
+          term: { ar: "البرمجيات الوسيطة", en: "Middleware" },
+          def: { ar: "برامج تقف وسيطًا بين نظام التشغيل والمكونات المادية فتصبح الأجهزة قابلة للتعامل مع النظام، كوظيفة بطاقة الصوت في إخراج الصوت وإدخاله.", en: "Software standing between the operating system and physical components so devices become usable by the system, as with the sound card's output and input paths." }
+        }
+      ],
+      example: {
+        ar: "عند كتابة نص بلوحة المفاتيح — وهي وحدة إدخال — تنتقل البيانات إلى ذاكرة الوصول العشوائي، ثم يعالجها المعالج ويحولها إخراجًا، فتحوّلها بطاقة الشاشة إلى صيغة قابلة للعرض وتظهر النتيجة على الشاشة — وهي وحدة إخراج. وحين يُحفظ المستند على القرص الصلب ويُطفأ الجهاز يبقى المستند محفوظًا، لأن القرص الصلب يحتفظ بالملفات مدة تزيد على فترة التشغيل، بخلاف ما كان في الذاكرة المؤقتة الذي يضيع بانقطاع التيار.",
+        en: "Typing text on the keyboard — an input unit — moves data into RAM, the processor works on it, and the graphics card converts the result into a displayable form shown on the screen, an output unit. When the document is saved to the hard disk and the machine is turned off, the file survives, because the disk keeps files beyond the working session, unlike the temporary memory content lost when power is cut."
+      },
+      mistakes: [
+        { ar: "الخلط بين ذاكرة الوصول العشوائي والقرص الصلب؛ فالأولى تفقد بياناتها بانقطاع التيار والثاني يحتفظ بها.", en: "Confusing RAM with the hard disk; RAM loses its data on power loss while the disk keeps it." },
+        { ar: "ظن أن وحدة السيطرة هي التي تنفذ العمليات الحسابية؛ والصواب أنها توزع الأوامر ووحدة الحساب والمنطق تنفذ.", en: "Thinking the control unit performs arithmetic; it issues orders while the arithmetic-logic unit executes." },
+        { ar: "الخلط بين نظام التشغيل والبرنامج التطبيقي، كعدّ برنامج معالجة النصوص نظام تشغيل لأنه يعرض المستندات ويطبعها.", en: "Confusing the operating system with application software, such as calling a word processor an operating system because it shows and prints documents." },
+        { ar: "الظن أن المكونات المادية تستطيع وحدها أداء المهام بمجرد توصيلها بالكهرباء دون برمجيات.", en: "Believing hardware alone performs tasks once powered, with no software." },
+        { ar: "إغفال دور البرمجيات الوسيطة، فبطاقة الصوت مثلًا لا تؤدي عملها دونها.", en: "Overlooking middleware: the sound card, for instance, does nothing without it." }
+      ],
+      terminology: [
+        { ar: "العتاد", en: "Hardware" },
+        { ar: "المعالج", en: "Processor" },
+        { ar: "وحدة الحساب والمنطق", en: "ALU" },
+        { ar: "وحدة السيطرة", en: "Control Unit" },
+        { ar: "ذاكرة الوصول العشوائي", en: "RAM" },
+        { ar: "ذاكرة القراءة فقط", en: "ROM" },
+        { ar: "نظام التشغيل", en: "Operating System" },
+        { ar: "البرمجيات الوسيطة", en: "Middleware" },
+        { ar: "بطاقة الشاشة", en: "Graphics Card" }
+      ],
+      level: "easy"
+    },
+
+    cloud: {
+      title: {
+        ar: "الفصل 3 · الحوسبة السحابية",
+        en: "Chapter 3 · Cloud Computing"
+      },
+      explanation: {
+        ar: "الحوسبة السحابية نموذج لتمكين الوصول الشبكي المنتشر والمريح وعند الطلب إلى مجموعة مشتركة من الموارد الحاسوبية القابلة للتهيئة، تُوفَّر وتُحرَّر بسرعة بأقل جهد إداري، وخصائصه الخمس: الخدمة الذاتية عند الطلب، والوصول الواسع عبر الشبكة، وتجميع الموارد، والمرونة السريعة، والخدمة المقيسة. وتنشأ قوته من الافتراضية التي تحول عتاد الخادم إلى موارد تُوزع برمجيًا، فتمنح البيئة السحابية قابلية التوسع والتخزين المرن، وتُبنى عليه نماذج التقديم الثلاثة المتدرجة — بنية ثم منصة ثم برمجيات كخدمة — مع خدمات متفرعة كقاعدة البيانات والأمن والاختبار كخدمة، وتحكم العلاقة اتفاقية مستوى الخدمة ومعايير تسعير قائمة على الاستخدام. واختيار البيئة قرار استثماري تقيسه دراسة الجدوى بالتكاليف الأولية والجارية والنفقات الرأسمالية والعائد، وتُنفَّذ الانتقالات باستراتيجية ترحيل من سبع ممارسات لا تهمل الأمن ومعايير الخصوصية، مع ما يفرضه التشغيل السحابي من فهم متقدم لبنى النشر ووظائف أطر الأمن.",
+        en: "Cloud computing is a model for enabling convenient, on-demand network access to a shared pool of configurable computing resources, provisioned and released quickly with minimal management effort; its five characteristics are on-demand self-service, broad network access, resource pooling, rapid elasticity and measured service. Its power comes from virtualization turning server hardware into software-distributed resources, granting scalability and elastic storage, on which the three graduated delivery models are built — infrastructure, platform, then software as a service — with derived offerings such as database, security and testing as a service, governed by service-level agreements and usage-based pricing. Choosing an environment is an investment decision measured by feasibility studies through up-front, ongoing, capital and return figures, and migrations follow a seven-practice strategy that never omits security and privacy standards, alongside the advanced grasp of deployment models and security frameworks that cloud operations demand."
+      },
+      objectives: [
+        { ar: "تعريف الحوسبة السحابية بخصائصها الخمس كما وردت عند NIST.", en: "Define cloud computing with its five NIST characteristics." },
+        { ar: "المقارنة بين البيئة المحلية والبيئة السحابية من جهة الملكية والإدارة والدعم والوصول.", en: "Compare on-premise and cloud environments in ownership, management, support and access." },
+        { ar: "تمييز نماذج التقديم الثلاثة ونماذج النشر الأربعة.", en: "Distinguish the three delivery models from the four deployment models." },
+        { ar: "تقييم قرار الانتقال بالتكلفة الأولية والجارية والنفقات الرأسمالية والعائد.", en: "Evaluate a migration decision through up-front and ongoing costs, capital expenditure and return." },
+        { ar: "تعداد وظائف إطار NIST للأمن السيبراني الخمس.", en: "List the five functions of the NIST cybersecurity framework." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الحوسبة السحابية", en: "Cloud Computing" },
+          def: { ar: "نموذج لتقديم الموارد الحاسوبية عبر الشبكة عند الطلب وبأقل جهد إداري، بخمس خصائص: الخدمة الذاتية والوصول الواسع وتجميع الموارد والمرونة السريعة والخدمة المقيسة.", en: "A model delivering computing resources over the network on demand with minimal management effort, with five characteristics: self-service, broad access, pooling, rapid elasticity and measured service." }
+        },
+        {
+          term: { ar: "الافتراضية وقابلية التوسع", en: "Virtualization and Scalability" },
+          def: { ar: "تقنية تحول عتاد الخادم إلى موارد برمجية تُقسم على الأجهزة بحسب حاجتها، فتتحول السحابة إلى موارد يُعاد توزيعها فتزيد أو تنقص بأقل جهد دون شراء عتاد.", en: "A technology turning server hardware into software resources divided among machines; the cloud thereby redistributes capacity up or down with minimal effort and no hardware buying." }
+        },
+        {
+          term: { ar: "نماذج التقديم", en: "Delivery Models" },
+          def: { ar: "ثلاثة مستويات متدرجة قائمة على الاشتراك: البنية التحتية كخدمة للموارد الخام، والمنصة كخدمة لبيئة التطوير، والبرمجيات كخدمة للتطبيقات الجاهزة.", en: "Three graduated subscription levels: infrastructure as a service for raw resources, platform as a service for a development environment, and software as a service for ready applications." }
+        },
+        {
+          term: { ar: "نماذج النشر", en: "Deployment Models" },
+          def: { ar: "أربعة نماذج بحسب المالك والوصول: المجتمعية تتشاركها جهات ذات اهتمام، والخاصة لمنظمة واحدة تتحمل مسؤولية الإدارة، والعامة عند الطلب، والهجينة مزيج من العامة والخاصة.", en: "Four models by ownership and access: community shared by like-minded parties, private for one organization carrying management responsibility, public on demand, and hybrid blending public and private." }
+        },
+        {
+          term: { ar: "اتفاقية مستوى الخدمة", en: "Service-Level Agreement" },
+          def: { ar: "وثيقة بمستويات الخدمة التي يضمنها المزوّد ومرجع للتشغيل اليومي يقاس بأداة مراقبة، وقد تنص على غرامات عند إخفاق المزوّد.", en: "A document of the service levels the provider guarantees and a daily-operations reference measured by a monitoring tool, possibly with penalties when the provider fails." }
+        },
+        {
+          term: { ar: "دراسة الجدوى", en: "Feasibility Study" },
+          def: { ar: "مقارنة البيئات ومتطلباتها وعروض المزوّدين بالتكلفة الأولية وما قبل التسليم والجارية اليومية والنفقات الرأسمالية، ثم التكلفة الإجمالية للملكية والعائد على الاستثمار.", en: "Comparing environments, requirements and provider offers through up-front and ongoing costs and capital expenditure, then total cost of ownership and return on investment." }
+        },
+        {
+          term: { ar: "استراتيجية الترحيل", en: "Migration Strategy" },
+          def: { ar: "خطة نقل الأنظمة والبيانات والبنية إلى السحابة بسبع ممارسات: تحديد الأهداف وتقييم المزوّدين وتصميم الخطة والتواصل والاختبار والتنفيذ والاستعانة بمتخصص، مع أمن الترحيل ومعايير الخصوصية.", en: "A plan moving systems, data and infrastructure to the cloud in seven practices: setting goals, evaluating providers, designing the plan, communicating, testing, executing, and engaging a specialist — with migration security and privacy standards." }
+        },
+        {
+          term: { ar: "إطار NIST للأمن السيبراني", en: "NIST Cybersecurity Framework" },
+          def: { ar: "معيار فيدرالي لأي بيئة حاسوبية أساس لبرنامج الأمن وسياساته وإدارة مخاطره، بخمس وظائف: التحديد والحماية والاكتشاف والاستجابة والتعافي.", en: "A federal standard for any computing environment underpinning a security program, its policies and risk management, with five functions: identify, protect, detect, respond and recover." }
+        }
+      ],
+      example: {
+        ar: "ينشئ المستخدم مستندًا في Google Drive من هاتفه ويسمح لزميل بتعديله من جهاز مختلف، ويتيح Google Docs العمل المتزامن لعدة أشخاص. ويشرح المثال الفرق عمليًا: العتاد مملوك للمزوّد خارج مرافق المنظمة ويُوصل إليه عبر الإنترنت من أي جهاز وفي أي وقت، والدعم مسؤوليته بحسب الاتفاقية، ومدة التنفيذ أيام لا أشهر كما في شراء الأجهزة وإعداد البيئة المحلية. لكن هذا السهولة لا تعني إعفاء المستخدم من المسؤولية: فتحديد من يشارك المستند وضبط صلاحياته وسياسة النسخ الاحتياطي تبقى قرارات على المنظمة المستفيدة، وهذا ما تجسده المسؤولية المشتركة في السحابة.",
+        en: "A user creates a document in Google Drive from a phone and lets a colleague edit it from another device, with Google Docs enabling simultaneous work by several people. The example shows the difference in practice: hardware owned by the provider outside the organization's premises and reached over the internet from any device at any time, support the provider's responsibility per agreement, and rollout in days rather than the months of buying machines and setting up an on-premise environment. Yet this ease does not remove the user's responsibility: deciding who shares the document, controlling permissions and setting backup policy remain decisions of the consuming organization — the shared-responsibility idea in action."
+      },
+      mistakes: [
+        { ar: "الظن أن السحابة بلا عتاد؛ فالتقنية نفسها تعمل على عتاد مادي، والفرق في ملكيته وإدارته وتقديمه عبر الافتراضية.", en: "Thinking the cloud has no hardware; the same technology runs on physical machines, differing only in ownership, management and virtualized delivery." },
+        { ar: "عدّ نماذج التقديم الثلاثة منفصلة؛ والصواب أنها طبقات يُبنى بعضها فوق بعضها.", en: "Treating the three delivery models as separate; they are layers where each builds on the one below." },
+        { ar: "الاعتقاد أن السحابة آمنة تلقائيًا، وإغفال الامتثال والمعايير كGDPR وCIA عند الترحيل.", en: "Assuming the cloud is secure by default, ignoring compliance and standards such as GDPR and the CIA triad during migration." },
+        { ar: "عكس الترتيب الصحيح لاختيار أداة الترحيل؛ فيُختار المزوّد أولًا ثم أداته الخاصة بالترحيل.", en: "Reversing the order of migration-tool choice; the provider is chosen first, then its own migration tool." },
+        { ar: "الخلط بين التكلفة الأولية والجارية؛ فالأولى ما يُنفق قبل تسليم الخدمات والثانية ما يتكرر في التشغيل اليومي.", en: "Confusing up-front with ongoing cost; the first is spent before services are delivered, the second recurs in daily operations." }
+      ],
+      terminology: [
+        { ar: "الحوسبة السحابية", en: "Cloud Computing" },
+        { ar: "الافتراضية", en: "Virtualization" },
+        { ar: "البنية التحتية كخدمة", en: "IaaS" },
+        { ar: "المنصة كخدمة", en: "PaaS" },
+        { ar: "البرمجيات كخدمة", en: "SaaS" },
+        { ar: "اتفاقية مستوى الخدمة", en: "Service-Level Agreement" },
+        { ar: "السحابة الهجينة", en: "Hybrid Cloud" },
+        { ar: "استراتيجية الترحيل", en: "Migration Strategy" },
+        { ar: "قابلية التوسع", en: "Scalability" }
+      ],
+      level: "medium"
+    },
+
+    security: {
+      title: {
+        ar: "الفصل 4 · أمن المعلومات والشبكات",
+        en: "Chapter 4 · Information and Network Security"
+      },
+      explanation: {
+        ar: "يحمي الأمن السيبراني الأنظمة والشبكات والأجهزة والبيانات من تهديدات الإنترنت، وأمن الشبكات جزء منه يحمي البنية التحتية بالأدوات والتقنيات والسياسات من الوصول غير المصرح به وسوء الاستخدام والأعطال والإفصاح، بينما أمن المعلومات يخفف مخاطر البيانات وثغراتها، والخصوصية حق الأفراد في التحكم بجمع معلوماتهم وتخزينها ونشرها؛ فالخصوصية تحدد من يطلع والأمن يفرض ذلك تقنيًا، وعدّهما شيئًا واحدًا خطأ شائع. ويقوم الأمن على ثلاثية السرية والسلامة والإتاحة: تحقق السريةَ سياساتٌ وتشفيرٌ وضوابطُ وصول، وتصون السلامةَ التجزئةُ والتوقيع الرقمي ببنية المفاتيح العامة، وتضمن الإتاحةُ خططُ التعافي والنسخ والأنظمة الاحتياطية. وتنتقل البيانات عبر مكونات شبكة من خادم وموجّه ومبدّل وعناوين ومنافذ ونظام أسماء، ولكل منها نقاط ضعف — من مسح المنافذ وانتحال العناوين والتصيد الاحتيالي إلى الثغرات والتهديدات البيئية والخارجية والداخلية — تقابلها تقنيات متدرجة من التشفير إلى المصادقة المتعددة والجدار الناري وكشف التسلل، مع لوائح تحمي البيانات الحساسة.",
+        en: "Cybersecurity protects systems, networks, devices and data from internet threats; network security is part of it, guarding infrastructure with tools, techniques and policies against unauthorized access, misuse, failure and disclosure, while information security reduces data risks and privacy is people's right to control collection, storage and sharing of their information — privacy sets who may look and security enforces it, and treating them as one is a common error. Security rests on the CIA triad: confidentiality delivered by policy, encryption and access controls; integrity preserved by hashing and digital signatures over public-key infrastructure; availability guaranteed by recovery plans, backups and redundant systems. Data crosses network components — server, router, switch, addresses, ports and name system — each with weaknesses from port scanning, spoofing and phishing to vulnerabilities and environmental, external and internal threats, met by graduated technologies from encryption to multi-factor authentication, firewalls and intrusion detection, with regulations guarding sensitive data."
+      },
+      objectives: [
+        { ar: "تعريف الأمن السيبراني وأمن الشبكات والتمييز بين أمن المعلومات والخصوصية.", en: "Define cybersecurity and network security and distinguish information security from privacy." },
+        { ar: "شرح عناصر ثلاثية السرية والسلامة والإتاحة ووسيلتين لتحقيق كل منها.", en: "Explain the CIA triad elements and two means for each." },
+        { ar: "بيان وظائف مكونات الشبكة والعناوين ونظام الأسماء وثغراتها.", en: "State the roles of network components, addresses and the name system, and their weaknesses." },
+        { ar: "المقارنة بين التشفير المتماثل وغير المتماثل ومنهج المصادقة متعددة العوامل.", en: "Compare symmetric and asymmetric encryption and the multi-factor authentication approach." },
+        { ar: "تعداد تقنيات الحماية وأفضل الممارسات والإجراءات المضادة.", en: "List protection technologies, best practices and countermeasures." }
+      ],
+      concepts: [
+        {
+          term: { ar: "ثلاثية السرية والسلامة والإتاحة", en: "CIA Triad" },
+          def: { ar: "نموذج أساسي لأمن المعلومات يوازن بين حماية البيانات وتمكين المصرح لهم: السرية منع وصول غير المصرح، والسلامة حفظ الدقة، والإتاحة ضمان الوصول عند الحاجة.", en: "A foundational model balancing data protection with authorized use: confidentiality blocks unauthorized access, integrity preserves accuracy, and availability guarantees access when needed." }
+        },
+        {
+          term: { ar: "أمن المعلومات والخصوصية", en: "Information Security and Privacy" },
+          def: { ar: "الأمن حماية المعلومات بالحد من مخاطرها لمنع الوصول غير المصرح والعبث، والخصوصية حق التحكم بجمع المعلومات الشخصية وتخزينها ونشرها؛ فهما متكاملان لا مترادفان.", en: "Security protects information by reducing risks of unauthorized access and tampering; privacy is the right to control collection, storage and sharing of personal data — complementary, not synonymous." }
+        },
+        {
+          term: { ar: "مكونات الشبكة وعنونتها", en: "Network Components and Addressing" },
+          def: { ar: "الخادم يقدم البيانات للعملاء، والموجّه يوجه الحزم، والمبدّل يربط الشبكة المحلية ويقسمها؛ ويُعرَّف كل اتصال بعنوان IP عبر الإنترنت وعنوان MAC داخليًا، مع منافذ تحدد الخدمات.", en: "The server delivers data to clients, the router directs packets, the switch links and divides the local network; each connection is identified by an IP address online and a MAC address locally, with ports naming services." }
+        },
+        {
+          term: { ar: "نظام أسماء النطاقات", en: "DNS (Domain Name System)" },
+          def: { ar: "دليل الإنترنت الذي يترجم أسماء النطاقات إلى عناوين IP، ويُستغل بانتحال خوادمه لتحويل الحركة واعتراضها، وتحمي منه DNSSEC بتوقيع الاستجابات رقميًا.", en: "The internet's directory translating domain names into IP addresses; it is abused by spoofing its servers to redirect and intercept traffic, countered by DNSSEC signing responses digitally." }
+        },
+        {
+          term: { ar: "التشفير المتماثل وغير المتماثل", en: "Symmetric and Asymmetric Encryption" },
+          def: { ar: "المتماثل بمفتاح واحد سريع للبيانات المخزنة كثيرة الحجم ومعياره AES لكن مشاركة مفتاحه صعبة، وغير المتماثل بمفتاحين عام وخاص أبطأ للبيانات المنقولة ومنه RSA.", en: "Symmetric uses one key — fast for large stored data, standardized as AES, but hard to share securely; asymmetric uses public and private keys — slower, for data in transit, exemplified by RSA." }
+        },
+        {
+          term: { ar: "بروتوكولا SSL وTLS", en: "SSL and TLS" },
+          def: { ar: "بروتوكول تشفير ينشئ نفقًا مشفرًا بين المتصفح والموقع أو بين خادمين، يمنع اختطاف الاتصالات واعتراض الرسائل، وTLS هو إصداره الأحدث.", en: "An encryption protocol creating a secure tunnel between browser and site or between servers, preventing connection hijacking and message interception; TLS is its newer version." }
+        },
+        {
+          term: { ar: "المصادقة متعددة العوامل", en: "Multi-Factor Authentication" },
+          def: { ar: "طلب أكثر من عامل تحقق: شيء تعرفه ككلمة المرور، وشيء تملكه كهاتف يتلقى رمزًا، وشيء هو أنت كالبصمة؛ فإن اخترق عامل منع الآخر الوصول.", en: "Requiring more than one factor: something you know like a password, something you hold like a phone receiving a code, something you are like a fingerprint; breaching one factor still blocks access." }
+        },
+        {
+          term: { ar: "الجدار الناري وكشف التسلل", en: "Firewall and Intrusion Detection" },
+          def: { ar: "الجدار نظام وقائي بين شبكة موثوقة وأخرى غير موثوقة يراقب الحركة بقواعد ويمنع غير المصرح، وكاشف التسلل يرصد الأنماط الشاذة؛ فالخلط بينهما خطأ شائع.", en: "A firewall is a preventive system between trusted and untrusted networks policing traffic by rules; intrusion detection watches for abnormal patterns — confusing the two is a common error." }
+        }
+      ],
+      example: {
+        ar: "شركة صغيرة تحمي متجرها الإلكتروني بطبقات متكاملة بدل ضابط واحد: يشفّر النقل بين المتصفح والخادم بـTLS عبر HTTPS، وتُشفَّر قاعدة البيانات المخزنة بمعيار AES، وتحفظ مفاتيح الشهادات ببنية المفاتيح العامة وبتوقيع رقمي يثبت سلامة المستندات المصرفية. ويحمي الموظفين عاملان معًا: كلمة مرور قوية وسياسة تغيير دورية، ثم رمز يصل إلى الهاتف عند الدخول — فإن سُرقت كلمة المرور وحدها لم يكفِ السارق. ويراقب جدار ناري منافذ الخادم فيسمح بالمنفذ 443 ويحجب غيره، بينما يرصد نظام كشف التسلل مسح المنافذ المتكرر الذي سبق هجومًا؛ ويظل العنصر البشري خط الدفاع الأهم: قليل من الموظفين من يفتح رسالة تصيد تُدّعي أنها من البنك، وهنا تكشف مراجعة عنوان المرسل التناقض.",
+        en: "A small company protects its online store with integrated layers rather than one control: traffic between browser and server is encrypted with TLS over HTTPS, the stored database is encrypted with AES, and certificate keys are kept under public-key infrastructure with digital signatures proving the integrity of banking documents. Employees are guarded by two factors: a strong password under a rotation policy, plus a code sent to the phone at sign-in — stealing the password alone is not enough. A firewall polices the server's ports, allowing 443 and blocking the rest, while intrusion detection spots the repeated port scan that preceded an attack; and people remain the most important line: few employees question a phishing message claiming to be their bank, where checking the sender's address exposes the contradiction."
+      },
+      mistakes: [
+        { ar: "معاملة الأمن والخصوصية شيئًا واحدًا؛ فالخصوصية تحدد من يطلع والأمن يفرض ذلك تقنيًا.", en: "Treating security and privacy as one thing; privacy defines who may look and security enforces it technically." },
+        { ar: "ظن أن الجدار الناري كاشف للاختراقات؛ والصواب أنه وقائي، وكشف الأنماط الشاذة من عمل أنظمة كشف التسلل.", en: "Believing the firewall detects intrusions; it prevents, while spotting abnormal patterns is intrusion detection's job." },
+        { ar: "الاعتماد على كلمة مرور قوية وحدها دون مصادقة متعددة العوامل، مع أن الخطأ البشري أكبر الثغرات.", en: "Relying on a strong password alone without multi-factor authentication, when human error is the largest vulnerability." },
+        { ar: "إهمال تحديث الأنظمة بحجة أنها تعمل طبيعيًا؛ فالنظام غير المرقع يعطي أمانًا زائفًا وثغراته معروفة.", en: "Skipping updates because systems seem to work; an unpatched system gives false confidence while its flaws are known." },
+        { ar: "الخلط بين استخدامي التشفير: المتماثل للبيانات المخزنة كثيرة الحجم وغير المتماثل للبيانات المنقولة.", en: "Confusing the two encryptions' uses: symmetric for large stored data, asymmetric for data in transit." }
+      ],
+      terminology: [
+        { ar: "الأمن السيبراني", en: "Cybersecurity" },
+        { ar: "السرية والسلامة والإتاحة", en: "CIA Triad" },
+        { ar: "التشفير", en: "Encryption" },
+        { ar: "التجزئة", en: "Hashing" },
+        { ar: "التوقيع الرقمي", en: "Digital Signature" },
+        { ar: "المصادقة متعددة العوامل", en: "Multi-Factor Authentication" },
+        { ar: "الجدار الناري", en: "Firewall" },
+        { ar: "الشبكة الافتراضية الخاصة", en: "VPN" },
+        { ar: "نظام كشف التسلل", en: "IDS" }
+      ],
+      level: "medium"
+    },
+
+    databases: {
+      title: {
+        ar: "الفصل 5 · قواعد البيانات",
+        en: "Chapter 5 · Databases"
+      },
+      explanation: {
+        ar: "قواعد البيانات حاضرة يوميًا في كل تطبيق تقريبًا، ويحتاج مختص نظم المعلومات إلى فهم أساسيات أنظمة إدارتها واستخدامها في حل مشكلات الأعمال. وتنقسم البيانات بحسب تنظيمها إلى مهيكلة تُخزن في صفوف وأعمدة وتسهل الاستعلام عنها، وشبه مهيكلة تفصل وسومها بين عناصرها كـXML وJSON، وغير مهيكلة بلا بنية محددة تحتاج أساليب تحليل متقدمة. ويدير البياناتَ نظامُ إدارة قواعد البيانات بوظائف التخزين الكفء والاستعلام وضمان الدقة والتحكم في الوصول وإدارة المعاملات والاستعادة، حافظًا السلامة بالموفتاح الأساسي والقيود والاتساق بخصائص ACID، ومزيلًا التكرار بالتطبيع عبر صيغه الثلاث. وتتعدد الأنواع بحسب الحاجة بين العلائقية والموجهة بالمستندات ومخازن المفاتيح والعائلات والرسوم، والمستودعات والبحيرات والقواعد الكائنية، بينما يسرّع الاسترجاع فهارس متخصصة وتُستعمل لغة SQL بمعاملاتها الخمس، وتمتد إدارة البيانات على دورة حياة كاملة من الجمع والتنقيح إلى التحليل والأرشفة.",
+        en: "Databases are present daily in nearly every application, and IT professionals must grasp their management systems and use them to solve business problems. By organization, data divides into structured rows and columns that query easily, semi-structured forms whose tags separate elements such as XML and JSON, and unstructured content lacking a fixed structure that needs advanced analysis. A database management system runs the data with efficient storage, query, accuracy, access control, transaction management and recovery functions, preserving integrity through primary keys and constraints and consistency through ACID properties, removing redundancy through the three normal forms. Types multiply with need — relational, document-oriented, key-value, column-family and graph stores, warehouses, lakes and object databases — while retrieval accelerates through specialized indexes and SQL with its five statements, and data management spans a full life cycle from collection and curation to analysis and archiving."
+      },
+      objectives: [
+        { ar: "تصنيف البيانات إلى مهيكلة وشبه مهيكلة وغير مهيكلة مع مثال لكل نوع.", en: "Classify data into structured, semi-structured and unstructured with an example of each." },
+        { ar: "تعداد وظائف نظام إدارة قواعد البيانات وشرح خصائص ACID.", en: "List DBMS functions and explain the ACID properties." },
+        { ar: "شرح المفاتيح والقيود والتطبيع بصيغه الثلاث وإلغاء التطبيع.", en: "Explain keys, constraints, the three normal forms and denormalization." },
+        { ar: "المقارنة بين أنواع قواعد البيانات ومستودع البيانات وبحيرته.", en: "Compare database types and the data warehouse against the lake." },
+        { ar: "تتبع دورة حياة البيانات من الجمع إلى الأرشفة والحذف.", en: "Trace the data life cycle from collection to archiving and deletion." }
+      ],
+      concepts: [
+        {
+          term: { ar: "أنواع البيانات", en: "Data Types" },
+          def: { ar: "ثلاثة أنواع بحسب التنظيم: مهيكلة في جداول سهلة الاستعلام، وشبه مهيكلة منظمة جزئيًا بوسوم، وغير مهيكلة بلا بنية محددة كالصور والفيديو.", en: "Three kinds by organization: structured in easily queried tables, semi-structured partially tagged, and unstructured with no fixed form such as images and video." }
+        },
+        {
+          term: { ar: "نظام إدارة قواعد البيانات", en: "DBMS" },
+          def: { ar: "مجموعة برامج لإنشاء قواعد البيانات وصيانتها تدير البيانات وتخزنها وتعالجها بطريقة منهجية، فتبقى منظمة ومتاحة وآمنة وسهلة الاسترجاع.", en: "Software for creating and maintaining databases, managing, storing and processing data methodically so it stays organized, available, secure and easy to retrieve." }
+        },
+        {
+          term: { ar: "خصائص ACID", en: "ACID Properties" },
+          def: { ar: "أربع خصائص تحفظ اتساق المعاملات: الذرية تنفيذ المعاملة كلها أو لا شيء، والاتساق بقاء القاعدة ملتزمة بقواعدها، والعزل منع التداخل، والديمومة بقاء المكتملة رغم الأعطال.", en: "Four properties preserving transaction consistency: atomicity all-or-nothing, consistency keeping the database rule-bound, isolation preventing interference, durability surviving failures once complete." }
+        },
+        {
+          term: { ar: "المفاتيح والقيود", en: "Keys and Constraints" },
+          def: { ar: "المفتاح الأساسي معرّف فريد لكل سجل لا يتكرر ولا يقبل الفراغ، والمفتاح الأجنبي يشير إلى مفتاح أساسي في جدول آخر فيحفظ السلامة المرجعية ويمنع السجل اليتيم، وقيد التحقق يحدد القيم المسموحة.", en: "The primary key uniquely identifies each record, repeating never and blank never; the foreign key points to another table's primary key preserving referential integrity and preventing orphans; check constraints bound allowed values." }
+        },
+        {
+          term: { ar: "التطبيع وإلغاؤه", en: "Normalization and Denormalization" },
+          def: { ar: "التطبيع فحص الاعتمادات الوظيفية لتخزين كل معلومة مرة واحدة عبر ثلاث صيغ: قيمة ذرية، ثم إزالة الاعتماد الجزئي، ثم إزالة الاعتماد المتعدي؛ وإلغاء التطبيع تكرار متعمد لتسريع الأنظمة الكبيرة.", en: "Normalization examines functional dependencies to store each fact once across three forms: atomic values, removing partial dependency, removing transitive dependency; denormalization is deliberate duplication to speed large systems." }
+        },
+        {
+          term: { ar: "أنواع قواعد البيانات", en: "Database Types" },
+          def: { ar: "العلائقية بجداولها وعلاقاتها بالمفاتيح الأجنبية، وNoSQL بأربعة أنواع منها مخازن المفتاح والقيمة والموجهة بالمستندات، ومستودع البيانات للتحليل والتقارير، وبحيرة البيانات لحفظ الخام بصيغته، والنظام الكائني للنماذج المعقدة.", en: "Relational with tables and foreign-key relations; NoSQL in four kinds including key-value and document stores; the warehouse for analysis and reporting; the lake keeping raw data as-is; and object databases for complex models." }
+        },
+        {
+          term: { ar: "الفهارس ولغة SQL", en: "Indexes and SQL" },
+          def: { ar: "الفهرسة تسرّع الاسترجاع بتحديد موقع البيانات دون فحص الجدول كله، بأنواع كفهرس الشجرة المتوازنة للبحث والنطاق والفهرس التجزيئي للمساواة؛ وSQL اللغة القياسية بأوامرها الخمس: إنشاء وتعديل واستعلام وتحديث وحذف.", en: "Indexing speeds retrieval by locating data without scanning the whole table — B-tree for search and ranges, hash for equality; SQL is the standard language with five statements: create, insert, select, update and delete." }
+        },
+        {
+          term: { ar: "دورة حياة البيانات", en: "Data Life Cycle" },
+          def: { ar: "مراحل متتابعة من الجمع من مصادر أولية أو ثانوية، فالتخزين والتنظيم، فالمعالجة والتنقيح تنظيفًا وتحويلًا وضمان جودة، فالتحليل، ثم الأرشفة أو الحذف بعد انتهاء الحاجة.", en: "Sequential stages from collection from primary or secondary sources, to storage and organization, processing and curation through cleaning, transformation and quality assurance, then analysis, and archiving or deletion once no longer needed." }
+        }
+      ],
+      example: {
+        ar: "نظام مكتبة محلية يوضح السلسلة كاملة: متطلباته الوظيفية حفظ بيانات الكتب والأعضاء وتتبع الإعارة والغرامات والتقارير، وغير الوظيفية حماية خصوصية الأعضاء وسرعة البحث. وبنيته تطبيق ويب بواجهة أمامية وخلفية من قاعدة MySQL للمعالجة، وفيه جدول الكتب بمفتاح BookID وأنواع CHAR وVARCHAR للترمز والعناوين، وجدول الأعضاء بمفتاح MemberID، وجدول الإعارة الذي يحمل المفتاحين الأجنبيين BookID وMemberID مع تواريخ الإعارة والاستحقاق والإرجاع. وبالمفاتيح الأجنبية يحفظ النظام السلامة المرجعية فلا تُسجل إعارة لكتاب غير موجود ولا لعضو وهمي، ومع الفهرسة يسرع البحث عن الكتب وتسجيل الأعضاء وتنبيه الإرجاع بالبريد.",
+        en: "A local library system shows the entire chain: its functional requirements keep book and member data and track lending, fines and reports, while non-functional requirements protect member privacy and speed search. Its architecture is a web application with a front end and a MySQL back end, with a books table keyed by BookID using CHAR and VARCHAR for the ISBN and titles, a members table keyed by MemberID, and a lending table carrying both foreign keys BookID and MemberID with lending, due and return dates. Through the foreign keys the system enforces referential integrity — no loan for a missing book or a phantom member — and with indexing it speeds up book search, member registration and email due-date reminders."
+      },
+      mistakes: [
+        { ar: "الخلط بين شبه المهيكلة وغير المهيكلة؛ والفيصل وجود الوسوم المنظمة جزئيًا في الأولى.", en: "Confusing semi-structured with unstructured data; the distinguishing mark is the partially organizing tags of the former." },
+        { ar: "عدّ مستودع البيانات وبحيرة البيانات شيئًا واحدًا؛ فالأول يدمج للتحليل والتقارير والثانية تحفظ البيانات خامًا.", en: "Treating the warehouse and the lake as one; the first integrates for analysis and reports, the second keeps raw data." },
+        { ar: "ظن أن المفتاح الأساسي يقبل التكرار أو الفراغ؛ فحينها تنشأ سجلات لا تتميز.", en: "Thinking the primary key tolerates repetition or blanks; then records become indistinguishable." },
+        { ar: "استخدام الفهرس التجزيئي في استعلامات النطاق؛ ففهرس الشجرة المتوازنة أنسب لها لأنه يحفظ الترتيب.", en: "Using a hash index for range queries; a B-tree index suits them because it preserves order." },
+        { ar: "إغفال التحقق عند الإدخال فيقبل حقل البريد صيغة خاطئة وحقل التاريخ تاريخًا مستقبلًا حيث يُطلب ماض.", en: "Ignoring input validation so an email field accepts a wrong format and a date field a future date where the past is required." }
+      ],
+      terminology: [
+        { ar: "قاعدة البيانات", en: "Database" },
+        { ar: "نظام إدارة قواعد البيانات", en: "DBMS" },
+        { ar: "المفتاح الأساسي", en: "Primary Key" },
+        { ar: "المفتاح الأجنبي", en: "Foreign Key" },
+        { ar: "التطبيع", en: "Normalization" },
+        { ar: "خصائص ACID", en: "ACID" },
+        { ar: "مستودع البيانات", en: "Data Warehouse" },
+        { ar: "بحيرة البيانات", en: "Data Lake" },
+        { ar: "دورة حياة البيانات", en: "Data Life Cycle" }
+      ],
+      level: "medium"
+    },
+
+    netsec: {
+      title: {
+        ar: "الفصل 6 · أمن الشبكات وحمايتها",
+        en: "Chapter 6 · Network Security and Protection"
+      },
+      explanation: {
+        ar: "أمن الشبكات مجال متغير لا يبقى فيه ما يُعد آمنًا اليوم آمنًا غدًا، ويقوم على فهم عناصر الشبكة وعناوينها ومنافذها وتشفيرها ومصادقتها، ثم على معرفة الثغرات التي تفتح المداخل: خلل البرمجيات غير المرقّعة الذي يمنح أمانًا زائفًا، وثغرات العتاد المهملة في الموجّهات وأجهزة إنترنت الأشياء، ومشكلات الإعداد وأخطرها بيانات الدخول الافتراضية التي تمنح وصولًا شاملًا، وضعف تأمين واجهات برمجة التطبيقات. وتقع التهديدات في ثلاث فئات — بيئية لا تُتحكم فيها، وخارجية يحركها المال أو التجسس وتستعمل الهندسة الاجتماعية والتهديدات المتقدمة والبرمجيات الخبيثة والفدية، وداخلية يتجاوز صاحبها خطوط الدفاع الأولى — ويقابلها دفاع متكامل: أربعة أنواع من الجدران النارية، وأنظمة كشف ومنع تُصنف بالتوقيعات والشذوذ، وأدوات رقابية من السجلات والإنذارات إلى المراقب الموحّد للأحداث. وتُختم الاستراتيجية بممارسات مجربة: مصادقة متعددة العوامل، وترقيع في وقته، وانعدام ثقة، ودفاع في العمق، وتنويع مزودين، وتدريب بشري؛ فالعنصر البشري يبقى الحلقة الأضعف وأول ما يُستهدف.",
+        en: "Network security is a shifting field where today's safety is not tomorrow's, built on understanding network elements, addresses, ports, encryption and authentication, then on knowing the vulnerabilities that open doors: flaws in unpatched software granting false confidence, neglected hardware weaknesses in routers and IoT devices, configuration problems whose worst form is default administrative credentials granting full access, and weakly secured application programming interfaces. Threats fall into three classes — environmental beyond control, external driven by money or espionage and wielding social engineering, advanced persistent threats, malware and ransomware, and internal actors bypassing the first lines of defense — met by integrated defense: four firewall types, detection and prevention systems classified by signatures and anomalies, and monitoring tools from log files and alarms to unified event management. The strategy closes with proven practices: multi-factor authentication, timely patching, zero trust, defense in depth, vendor diversity and human training, because people remain the weakest link and the first target."
+      },
+      objectives: [
+        { ar: "تعداد أنواع ثغرات الشبكات مع مثال لكل نوع.", en: "List network vulnerability types with an example of each." },
+        { ar: "تصنيف تهديدات الشبكة الثلاثة وتمييز دوافع مجرمي الإنترنت والجهات المدعومة من دول.", en: "Classify the three threat categories and distinguish cybercriminal motives from state-backed ones." },
+        { ar: "المقارنة بين هجمات كلمات المرور والتصيد وأنواع البرمجيات الخبيثة.", en: "Compare password attacks, phishing and malware types." },
+        { ar: "شرح أنواع جدران الحماية وأنظمة كشف ومنع التسلل وأدوات المراقبة.", en: "Explain firewall types, intrusion detection and prevention systems, and monitoring tools." },
+        { ar: "تطبيق أفضل الممارسات والإجراءات المضادة بحسب التهديد.", en: "Apply best practices and countermeasures according to the threat." }
+      ],
+      concepts: [
+        {
+          term: { ar: "أمن الشبكات ومبادئه", en: "Network Security and Its Principles" },
+          def: { ar: "حماية البنية التحتية وأنظمة تقنية المعلومات من الوصول غير المخول وسوء الاستعمال والعطل والكشف، بأدوات وتقنيات وسياسات، وأساسه فهم العناوين والمنافذ والتشفير والمصادقة.", en: "Protecting infrastructure and IT systems from unauthorized access, misuse, failure and disclosure with tools, techniques and policies; its base is understanding addresses, ports, encryption and authentication." }
+        },
+        {
+          term: { ar: "ثغرات الشبكات", en: "Network Vulnerabilities" },
+          def: { ar: "نقاط ضعف تفتح مداخل للاستغلال: خلل برمجي في نظام قديم غير مرقع، وضعف في العتاد كموجّه بكلمة مرور افتراضية، ومشكلات إعداد أخطؤها بيانات دخول مصنعية، وضعف تأمين واجهات برمجة التطبيقات.", en: "Weak points opening doors to exploitation: software flaws in old unpatched systems, hardware weaknesses like a router with a default password, configuration problems whose worst is factory credentials, and unsecured APIs." }
+        },
+        {
+          term: { ar: "تهديدات الشبكات الثلاثة", en: "The Three Threat Categories" },
+          def: { ar: "البيئي عامل لا ينشأ عن فعل بشري مقصود كالكوارث وتعطل العتاد، والخارجي من خارج المنظمة بمجرمين يحركهم المال أو جهات مدعومة من دول تسعى للتجسس، والداخلي من موظفين ومتعاقدين يملكون الوصول.", en: "Environmental threats from non-deliberate causes like disasters and hardware failure; external threats from cybercriminals driven by money or state-backed actors seeking espionage; and internal threats from employees and contractors holding access." }
+        },
+        {
+          term: { ar: "هجمات كلمات المرور والتصيد", en: "Password and Phishing Attacks" },
+          def: { ar: "القوة الغاشمة تجرب كل احتمالات كلمة المرور، والقاموس يجرب الأنماط الشائعة أولًا، ويُحمى منهما بسياسات صارمة ومصادقة متعددة العوامل؛ والتصيد رسائل تنتحل جهة موثوقة لاستدراج البيانات ويُكشف بتناقضاتها.", en: "Brute force tries every password possibility, dictionaries try common patterns first, both countered by strict policies and multi-factor authentication; phishing messages impersonate a trusted party to harvest data and are exposed by their contradictions." }
+        },
+        {
+          term: { ar: "البرمجيات الخبيثة", en: "Malware" },
+          def: { ar: "برامج مصممة للإضرار بالأنظمة أو استغلالها، وأشيعها الفيروس الذي يلتصق بالملفات، والدودة المستقلة بلا مضيف، وحصان طروادة المتنكر في برنامج آمن، وبرامج الفدية التي تشفر الملفات وتطلب فدية.", en: "Programs designed to damage or exploit systems: viruses clinging to files, worms spreading without hosts, trojans disguised in safe software, and ransomware encrypting files for payment." }
+        },
+        {
+          term: { ar: "جدران الحماية الأربعة", en: "The Four Firewall Types" },
+          def: { ar: "ترشيح الحزم يفحص الترويسة وفق قواعد مسبقة، والفحص الحالي يراقب سياق الاتصالات النشطة، والجيل التالي يضم كشف التسلل ومنعه، والوكيل يرشح الحركة وسيطًا بين المستخدمين والويب.", en: "Packet filtering inspects headers against preset rules; stateful inspection tracks active connection contexts; next-generation adds detection and prevention; and the proxy filters traffic as an intermediary between users and the web." }
+        },
+        {
+          term: { ar: "كشف التسلل ومنعه", en: "Intrusion Detection and Prevention" },
+          def: { ar: "أدوات عتادية وبرمجية ترصد النشاط الخبيث ومخالفة السياسات: القائم على التوقيعات فعال ضد المعروف ويفوّت الجديد، والقائم على الشذوذ يكشف الجديد وتكثر إنذاراته الكاذبة.", en: "Hardware and software watching for malicious activity and policy violations: signature-based works against the known and misses the new; anomaly-based catches the new with many false alarms." }
+        },
+        {
+          term: { ar: "الأدوات الرقابية وسجل الأحداث", en: "Monitoring Tools and SIEM" },
+          def: { ar: "ملف السجل يسجل أحداث الشبكة للتدقيق والتشخيص، والإنذار ينبه فورًا عند العبث، ومحلل البروتوكولات يفك الحزم ليكشف الأخطاء والثغرات، وSIEM يجمع السجلات ويربطها لكشف النشاط المريب لحظيًا.", en: "Log files record network events for audit and diagnosis, alarms alert on tampering, protocol analyzers decode packets to reveal errors and vulnerabilities, and SIEM aggregates logs and correlates them to spot suspicious activity in real time." }
+        }
+      ],
+      example: {
+        ar: "في شركة سعودية تصل موظفًا رسالة يبدو أنها من مصرفه تطلب تحديث كلمة المرور عبر رابط، فيفضحها أن عنوان المرسل لا يطابق المصرف، وأن الجهة الموثوقة لا تطلب كلمة المرور برسالة أصلًا. وفي الوقت نفسه ترصد السجلات محاولات دخول فاشلة متكررة إلى أحد الخوادم، ويربط نظام إدارة المعلومات والأحداث الأمنية بينها وبين تنبيه من جدار الحماية فيعرضها هجومًا واحدًا محتملًا. فتتحرك السلاسل كلها: كتلة كلمة المرور بسياسة صارمة ومصادقة متعددة العوامل، ويحجب الجدار الحزم الواردة إلى منافذ لا تستخدمها الخدمات، ويمنع نظام كشف التسلل ومنعه استمرار المحاولات، ويُرقّع الخادم قبل أن يستغل المهاجم ثغرة معروفة.",
+        en: "At a Saudi company an employee receives a message appearing to come from their bank asking to update the password through a link; it is exposed because the sender's address does not match the bank and because a trusted party never asks for a password by message. Meanwhile logs show repeated failed sign-ins to a server, and the security event management system links them with a firewall alert, presenting one probable attack. The whole chain mobilizes: passwords harden under strict policy and multi-factor authentication, the firewall blocks packets arriving at ports no service uses, the detection and prevention system stops the attempts, and the server is patched before the attacker exploits a known flaw."
+      },
+      mistakes: [
+        { ar: "الاعتماد على نظام كشف قائم على التوقيعات وحده؛ فهو فعال ضد المعروف ويفوّت الجديد.", en: "Relying on signature-based detection alone; it works against the known and misses the new." },
+        { ar: "تأخير التثبيت لرقعة أمنية لأن النظام يعمل طبيعيًا؛ وقد وسّع التأخر أضرار ثغرة شهيرة مليارات الدولارات.", en: "Delaying a security patch because the system works; such delay widened a famous flaw's damage by billions." },
+        { ar: "عدّ التهديد الداخلي نادرًا أو متعمدًا دائمًا؛ فقد يضر موظف بكلمة مرور ضعيفة أو بالوقوع ضحية للتصيد دون قصد.", en: "Treating the insider threat as rare or always deliberate; an employee may harm through a weak password or unwitting phishing." },
+        { ar: "إهمال الإعدادات الافتراضية وخطورتها؛ فبيانات الدخول المصنعية تمنح المهاجم وصولًا شاملًا بلا جهد.", en: "Neglecting defaults and their danger; factory credentials hand the attacker full access with no effort." },
+        { ar: "الظن أن البرمجيات عديمة الملفات لا تشكل خطرًا لأنها بلا ملفات؛ فهي تعمل في الذاكرة بأدوات مشروعة ويصعب كشفها.", en: "Thinking fileless malware is harmless because it leaves no files; it runs in memory through legitimate tools and is hard to detect." }
+      ],
+      terminology: [
+        { ar: "ثغرة الشبكة", en: "Network Vulnerability" },
+        { ar: "البرمجيات الخبيثة", en: "Malware" },
+        { ar: "برنامج الفدية", en: "Ransomware" },
+        { ar: "الهندسة الاجتماعية", en: "Social Engineering" },
+        { ar: "التصيد الاحتيالي", en: "Phishing" },
+        { ar: "جدار الحماية", en: "Firewall" },
+        { ar: "كشف التسلل ومنعه", en: "IDPS" },
+        { ar: "انعدام الثقة", en: "Zero Trust" },
+        { ar: "الدفاع في العمق", en: "Defense in Depth" }
+      ],
+      level: "medium"
+    },
+
+    analysis: {
+      title: {
+        ar: "الفصل 7 · تحليل الأنظمة وتصميمها",
+        en: "Chapter 7 · Systems Analysis and Design"
+      },
+      explanation: {
+        ar: "تحليل الأنظمة وتصميمها عملية متدرجة لتقييم نظم المعلومات وتطويرها انطلاقًا من احتياجات العمل، تبدأ بفهم مشكلة العمل وتحديد أصحاب المصلحة وجمع المعلومات بالوثائق والاستبانات والمقابلات والملاحظة وتحليل البيانات، ثم بصياغة المتطلبات الوظيفية وغير الوظيفية وتسجيلها في مصفوفة تتبع المتطلبات والتحقق منها بتقرير تحليل الأنظمة ودراسة الجدوى. وينتقل التصميم من النموذج المنطقي إلى المادي عبر مجالات البيانات والواجهة والعمليات، بأدوات تمتد من قاموس البيانات والمحاكاة والشيفرة الزائفة والإنجليزية المهيكلة إلى مخططات UML وتدفق البيانات، ضمن دورة حياة من ست مراحل يضبطها نموذج الشلال أو يعيد ترتيبها التطوير الرشيق بسباقاته واجتماعاته اليومية ومخطط الإنجاز، أو يجمع بينهما نهج هجين. وتُتوّج العملية بستة مبادئ — البساطة والوضوح والوظائف الأساسية وقابلية التوسع والموثوقية والأمن — ومدونة أخلاقيات تحمي المستخدمين، وبفهم البنية الشبكية وتصميمها المنطقي والفيزيائي.",
+        en: "Systems analysis and design is a staged process evaluating and developing information systems from business needs, beginning with understanding the business problem, identifying stakeholders and gathering information through documents, surveys, interviews, observation and data analysis, then formulating functional and non-functional requirements, logging them in the requirements traceability matrix and validating them through the analysis report and feasibility study. Design moves from logical to physical models across data, interface and process domains with tools from data dictionaries, simulation, pseudocode and structured English to UML and data-flow diagrams, inside a six-stage life cycle disciplined by Waterfall, reordered by Agile with sprints, daily stand-ups and burndown charts, or blended by hybrid approaches. The process culminates in six principles — simplicity, clarity, core functions, scalability, reliability and security — a code of ethics protecting users, and command of network architecture and its logical and physical design."
+      },
+      objectives: [
+        { ar: "وصف الأنشطة الثلاثة لتحليل الأنظمة وأدوار محلل الأنظمة.", en: "Describe the three systems-analysis activities and the analyst's roles." },
+        { ar: "التمييز بين المتطلبات الوظيفية وغير الوظيفية وتسجيلها بمصفوفة التتبع.", en: "Distinguish functional from non-functional requirements and log them in the traceability matrix." },
+        { ar: "المقارنة بين دورة حياة التطوير والتطوير الرشيق والنهج الهجين.", en: "Compare the system development life cycle, Agile development and the hybrid approach." },
+        { ar: "تعداد أدوات التحليل ومخططات UML ووظيفة كل منها.", en: "List analysis tools and UML diagrams with each one's function." },
+        { ar: "شرح مبادئ التصميم الستة والبنية الشبكية وتصميمها المنطقي والمادي.", en: "Explain the six design principles and network architecture with its logical and physical design." }
+      ],
+      concepts: [
+        {
+          term: { ar: "تحليل الأنظمة وتصميمها", en: "Systems Analysis and Design" },
+          def: { ar: "عملية متدرجة لتقييم نظم المعلومات وتطويرها انطلاقًا من احتياجات العمل لإيجاد حلول فعالة للتحديات التقنية، وفائدتها الكفاءة التشغيلية والمواءمة الاستراتيجية والكشف المبكر عن المخاطر.", en: "A staged process evaluating and developing information systems from business needs to find effective technical solutions, yielding operational efficiency, strategic alignment and early risk detection." }
+        },
+        {
+          term: { ar: "محلل الأنظمة", en: "Systems Analyst" },
+          def: { ar: "مهني يوظف التحليل والتصميم لدعم نظم المعلومات، حلقة وصل بين تقنية المعلومات وإدارات العمل، يدرس دعم النظام لوظائف العمل ويحدد مجالات التحسين.", en: "A professional applying analysis and design to support information systems, a bridge between IT and business units who studies how the system supports work functions and finds improvements." }
+        },
+        {
+          term: { ar: "أصحاب المصلحة وأساليب الجمع", en: "Stakeholders and Gathering Methods" },
+          def: { ar: "أفراد أو مجموعات لهم مصلحة في القرار كالموظفين والعملاء والموردين، تُجمع معلوماتهم بفحص الوثائق والاستبانات والمقابلات المنظمة وغير المنظمة والملاحظة السلبية والإيجابية وتحليل البيانات.", en: "Individuals or groups with an interest in the decision, such as employees, customers and suppliers, whose information is gathered through document review, surveys, structured and unstructured interviews, passive and active observation and data analysis." }
+        },
+        {
+          term: { ar: "المتطلبات ومصفوفة التتبع", en: "Requirements and Traceability Matrix" },
+          def: { ar: "المتطلب الوظيفي وظيفة تحتاجها الإدارة، وغير الوظيفي سمة تصف كيف يعمل النظام؛ وتُسجل جميعها في مصفوفة تتبع تربط كل متطلب بنوعه وأولويته وحالة تطويره ومرجع للاختبار.", en: "A functional requirement is a function the business needs; a non-functional one is a quality describing how the system works; both are logged in a traceability matrix tying each to its type, priority, progress and test reference." }
+        },
+        {
+          term: { ar: "تقرير تحليل الأنظمة ودراسة الجدوى", en: "Analysis Report and Feasibility Study" },
+          def: { ar: "يعرض المحلل بعد تغذية راجعة مرحلية حلولًا موصى بها — تغيير العمليات أو تحسين الأنظمة أو إلغاؤها — مصحوبة بدراسة جدوى تكشف قوة المشروع وضعفه وملاءمته الفنية والسوقية والتشغيلية والمالية.", en: "After staged feedback the analyst presents recommended solutions — changing processes, improving systems or cancelling them — with a feasibility study revealing the project's strengths, weaknesses and technical, market, operational and financial fit." }
+        },
+        {
+          term: { ar: "دورة حياة تطوير البرمجيات", en: "System Development Life Cycle" },
+          def: { ar: "إطار دوري من ست مراحل: التحليل لجمع المتطلبات، فالتصميم لتحويلها مواصفات، فالتطوير أطول المراحل، فالاختبار في بيئة منفصلة، فالنشر مع الوثائق، فالصيانة بالترقيعات والتحسينات.", en: "A cyclical framework of six stages: analysis gathering requirements, design turning them into specifications, development as the longest stage, testing in a separate environment, deployment with documentation, and maintenance through patches and improvements." }
+        },
+        {
+          term: { ar: "التطوير الرشيق والنهج الهجين", en: "Agile and Hybrid Approaches" },
+          def: { ar: "الرشيق تسليم تكراري تدريجي بفرق صغيرة وسباقات تُقيّم بعد كل منها، وقيمه الأربع: الأفراد قبل العمليات، والبرمجيات العاملة قبل التوثيق الشامل، والتعاون مع العميل قبل التفاوض، والاستجابة للتغيير قبل اتباع الخطة؛ والهجين يجمع انضباط الشلال بمرونة الرشيق.", en: "Agile delivers iteratively and incrementally with small teams and sprints reviewed after each, holding four values: individuals over processes, working software over comprehensive documentation, customer collaboration over negotiation, and responding to change over following a plan; hybrid blends Waterfall's discipline with Agile's flexibility." }
+        },
+        {
+          term: { ar: "أدوات التحليل والنمذجة", en: "Analysis and Modeling Tools" },
+          def: { ar: "قاموس البيانات يحفظ تفاصيل البيانات وعلاقاتها، والمحاكاة تنمذج نظامًا مقترحًا، والشيفرة الزائفة تصف الخطوات بلا تنفيذ، والإنجليزية المهيكلة قواعد قرار، ومخططات UML أنواعها خمسة: حالات الاستخدام والتتابع والنشاط والحالة والفئات، ومخطط تدفق البيانات يمثل انتقال المعلومات.", en: "A data dictionary stores data details and relations, simulation models a proposed system, pseudocode describes steps without execution, structured English states decision rules, and UML diagrams come in five kinds — use case, sequence, activity, state and class — while data-flow diagrams trace information movement." }
+        },
+        {
+          term: { ar: "مبادئ التصميم والبنية الشبكية", en: "Design Principles and Network Architecture" },
+          def: { ar: "ستة مبادئ: البساطة والوضوح والوظائف الأساسية وقابلية التوسع والموثوقية والأمن؛ والبنية الشبكية نظرة عليا تحدد المعدات وتفاعلها، والتصميم الشبكي تنفيذها المحدد بنماذج منطقية ومادية ومخططات علاقات الكيانات.", en: "Six principles: simplicity, clarity, core functions, scalability, reliability and security; network architecture is a high-level view determining equipment and interaction, and network design its specific realization in logical, physical and prototype models with entity-relationship diagrams." }
+        }
+      ],
+      example: {
+        ar: "يبدو صرف الدواء بسيطًا، لكنه حلقة في سلسلة أنظمة متكاملة: يرسل الطبيب الطلب إلى السجل الصحي الإلكتروني فيحوله إلى مزود الوصفات الإلكترونية الذي يوجهه إلى نظام الصيدلية، حيث يتحقق النظام من الوصفة ويتيح الصرف ويطبع تعليمات الجرعة وقد يفحص الحساسية والتفاعلات. وتمر السلسلة بالتحليل والتصميم كاملين: أصحاب المصلحة هم الطبيب والصيدلي والمريض وشركة التأمين، ويصف مخطط التتابع ترتيب الخطوات فلا يستلم المريض الدواء قبل كتابة الوصفة وإرسالها، ويميز مخطط الحالة سلوك النظام بحسب حالته — فإن كان الدواء خاضعًا للرقابة أضيفت إجراءات الإبلاغ قبل الصرف — ويثبت ذلك أن خللًا واحدًا في متطلب واحد يمتد أثره إلى النظام النهائي كله.",
+        en: "Dispensing medication looks simple, yet it is a link in an integrated chain: the doctor sends the order to the electronic health record, which passes it to the e-prescribing provider, which routes it to the pharmacy system, where the order is verified, dispensing enabled, dosage instructions printed, and allergy and interaction checks possibly run. The chain passes through full analysis and design: stakeholders are the doctor, pharmacist, patient and insurer; a sequence diagram fixes the order of steps so the patient never receives medication before the prescription is written and sent; and a state diagram marks behavior by system state — if the drug is controlled, reporting steps precede release — proving that one flaw in one requirement runs through the whole final system."
+      },
+      mistakes: [
+        { ar: "الاقتصار على استبانة واحدة وإغفال الوثائق والمقابلات والملاحظة التي تكشف ما لا تكشفه الاستبانات.", en: "Stopping at a single survey and skipping documents, interviews and observation that reveal what surveys miss." },
+        { ar: "تسجيل المتطلبات سماعًا بلا مصفوفة تتبع، فتنشأ متطلبات ناقصة أو متعارضة تعطل التسليم.", en: "Recording requirements by ear without a traceability matrix, so missing or conflicting requirements stall delivery." },
+        { ar: "الخلط بين المتطلبات الوظيفية وغير الوظيفية، فتضيع أولويات العمل ويصعب اختبار ما ينبغي أن يفعله النظام مقابل كيف يعمل.", en: "Confusing functional with non-functional requirements, blurring business priorities and making it hard to test what the system should do versus how it works." },
+        { ar: "افتراض أن التطوير الرشيق يلغي الحاجة إلى التخطيط والتحليل، فيبدأ التنفيذ قبل فهم المشكلة وتتراكم الديون التقنية.", en: "Assuming Agile removes the need for planning and analysis, starting implementation before the problem is understood and letting technical debt pile up." },
+        { ar: "تأجيل اعتبارات الأمن والموثوقية إلى ما بعد البناء بدل تضمينها في التصميم، فتتضخم كلفة المعالجة وتضعف حماية البيانات.", en: "Deferring security and reliability until after building instead of embedding them in design, inflating remediation cost and weakening data protection." }
+      ],
+      terminology: [
+        { ar: "تحليل الأنظمة وتصميمها", en: "Systems Analysis and Design" },
+        { ar: "محلل الأنظمة", en: "Systems Analyst" },
+        { ar: "أصحاب المصلحة", en: "Stakeholders" },
+        { ar: "مصفوفة تتبع المتطلبات", en: "Requirements Traceability Matrix" },
+        { ar: "تقرير تحليل الأنظمة", en: "Analysis Report" },
+        { ar: "دراسة الجدوى", en: "Feasibility Study" },
+        { ar: "دورة حياة تطوير البرمجيات", en: "System Development Life Cycle" },
+        { ar: "التطوير الرشيق", en: "Agile Development" },
+        { ar: "مبادئ التصميم الستة", en: "Six Design Principles" }
+      ],
+      level: "medium"
+    }
+  },
+
+  /* ---- 260210030902 · السياسات والتشريعات والأخلاقيات والالتزام بها · PSE course book ---- */
+  "260210030902": {
+    policy: {
+      title: {
+        ar: "الفصل 1 · مقدمة في السياسات الأمنية",
+        en: "Chapter 1 · Introduction to Security Policies"
+      },
+      explanation: {
+        ar: "تحتاج كل جهة إلى وثيقة عليا تحدد الأصول التي تُحمى ومن يلتزم بحمايتها ومن يعتمد متطلباتها وعواقب مخالفتها. والسياسة الأمنية وثيقة توفر متطلبات الأمن السيبراني المبنية على أفضل الممارسات والمعايير وتوثق التزام الجهة بها لتقليل مخاطرها، ولها ثلاث خصائص: تُبنى على نتائج تقييم المخاطر، ويعتمدها رئيس الجهة، ويُطلَع عليها العاملون المعنيون والأطراف ذات العلاقة. وتنتظم وثائق الأمن السيبراني في هرم: السياسة العامة في القمة تليها البرامج والمعايير ثم الإجراءات التنظيمية، ويجيب كل مستوى عن سؤال: لماذا؟ ماذا؟ كيف؟ وتتكون الوثيقة من ستة أقسام: الأهداف، ونطاق العمل وقابلية التطبيق، وعناصر السياسة، والأدوار والمسؤوليات، والالتزام بالسياسة، والاستثناءات، وتسبقها بيانات تعريف وجداول اعتماد ونسخ. وتقوم السياسة على ثلاثة التزامات توثق سبعة وعشرين بندًا في ثلاث مجموعات: تنظيم الأمن السيبراني، وحماية الأصول، والاستمرارية والأطراف الخارجية والحوسبة السحابية وأنظمة التحكم الصناعي. ويظهر الالتزام على ثلاثة مستويات: رئيس الجهة يضمنه، ورئيس الإدارة المعنية بالأمن السيبراني يتأكد منه دوريًا، والعاملون يلتزمون بالسياسات والإجراءات، ولا يمنح الاستثناء إلا بتصريح رسمي مسبق ولا يُمنح إذا تعارض مع متطلب تشريعي.",
+        en: "Every entity needs a top-level document defining the assets it protects, who must protect them, who approves its requirements and the consequences of violation. A security policy is a document providing cybersecurity requirements built on best practices and standards and recording the entity's commitment to them in order to reduce its risks; it has three characteristics: it is built on risk-assessment findings, approved by the head of the entity, and communicated to relevant workers and stakeholders. Cybersecurity documents form a pyramid: the general policy at the top, then programs and standards, then regulatory procedures — answering at each level why, what and how. The document has six sections — objectives, scope and applicability, policy elements, roles and responsibilities, compliance, and exceptions — preceded by identification data and approval and version tables. It rests on three commitments documenting twenty-seven items in three groups: cybersecurity organization, asset protection, and continuity, external parties, cloud computing and industrial control systems. Compliance appears at three levels: the entity's head ensures it, the cybersecurity administration head verifies it periodically, and workers adhere to policies and procedures; exceptions are granted only by prior official authorization, never when they conflict with a regulatory requirement."
+      },
+      objectives: [
+        { ar: "تعريف السياسة الأمنية وذكر خصائصها الثلاث.", en: "Define a security policy and state its three characteristics." },
+        { ar: "بيان هرم وثائق الأمن السيبراني والسؤال الذي يجيب عنه كل مستوى.", en: "Explain the cybersecurity documents pyramid and the question each level answers." },
+        { ar: "تعداد أقسام وثيقة السياسة الستة وبيانات تعريفها وجداولها.", en: "List the six sections of the policy document with its identification data and tables." },
+        { ar: "تعداد الالتزامات الثلاثة ومجموعات البنود السبع والعشرين.", en: "List the three commitments and the three groups of the twenty-seven items." },
+        { ar: "بيان مستويات الالتزام الثلاثة وشروط الاستثناء من السياسة.", en: "State the three compliance levels and the conditions for policy exception." }
+      ],
+      concepts: [
+        {
+          term: { ar: "السياسة الأمنية", en: "Security Policy" },
+          def: { ar: "وثيقة توفر متطلبات الأمن السيبراني المبنية على أفضل الممارسات والمعايير، وتوثق التزام الجهة بها لتقليل المخاطر السيبرانية وحمايتها من التهديدات.", en: "A document providing cybersecurity requirements built on best practices and standards, recording the entity's commitment to reduce cyber risks and protect against threats." }
+        },
+        {
+          term: { ar: "هرم وثائق الأمن السيبراني", en: "Cybersecurity Documents Pyramid" },
+          def: { ar: "السياسة العامة في القمة تحدد لماذا، ثم البرامج التي تجيب لماذا أيضًا، ثم المعايير التي تجيب ماذا، وأخيرًا الإجراءات التنظيمية التي تجيب كيف تُنفذ الأعمال.", en: "The general policy at the top answering why, then programs also answering why, then standards answering what, and finally regulatory procedures answering how work is done." }
+        },
+        {
+          term: { ar: "المعيار والإجراء", en: "Standard and Procedure" },
+          def: { ar: "المعيار يحدد المتطلبات التقنية والأمنية الواجبة الجمع بينها لتقوية بيئة العمل كالتشفير وإدارة الثغرات واختبار الاختراق وحماية تطبيقات الويب، والإجراء يحدد كيفية تنفيذ العمل خطوة بخطوة.", en: "A standard sets the technical and security requirements to be combined to strengthen the environment, such as encryption, vulnerability management, penetration testing and web-application protection; a procedure sets out how the work is carried out step by step." }
+        },
+        {
+          term: { ar: "بيانات التعريف والجداول", en: "Identification Data and Tables" },
+          def: { ar: "تصنيف الوثيقة وتاريخها وإصدارها ورمزها المرجعي في مقدمتها، يليها جدول الاعتماد ببيانات من أقر الوثيقة — الدور والاسم والتاريخ والتوقيع — وجدول النسخ الذي يوثق كل تعديل برقم النسخة وتاريخها والمعدِّل ووصفه.", en: "The document's classification, date, issue and reference code up front, followed by an approval table with the approver's role, name, date and signature, and a version table recording each change with version number, date, editor and description." }
+        },
+        {
+          term: { ar: "أقسام الوثيقة الستة", en: "The Six Sections" },
+          def: { ar: "الأهداف، ونطاق العمل وقابلية التطبيق، وعناصر السياسة، والأدوار والمسؤوليات، والالتزام بالسياسة، والاستثناءات.", en: "Objectives, scope and applicability, policy elements, roles and responsibilities, policy compliance, and exceptions." }
+        },
+        {
+          term: { ar: "الأهداف الأساسية للحماية وسندها التشريعي", en: "Core Protection Objectives and Legal Basis" },
+          def: { ar: "حماية سرية المعلومات وسلامتها وتوافرها بالضوابط الملائمة وتحقيق الاستمرارية، مع الحد من المخاطر الداخلية والخارجية والالتزام بالتشريعات الوطنية — والضابط 1-3-1 من الضوابط الأساسية للأمن السيبراني ECC-1:2018 يوجب وجود سياسة معتمدة.", en: "Protecting the confidentiality, integrity and availability of information with suitable controls and achieving continuity, reducing internal and external risks and complying with national legislation — control 1-3-1 of ECC-1:2018 requires an approved policy." }
+        },
+        {
+          term: { ar: "نطاق العمل وقابلية التطبيق", en: "Scope and Applicability" },
+          def: { ar: "النطاق يحدد ما تشمله السياسة من بيانات وأنظمة وشبكات وبريد إلكتروني وإعدادات، وقابلية التطبيق تحدد من يلتزم بها وهم جميع العاملين في الجهة.", en: "Scope defines what the policy covers — data, systems, networks, email and settings — while applicability defines who must comply: all workers in the entity." }
+        },
+        {
+          term: { ar: "عناصر السياسة", en: "Policy Elements" },
+          def: { ar: "ثلاثة التزامات توثق سبعة وعشرين بندًا: تنظيم الأمن السيبراني (2-1 إلى 2-8)، وحماية الأصول (2-9 إلى 2-23)، والاستمرارية والأطراف الخارجية والحوسبة السحابية وأنظمة التحكم الصناعي (2-24 إلى 2-27).", en: "Three commitments documenting twenty-seven items: cybersecurity organization (2-1 to 2-8), asset protection (2-9 to 2-23), and continuity, external parties, cloud computing and industrial control systems (2-24 to 2-27)." }
+        },
+        {
+          term: { ar: "الأدوار والالتزام والاستثناء", en: "Roles, Compliance and Exception" },
+          def: { ar: "سبعة أدوار — صاحب الصلاحية والشؤون القانونية والتدقيق الداخلي والموارد البشرية والإدارة المعنية بالأمن السيبراني ورؤساء الإدارات والعاملون — تدعمها لجنة إشرافية واتفاقيات سرية، والالتزام على ثلاثة مستويات بضمان وتأكيد وامتثال، ولا يُمنح استثناء إلا بتصريح رسمي مسبق من رئيس الإدارة المعنية بالأمن السيبراني أو اللجنة الإشرافية.", en: "Seven roles — the owning authority, legal affairs, internal audit, human resources, the cybersecurity administration, department heads and workers — supported by a steering committee and non-disclosure agreements; compliance works at three levels of ensuring, verifying and adhering, and an exception is granted only by prior official authorization from the cybersecurity administration head or the steering committee." }
+        }
+      ],
+      example: {
+        ar: "لا تصبح مسودة وثيقة كتبها مختص سياسةً نافذة بمجرد اكتمال نصوصها: فهي تستند أولًا إلى نتائج تقييم المخاطر، ثم يعتمدها رئيس الجهة فيثبت جدول الاعتماد دوره واسمه وتاريخه وتوقيعه، ثم تُبلَّغ إلى العاملين المعنيين والأطراف ذات العلاقة. وحين يُعدَّل بند لاحقًا يُسجل صف جديد في جدول النسخ برقم النسخة الجديد وتاريخها واسم المعدِّل ووصف التعديل والسبب، فلا تضيع حجة أي تغيير.",
+        en: "A draft written by a specialist does not become an operative policy merely by being finished: it first rests on risk-assessment findings, then the entity's head approves it, so the approval table records the approver's role, name, date and signature, and it is then communicated to relevant workers and stakeholders. When a clause is later amended, a new row is entered in the version table with the new version number, date, editor, change description and reason, so no change goes unaccounted for."
+      },
+      mistakes: [
+        { ar: "ترك البيانات والحقول النموذجية دون تعبئة واستبدال، فتفقد الوثيقة صفتها الرسمية بغياب تاريخ السريان واسم المعتمد ورمز الوثيقة.", en: "Leaving template fields unfilled and unreplaced, so the document loses its official standing for want of an effective date, approver name and document code." },
+        { ar: "حصر هدف السياسة في سرية المعلومات وإهمال سلامتها وتوافرها.", en: "Limiting the policy's objectives to confidentiality and neglecting integrity and availability." },
+        { ar: "كتابة السياسات قبل الانتهاء من تقييم المخاطر أو نسخها حرفيًا من جهة أخرى دون مواءمتها مع مخاطر الجهة.", en: "Writing policies before risk assessment is complete, or copying them verbatim from another entity without aligning them to the entity's own risks." },
+        { ar: "الظن أن السياسة تخص إدارة تقنية المعلومات وإدارة الأمن السيبراني وحدهما دون بقية الإدارات.", en: "Assuming the policy concerns only the IT and cybersecurity administrations, not the rest of the departments." },
+        { ar: "منح استثناء شفهي أو لاحق لتجاوز وقع فعلًا، أو منحه رغم تعارضه مع متطلب تشريعي أو تنظيمي.", en: "Granting a verbal exception or one after a violation has occurred, or granting it despite conflict with a legislative or regulatory requirement." }
+      ],
+      terminology: [
+        { ar: "السياسة الأمنية", en: "Security Policy" },
+        { ar: "البرنامج", en: "Program" },
+        { ar: "المعيار", en: "Standard" },
+        { ar: "الإجراءات التنظيمية", en: "Regulatory Procedures" },
+        { ar: "نطاق العمل", en: "Scope" },
+        { ar: "قابلية التطبيق", en: "Applicability" },
+        { ar: "اللجنة الإشرافية للأمن السيبراني", en: "Cybersecurity Steering Committee" },
+        { ar: "الالتزام بالسياسة", en: "Policy Compliance" },
+        { ar: "الاستثناء", en: "Exception" }
+      ],
+      level: "easy"
+    },
+
+    laws: {
+      title: {
+        ar: "الفصل 2 · التشريعات والقوانين المرتبطة بأمن المعلومات",
+        en: "Chapter 2 · Legislation and Laws Related to Information Security"
+      },
+      explanation: {
+        ar: "تقوم حماية الأصول وإدارة المخاطر على منظومة من المبادئ التقنية التي تلتقي معها التشريعات والتوجيهات التنظيمية. ويبدأ التحكم في الوصول بأربعة عناصر متسلسلة — تحديد الهوية ثم المصادقة ثم التصريح بالوصول ثم المحاسبة — وتوجهه مبادئ الصلاحيات الأقل والحاجة إلى المعرفة وفصل المهام، ويتخذ أربعة نماذج: التقديري الذي يمنح مالك المورد صلاحية منح الوصول، والإلزامي الذي يُدار مركزيًا، والمبني على الأدوار الذي يربط الصلاحيات بالوظائف لا بالأشخاص، والمبني على السمات الذي يقرر بمجموعة خصائص. وتقوم حماية البيانات أثناء تخزينها ونقلها على التشفير بأغراضه الثلاثة — السرية والسلامة والمصادقة — في صورته المتماثلة بمفتاح سري واحد أو غير المتماثلة بمفتاحين عام وخاص، وعلى آليات سلامة البيانات: دوال التجزئة ورموز مصادقة الرسائل والتواقيع الرقمية. وقد هجرت الخوارزميات القديمة الضعيفة — MD5 وDES — لصالح خوارزميات معاصرة كخوارزمية التجزئة SHA-256 وخوارزمية التشفير AES-256 وفق الضوابط الوطنية NCS-1:2020. وتنتظم هذه المبادئ كلها في استراتيجية الدفاع بالعمق القائمة على قدرات الأشخاص والتقنية والعمليات، والمتجلية في مكونات الضوابط الأساسية الأربعة: حوكمة الأمن السيبراني وتعزيزه وصموده وأمنه المتعلق بالأطراف الخارجية والحوسبة السحابية.",
+        en: "Protecting assets and managing risk rests on a set of technical principles that legislation and regulatory directives meet. Access control begins with four sequential elements — identification, then authentication, then authorization, then accountability — steered by the principles of least privilege, need-to-know and separation of duties, and takes four models: discretionary, where a resource owner grants access; mandatory, administered centrally; role-based, tying permissions to jobs rather than people; and attribute-based, deciding on a set of characteristics. Protecting data at rest and in transit rests on encryption with its three purposes — confidentiality, integrity and authentication — whether symmetric with one secret key or asymmetric with public and private keys, and on integrity mechanisms: hash functions, message authentication codes and digital signatures. Weak legacy algorithms — MD5 and DES — have been abandoned for modern ones such as the SHA-256 hash and the AES-256 cipher under the national standard NCS-1:2020. All these principles come together in the defense-in-depth strategy built on people, technology and operations capabilities, embodied in the four essential cybersecurity control components: cybersecurity governance, enhancement, resilience, and security related to external parties and cloud computing."
+      },
+      objectives: [
+        { ar: "تعداد عناصر التحكم في الوصول الأربعة المتسلسلة وتمييز وظيفة كل عنصر.", en: "List the four sequential access-control elements and distinguish each one's function." },
+        { ar: "تطبيق مبادئ الصلاحيات الأقل والحاجة إلى المعرفة وفصل المهام.", en: "Apply the principles of least privilege, need-to-know and separation of duties." },
+        { ar: "المقارنة بين نماذج التحكم في الوصول الأربعة.", en: "Compare the four access-control models." },
+        { ar: "التمييز بين التشفير المتماثل وغير المتماثل وآليات سلامة البيانات.", en: "Distinguish symmetric from asymmetric encryption and the data-integrity mechanisms." },
+        { ar: "ربط الدفاع بالعمق بمكونات الضوابط الأساسية الأربعة.", en: "Connect defense in depth to the four essential control components." }
+      ],
+      concepts: [
+        {
+          term: { ar: "التحكم في الوصول", en: "Access Control" },
+          def: { ar: "مجموعة الضوابط التي تنظم وصول المستخدمين إلى موارد نظام المعلومات بعد التأكد من هويتهم وصلاحياتهم، فتحمي الموارد من الوصول غير المصرح به.", en: "Controls governing users' access to information-system resources after verifying their identity and permissions, protecting resources from unauthorized access." }
+        },
+        {
+          term: { ar: "العناصر الأربعة المتسلسلة", en: "The Four Sequential Elements" },
+          def: { ar: "تحديد الهوية بادعاء المستخدم هويته، ثم المصادقة بالتحقق منها بوسائل ككلمة المرور أو بطاقة الهوية أو البصمة، ثم التصريح بتقرير ما يُسمح به، ثم المحاسبة بتتبع الأفعال وإسنادها ورفض إنكارها ودعم اكتشاف المخالفات.", en: "Identification when the user claims an identity, authentication verifying it through passwords, ID cards or fingerprints, authorization deciding what is allowed, and accountability tracing actions, attributing them, refusing repudiation and supporting violation detection." }
+        },
+        {
+          term: { ar: "مبادئ التحكم في الوصول", en: "Access-Control Principles" },
+          def: { ar: "الصلاحيات الأقل بمنح الحد الأدنى الكافي فقط، والحاجة إلى المعرفة بمنح الوصول للقيام بمهام العمل فقط، وفصل المهام بتوزيع المهام بين أكثر من فرد لمنع الغش والاختلاس.", en: "Least privilege granting only the minimum needed, need-to-know granting access solely to perform job duties, and separation of duties splitting tasks among individuals to prevent fraud." }
+        },
+        {
+          term: { ar: "نماذج التحكم في الوصول", en: "Access-Control Models" },
+          def: { ar: "التقديري DAC يمنح مالك المورد حق تحديد من يصل، والإلزامي MAC تُتخذ قراراته بسلطة مركزية، والمبني على الأدوار RBAC يربط الوصول بالمهام الوظيفية لا بالأفراد، والمبني على السمات ABAC يقرر بناء على سمات المستخدم والبيئة والزمان.", en: "Discretionary DAC lets the resource owner decide who gets access, mandatory MAC decides through central authority, role-based RBAC ties access to job functions not individuals, and attribute-based ABAC decides from user, environment and time attributes." }
+        },
+        {
+          term: { ar: "أغراض التشفير", en: "Purposes of Encryption" },
+          def: { ar: "السرية بحماية البيانات من العرض غير المصرح به، والسلامة بمنع التعديل غير المصرح به وكشفه، والمصادقة بالتأكد من هوية الطرف الآخر ومن مصدر الرسالة وسلامتها.", en: "Confidentiality protecting data from unauthorized disclosure, integrity preventing and detecting unauthorized modification, and authentication confirming the other party's identity and the message's origin and integrity." }
+        },
+        {
+          term: { ar: "التشفير المتماثل وغير المتماثل", en: "Symmetric and Asymmetric Encryption" },
+          def: { ar: "المتماثل يستخدم مفتاحًا سريًا واحدًا للتشفير وفك التشفير وهو أسرع ويناسب القنوات واسعة النطاق، وغير المتماثل يستخدم مفتاحين: عام للتشفير وخاص لفك التشفير، ويصلح للمصادقة وتبادل المفاتيح.", en: "Symmetric uses one secret key to encrypt and decrypt — faster and suited to high-bandwidth channels — while asymmetric uses two keys, a public one to encrypt and a private one to decrypt, fitting authentication and key exchange." }
+        },
+        {
+          term: { ar: "آليات سلامة البيانات", en: "Data-Integrity Mechanisms" },
+          def: { ar: "دالة التجزئة تولد قيمة ثابتة الطول تمثل البيانات وتكشف أي تعديل، ورمز مصادقة الرسالة يضيف مفتاحًا سريًا مشتركًا فتمنع التعديل والانتحال، والتوقيع الرقمي — وهو دالات تجزئة وتشفير غير متماثل — يثبت البيانات ويضمن مصدرها ويمنع التنصل.", en: "A hash function generates a fixed-length digest representing the data and exposing any change; a message authentication code adds a shared secret key to block modification and impersonation; and a digital signature — hash functions plus asymmetric encryption — secures the data, guarantees its origin and prevents repudiation." }
+        },
+        {
+          term: { ar: "معايير التشفير الواجبة", en: "Required Encryption Standards" },
+          def: { ar: "الضوابط الوطنية NCS-1:2020 تحصر استخدام خوارزميات التشفير المعتمدة وتوجب تجنب الضعيفة المهجورة كخوارزمية MD5 للتجزئة وخوارزمية DES للتشفير، وتُعتمد بدلًا منها خوارزميات قوية معاصرة كخوارزمية SHA-256 للتجزئة وخوارزمية AES-256 للتشفير.", en: "The national NCS-1:2020 standard limits use to approved cryptographic algorithms and requires avoiding weak abandoned ones such as the MD5 hash and the DES cipher, adopting modern strong alternatives such as SHA-256 for hashing and AES-256 for encryption." }
+        },
+        {
+          term: { ar: "الدفاع بالعمق ومكونات الضوابط الأربعة", en: "Defense in Depth and the Four Control Components" },
+          def: { ar: "طبقات دفاعية متكاملة توظف قدرات الأشخاص — التدريب والتوعية — والتقنية — تصنيف البيانات والتحكم في الوصول وكشف التسلل — والعمليات — التقييم وإدارة المخاطر والتحديث — مشغلة عبر مكونات الضوابط الأساسية الأربعة: الحوكمة والتعزيز والصمود والأمن المتعلق بالأطراف الخارجية والحوسبة السحابية.", en: "Integrated defensive layers using people capabilities — training and awareness — technology — data classification, access control, intrusion detection — and operations — assessment, risk management, updates — run through the four essential control components: governance, enhancement, resilience, and security of external parties and cloud computing." }
+        }
+      ],
+      example: {
+        ar: "عند تبادل بيانات الحوالات المالية بين فرعين لبنك يحسب الفرعان رمز مصادقة رسالة بمفتاح سري مشترك: فإن عدّل أي طرف قيمة من قيم الحوالة تغير الرمز عند الطرف الآخر ورُفضت الرسالة، فحماية سلامة البيانات ودقتها شرط مباشر للمصداقية. وعند إرسال إيصال دفع إلكتروني يُنشأ الموقع توقيعًا رقميًا بمفتاحه الخاص ويتحقق منه العميل بالمفتاح العام، فيثبت أن الإيصال صادر عن الموقع ولم يتغير، وهي ضمانة لا توفرها دالة التجزئة وحدها لأن المهاجم قد يعيد حساب التجزئة بعد تعديل البيانات.",
+        en: "When transferring funds between two bank branches, both compute a message authentication code with a shared secret key: if either party changes any transfer value the code changes at the other end and the message is rejected, making data integrity a direct condition of credibility. When sending an electronic payment receipt, the site creates a digital signature with its private key and the customer verifies it with the public key, proving the receipt came from the site and was unchanged — a guarantee a hash function alone cannot give, since an attacker could recompute the hash after altering the data."
+      },
+      mistakes: [
+        { ar: "منح صلاحيات إدارية كاملة لجميع الموظفين، وهي مخالفة لمبدأ الصلاحيات الأقل يعالجها التحكم بالأدوار وتخصيص الحسابات الإدارية.", en: "Granting full administrative rights to all employees, violating least privilege; role-based control and dedicated admin accounts fix it." },
+        { ar: "استخدام خوارزميات تجزئة وتشفير قديمة مهجورة كخوارزمية MD5 وخوارزمية DES بدافع الامتثال الشكلي، والواجب اتباع الضوابط الوطنية باستخدام SHA-256 وAES-256.", en: "Using abandoned legacy hash and cipher algorithms such as MD5 and DES for formal compliance; the national standard requires SHA-256 and AES-256." },
+        { ar: "الظن أن شراء أحدث أجهزة الحماية يحقق الأمن، متجاهلًا أن الدفاع بالعمق مبني على الأشخاص والعمليات أيضًا؛ فإن اختراق طبقة تعني الاستجابة والصمود وامتلاك نسخ احتياطية معزولة، لا انتظار جهاز ينقذ الموقف.", en: "Believing the newest protective appliances achieve security, ignoring that defense in depth also rests on people and operations; breaching one layer means response, resilience and isolated backups, not waiting for a device to save the day." },
+        { ar: "الخلط بين اختصار MAC الذي يرمز إلى التحكم الإلزامي في الوصول وبين رموز مصادقة الرسائل المشفرة التي تضمن سلامة البيانات أثناء النقل.", en: "Confusing the MAC acronym for mandatory access control with message authentication codes that secure data integrity in transit." },
+        { ar: "الاعتماد على دالة التجزئة وحدها لإثبات مصدر البيانات وعدم تغييرها، مع أن مهاجمًا قد يعدّل البيانات ويعيد حساب التجزئة، والواجب التوقيع الرقمي أو رمز المصادقة بمفتاح سري.", en: "Relying on a hash alone to prove a message's origin and integrity, though an attacker could alter the data and recompute the hash; a digital signature or keyed authentication code is required." }
+      ],
+      terminology: [
+        { ar: "التحكم في الوصول", en: "Access Control" },
+        { ar: "تحديد الهوية", en: "Identification" },
+        { ar: "المصادقة", en: "Authentication" },
+        { ar: "التصريح بالوصول", en: "Authorization" },
+        { ar: "المحاسبة", en: "Accountability" },
+        { ar: "التحكم التقديري في الوصول", en: "DAC" },
+        { ar: "التحكم المبني على الأدوار", en: "RBAC" },
+        { ar: "التشفير المتماثل", en: "Symmetric Encryption" },
+        { ar: "التوقيع الرقمي", en: "Digital Signature" }
+      ],
+      level: "medium"
+    },
+
+    ethics: {
+      title: {
+        ar: "الفصل 3 · الأخلاقيات المهنية في أمن المعلومات",
+        en: "Chapter 3 · Professional Ethics in Information Security"
+      },
+      explanation: {
+        ar: "يطّلع مختص أمن المعلومات بحكم عمله على معلومات حساسة ويملك صلاحيات واسعة ويعرف نقاط الضعف قبل غيره؛ فلا يكفي أن يكون كفئًا، فالمسؤولية المهنية التزام الجهة والعاملين بحماية أصولها دون نقل المسؤولية إلى جهة أخرى، ويشمل لفظ العاملين كل من يعمل في الجهة أياً كانت صفته التعاقدية. وتُلزم الضوابط الوظائف الأمنية بمواطنين متفرغين ذوي كفاءة، ويسبق إسناد الوظائف الحساسة مسح أمني للمرشحين. والسرية سلوك قبل أن تكون تقنية: تمتد إلى المعلومات الحساسة وإلى بنود عدم الإفصاح التي تسري بعد انتهاء العلاقة الوظيفية، ويضبط نطاق مشاركة المعلومات بروتوكول الإشارة الضوئية بألوانه الأربعة. وتقوم النزاهة على تجنب تعارض المصالح وفصل المهام، وعدم الإنكار يمنع العامل من إنكار أثر عمله على المعلومة. وتقيد صلاحيات المستخدم بمبدأي الحاجة إلى المعرفة والحاجة إلى الاستخدام وبأقل الصلاحيات، وتنتهي العلاقة المهنية بمراجعة الصلاحيات وإلغائها فورًا وحذف بيانات الجهة من الأجهزة. ويجب الإبلاغ عن الحوادث فور اكتشافها — بما فيها الأخطاء غير المقصودة — ولا يمارس الاختبار الأمني إلا داخل النطاق المعتمد بتفويض رسمي.",
+        en: "A cybersecurity specialist sees sensitive information by the nature of the work, holds wide privileges and knows weaknesses before others; being technically competent is not enough. Professional responsibility is the entity's and its workers' commitment to protect its assets without shifting that responsibility elsewhere, and the term workers covers everyone working in the entity regardless of contractual status. The controls require cybersecurity functions to be held by competent full-time citizens, and a security screening precedes sensitive assignments. Confidentiality is behavior before technology: it extends to sensitive information and to non-disclosure clauses surviving the end of the employment relationship, while the sharing scope is governed by the four-color traffic-light protocol. Integrity rests on avoiding conflicts of interest and separating duties, and non-repudiation stops a worker from denying the effect of his actions on information. User permissions are bound by need-to-know and need-to-use under least privilege, and the professional relationship ends by reviewing and immediately revoking permissions and erasing entity data from devices. Incidents must be reported the moment they are discovered — including unintentional mistakes — and security testing is performed only within the approved scope under official authorization."
+      },
+      objectives: [
+        { ar: "شرح المسؤولية المهنية وشمول العاملين باختلاف صفتهم التعاقدية.", en: "Explain professional responsibility and how workers of every contractual status are covered." },
+        { ar: "تطبيق بنود سرية المعلومات وبروتوكول الإشارة الضوئية في مشاركة المعلومات.", en: "Apply confidentiality clauses and the traffic-light protocol when sharing information." },
+        { ar: "تمييز مواضع تعارض المصالح ومبدأ فصل المهام وأثرهما على النزاهة.", en: "Recognize conflicts of interest and the separation-of-duties principle and their effect on integrity." },
+        { ar: "تطبيق حدود الصلاحيات عند الاستخدام وعند انتهاء العلاقة المهنية.", en: "Apply permission limits in day-to-day use and at the end of the professional relationship." },
+        { ar: "بيان واجب الإبلاغ عن الحوادث وحدود الاختبار الأمني المعتمد.", en: "State the duty to report incidents and the limits of authorized security testing." }
+      ],
+      concepts: [
+        {
+          term: { ar: "المسؤولية المهنية", en: "Professional Responsibility" },
+          def: { ar: "التزام الجهة والعاملين بحماية الأصول وعدم نقل المسؤولية إلى جهة أخرى؛ ويشمل لفظ العاملين كل من يعمل في الجهة أياً كانت صفته التعاقدية، وتتحمل الجهة مسؤولية تطبيق متطلبات الأمن السيبراني والالتزام بها بصفتها جهة مُلزِمة ومتحققة في الوقت ذاته.", en: "The entity's and workers' commitment to protecting assets without shifting responsibility elsewhere; workers means everyone in the entity whatever their contractual status, and the entity bears responsibility for applying and adhering to cybersecurity requirements as both obligor and verifier." }
+        },
+        {
+          term: { ar: "الكفاءة والمسح الأمني", en: "Competence and Security Screening" },
+          def: { ar: "توجب الضوابط إسناد وظائف الأمن السيبراني إلى مواطنين متفرغين ذوي كفاءة في المجال، والكفاءة واجب مستمر بالتأهيل والتدريب، ويسبق إسناد الوظائف الحساسة مسح أمني للمرشحين.", en: "The controls require cybersecurity functions to be filled by competent, full-time citizens; competence is a continuing duty through qualification and training, and a security screening precedes sensitive assignments." }
+        },
+        {
+          term: { ar: "السرية والمعلومات الحساسة", en: "Confidentiality and Sensitive Information" },
+          def: { ar: "واجب المحافظة على سرية المعلومات الحساسة وعدم إفشائها لأي جهة، وهو التزام سلوكي دائم على كل عامل ولا تقوم به الضوابط التقنية وحدها.", en: "The duty to keep sensitive information confidential and disclose it to no party — a continuing behavioral commitment on every worker that technical controls alone cannot fulfill." }
+        },
+        {
+          term: { ar: "بنود عدم الإفصاح", en: "Non-Disclosure Clauses" },
+          def: { ar: "بنود تُضمَّن عقود العاملين واتفاقيات الأطراف الخارجية تُلزمهم بعدم إفشاء المعلومات، وتبقى سارية بعد انتهاء العلاقة الوظيفية، مع إعادة أو إتلاف الأصول المادية الحساسة وفق التعليمات.", en: "Clauses inserted into worker contracts and external-party agreements obliging non-disclosure; they remain in force after the employment relationship ends, alongside returning or destroying sensitive physical assets per instructions." }
+        },
+        {
+          term: { ar: "بروتوكول الإشارة الضوئية", en: "Traffic Light Protocol" },
+          def: { ar: "نظام من أربعة ألوان يحدد نطاق مشاركة المعلومة: الأحمر اطلاع شخصي، والبرتقالي مشاركة محدودة مع من يلزم، والأخضر مشاركة أوسع مع الجهات التي يهمها الأمر، والأبيض مشاركة غير محدودة.", en: "A four-color scheme setting how far information may be shared: red for personal review, amber for limited sharing with those who need it, green for wider sharing with concerned parties, and white for unrestricted sharing." }
+        },
+        {
+          term: { ar: "تعارض المصالح", en: "Conflict of Interest" },
+          def: { ar: "حالة يقف فيها العامل بين مصلحة شخصية وواجباته تجاه الجهة، كعضو فريق الاستجابة للحوادث الذي يقدّم خدمات صيانة منزلية للموظفين، والواجب تجنبها والإفصاح عنها.", en: "A situation placing a worker between personal interest and duties to the entity — such as an incident-response team member running home support services for employees; it must be avoided and disclosed." }
+        },
+        {
+          term: { ar: "فصل المهام", en: "Separation of Duties" },
+          def: { ar: "توزيع المهام والصلاحيات على أكثر من فرد فلا يستأثر شخص واحد بدورة عمل كاملة، لمنع الغش والاختلاس والتصرف المنفرد دون رقابة أو محاسبة.", en: "Dividing tasks and privileges among more than one person so no individual owns a whole work cycle, preventing fraud and unsupervised, unaccountable independent action." }
+        },
+        {
+          term: { ar: "سلامة المعلومة وعدم الإنكار", en: "Integrity and Non-Repudiation" },
+          def: { ar: "ألا تُعدَّل المعلومة إلا بإذن أو إذن مسبق بحسب الصلاحية، وألا يستطيع العامل إنكار أثر عمله عليها؛ فالسجلات تثبت من فعل ماذا ومتى، ويُصعّب بذلك التحريف أو النفي.", en: "Information changes only with due authorization, and a worker cannot deny the effect of his actions on it; logs record who did what and when, making tampering or disavowal hard." }
+        },
+        {
+          term: { ar: "حدود الصلاحيات وانتهاؤها", en: "Permission Limits and Their End" },
+          def: { ar: "تُقيَّد صلاحيات المستخدم بمبدأي الحاجة إلى المعرفة والحاجة إلى الاستخدام وبأقل صلاحيات ممكنة، فلا يستعرض المختص ملفات لا تخصه؛ وتنتهي بمراجعة الصلاحيات وإلغائها فورًا وحذف بيانات الجهة من الأجهزة عند انتهاء العلاقة المهنية، ويُمنع تشارك كلمات المرور واستخدام الحسابات القديمة.", en: "User permissions are bound by need-to-know and need-to-use under least privilege, so a specialist browses no files beyond his job; they end by reviewing and immediately revoking permissions and deleting entity data from devices when the relationship ends, with password sharing and old accounts forbidden." }
+        },
+        {
+          term: { ar: "الإبلاغ عن الحوادث وحدود الاختبار", en: "Incident Reporting and Testing Limits" },
+          def: { ar: "يبلغ العامل عن أي حادثة أمن سيبراني فور اكتشافها — بما فيها الأخطاء غير المقصودة — ولا يُستهان بها، ولا تُنفَّذ اختبارات أمنية كاختبار الاختراق أو فحص قوائم كلمات المرور إلا داخل النطاق المعتمد وبإجراء رسمي وتفويض مكتوب.", en: "A worker reports any cybersecurity incident the moment it is discovered — including unintentional mistakes — and never underestimates it; security tests such as penetration testing or password-list scanning run only within the approved scope under formal, written authorization." }
+        }
+      ],
+      example: {
+        ar: "ينتقل محلل أمن من جهة إلى أخرى فيبقى ملتزمًا بعدم الإفصاح عن تفاصيل أنظمة جهته السابقة ونقاط ضعفها، لأن بنود السرية تسري بعد انتهاء العلاقة الوظيفية؛ وعندما يتلقى تنبيهًا أمنيًا موسومًا بالإشارة الخضراء عن تهديد يستهدف القطاع يشاركه مع نظرائه في الجهات التي يهمها الأمر أو داخل جهته دون نشره في قناة عامة، في حين يبقى التنبيه الموسوم بالأحمر مقتصرًا عليه وحده لا يتجاوزه إلى غيره.",
+        en: "An analyst moves from one entity to another and remains bound not to disclose details of the previous entity's systems and weaknesses, because confidentiality clauses survive the end of the employment relationship; when receiving a security advisory marked green about a threat to the sector, he shares it with peers in concerned entities or internally without posting it on a public channel, while a red-marked advisory stays with him alone."
+      },
+      mistakes: [
+        { ar: "الخلط بين الإشارتين الحمراء والبرتقالية فتصل معلومة موجهة للاطلاع الشخصي وحده إلى دائرة المعنيين، وقد يقع العكس بخطر أشد.", en: "Confusing red and amber markings, so information meant for personal review alone reaches the wider circle — and the inverse can occur with graver risk." },
+        { ar: "فتح مختص أمن ملفات وسجلات لا تخصه ولا تخدم مهمة رسمية بدافع الفضول أو الاستطلاع.", en: "A security specialist opening files and records unrelated to his role and to no official task out of curiosity or browsing." },
+        { ar: "الاحتفاظ بالصلاحيات القديمة بعد الانتقال أو انتهاء الخدمة واستعمالها لأنها ما زالت تعمل؛ والواجب المبادرة إلى الإبلاغ لمراجعتها وإلغائها.", en: "Keeping old permissions after transfer or termination and using them because they still work; proactive reporting for review and revocation is required." },
+        { ar: "التكتم على خطأ غير مقصود خوفًا على الصورة، مع أن الإفصاح عنه يخفف الضرر ويقلل احتمال تكراره وتحوله إلى حادثة أكبر.", en: "Hiding an unintentional mistake for fear of reputational damage, though disclosing it limits the harm and reduces the chance it recurs and grows into a bigger incident." },
+        { ar: "تجربة أدوات الاختراق أو فحص قوائم كلمات المرور على نظام حي بلا تفويض مكتوب بحجة اختبار الأثر؛ فيتحول العمل إلى تجاوز يعطل خدمات أو يكشف بيانات.", en: "Testing penetration tools or password-list scans on a live system with no written authorization under the pretext of impact testing; it turns into a violation that disrupts services or exposes data." }
+      ],
+      terminology: [
+        { ar: "المسؤولية المهنية", en: "Professional Responsibility" },
+        { ar: "المسح الأمني", en: "Security Screening" },
+        { ar: "بنود عدم الإفصاح", en: "Non-Disclosure Clauses" },
+        { ar: "المعلومات الحساسة", en: "Sensitive Information" },
+        { ar: "بروتوكول الإشارة الضوئية", en: "Traffic Light Protocol" },
+        { ar: "تعارض المصالح", en: "Conflict of Interest" },
+        { ar: "فصل المهام", en: "Separation of Duties" },
+        { ar: "عدم الإنكار", en: "Non-Repudiation" },
+        { ar: "سياسة الاستخدام المقبول", en: "Acceptable Use Policy" }
+      ],
+      level: "easy"
+    },
+
+    compliance: {
+      title: {
+        ar: "الفصل 4 · الامتثال والالتزام التنظيمي",
+        en: "Chapter 4 · Compliance and Regulatory Adherence"
+      },
+      explanation: {
+        ar: "الالتزام أو الامتثال هو تقيد المنشأة بالأنظمة والتعليمات والمعايير التنظيمية والقواعد السلوكية والأخلاقية السارية على نشاطها، ومخاطر عدم الالتزام احتمال تطبيق عقوبات نظامية أو تكبد خسائر مالية جسيمة أو الإضرار بسمعة المنشأة نتيجة مخالفة التعليمات، بل إن التصرف الذي يضر بالسمعة دون مخالفة صريحة يعد خطر عدم التزام بذاته. ويقوم هيكل حوكمة الالتزام على ثلاثة أطراف: المجلس الذي يعتمد سياسة الالتزام ويشرف على تنفيذها ويقيم فعاليتها سنويًا، والإدارة العليا التي تدير مخاطر عدم الالتزام وتعد السياسة وتأمر بالإجراءات التصحيحية وتبلغ المجلس بالمعالجات الجوهرية، ووحدة الالتزام التي تنسق مع الوحدات وتقدم المشورة والمتابعة وترفع التقارير. وتقوم استقلالية الوحدة على أربعة عناصر: صفة رسمية واضحة في الهيكل التنظيمي، ورئاسة ترتبط بالمستوى الإداري الأول، وتجنب تعارض المصالح، وحق الوصول الكامل إلى المعلومات والسجلات. ويرتبط برنامج الالتزام بحصر الأنظمة والتعليمات وإبلاغها وقياس مخاطر عدم الالتزام والمراقبة والاختبار ورفع التقارير، ويخضع نشاط الوحدة لتدقيق داخلي مستقل في إطار خطوط الدفاع الثلاثة، ولا تنفرد الوحدة بمعالجة المخالفات لأن عبء المعالجة على الإدارة العليا ورؤساء الوحدات.",
+        en: "Compliance is the entity's adherence to the laws, instructions, regulatory standards and behavioral and ethical rules applicable to its activity, and compliance risk is the probability of regulatory penalties, severe financial losses or reputational damage from violating instructions — even conduct damaging reputation without an explicit breach is compliance risk in itself. The compliance governance structure rests on three parties: the board, which approves the compliance policy, oversees implementation and evaluates its effectiveness annually; senior management, which manages compliance risk, prepares the policy, orders corrective action and reports material remediations to the board; and the compliance unit, which coordinates with units, advises, monitors and reports. The unit's independence rests on four elements: a clear official status in the organizational structure, leadership attached to the first administrative level, avoiding conflicts of interest, and full access to needed information and records. The compliance program covers surveying rules, communicating them, measuring compliance risk, monitoring, testing and reporting, while the unit's work is reviewed by independent internal audit in a three-lines-of-defense setup; the unit does not alone handle violations, since remediation rests with senior management and department heads."
+      },
+      objectives: [
+        { ar: "تعريف الالتزام ومخاطر عدم الالتزام ونتائجه الثلاثة.", en: "Define compliance and compliance risk with its three outcomes." },
+        { ar: "تعداد أطراف هيكل حوكمة الالتزام ومسؤولية كل طرف.", en: "List the parties of the compliance governance structure and each one's responsibility." },
+        { ar: "بيان مضمون سياسة الالتزام وعناصر استقلالية الوحدة الأربعة.", en: "State the content of the compliance policy and the four independence elements of the unit." },
+        { ar: "توضيح مهام وحدة الالتزام وتقاريرها ومحتوى برنامج الالتزام.", en: "Explain the unit's duties, reporting and the components of the compliance program." },
+        { ar: "التمييز بين وحدة الالتزام والتدقيق الداخلي ومسؤولية معالجة المخالفات.", en: "Distinguish the compliance unit from internal audit and locate responsibility for remediation." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الالتزام (الامتثال)", en: "Compliance" },
+          def: { ar: "تقيد المنشأة بالأنظمة والتعليمات والمعايير التنظيمية والقواعد السلوكية والأخلاقية السارية على نشاطها، وهو وظيفة تنظيمية قائمة داخل المنشأة ذات طبيعة مستقلة.", en: "The entity's adherence to the laws, instructions, regulatory standards and behavioral and ethical rules applicable to its activity — an organizational function with an independent nature." }
+        },
+        {
+          term: { ar: "مخاطر عدم الالتزام", en: "Compliance Risk" },
+          def: { ar: "احتمال تعرض المنشأة لعقوبات نظامية أو خسائر مالية جسيمة أو الإضرار بالسمعة نتيجة مخالفة الأنظمة والتعليمات أو القواعد السلوكية، ويعد التصرف المضر بالسمعة خطرًا حتى دون مخالفة صريحة.", en: "The probability of regulatory penalties, severe financial losses or reputational damage from violating rules, instructions or behavioral codes; conduct harming reputation counts even without an explicit breach." }
+        },
+        {
+          term: { ar: "الأنظمة والتعليمات", en: "Laws and Instructions" },
+          def: { ar: "القوانين واللوائح والقرارات والتعميمات الصادرة عن الجهات الرقابية والتنظيمية، وهي المعيار الذي يقاس به الالتزام، وتُبلَّغ إلى الوحدات وتُضمَّن في السياسات والإجراءات ثم يُتحقق من تطبيقها.", en: "Laws, regulations, decisions and circulars issued by supervisory bodies — the yardstick for compliance — communicated to units, embedded in policies and procedures, and then verified in practice." }
+        },
+        {
+          term: { ar: "هيكل حوكمة الالتزام", en: "Compliance Governance Structure" },
+          def: { ar: "المجلس يعتمد سياسة الالتزام ويشرف على التنفيذ ويقيم الفعالية سنويًا ويضمن الموارد، والإدارة العليا تدير مخاطر عدم الالتزام وتعد السياسة وتأمر بالإجراء التصحيحي وتبلغ المجلس بالمعالجات الجوهرية، ووحدة الالتزام تنسق وتنصح وتتابع وترفع التقارير.", en: "The board approves the compliance policy, oversees implementation, evaluates effectiveness annually and ensures resources; senior management manages compliance risk, prepares the policy, orders corrective action and reports material remediation to the board; the unit coordinates, advises, monitors and reports." }
+        },
+        {
+          term: { ar: "سياسة الالتزام", en: "Compliance Policy" },
+          def: { ar: "وثيقة يعتمدها المجلس سنويًا وتحدد مسؤوليات الالتزام وبرنامجه وقياس مخاطره والتزام الموظفين ورؤساء الوحدات والجهات الخارجية والإفصاح عن تعارض المصالح والبلاغات والتعاون مع الجهات التنظيمية وخطة التعامل عند المخالفة وآلية التدقيق.", en: "A document approved by the board annually, defining compliance responsibilities, its program and risk measurement, obligations of employees, unit heads and external parties, conflict-of-interest disclosure, whistleblowing, cooperation with regulators, the violation-response plan and the auditing mechanism." }
+        },
+        {
+          term: { ar: "استقلالية وحدة الالتزام", en: "Independence of the Compliance Unit" },
+          def: { ar: "أربعة عناصر: صفة رسمية واضحة للوحدة في الهيكل التنظيمي، ورئاسة ترتبط بالمستوى الإداري الأول وترفع تقاريرها إليه وإلى المجلس، وتجنب تعارض المصالح في مهام الوحدة وأدوارها، وحق الوصول الكامل إلى المعلومات والسجلات اللازمة لأداء عملها.", en: "Four elements: a clear official status in the organizational structure; leadership attached to the first administrative level, reporting to it and to the board; avoiding conflicts of interest in the unit's duties; and full access to the information and records needed for its work." }
+        },
+        {
+          term: { ar: "برنامج الالتزام ومهام الوحدة", en: "Compliance Program and Unit Duties" },
+          def: { ar: "إطار مبني على قياس مخاطر عدم الالتزام: تنسيق وترتيب مع الوحدات، وإبلاغ المتطلبات والتعليمات، والمراقبة وإثبات الالتزام وتأكيد استيفاء البرنامج، واستطلاع التعليقات، والتقارير الدورية للمجلس والإدارة العليا، وبناء علاقات مع الجهات التنظيمية، بإجراءات تحقق واختبار ووثائق ومثبتات.", en: "A framework built on measuring compliance risk: coordinating with units, communicating requirements, monitoring and evidencing adherence, surveying feedback, periodic reporting to the board and senior management, and building regulator relations — backed by verification, testing, documentation and evidence." }
+        },
+        {
+          term: { ar: "مسؤولية معالجة المخالفات", en: "Responsibility for Remediation" },
+          def: { ar: "الإدارة العليا مسؤولة عن إدارة مخاطر عدم الالتزام ومعالجة المخالفات، ورؤساء الوحدات مسؤولون عن سيادة الالتزام في نطاقهم، أما وحدة الالتزام فدورها النصح والمتابعة والتقارير ولا تحمل العبء بدلًا عنهم.", en: "Senior management is accountable for managing compliance risk and remediating violations, department heads own compliance within their scope, and the unit advises, monitors and reports rather than carrying the burden for them." }
+        },
+        {
+          term: { ar: "التدقيق الداخلي وخطوط الدفاع", en: "Internal Audit and Lines of Defense" },
+          def: { ar: "وحدة الالتزام والتدقيق الداخلي مستقلان ومتكاملان لا يحل أحدهما محل الآخر: تتابع الوحدة تقيد المنشأة بالقواعد وتنسق البرنامج، بينما يدقق التدقيق الداخلي نشاطات الوحدة ومخاطرها ويصدر نتائجه إلى الإدارة العليا والمجلس في إطار خطوط دفاع متمايزة.", en: "The unit and internal audit are independent and complementary, neither replacing the other: the unit follows the entity's adherence to rules and runs the program, while internal audit reviews the unit's activities and risks and reports to senior management and the board within distinct lines of defense." }
+        }
+      ],
+      example: {
+        ar: "عند صدور تعليمة جديدة تخص أمن المعلومات تبلغها وحدة الالتزام إلى الوحدة المعنية وتحصل على تأكيد الاستلام وتتأكد من تضمينها في السياسات والإجراءات ثم تطلب مثبتات التطبيق؛ ويظل البنك مسؤولًا عن المخالفات الناشئة عن سوء فهم التعليمة ولا يعفيه الجهل أو الخطأ من العقوبات، لذلك يجب عند غموض أي تعليمة طلب التوضيح من وحدة الالتزام قبل التطبيق لا بعده.",
+        en: "When a new instruction concerning information security is issued, the compliance unit communicates it to the unit concerned, obtains acknowledgement of receipt, verifies it is embedded in policies and procedures, then requests implementation evidence; the bank remains liable for violations arising from misunderstanding the instruction — ignorance or error grants no exemption from penalties — so when an instruction is ambiguous, clarification is sought from the unit before applying it, not after."
+      },
+      mistakes: [
+        { ar: "الظن أن وحدة الالتزام هي التي تعالج المخالفات؛ فعبء المعالجة على الإدارة العليا ورؤساء الوحدات، ودور الوحدة النصح والمتابعة والتقارير.", en: "Assuming the compliance unit remediates violations; remediation falls on senior management and department heads, while the unit advises, monitors and reports." },
+        { ar: "حصر الالتزام في تجنب المخالفة الصريحة وإغفال روح النظام؛ فالتصرف الذي يضر بالسمعة خطر التزام حتى بلا مخالفة نصية.", en: "Reducing compliance to avoiding explicit breaches and ignoring the spirit of the rules; conduct damaging reputation is compliance risk even with no textual violation." },
+        { ar: "تكليف رئيس الالتزام بمهام مصرفية أو تشغيلية تمكّنه من إبرام تعهدات أو استثمارات، وهو ما يمنعه إطار الالتزام صراحة حفاظًا على الاستقلالية.", en: "Assigning the head of compliance banking or operational duties enabling commitments or investments, which the compliance framework explicitly forbids to preserve independence." },
+        { ar: "دمج وحدة الالتزام في التدقيق الداخلي أو الاستغناء بأحدهما عن الآخر، مع أنهما وظيفتان مستقلتان لكل منهما نطاق واتجاه تقارير.", en: "Merging the compliance unit into internal audit or dropping one of them, though they are independent functions with their own scopes and reporting lines." },
+        { ar: "تطبيق التعليمة بفهم خاطئ دون طلب التوضيح مسبقًا؛ فسوء الفهم لا يعفي البنك من العقوبات المترتبة.", en: "Applying an instruction on a mistaken reading without seeking clarification first; misunderstanding grants the bank no exemption from the resulting penalties." }
+      ],
+      terminology: [
+        { ar: "الالتزام (الامتثال)", en: "Compliance" },
+        { ar: "مخاطر عدم الالتزام", en: "Compliance Risk" },
+        { ar: "سياسة الالتزام", en: "Compliance Policy" },
+        { ar: "وحدة الالتزام", en: "Compliance Unit" },
+        { ar: "رئيس الالتزام", en: "Head of Compliance" },
+        { ar: "برنامج الالتزام", en: "Compliance Program" },
+        { ar: "بلاغات المخالفات", en: "Whistleblowing" },
+        { ar: "خطوط الدفاع الثلاثة", en: "Three Lines of Defense" },
+        { ar: "مكافحة غسل الأموال", en: "Anti-Money Laundering" }
+      ],
+      level: "easy"
+    },
+
+    risk: {
+      title: {
+        ar: "الفصل 5 · تقييم المخاطر القانونية والأخلاقية",
+        en: "Chapter 5 · Legal and Ethical Risk Assessment"
+      },
+      explanation: {
+        ar: "لم يعد تقييم مخاطر الأمن السيبراني عملًا فنيًا اختياريًا؛ فالإطار الوطني لإدارة مخاطر الأمن السيبراني ألزم الجهات الحكومية والجهات والشركات التابعة لها والقطاع الخاص الذي يملك بنى تحتية وطنية حساسة أو يشغلها أو يستضيفها بمنهجية موحدة، تجتمع فيها الاعتبارات الفنية مع التزامات الجهة النظامية وامتداد الأثر الأخلاقي إلى الأفراد والجهات الأخرى والدولة. ويقوم التحليل على مفاهيم متسلسلة: الأصول — بما فيها غير الملموس كحسابات التواصل والأصول المواجهة للإنترنت — والثغرة التي هي ضعف قائم في الأصول أو الضوابط أو الإجراءات، والتهديد الذي هو ظرف أو حدث يؤثر سلبًا باستغلال ذلك الضعف، ثم السيناريو الذي يجمعها ويوصف به كيف يتحقق الضرر. وتُقدَّر المخاطر الكامنة قبل الضوابط، ثم تختار الجهة أحد أربعة خيارات — القبول والمشاركة والمعالجة والتجنب — وتقيس المخاطر المتبقية بعد الخطط مقابل المستوى المقبول الذي يحدده صاحب الصلاحية. وتتكون المنهجية من أربع مراحل: التحديد والتقييم والتعامل والمتابعة، يحفظ نتائجها سجل المخاطر، ويُبنى مستوى الخطر على ضرب الأثر في الاحتمالية، ولكل منهما خمسة مستويات — من نادر جدًا إلى شبه مؤكد في الاحتمالية ومن منخفض جدًا إلى كارثي في الأثر — فيتراوح الناتج بين 1 و25 توزعه خمسة نطاقات حتى المستوى الكارثي (20–25) الذي يُرفع إلى الهيئة مباشرة مع مشاركة خطط التعامل.",
+        en: "Assessing cybersecurity risk is no longer optional technical work: the National Cybersecurity Risk Management Framework obliges government entities and their subsidiaries, and private-sector parties owning, operating or hosting critical national infrastructure, to follow one methodology where technical analysis meets the entity's regulatory obligations and the ethical reach of impact on individuals, other entities and the state. Analysis moves through chained concepts: assets — including intangibles such as social-media accounts and internet-facing assets — the vulnerability, a standing weakness in assets, controls or procedures, and the threat, a circumstance or event acting harmfully by exploiting that weakness, then the scenario combining them to describe how harm materializes. Inherent risk is estimated before controls, one of four options is chosen — accepting, sharing, mitigating or avoiding — and residual risk is measured after plans against the risk appetite set by the owning authority. The methodology has four phases — identification, assessment, treatment, monitoring — recorded in the risk register, and the risk level is the product of impact and likelihood, each with five levels — very rare to almost certain for likelihood, very low to catastrophic for impact — yielding a score from 1 to 25 across five bands up to the catastrophic 20–25 reported to the Authority directly with treatment plans."
+      },
+      objectives: [
+        { ar: "تعريف مخاطر الأمن السيبراني والتمييز بين الثغرة والتهديد.", en: "Define cybersecurity risk and distinguish vulnerability from threat." },
+        { ar: "تعداد مراحل منهجية إدارة المخاطر وخطواتها ودور سجل المخاطر.", en: "List the methodology's phases and steps and the role of the risk register." },
+        { ar: "تصنيف الأثر على السرية والسلامة والتوافر وشرح مستويات الاحتمالية.", en: "Classify impact on confidentiality, integrity and availability and explain likelihood levels." },
+        { ar: "حساب مستوى الخطر بمصفوفة الأثر والاحتمالية وتحديد نطاقه.", en: "Compute the risk level with the impact-likelihood matrix and locate its band." },
+        { ar: "تعداد خيارات التعامل مع المخاطر والتزامات الرفع إلى الهيئة.", en: "List the risk-treatment options and the reporting obligations to the Authority." }
+      ],
+      concepts: [
+        {
+          term: { ar: "مخاطر الأمن السيبراني", en: "Cybersecurity Risk" },
+          def: { ar: "مخاطر تمس أعمال الجهة — رؤيتها ورسالتها وصورتها وسمعتها وعملياتها — أو أصولها أو الأفراد أو الجهات الأخرى أو الدولة، بسبب إمكانية الاختراق أو التعطيل أو التعديل أو الدخول أو الاستخدام أو الاستغلال أو الإفصاح أو التدمير غير المشروع للشبكات والأنظمة وخدماتها وبياناتها.", en: "Risks touching the entity's business — vision, mission, image, reputation and operations — or its assets, people, other entities or the state, through unlawful breach, disruption, alteration, access, use, exploitation, disclosure or destruction of networks, systems, services and data." }
+        },
+        {
+          term: { ar: "الأصول المواجهة للإنترنت", en: "Internet-Facing Assets" },
+          def: { ar: "أصول الجهة المتاحة عبر الإنترنت ويُتتبع بها عنوان الشبكة، وتُحصر وتُصنف وتُرفع دوريًا إلى الهيئة وتخضع لضوابط تمنع أن تكون بابًا للدخول غير المصرح به، وتشمل الأصول غير الملموسة كحسابات التواصل الاجتماعي التي يجب حصرها ضمن الأصول.", en: "Entity assets exposed to the internet and tracked by network address; enumerated, classified and reported to the Authority periodically, governed by controls so they open no unauthorized door — including intangible assets such as social-media accounts that must be inventoried." }
+        },
+        {
+          term: { ar: "الثغرة والتهديد", en: "Vulnerability and Threat" },
+          def: { ar: "الثغرة ضعف قائم في الأصول أو الضوابط أو الإجراءات، والتهديد ظرف أو حدث يؤثر سلبًا على الجهة باستغلال ذلك الضعف، فلا يصح الخلط بين الضعف القائم والحدث المتربص.", en: "A vulnerability is a standing weakness in assets, controls or procedures; a threat is a circumstance or event acting harmfully by exploiting it — the standing weakness and the looming event are not to be confused." }
+        },
+        {
+          term: { ar: "السيناريو", en: "Risk Scenario" },
+          def: { ar: "وصف يجمع الأصل والثغرة والتهديد والضوابط الحالية وقدرة الاستغلال ليبيّن كيف يتحقق الضرر على الجهة، وعليه يُبنى تقدير الأثر والاحتمالية.", en: "A description combining asset, vulnerability, threat, current controls and exploitability to show how harm to the entity materializes, on which impact and likelihood estimates are built." }
+        },
+        {
+          term: { ar: "الخطر الكامن والمتبقي والمستوى المقبول", en: "Inherent, Residual Risk and Appetite" },
+          def: { ar: "الخطر الكامن هو مقدار الخطر قبل تنفيذ خطط التعامل وضوابطها، والمتبقي ما يتبقى بعد احتسابها، والمستوى المقبول هو القدر الذي يمكن تحمل أثره ويحدده صاحب الصلاحية وتُقبل المخاطر دونه موثقة في السجل.", en: "Inherent risk is the level before treatment plans and controls, residual what remains after them, and appetite the amount of impact the entity can bear, set by the owning authority, under which risks are accepted and documented in the register." }
+        },
+        {
+          term: { ar: "الإطار الوطني لإدارة مخاطر الأمن السيبراني", en: "National Cybersecurity Risk Management Framework" },
+          def: { ar: "إطار صادر عن الهيئة الوطنية للأمن السيبراني يحقق تحديد المخاطر ذات الأولوية وتعزيز الصمود الوطني بتطبيق الضوابط وتحديد الأدوار والمسؤوليات، ويشمل الجهات الحكومية والجهات والشركات التابعة لها وقطاع الخاص يملك بنى تحتية وطنية حساسة أو يشغلها أو يستضيفها.", en: "A framework issued by the National Cybersecurity Authority realizing priority-risk identification, national resilience through controls and clear roles and responsibilities; it covers government entities, their subsidiaries and private-sector parties owning, operating or hosting critical national infrastructure." }
+        },
+        {
+          term: { ar: "مراحل المنهجية وسجل المخاطر", en: "Methodology Phases and Risk Register" },
+          def: { ar: "أربع مراحل — التحديد والتقييم والتعامل والمتابعة — وخطواتها: حصر الأصول وتصنيفها ثم الثغرات ثم التهديدات ثم تطوير السيناريوهات ثم تحديد الضوابط الحالية ثم المستوى المقبول، وتحفظ النتائج وخطط التعامل والمخاطر المتبقية في سجل المخاطر.", en: "Four phases — identification, assessment, treatment, monitoring — with steps: inventorying and classifying assets, then vulnerabilities, then threats, then developing scenarios, then identifying current controls, then the appetite; results, treatment plans and residual risks are kept in the risk register." }
+        },
+        {
+          term: { ar: "مصفوفة تقييم المخاطر", en: "Risk Assessment Matrix" },
+          def: { ar: "منهجية تحدد مستوى الخطر باحتمالية السيناريو وأثره: ناتج التقييم = الأثر × الاحتمالية، ويتراوح بين 1 و25، وتُقاس مستويات الخطر في نطاقات: 1–2 منخفض جدًا، و3–7 منخفض، و8–14 متوسط، و15–19 مرتفع، و20–25 كارثي.", en: "A methodology fixing the risk level from scenario likelihood and impact: score = impact × likelihood, ranging 1 to 25, with risk bands: 1–2 very low, 3–7 low, 8–14 medium, 15–19 high, and 20–25 catastrophic." }
+        },
+        {
+          term: { ar: "مستويات الاحتمالية والأثر", en: "Likelihood and Impact Levels" },
+          def: { ar: "الاحتمالية خمسة مستويات — من نادر جدًا إلى شبه مؤكد — تُقدَّر بالفترة الزمنية أو بقدرة الاستغلال، ومنها المهاجم غير المتمكن الذي يستخدم أكوادًا جاهزة، والأثر خمسة مستويات — من منخفض جدًا إلى كارثي — يقاس بتأثير الإفصاح أو التغيير أو التوقف على السرية والسلامة والتوافر.", en: "Likelihood has five levels — very rare to almost certain — estimated by time frame or exploitability, including the unskilled script-kiddie using ready-made code; impact has five levels — very low to catastrophic — measured through disclosure, alteration or outage effects on confidentiality, integrity and availability." }
+        },
+        {
+          term: { ar: "خيارات التعامل مع المخاطر", en: "Risk-Treatment Options" },
+          def: { ar: "القبول: تحمل الخطر كما هو ضمن المستوى المقبول لدى صاحب الصلاحية وتوثيقه، والمشاركة: تقاسمه مع طرف آخر، والمعالجة: تخفيضه بخطط وضوابط حتى بلوغ المستوى المقبول، والتجنب: منع وقوعه كإيقاف إتاحة خدمة على أصل مواجه للإنترنت يحمل خطرًا كارثيًا.", en: "Accepting: bearing the risk within the owning authority's appetite and documenting it; sharing: splitting it with another party; mitigating: lowering it with plans and controls until appetite is met; avoiding: preventing it — such as disabling a service on an internet-facing asset carrying catastrophic risk." }
+        }
+      ],
+      example: {
+        ar: "ثغرة تسريب بيانات حساسة تستغلها قدرة استغلال عالية: مهاجم غير متمكن بأكواد جاهزة، فيُقدَّر الأثر كبيرًا (4) والاحتمالية شبه مؤكدة (5)، والناتج 4 × 5 = 20، وبالوقوف على التقاطع في المصفوفة (جدول 5.4) يقع 20 ضمن النطاق 20–25 فالمستوى كارثي، فيُرفع إلى الهيئة مباشرة وفق الفقرة 5.5 ويُوثق في السجل، ثم يُعالج بضوابط متسقة مع ضوابط الهيئة حتى تنخفض المخاطر المتبقية إلى المستوى المقبول.",
+        en: "A sensitive-data leak vulnerability with high exploitability — an unskilled attacker using ready-made code — yields impact 4 and likelihood 5; the score 4 × 5 = 20 falls, at the matrix intersection (Table 5.4), within the 20–25 band, making the level catastrophic; it is reported directly to the Authority per section 5.5 and documented in the register, then mitigated with controls consistent with the Authority's until residual risk falls to the accepted level."
+      },
+      mistakes: [
+        { ar: "الاقتصار على الفترة الزمنية وإهمال قدرة الاستغلال، فالثغرة التي يستغلها مهاجم غير متمكن بأكواد جاهزة قد تكون استُغلت سابقًا فلا يصح تقديرها نادرة.", en: "Relying on time frame alone and ignoring exploitability: a vulnerability attacked by an unskilled user of ready-made code may already have been exploited and cannot be rated rare." },
+        { ar: "الخلط بين الثغرة والتهديد؛ فالثغرة ضعف قائم في الأصول أو الضوابط أو الإجراءات، والتهديد ظرف أو حدث يؤثر سلبًا باستغلاله.", en: "Confusing vulnerability with threat; a vulnerability is a standing weakness in assets, controls or procedures, while a threat is a circumstance or event acting harmfully by exploiting it." },
+        { ar: "عدّ القبول إهمالًا وتقصيرًا، وهو قرار موثق مرتبط بالمستوى المقبول لدى صاحب الصلاحية.", en: "Treating acceptance as neglect; it is a documented decision tied to the owning authority's risk appetite." },
+        { ar: "الظن أن التقييم يُجرى مرة واحدة؛ ويُعاد دوريًا أو وفق ما يصدر عن الهيئة أو عند تحديث الخطط أو التهديدات أو السيناريوهات أو حالة الضوابط أو تغيير البنية الرقمية.", en: "Assuming assessment happens once; it recurs periodically, on Authority issuances, or when plans, threats, scenarios, control status or the digital infrastructure change." },
+        { ar: "حصر الإطار الوطني في الجهات الحكومية وحدها وإغفال الشركات التابعة والقطاع الخاص الذي يملك بنى تحتية وطنية حساسة أو يشغلها أو يستضيفها.", en: "Limiting the national framework to government entities and missing subsidiaries and private-sector parties owning, operating or hosting critical national infrastructure." }
+      ],
+      terminology: [
+        { ar: "الأمن السيبراني", en: "Cybersecurity" },
+        { ar: "الأصول المواجهة للإنترنت", en: "Internet-Facing Assets" },
+        { ar: "البنية التحتية الوطنية الحساسة", en: "Critical National Infrastructure" },
+        { ar: "الإطار الوطني لإدارة مخاطر الأمن السيبراني", en: "National Cybersecurity Risk Management Framework" },
+        { ar: "السيناريو", en: "Risk Scenario" },
+        { ar: "الاحتمالية", en: "Likelihood" },
+        { ar: "الأثر", en: "Impact" },
+        { ar: "سجل المخاطر", en: "Risk Register" },
+        { ar: "المستوى المقبول", en: "Risk Appetite" }
+      ],
+      level: "medium"
+    },
+
+    awareness: {
+      title: {
+        ar: "الفصل 6 · الثقافة التنظيمية والتوعية الأمنية",
+        en: "Chapter 6 · Organizational Culture and Security Awareness"
+      },
+      explanation: {
+        ar: "تقوم الثقافة الأمنية في الجهة على قدرة العاملين على أداء أدوارهم المتعلقة بالأمن السيبراني واستعدادهم لأدائها معًا؛ فالقدرة تُكتسب بالتدريب والمعرفة، والاستعداد يظهر في القبول بالبرنامج ودعمه على كل المستويات، والمعرفة وحدها لا تتحول إلى سلوك دونهما. وتظهر هذه الثقافة في ثلاثة عناصر: وعي الإدارة التنفيذية بمسؤولياتها تجاه الأطراف المعنية والعملاء والموظفين، وانتقال المعرفة من الموظفين المدرَّبين إلى غير المدرَّبين، والتزام جميع العاملين بالبرنامج مع إجراء تأديبي عند الانتهاك. وبرنامج التوعية بالأمن السيبراني مجموعة متطلبات غايتها إنشاء برنامج شامل للتوعية ومتابعته وتحديثه، ويقع في منظومة الأمن السيبراني يخدم أهدافها ويخضع لإدارتها وليس نشاطًا منفصلًا عنها، ويتواءم مع الضوابط الأساسية للأمن السيبراني ECC-1:2018. وتمر دورة حياته بالإعداد ثم التنفيذ ثم ما بعد التنفيذ ثم التقييم، ولا يُنفَّذ إلا بعد استكمال الاستراتيجية والخطة والمواد ومعالجة المتطلبات المالية، ويستهدف ثلاث فئات: الإدارة العليا، والعاملين في تقنية المعلومات، وجميع العاملين من موظفين ومتعاقدين، ولكل فئة محتوى يناسب مسؤولياتها. ثم يُقيَّم بجمع الملاحظات وفق سبعة عناصر ويُختبر دوريًا بمحاكاة الهجمات ومكافحة التصيد، ويُحدَّد مستوى نضج التوعية باستبيان من أربعة وثلاثين سؤالًا وأربعة محاور، ويُحدَّث سنويًا على الأقل وعند التغييرات الجوهرية، ووثيقته بجداول الاعتماد والنسخ والمواعيد ملك لرئيس الإدارة المعنية بالأمن السيبراني، والالتزام به واجب على جميع العاملين وإلا فإجراء تأديبي.",
+        en: "Security culture in an entity rests on workers' capability to perform their cybersecurity roles and their readiness to do so, together: capability comes through training and knowledge, readiness shows in accepting the program and supporting it at every level, and knowledge alone does not become behavior without both. The culture shows in three elements: executive management's awareness of its responsibilities toward stakeholders, clients and employees; knowledge transfer from trained to untrained employees; and all workers' commitment to the program, with disciplinary action on violation. The cybersecurity awareness program is a set of requirements to build a comprehensive awareness program, follow it up and update it; it sits within the cybersecurity framework, serves its goals and answers to its management — no separate activity — aligned with the essential controls ECC-1:2018. Its lifecycle runs preparation, delivery, post-delivery and evaluation, and it is delivered only after the strategy, plan, materials and financial requirements are complete; it targets three audiences — senior management, IT staff, and all workers including contractors — each with content fitting its duties. It is then evaluated through feedback across seven elements and tested periodically with attack simulation and phishing drills; maturity is gauged by a thirty-four-question, four-axis questionnaire, updated at least annually and on material changes, and its document with approval, version and schedule tables is owned by the cybersecurity administration head; adherence binds all workers or disciplinary action follows."
+      },
+      objectives: [
+        { ar: "تفسير قيام الثقافة الأمنية على القدرة والاستعداد معًا.", en: "Explain how security culture rests on capability and readiness together." },
+        { ar: "تعداد عناصر الثقافة ومراحل دورة حياة البرنامج والفئات المستهدفة.", en: "List the culture's elements, the program lifecycle and the target audiences." },
+        { ar: "تحديد أدوار رئيس الإدارة ومدير البرنامج والمدراء والمستخدمين.", en: "Identify the roles of the administration head, program manager, managers and users." },
+        { ar: "تمييز محتوى التوعية المناسب لكل فئة من الفئات الثلاث.", en: "Distinguish the awareness content suited to each of the three audiences." },
+        { ar: "بيان متطلبات تنفيذ البرنامج ووسائل قياس الفعالية وحالات التحديث الإلزامي.", en: "State the program's delivery requirements, effectiveness measures and mandatory update cases." }
+      ],
+      concepts: [
+        {
+          term: { ar: "الثقافة الأمنية", en: "Security Culture" },
+          def: { ar: "مستوى قدرة العاملين في الجهة على أداء أدوارهم المتعلقة بالأمن السيبراني واستعدادهم لأدائها؛ والقدرة تُكتسب بالتدريب والمعرفة والاستعداد يظهر في القبول بالدعم على كل المستويات، ويُقاس الدعم بمؤشرات منها دعم الإدارة العليا ومستوى الحضور في التدريب الإلزامي.", en: "The level of workers' capability to perform their cybersecurity roles and their readiness to do so; capability comes through training and knowledge while readiness shows in acceptance and support at every level, measured by indicators including senior management backing and attendance in mandatory training." }
+        },
+        {
+          term: { ar: "برنامج التوعية بالأمن السيبراني", en: "Cybersecurity Awareness Program" },
+          def: { ar: "مجموعة من متطلبات الأمن السيبراني غايتها إنشاء برنامج شامل للتوعية ومتابعته وتحديثه، ويقع في إطار منظومة الأمن السيبراني للجهة يخدم أهدافها ويخضع لإدارتها، وليس نشاطًا منفصلًا عنها، ومتطلباته متوائمة مع الضوابط الأساسية للأمن السيبراني ECC-1:2018.", en: "A set of cybersecurity requirements aiming to build a comprehensive awareness program, follow it up and update it; it sits within the entity's cybersecurity framework, serves its goals and answers to its management — no separate activity — aligned with the essential controls ECC-1:2018." }
+        },
+        {
+          term: { ar: "دورة حياة البرنامج", en: "Program Lifecycle" },
+          def: { ar: "أربع مراحل: الإعداد ثم التنفيذ ثم مرحلة ما بعد التنفيذ ثم التقييم، مع تحسين مستمر، وثلاث مهام متسلسلة: اختيار مواضيع التوعية، وإعداد مواد التوعية، وتقييم فعالية البرنامج.", en: "Four phases — preparation, delivery, post-delivery, evaluation — with continuous improvement, and three chained tasks: choosing awareness topics, preparing materials, and evaluating the program's effectiveness." }
+        },
+        {
+          term: { ar: "الفئات المستهدفة ومحتواها", en: "Target Audiences and Content" },
+          def: { ar: "ثلاث فئات: العاملون في تقنية المعلومات بمحتوى تقني كإدارة الأصول والنسخ الاحتياطي والتشفير والتحصين وإدارة الهويات والثغرات والحوادث، والإدارة العليا بمحتوى يدعم القرار كالسياسات والمعايير ومخاطر الأمن السيبراني بأثره المالي والتدقيقات والمتطلبات التشريعية والاستمرارية، وجميع العاملين بمحتوى سلوكي يومي يشمل السياسات الست — ومنها الاستخدام المقبول والعمل عن بعد — والهندسة الاجتماعية وكلمات المرور والأمن في المنزل.", en: "Three groups: IT staff with technical content such as asset management, backup and recovery, encryption, hardening, identity and access, vulnerability and incident management; senior management with decision-oriented content such as policies, standards, cyber risk with its financial impact, audits, legislative requirements and continuity; and all workers with daily-behavior content covering the six policies — including acceptable use and remote work — social engineering, passwords and home security." }
+        },
+        {
+          term: { ar: "أدوار البرنامج", en: "Program Roles" },
+          def: { ar: "رئيس الإدارة المعنية بالأمن السيبراني يضع الاستراتيجية ويضمن فهم القيادة والتمويل وتدريب ذوي المسؤوليات المهمة وآليات المتابعة ويعين مدير البرنامج، ومدير البرنامج مسؤول عن التنفيذ ومواد التوعية وصلتها بالتقنيات وتوقيتها ونشرها والتغذية الراجعة وتحديثها، والمدراء يتحملون التزام فرقهم ويدرسون خطط تطوير فردية ويعملون على تقليل أخطاء المستخدمين.", en: "The cybersecurity administration head sets strategy, ensures leadership understanding, funding, training of key staff and follow-up mechanisms and appoints the program manager; the program manager owns delivery, materials' currency, timing, distribution, feedback and updates; managers own their teams' adherence, develop individual plans and reduce user errors." }
+        },
+        {
+          term: { ar: "المستخدمون وواجباتهم", en: "Users and Their Duties" },
+          def: { ar: "المستخدمون أكبر فئة مستهدفة وأهم مجموعة في الحد من الأخطاء غير المقصودة، ويشمل المصطلح الموظفين والمتعاقدين والزوار والضيوف وكل من يصل إلى الأصول التقنية؛ وواجباتهم حضور التدريب على قواعد الأنظمة، والتعاون لتلبية الاحتياجات التدريبية، والإلمام بإجراءات حماية المعلومات.", en: "Users are the largest audience and the key group in limiting unintentional errors; the term covers employees, contractors, visitors and guests and anyone reaching the entity's technical assets; their duties are attending systems-rules training, cooperating to meet training needs and being versed in information-protection procedures." }
+        },
+        {
+          term: { ar: "التدريب قبل منح الوصول", en: "Training Before Access" },
+          def: { ar: "قاعدة تقضي بتدريب المستخدم على مسؤولياته الأمنية وقواعد النظام قبل السماح له بالوصول إليه، ويضمن المدراء تطبيقها على كل المستخدمين والمتعاقدين الذين يديرون أنظمة الدعم والتطبيقات الرئيسية أو يعملون عليها.", en: "A rule requiring a user to be trained on security responsibilities and the system's rules before being allowed access, enforced by managers for every user and contractor administering or working on main support systems and applications." }
+        },
+        {
+          term: { ar: "ميزات المواد وأساليب التقديم", en: "Material Traits and Delivery Methods" },
+          def: { ar: "تعتمد المواد الفعالة على سهولة الاستخدام وإمكانية التوسع والمساءلة بتسجيل إحصائيات الإنجاز والاستفادة، ومن أساليب التقديم: الفيديوهات التفاعلية والتدريب عبر الإنترنت والتدريب على جهاز المستخدم دون إنترنت والجلسات الحضورية والملصقات والكتيبات وشاشات التوقف، ويُعد المزج بينها من الطرق الفعالة.", en: "Effective materials rest on ease of use, scalability and accountability through completion and benefit statistics; delivery methods include interactive videos, online training, on-device training without the internet, instructor-led on-site sessions, posters and booklets and screensavers, with mixing them among effective approaches." }
+        },
+        {
+          term: { ar: "التقييم والاختبار الدوري", en: "Evaluation and Periodic Testing" },
+          def: { ar: "تُحفظ الملاءمة المستمرة بدمج آليات في الاستراتيجية تواكب التطور التقني والتنظيمي، وتُصمم الملاحظات على سبعة عناصر: الجودة ونطاق العمل وطريقة النشر ومستوى الصعوبة وسهولة الاستخدام ومدة الجلسة والصلة واقتراحات التعديل، ويُختبر الأداء الفعلي دوريًا بمحاكاة الهجمات ومكافحة التصيد الاحتيالي لا بحضور الجلسات وحده.", en: "Continuous relevance is preserved through strategy mechanisms tracking technical and regulatory change; feedback follows seven elements — quality, scope, publication method, difficulty, ease of use and session length, relevance and improvement suggestions — and actual behavior is tested periodically through attack simulation and phishing drills, not attendance alone." }
+        },
+        {
+          term: { ar: "الحوكمة والتحديث", en: "Governance and Updates" },
+          def: { ar: "وثيقة البرنامج تحمل تصنيفًا وتاريخًا وإصدارًا ومرجعًا وجداول الاعتماد والنسخ والمواعيد، ومالكها رئيس الإدارة المعنية بالأمن السيبراني التي تحدثها وتقيس الالتزام بها بينما تنفذها الإدارة المعنية بتقنية المعلومات، ويُحدَّث البرنامج سنويًا على الأقل وعند تغييرات تقنية جوهرية أو تغير السياسات والإجراءات أو المتطلبات التشريعية، ويُقاس النضج باستبيان من أربعة وثلاثين سؤالًا في أربعة محاور: بناء الوعي، ورفع مستوى وعي الإدارة التنفيذية، وسياسة التوعية والتدريب، ونقل المعرفة.", en: "The program document carries classification, date, issue, reference and the approval, version and schedule tables; it is owned by the cybersecurity administration head who updates it and measures adherence while the IT administration executes it; it is updated at least annually and on material technical change, policy and procedure change or legislative change, and maturity is measured by a thirty-four-question questionnaire across four axes: awareness building, raising executive awareness, awareness and training policy, and knowledge transfer." }
+        }
+      ],
+      example: {
+        ar: "تتلقى كل فئة محتواها: فني الدعم في إدارة تقنية المعلومات توعية بإدارة التحديثات والإصلاحات وبالنسخ الاحتياطي والاسترجاع، وتحضر الإدارة العليا جلسة عن المشهد العام للتهديدات وعن الأثر المالي للمخاطر لا جلسة تقنية عن تحصين الخوادم، ويتلقى السكرتير توعية بكلمات المرور والمصادقة وباستخدام الشبكات اللاسلكية العامة؛ ثم تنفذ الجهة بعد التدريب محاكاة لرسالة تصيد احتيالي وتتحقق من استجابة العاملين لها، فيُقاس السلوك الفعلي ولا يُكتفى بعدد الحضور.",
+        en: "Each audience gets its own content: the IT support technician receives awareness on update and patch management and on backup and recovery; senior management attends a session on the threat landscape and the financial impact of risk, not a technical session on server hardening; the secretary receives awareness on passwords and authentication and on public wireless networks; then after training the entity runs a phishing-simulation email and checks workers' responses — actual behavior is measured, not attendance counts."
+      },
+      mistakes: [
+        { ar: "استخدام نموذج الهيئة كما هو دون مواءمته مع أعمال الجهة واعتماده من رئيس الجهة أو من يفوضه، والنموذج مثال توضيحي والهيئة تخلي مسؤوليتها من هذا الاستخدام.", en: "Using the Authority's template as-is without aligning it to the entity's business and having it approved by the entity's head or delegate; the template is illustrative and the Authority disclaims this use." },
+        { ar: "حصر التوعية في الموظفين وإغفال المتعاقدين والزوار والضيوف، ومفهوم المستخدمين يشمل كل من يحتاج إلى الوصول إلى الأصول التقنية.", en: "Confining awareness to employees and omitting contractors, visitors and guests, while the user concept covers everyone needing access to the entity's technical assets." },
+        { ar: "تقديم محتوى واحد لكل الفئات، كأن تتلقى الإدارة العليا محتوى التحصين والتشفير، وهو من مواضيع العاملين في تقنية المعلومات لا غيرهم.", en: "Delivering one content for all audiences, such as giving senior management hardening and encryption material that belongs to IT staff." },
+        { ar: "إطلاق حملة التوعية قبل استكمال الاستراتيجية وخطة البرنامج والمواد ومعالجة المتطلبات المالية، والواجب تأجيل الإطلاق مع شرح الخطة للإدارة العليا.", en: "Launching the campaign before strategy, plan, materials and financial requirements are complete; launch should wait and the plan be explained to senior management." },
+        { ar: "الاكتفاء بعدد الحضور مقياسًا للنجاح أو بالتحديث السنوي وحده، والحضور مؤشر واحد من خمسة وتجب معه آليات الاختبار الدوري والملاحظات والتحديث عند التغييرات.", en: "Settling for attendance as the success measure or for annual update alone; attendance is one of five indicators and must be joined by periodic testing, feedback and change-triggered updates." }
+      ],
+      terminology: [
+        { ar: "الثقافة الأمنية", en: "Security Culture" },
+        { ar: "برنامج التوعية بالأمن السيبراني", en: "Cybersecurity Awareness Program" },
+        { ar: "الملاءمة المستمرة", en: "Continuous Relevance" },
+        { ar: "الاختبار الدوري للفعالية", en: "Periodic Effectiveness Testing" },
+        { ar: "محاكاة التصيد الاحتيالي", en: "Phishing Simulation" },
+        { ar: "استبيان تقييم الوعي", en: "Awareness Assessment Questionnaire" },
+        { ar: "الهندسة الاجتماعية", en: "Social Engineering" },
+        { ar: "مالك الوثيقة", en: "Document Owner" },
+        { ar: "الإجراء التأديبي", en: "Disciplinary Action" }
+      ],
+      level: "easy"
+    }
+  }
+
+};
 
 /* Expose the lesson registry so the top-level modules (MODULE 48 · search)
-   can index authored lessons without duplicating content. It is empty today
-   — so the search simply renders no lesson group instead of inventing one. */
+   can index authored lessons without duplicating content. Lessons ship
+   progressively; topics without an entry render the honest unavailable
+   state instead of invented content. */
 window.PLATFORM_LESSONS = LESSONS;
 
 
@@ -1257,7 +4073,7 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
 
   /* Seeded question counts so cards never show empty badges before
      Stats.Live overwrites them from the live question bank. */
-  const COUNT_SEED = { "260210030702": 20, "260210030802": 20, "260210030902": 20, "260210031002": 20, "260210031102": 20 };
+  const COUNT_SEED = { "260210030702": 32, "260210030802": 32, "260210030902": 24, "260210031002": 28, "260210031102": 28 };
 
   function materialsHtml(s) {
     const data = (typeof window !== "undefined" && window.PLATFORM_CURRENT_SEMESTER) || {};
@@ -1448,94 +4264,279 @@ const WorkerBridge = (() => {
 })();
 
 /* ---------- 03 · Sfx ---------------------------------------- */
+/* Cues that matter (MODULE 03). Every sound is synthesised live with the
+   Web Audio API — zero assets, offline-safe: FM bells for the tones,
+   band-passed noise for the transients, one short shared shimmer echo
+   for space, and a soft compressor on the bus so stacked cues never
+   clip. Only meaningful learning feedback is voiced: quiz grades
+   (good/bad), quiz timeout and the study-timer chime. Interface chrome
+   (clicks, opens, scrolling, navigation) stays silent by design. */
 const Sfx = (() => {
   let ctx = null;
   let master = null;
+  let shimIn = null;
+  let noiseBuf = null;
   let enabled = Store.get("sound", true) === true;
+  let lastKind = "";
+  let lastAt = 0;
+  const stamps = [];
 
-  /** Create/resume AudioContext after user gesture. @returns {AudioContext|null} */
+  const MAX_VOICES = 48;    /* flood guard: cues inside the window */
+  const VOICE_WINDOW = 800; /* ms */
+  const DUP_MS = 70;        /* same-cue de-bounce */
+
+  /** Rolling cue count over the last window (prunes as it reads).
+   *  @returns {number} */
+  function voiceCount() {
+    const now = Date.now();
+    while (stamps.length && now - stamps[0] > VOICE_WINDOW) stamps.shift();
+    return stamps.length;
+  }
+
+  /** Create/resume the shared AudioContext + bus after a gesture.
+   *  @returns {AudioContext|null} */
   function ensureCtx() {
     if (!enabled) return null;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
     if (!ctx) {
-      ctx = new AC();
-      master = ctx.createGain();
-      master.gain.value = 0.16;
-      master.connect(ctx.destination);
+      try {
+        ctx = new AC();
+        master = ctx.createGain();
+        master.gain.value = 0.16;
+        const glue = ctx.createDynamicsCompressor ? ctx.createDynamicsCompressor() : null;
+        if (glue) {
+          try {
+            glue.threshold.value = -18;
+            glue.knee.value = 12;
+            glue.ratio.value = 6;
+            glue.attack.value = 0.003;
+            glue.release.value = 0.12;
+          } catch (e1) { /* params are progressive */ }
+          master.connect(glue);
+          glue.connect(ctx.destination);
+        } else {
+          master.connect(ctx.destination);
+        }
+        /* Shimmer bus: one short feedback echo shared by the bells. */
+        shimIn = ctx.createGain();
+        shimIn.gain.value = 1;
+        const delay = ctx.createDelay(0.2);
+        delay.delayTime.value = 0.048;
+        const fb = ctx.createGain();
+        fb.gain.value = 0.22;
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 3800;
+        shimIn.connect(delay);
+        delay.connect(lp);
+        lp.connect(fb);
+        fb.connect(delay);
+        lp.connect(master);
+      } catch (e2) {
+        ctx = null; master = null; shimIn = null;
+        return null;
+      }
     }
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") { try { ctx.resume(); } catch (e3) { /* stay silent */ } }
     return ctx;
   }
 
-  /**
-   * Schedule one tone.
-   * @param {number} freq Hz.
-   * @param {number} dur Seconds.
-   * @param {OscillatorType} type Waveform.
-   * @param {number} when Offset seconds.
-   * @param {number} vol Volume.
-   * @returns {void}
-   */
-  function tone(freq, dur, type, when = 0, vol = 1) {
-    const c = ensureCtx();
-    if (!c) return;
-    const o = c.createOscillator();
-    const g = c.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0.0001, c.currentTime + when);
-    g.gain.linearRampToValueAtTime(vol * 0.5, c.currentTime + when + 0.012);
-    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + when + dur);
-    o.connect(g).connect(master);
-    o.start(c.currentTime + when);
-    o.stop(c.currentTime + when + dur + 0.05);
+  /** Stereo panner when the engine has one. @returns {Object|null} */
+  function panner(pan) {
+    if (!ctx.createStereoPanner) return null;
+    try {
+      const p = ctx.createStereoPanner();
+      p.pan.value = pan;
+      return p;
+    } catch (e) { return null; }
+  }
+
+  /** Connect a scheduled voice to the bus (+ optional shimmer send).
+   *  @returns {void} */
+  function route(node, send, pan) {
+    stamps.push(Date.now());
+    const panNode = (typeof pan === "number") ? panner(pan) : null;
+    let tail = node;
+    if (panNode) { node.connect(panNode); tail = panNode; }
+    tail.connect(master);
+    if (send > 0 && shimIn) {
+      const s = ctx.createGain();
+      s.gain.value = send;
+      tail.connect(s);
+      s.connect(shimIn);
+    }
+  }
+
+  /** Exponential glide helper that never touches zero. @returns {void} */
+  function glide(param, from, to, t0, dur) {
+    param.setValueAtTime(Math.max(from, 1), t0);
+    if (to !== from) param.exponentialRampToValueAtTime(Math.max(to, 1), t0 + dur);
+  }
+
+  /** One plucked FM bell (sine carrier + decaying sine modulator).
+   *  @returns {void} */
+  function bell(freq, t0, o) {
+    o = o || {};
+    const dur = o.dur || 0.34;
+    const vol = (o.vol == null ? 0.4 : o.vol);
+    const carrier = ctx.createOscillator();
+    const mod = ctx.createOscillator();
+    const mg = ctx.createGain();
+    const cg = ctx.createGain();
+    carrier.type = "sine";
+    carrier.frequency.value = freq;
+    mod.type = "sine";
+    mod.frequency.value = freq * (o.ratio || 2.01);
+    mg.gain.setValueAtTime(freq * (o.idx == null ? 1.6 : o.idx), t0);
+    mg.gain.exponentialRampToValueAtTime(Math.max(freq * 0.01, 1), t0 + dur * 0.55);
+    mod.connect(mg);
+    mg.connect(carrier.frequency);
+    cg.gain.setValueAtTime(0.0001, t0);
+    cg.gain.linearRampToValueAtTime(vol, t0 + 0.008);
+    cg.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    carrier.connect(cg);
+    route(cg, o.send || 0, o.pan);
+    mod.start(t0);
+    carrier.start(t0);
+    mod.stop(t0 + dur + 0.05);
+    carrier.stop(t0 + dur + 0.05);
+  }
+
+  /** One band-passed noise sweep (shared noise buffer, built lazily).
+   *  @returns {void} */
+  function swish(f0, f1, t0, dur, o) {
+    o = o || {};
+    const vol = (o.vol == null ? 0.3 : o.vol);
+    if (!noiseBuf) {
+      const len = Math.max(1, Math.floor(ctx.sampleRate * 0.6));
+      noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const data = noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuf;
+    const f = ctx.createBiquadFilter();
+    f.type = o.type || "bandpass";
+    f.Q.value = (o.q == null ? 1.2 : o.q);
+    glide(f.frequency, f0, f1, t0, dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + (o.attack || 0.006));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(f);
+    f.connect(g);
+    route(g, o.send || 0, o.pan);
+    src.start(t0);
+    src.stop(t0 + dur + 0.05);
+  }
+
+  /** One gliding tone blip. @returns {void} */
+  function blip(f0, f1, t0, dur, o) {
+    o = o || {};
+    const vol = (o.vol == null ? 0.3 : o.vol);
+    const osc = ctx.createOscillator();
+    osc.type = o.type || "sine";
+    glide(osc.frequency, f0, f1, t0, dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g);
+    route(g, o.send || 0, o.pan);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.05);
+  }
+
+  /** Schedule one named cue on the bus. @returns {void} */
+  function cue(kind, opt) {
+    const t0 = ctx.currentTime + 0.004;
+    const pan = opt.pan;
+    switch (kind) {
+      /* euphoric rising sparkle for a correct answer */
+      case "good": {
+        const run = [523.25, 659.25, 783.99, 1046.5];
+        for (let i = 0; i < run.length; i++) {
+          bell(run[i], t0 + i * 0.055, { vol: 0.34 - i * 0.02, dur: 0.42, send: 0.22 });
+        }
+        swish(5200, 6400, t0 + 0.12, 0.05, { vol: 0.08, q: 3 });
+        break;
+      }
+      /* a gentle low five for a miss — honest, never punishing */
+      case "bad":
+        blip(349.23, 293.66, t0, 0.16, { vol: 0.3 });
+        blip(233.08, 196, t0 + 0.09, 0.14, { vol: 0.22 });
+        swish(900, 500, t0, 0.1, { vol: 0.1, q: 1.5 });
+        break;
+      /* time ran out — three dusty descending bells */
+      case "timeout": {
+        const fall = [392, 311.13, 261.63];
+        for (let i = 0; i < fall.length; i++) {
+          bell(fall[i], t0 + i * 0.13, { vol: 0.3, dur: 0.3, idx: 1.1 });
+          swish(800, 500, t0 + i * 0.13, 0.08, { vol: 0.08, q: 2 });
+        }
+        break;
+      }
+      /* timer finish — a warm three-note ring */
+      case "chime":
+        bell(880, t0, { vol: 0.3, dur: 0.5, send: 0.3 });
+        bell(1174.66, t0 + 0.16, { vol: 0.28, dur: 0.5, send: 0.3 });
+        bell(880, t0 + 0.32, { vol: 0.22, dur: 0.6, send: 0.3 });
+        break;
+    }
   }
 
   return {
     get enabled() { return enabled; },
     set enabled(v) { enabled = !!v; },
+    /** Unlock the context on the first user gesture. @returns {void} */
+    prime() { try { ensureCtx(); } catch (e) { /* stay silent */ } },
     /**
-     * Play a named preset.
-     * @param {"good"|"bad"|"timeout"|"tick"|"flip"} kind Preset.
+     * Play a named cue.
+     * @param {"good"|"bad"|"timeout"|"chime"} kind Cue name.
+     * @param {Object=} opt Options: {intensity}, {dir}, {pan}.
      * @returns {void}
      */
-    play(kind) {
-      switch (kind) {
-        case "good": tone(523.25, 0.12, "triangle"); tone(783.99, 0.18, "triangle", 0.09); break;
-        case "bad": tone(196, 0.2, "square", 0, 0.55); tone(146.83, 0.28, "square", 0.1, 0.55); break;
-        case "timeout": tone(330, 0.14, "sawtooth", 0, 0.45); tone(262, 0.24, "sawtooth", 0.12, 0.45); break;
-        case "tick": tone(880, 0.05, "sine", 0, 0.35); break;
-        case "flip": tone(659.25, 0.07, "triangle", 0, 0.4); break;
-      }
+    play(kind, opt) {
+      try {
+        const now = Date.now();
+        if (kind === lastKind && now - lastAt < DUP_MS) return;
+        if (!ensureCtx()) return;
+        if (voiceCount() > MAX_VOICES) return;
+        lastKind = kind;
+        lastAt = now;
+        cue(kind, opt || {});
+      } catch (e) { /* audio is optional */ }
     }
   };
 })();
 
- 
- 
-/* ============================================================
-   MODULE 04 · Preloader — boot overlay lifecycle
-   ============================================================ */
+/* ---------- 03b · Soundscape — only the cues that matter ---------- */
 
-/** Fade out and remove the preloader overlay. @returns {void} */
-function hidePreloader() {
-  const pre = $id("preloader");
-  if (!pre) return;
-  pre.classList.add("is-done");
-  setTimeout(() => pre.remove(), 800);
-}
-window.addEventListener("load", () => setTimeout(hidePreloader, 600));
-setTimeout(hidePreloader, 4000); // hard safety net
+const primeAudio = (() => {
+  /** Unlock the shared context on the first user gesture. @returns {void} */
+  function prime() { try { Sfx.prime(); } catch (e) { /* stay silent */ } }
+  document.addEventListener("pointerdown", prime, true);
+  document.addEventListener("keydown", prime, true);
+  return prime;
+})();
 
-/* ---------- Navigation click sound — quiet, intentional feedback ---------- */
-document.addEventListener("click", (event) => {
-  const link = event.target && event.target.closest
-    ? event.target.closest(".nav-links a[href]")
-    : null;
-  if (!link) return;
-  Sfx.play("flip");
-});
+/** Public surface — kept for tests, power users and future opt-ins.
+ *  Speech cover from 2026: only meaningful learning feedback speaks
+ *  (quiz grades / lesson checks, timeout, master timer chime). */
+const Soundscape = {
+  /** @param {string} kind Cue name. @param {Object=} opt Options. @returns {void} */
+  play(kind, opt) { Sfx.play(kind, opt); },
+  get enabled() { return Sfx.enabled; },
+  setEnabled(v) {
+    Sfx.enabled = !!v;
+    try { Store.set("sound", !!v); } catch (e) { /* storage may be blocked */ }
+    return Sfx.enabled;
+  },
+  prime() { try { primeAudio(); } catch (e) { /* no-op */ } }
+};
+try { window.NovaSound = Soundscape; } catch (e) { /* non-browser embed */ }
+/* ---------- end 03b · Soundscape ---------------------------- */
 
 /* ============================================================
    MODULE 05 · PointerFX — shared pointer + idle-aware rAF loop
@@ -1585,6 +4586,7 @@ if (pointerFine && !prefersReducedMotion) {
     startFxLoop();
   }, { passive: true });
 }
+
 
 /* ============================================================
    MODULE 06 · Cursor — custom cursor, JS-gated activation
@@ -1766,6 +4768,262 @@ if (pointerFine && !prefersReducedMotion) {
       summary.focus({ preventScroll: true });
     }
   });
+
+  /* MODULE 95 · hover-to-open on fine pointers: the summary stays fully
+     clickable; hovering now previews the menu after a short intent
+     delay and auto-closes after leaving. Click, outside-click and
+     Escape behaviours above remain unchanged. Reduced motion users keep
+     native behaviour open/close (CSS already disables its transitions). */
+  if (typeof pointerFine !== "undefined" && pointerFine) {
+    let tOpen = null;
+    let tClose = null;
+    details.addEventListener("mouseenter", () => {
+      if (tClose) { clearTimeout(tClose); tClose = null; }
+      if (!details.open && !tOpen) {
+        tOpen = setTimeout(() => {
+          tOpen = null;
+          if (!details.open) details.open = true;
+        }, 140);
+      }
+    });
+    details.addEventListener("mouseleave", () => {
+      if (tOpen) { clearTimeout(tOpen); tOpen = null; }
+      if (tClose) clearTimeout(tClose);
+      tClose = setTimeout(() => {
+        tClose = null;
+        if (details.open) details.open = false;
+      }, 220);
+    });
+  }
+})();
+
+/* ============================================================
+   MODULE 10c · NavResume + reading progress (MODULE 95)
+   - NavResume: a compact "continue" pill in the top bar that reopens
+     the last visited view (localStorage, deep links like "#lesson/…"
+     preserved). Hidden while the user is already on that view and when
+     the last view is the home hero.
+   - Reading progress: a hairline gradient bar under the navbar that
+     reflects scroll position (RTL/LTR origin handled in CSS via dir).
+   Both are additive: no existing module behaviour changes. The view
+   events arrive after MODULE 33 boots, so Lang/Store exist by then.
+   ============================================================ */
+(function initNavResume() {
+  const chip = $id("navResume");
+  const labelEl = $id("navResumeTarget");
+  if (!chip || !labelEl) return;
+
+  const KEY = "nav.resume";
+  const MAX_LABEL = 40;
+  let saved = null;
+
+  /** @returns {string} Current hash, never empty ("#hero" fallback). */
+  function currentHash() {
+    return location.hash && location.hash !== "#" ? location.hash : "#hero";
+  }
+
+  /** Safe translation with fallback (handlers run after Lang boots). */
+  function t(key, fallback) {
+    try {
+      if (typeof Lang !== "undefined" && Lang && typeof Lang.t === "function") {
+        return Lang.t(key);
+      }
+    } catch (e0) { /* Lang not ready yet */ }
+    return fallback;
+  }
+
+  /**
+   * Best-guess human label for the heading of an active view/lesson.
+   * @param {string} viewId
+   * @returns {string}
+   */
+  function snapshotLabel(viewId) {
+    const view = $id(viewId);
+    const el = view && view.querySelector("h1, h2, [data-view-heading]");
+    if (!el) return "";
+    return ((el.textContent || "").trim().replace(/\s+/g, " ")).slice(0, MAX_LABEL);
+  }
+
+  /**
+   * MODULE 97 · live i18n label — when the stored hash matches a nav/menu/
+   * sitemap anchor, use THAT anchor's current text (it was already i18n-
+   * applied, so the chip re-reflects language switches for free). Heading
+   * snapshots remain the fallback for deep runs (#lesson/…, #path/…).
+   * @param {string} hash
+   * @returns {string}
+   */
+  function navLabelForHash(hash) {
+    if (!hash || hash === "#") return "";
+    try {
+      const el = document.querySelector('a[href="' + hash.replace(/"/g, '\\"') + '"]');
+      if (el && (el.closest("nav, .mobile-menu, .footer-links, .quick-strip") != null)) {
+        const s = ((el.textContent || "").trim().replace(/\s+/g, " "));
+        if (s) return s.slice(0, MAX_LABEL);
+      }
+    } catch (eSel) { /* malformed hash — swallow and fall back */ }
+    return "";
+  }
+
+  /** Reflect the stored position on the chip; fitCheck decides visibility. */
+  function paint() {
+    const show = !!(saved && saved.hash && saved.hash !== currentHash());
+    chip.href = show && saved ? saved.hash : "#";
+    if (show) {
+      const label = navLabelForHash(saved.hash) || saved.label || "";
+      labelEl.textContent = label;
+      try {
+        chip.setAttribute("aria-label", `${t("nav.resumeChip", "متابعة")}: ${label || currentHash()}`);
+      } catch (e1) { /* aria is best-effort */ }
+    }
+    scheduleFitCheck();
+  }
+
+  /**
+   * Capture the position after a view switch, then refresh lesson
+   * labels once module 40 renders the lesson content.
+   * @param {CustomEvent} e
+   * @returns {void}
+   */
+  function onViewChanged(e) {
+    const viewId = String((e && e.detail && e.detail.viewId) || "").replace(/^#/, "");
+    if (!viewId || viewId === "hero") { paint(); return; }
+
+    saved = saved || {};
+    saved.hash = currentHash();
+    saved.label = snapshotLabel(viewId);
+    Store.set(KEY, saved);
+    paint();
+
+    /* Lesson/path headings render asynchronously — refresh once. */
+    if (viewId === "lesson" || viewId === "path") {
+      const targetHash = saved.hash;
+      setTimeout(() => {
+        if (currentHash() !== targetHash) return;
+        const label = snapshotLabel(viewId);
+        if (label && saved && saved.hash === targetHash) {
+          saved.label = label;
+          Store.set(KEY, saved);
+          paint();
+        }
+      }, 700);
+    }
+  }
+
+  document.addEventListener("nova:view-changed", onViewChanged);
+
+  /* MODULE 97 · refresh the chip with the current language — nav anchors
+     re-applied their localized text before these listeners run. Lang is
+     declared further down the bundle (TDZ at parse time), so hook it
+     lazily and retry once DOMContentLoaded fires. */
+  let langHooked = false;
+  function hookLangRepaint() {
+    if (langHooked) return false;
+    try {
+      if (typeof Lang !== "undefined" && Lang && typeof Lang.onSwitch === "function") {
+        Lang.onSwitch(() => paint());
+        langHooked = true;
+      }
+    } catch (eLang) { /* const not initialized yet — retry on DOMContentLoaded */ }
+    return langHooked;
+  }
+  if (!hookLangRepaint()) {
+    document.addEventListener("DOMContentLoaded", hookLangRepaint, { once: true });
+  }
+
+  /* Fit check: the top bar is a closed flex row. When the links side
+     (nav-main) overflows — e.g. long EN labels — hide the pill instead
+     of letting it collide with the menu (re-checked on resize). */
+  let squeezed = false;
+  const navInner = chip.closest(".nav-inner");
+  const navMain = navInner ? navInner.querySelector(".nav-main") : null;
+  const navRoot = navInner ? navInner.closest(".nav") : null;
+  const moreDetails = navInner ? navInner.querySelector("#navMoreDetails") : null;
+
+  function scheduleFitCheck() {
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(fitCheck);
+    } else {
+      fitCheck();
+    }
+  }
+
+  /** Deterministic single-pass fit: measure the row bare → squeeze it if
+      it alone overflows → probe the pill (invisible) → final visibility. */
+  function fitCheck() {
+    if (!navMain) return;
+    const wanted = !!(saved && saved.hash && saved.hash !== currentHash());
+    /* The open dropdown is an absolutely positioned descendant whose
+       panel box inflates nav-main.scrollWidth — measure with it shut. */
+    const wasOpen = moreDetails && moreDetails.open;
+    if (wasOpen) moreDetails.open = false;
+
+    /* Sub-pixel/hairline shrink is invisible — only flag real collisions. */
+    const DEFICIT = 12;
+
+    /* Step 1 — the row's own need, pill and squeeze OFF the table. */
+    chip.hidden = true;
+    if (navRoot) navRoot.classList.remove("nav--squeeze");
+    const squeeze = navMain.scrollWidth > navMain.clientWidth + DEFICIT;
+    if (navRoot) navRoot.classList.toggle("nav--squeeze", squeeze);
+
+    /* Step 2 — pill show/probe at its full natural width (invisible so
+       nothing flickers); hide again when the row cannot host it. */
+    let show = false;
+    if (wanted) {
+      chip.style.visibility = "hidden";
+      chip.hidden = false;
+      show = navMain.scrollWidth <= navMain.clientWidth + DEFICIT;
+      chip.hidden = !show;
+      chip.style.visibility = "";
+    }
+    squeezed = squeeze;
+
+    if (wasOpen) moreDetails.open = true;
+  }
+
+  window.addEventListener("resize", () => {
+    if (!squeezed) return;
+    squeezed = false;
+    /* Repaint from the stored state, then re-measure next frame. */
+    paint();
+    scheduleFitCheck();
+  }, { passive: true });
+
+  /* First paint may happen before layout settles — defer to rAF. */
+  scheduleFitCheck();
+})();
+
+(function initNavProgress() {
+  const bar = $id("navProgressBar");
+  if (!bar) return;
+
+  let ticking = false;
+
+  function paint() {
+    ticking = false;
+    const doc = document.documentElement;
+    const max = Math.max(1, (doc.scrollHeight || 0) - (window.innerHeight || 1));
+    const p = Math.min(1, Math.max(0, (window.scrollY || 0) / max));
+    bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+  }
+
+  /** Batch scroll storms into one rAF paint. @returns {void} */
+  function schedule() {
+    if (!ticking && typeof requestAnimationFrame === "function") {
+      ticking = true;
+      requestAnimationFrame(paint);
+    } else if (typeof requestAnimationFrame !== "function") {
+      paint();
+    }
+  }
+
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule, { passive: true });
+  document.addEventListener("nova:view-changed", () => {
+    /* Views reset scroll and change document height */
+    setTimeout(schedule, 60);
+  });
+  paint();
 })();
 
  
@@ -1933,29 +5191,50 @@ if (pointerFine && !prefersReducedMotion) {
    ============================================================ */
 const MOCK_QUIZZES = {
   "260210030702": { name: "الخوارزميات", questions: [
-    { id: "algo-001", subjectId: "260210030702", difficulty: "easy", topic: "مفاهيم أساسية", q: "ما المقصود بالخوارزمية؟", opts: ["سلسلة خطوات محددة ومنتهية لحل مشكلة","لغة برمجة عالية المستوى","جهاز لحساب العمليات الحسابية","برنامج لمكافحة الفيروسات"], a: 0, ex: "الخوارزمية سلسلة خطوات محددة ومنتهية لتنفيذ مهمة أو حل مشكلة، وهي مستقلة عن لغة البرمجة." },
-    { id: "algo-002", subjectId: "260210030702", difficulty: "easy", topic: "التعقيد الزمني", q: "ماذا يقيس التعقيد الزمني (Time Complexity) للخوارزمية؟", opts: ["عدد أسطر الكود","كيف ينمو زمن التنفيذ مع نمو حجم المدخلات","حجم ملف البرنامج على القرص","عدد الأخطاء البرمجية"], a: 1, ex: "التعقيد الزمني يصف كيف يتغير زمن التنفيذ مع نمو حجم المدخلات (n)، وليس عدد الأسطر ولا حجم الملف." },
-    { id: "algo-003", subjectId: "260210030702", difficulty: "easy", topic: "الخوارزميات وتطبيقاتها", q: "ما التعقيد الزمني للبحث الخطي في مصفوفة من n عنصرًا في أسوأ حالة؟", opts: ["O(1)","O(log n)","O(n)","O(n²)"], a: 2, ex: "في أسوأ حالة (العنصر غير موجود أو في النهاية) يفحص البحث الخطي كل العناصر واحدًا تلو الآخر، فيكون التعقيد O(n)." },
+    { id: "algo-001", subjectId: "260210030702", difficulty: "easy", topic: "intro", q: "ما التعريف الأدق للخوارزمية؟", opts: ["مجموعة مرتبة من العمليات المعرّفة والمعدودة والضرورية لحل مسألة","لغة برمجة عالية المستوى","جهاز إلكتروني للحساب","ملف تخزين للبيانات"], a: 0, ex: "الخوارزمية مجموعة مرتبة من العمليات المعرّفة والمعدودة والضرورية للوصول إلى النتيجة الصحيحة." },
+    { id: "algo-002", subjectId: "260210030702", difficulty: "easy", topic: "describing", q: "أي شكل يمثل القرار (الشرط) في المخطط الانسيابي؟", opts: ["المستطيل","المعيّن","البيضاوي","متوازي الأضلاع"], a: 1, ex: "المعيّن للقرار، والمستطيل للعملية، ومتوازي الأضلاع للإدخال والإخراج، والبيضاوي للبداية والنهاية." },
+    { id: "algo-003", subjectId: "260210030702", difficulty: "easy", topic: "control", q: "ماذا يسبب عدم تحديث متغير التحكم في حلقة ما دام شرطها صحيحًا؟", opts: ["توقف الحلقة فورًا","تكرارًا لا نهائيًا","خطأ في الإدخال","تخطي أول دورة"], a: 1, ex: "لكل حلقة تحديث لمتغير التحكم؛ إغفاله مع شرط صحيح دائمًا يوقع البرنامج في تكرار لا نهائي." },
+    { id: "algo-004", subjectId: "260210030702", difficulty: "medium", topic: "search", q: "ما الشرط الأساسي لتشغيل البحث الثنائي؟", opts: ["أن تكون القائمة مرتبة","أن تكون القائمة فارغة","أن تكون القيم نصوصًا","أن يكون عدد العناصر زوجيًا"], a: 0, ex: "البحث الثنائي يستبعد نصف القائمة في كل خطوة، ولا يصح ذلك إلا على قائمة مرتبة." },
+    { id: "algo-005", subjectId: "260210030702", difficulty: "medium", topic: "sorting", q: "في ترتيب الفقاعات لجدول من n عنصرًا، ما حدّ الحلقة الداخلية في المرور i؟", opts: ["n − 1 − i","n − i","i","n + i"], a: 0, ex: "بعد كل مرور يستقر عنصر في نهايته فتتقلص المقارنات بمقدار عنصر: n − 1 − i." },
+    { id: "algo-006", subjectId: "260210030702", difficulty: "easy", topic: "arrays", q: "لماذا يكون شرط المرور على القائمة (i < الطول)؟", opts: ["لأن آخر موضع فعلي هو الطول − 1","لأن العد يبدأ من الواحد","لأن الطول متغيّر","لأن المصفوفة دائرية"], a: 0, ex: "المواضع تبدأ من الصفر، فآخر عنصر في الموضع الطول − 1، وi = الطول موضع لا وجود له." },
+    { id: "algo-007", subjectId: "260210030702", difficulty: "easy", topic: "strings", q: "ما موضع آخر حرف في سلسلة عدد حروفها 8؟", opts: ["الموضع 7","الموضع 8","الموضع 1","الموضع 9"], a: 0, ex: "المواضع تبدأ من الصفر فتشغل سلسلة من 8 حروف المواضع من 0 إلى 7." },
+    { id: "algo-008", subjectId: "260210030702", difficulty: "medium", topic: "crypto", q: "على ماذا يعتمد أمان التشفير في الأنظمة الحديثة؟", opts: ["سرية المفتاح","سرية الخوارزمية","سرعة الجهاز","طول الرسالة"], a: 0, ex: "الخوارزميات معلنة ومعيارية، والأمان في سرية المفتاح لا في إخفاء الخوارزمية." },
   ]},
   "260210030802": { name: "مفاهيم نظم التشغيل", questions: [
-    { id: "osys-001", subjectId: "260210030802", difficulty: "easy", topic: "وظائف نظام التشغيل", q: "ما الوظيفة الأساسية لنظام التشغيل؟", opts: ["إدارة موارد الجهاز وتوفير واجهة بين المستخدم والعتاد","تصميم الصور والجرافيك","تشفير رسائل البريد الإلكتروني","استضافة المواقع على الإنترنت"], a: 0, ex: "نظام التشغيل يدير المعالج والذاكرة والأجهزة والملفات، ويوفّر واجهة تتيح للبرامج استخدام العتاد بأمان." },
-    { id: "osys-002", subjectId: "260210030802", difficulty: "easy", topic: "العمليات", q: "ما المقصود بالعملية (Process)؟", opts: ["برنامج مخزن على القرص فقط","برنامج قيد التنفيذ مع موارده","ملف إعدادات للنظام","جهاز طرفي متصل بالحاسب"], a: 1, ex: "العملية برنامج قيد التنفيذ وتشمل كودها وذاكرتها وسجلاتها وحالتها؛ البرنامج المخزن ساكن ويصير عملية عند تشغيله." },
-    { id: "osys-003", subjectId: "260210030802", difficulty: "easy", topic: "العمليات والخيوط", q: "ما الفرق الجوهري بين العملية والخيط (Thread)؟", opts: ["الخيط أثقل من العملية عند الإنشاء","الخيوط داخل العملية الواحدة تشارك ذاكرتها ومواردها","العملية تشارك ذاكرتها مع كل العمليات","لا فرق بينهما"], a: 1, ex: "الخيوط وحدات تنفيذ داخل العملية تشارك ذاكرتها ومواردها، بينما لكل عملية فضاء ذاكرة مستقل خاص بها." },
+    { id: "osys-001", subjectId: "260210030802", difficulty: "easy", topic: "intro", q: "ما التعريف الأدق لنظام التشغيل؟", opts: ["برنامج يستخدم الموارد المادية للحاسب لتقديم الدعم اللازم لتشغيل برامج أخرى","لغة برمجة عالية المستوى لبناء التطبيقات","جهاز يدير تغذية الكهرباء عن المكونات","ملف نصي يشرح طريقة استخدام الحاسب"], a: 0, ex: "نظام التشغيل برنامج يستخدم موارد الحاسب المادية ليهيئ بيئة تشغيل البرامج ويدير الموارد ويفرض التفاعل المنضبط." },
+    { id: "osys-002", subjectId: "260210030802", difficulty: "easy", topic: "tasks", q: "ما دور مشغّل الجهاز (Device Driver)؟", opts: ["ترجمة أوامر النظام العامة إلى أوامر يفهمها جهاز بعينه","تصميم واجهة المستخدم الرسومية","جدولة العمليات على المعالج","ضغط الملفات قبل تخزينها"], a: 0, ex: "المشغل برنامج داخل النواة يترجم الأوامر العامة الموجهة للجهاز إلى أوامر خاصة بطراز ذلك الجهاز." },
+    { id: "osys-003", subjectId: "260210030802", difficulty: "easy", topic: "virtualization", q: "ما وظيفة اللقطة (Snapshot) في إدارة الأجهزة الافتراضية؟", opts: ["حفظ حالة الجهاز — إعدادات وأقراص وربما ذاكرة — للرجوع إليها لاحقًا","إيقاف المضيف مؤقتًا لتسريع الضيف","نسخ ملفات المضيف إلى الشبكة تلقائيًا","تشفير قرص الجهاز الافتراضي"], a: 0, ex: "اللقطة نسخة من حالة الجهاز تعاد عند الحاجة، فتفيد قبل تجربة إعدادات أو تحديثات خطرة ثم التراجع عنها." },
+    { id: "osys-004", subjectId: "260210030802", difficulty: "easy", topic: "processes", q: "ما المقصود بالعملية (Process)؟", opts: ["برنامج قيد التنفيذ مع موارده","برنامج مخزن على القرص فقط","ملف إعدادات للنظام","جهاز طرفي متصل بالحاسب"], a: 0, ex: "العملية برنامج قيد التنفيذ وتشمل كوده وذاكرته وسجلاته وحالته؛ البرنامج المخزن ساكن ويصير عملية عند تشغيله." },
+    { id: "osys-005", subjectId: "260210030802", difficulty: "medium", topic: "scheduling", q: "أي خوارزمية جدولة تنفذ العملية الأقصر أولًا لتقليل متوسطي الانتظار والدوران؟", opts: ["الأقصر أولًا (SJF)","الأولى بالورود (FCFS)","التناوب الدائري (Round Robin)","لا شيء منها"], a: 0, ex: "SJF تقدم صاحبة الوقت الأقل فلا تترك القصيرة خلف الطويلة، لكنها تقدر الأزمنة من سلوك العمليات السابق." },
+    { id: "osys-006", subjectId: "260210030802", difficulty: "medium", topic: "memory", q: "ما وظيفة جدول الصفحات في الذاكرة الافتراضية؟", opts: ["ربط رقم كل صفحة برقم إطارها وبتمييز ما إذا كانت مقيمة أو على القرص","تمزيق الملفات إلى كتل على القرص","ترتيب العمليات في طابور الجاهزين","ضبط سرعة المعالج أثناء التبديل السياقي"], a: 0, ex: "الجدول يربط الصفحة بإطارها ويحمل بت الصلاحية؛ وإن كانت الصفحة على القرص وقع خطأ الصفحة وجُلبت إلى إطار ثم حُدّث الجدول." },
+    { id: "osys-007", subjectId: "260210030802", difficulty: "medium", topic: "filesystems", q: "أين يُحفظ اسم الملف في نظام الملفات؟", opts: ["في المجلد، بينما يحفظ الحرز الصفات والبيانات الوصفية","داخل الحرز إلى جانب الصلاحيات","في كتلة البيانات الأولى من الملف","لا يُحفظ الاسم إطلاقًا بعد الإنشاء"], a: 0, ex: "المجلد جدول يربط الأسماء بأرقام الأحراز، والحرز يحمل الصفات — النوع والصلاحيات والمالك والحجم والتواريخ — دون الاسم." },
+    { id: "osys-008", subjectId: "260210030802", difficulty: "easy", topic: "linux", q: "ما الأمر الذي يكشف موقعك الحالي في شجرة المجلدات؟", opts: ["pwd","ls","cd","man"], a: 0, ex: "pwd يعرض المسار الحالي؛ وهو أول خطوة آمنة قبل التنقل أو الحذف في سطر أوامر Linux." },
   ]},
   "260210030902": { name: "السياسات والتشريعات والأخلاقيات والالتزام بها", questions: [
-    { id: "pol-001", subjectId: "260210030902", difficulty: "easy", topic: "مفاهيم أساسية", q: "ما المقصود بسياسة الأمن (Security Policy)؟", opts: ["وثيقة تحدد القواعد والمسؤوليات المطلوبة لحماية أصول المنظمة","برنامج مضاد للفيروسات","جهاز جدار حماية متطور","نسخة احتياطية من البيانات"], a: 0, ex: "سياسة الأمن وثيقة رسمية تحدد ما يجوز وما لا يجوز، والمسؤوليات والعقوبات، بهدف حماية أصول المعلومات." },
-    { id: "pol-002", subjectId: "260210030902", difficulty: "easy", topic: "السياسات الأمنية", q: "ما الهدف الأساسي من سياسة كلمات المرور؟", opts: ["إلزام المستخدمين بكلمات مرور قوية وتغييرها دوريًا","منع استخدام الحاسب تمامًا","تسريع تسجيل الدخول","حذف الحسابات القديمة"], a: 0, ex: "تفرض السياسة حدًا أدنى من الطول والتعقيد والتغيير الدوري لتقليل احتمال تخمين كلمات المرور أو كسرها." },
-    { id: "pol-003", subjectId: "260210030902", difficulty: "easy", topic: "السياسات الأمنية", q: "ما المقصود بسياسة الاستخدام المقبول (Acceptable Use Policy)؟", opts: ["وثيقة تحدد الاستخدامات الجائزة والممنوعة لموارد المنظمة","عقد توظيف الموظفين","دليل تركيب الأجهزة","قائمة أسعار الخدمات"], a: 0, ex: "توضّح AUP للمستخدم ما يُسمح به عند استخدام الشبكة والأجهزة والبريد الإلكتروني، وما يُمنع، وما يترتب على المخالفة." },
+    { id: "pol-001", subjectId: "260210030902", difficulty: "easy", topic: "policy", q: "ما التعريف الأدق للسياسة الأمنية؟", opts: ["وثيقة توفر متطلبات الأمن السيبراني المبنية على أفضل الممارسات وتوثق التزام الجهة بها لتقليل المخاطر","برنامج مضاد للفيروسات يُوزَّع على أجهزة العاملين","تقرير مالي يرصد مخاطر التشغيل والأرباح","جهاز جدار حماية متطور يحمي الشبكة الداخلية"], a: 0, ex: "السياسة وثيقة توفر المتطلبات المبنية على أفضل الممارسات والمعايير وتوثق التزام الجهة بها لتقليل مخاطرها وحمايتها من التهديدات — لا أداة تقنية بعينها." },
+    { id: "pol-005", subjectId: "260210030902", difficulty: "easy", topic: "laws", q: "ما العناصر الأربعة المتسلسلة للتحكم في الوصول؟", opts: ["تحديد الهوية ثم المصادقة ثم التصريح بالوصول ثم المحاسبة","المصادقة ثم التشفير ثم النسخ الاحتياطي ثم المراجعة","جدار الحماية ثم كشف التسلل ثم الحماية ثم الاستجابة","كلمة المرور ثم البصمة ثم الرمز السري ثم الشهادة"], a: 0, ex: "يبدأ المسار بتحديد الهوية فالمصادقة فالتصريح بالوصول، ثم تأتي المحاسبة التي تتتبع الأفعال وتسندها وتمنع إنكارها وتدعم كشف المخالفات." },
+    { id: "pol-009", subjectId: "260210030902", difficulty: "easy", topic: "ethics", q: "من يشمل لفظ العاملين في الجهة وفق الضوابط الأساسية للأمن السيبراني؟", opts: ["كل من يعمل في الجهة أياً كانت صفته التعاقدية","الموظفون الرسميون على العقود الدائمة فقط","العاملون في إدارة الأمن السيبراني وحدهم","من أمضى سنة خدمة كاملة على الأقل"], a: 0, ex: "لا تعفي الصفة التعاقدية من الالتزام؛ فالعاملون يشملون الموظفين والمتعاقدين أياً كانت صفة العلاقة التعاقدية." },
+    { id: "pol-013", subjectId: "260210030902", difficulty: "easy", topic: "compliance", q: "ما المقصود بمخاطر عدم الالتزام (Compliance Risk)؟", opts: ["احتمال تطبيق عقوبات نظامية أو خسائر مالية جسيمة أو الإضرار بالسمعة نتيجة مخالفة الأنظمة والتعليمات","احتمال تعطل الشبكة بسبب خلل تقني في العتاد","ارتفاع تكاليف تراخيص البرمجيات السحابية","تباطؤ اتصال الفروع البعيدة بالمركز الرئيسي"], a: 0, ex: "مخاطر عدم الالتزام تطبيق عقوبات نظامية أو خسائر مالية جسيمة أو ضرر بالسمعة؛ ويعد التصرف المضر بالسمعة خطرًا حتى دون مخالفة نصية." },
+    { id: "pol-017", subjectId: "260210030902", difficulty: "easy", topic: "risk", q: "ما الفرق بين الثغرة والتهديد؟", opts: ["الثغرة ضعف قائم في الأصول أو الضوابط أو الإجراءات، والتهديد ظرف أو حدث يؤثر سلبًا باستغلال ذلك الضعف","الثغرة برنامج خبيث والتهديد خلل مادي في الأجهزة","كلاهما اسمان لشيء واحد لا فرق بينهما","الثغرة تخص الشبكات والتهديد يخص الأفراد فقط"], a: 0, ex: "الثغرة ضعف قائم في الجهة كنسيان تحديث أو صلاحية واسعة، والتهديد ظرف أو حدث يستغل الضعف ويؤثر سلبًا؛ والخلط بينهما خطأ شائع." },
+    { id: "pol-021", subjectId: "260210030902", difficulty: "easy", topic: "awareness", q: "على أي شرطين تقوم الثقافة الأمنية في الجهة؟", opts: ["قدرة العاملين على أداء أدوارهم الأمنية واستعدادهم لأدائها","عدد الدورات التدريبية المنفذة سنويًا","حجم الميزانية المخصصة للتوعية","وجود إدارة مستقلة للأمن السيبراني"], a: 0, ex: "القدرة وحدها لا تكفي؛ فالقدرة تُكتسب بالتدريب والمعرفة، والاستعداد يظهر في القبول بالبرنامج ودعمه على كل المستويات حتى يتحول التدريب إلى سلوك." },
   ]},
   "260210031002": { name: "مكونات أنظمة تقنية المعلومات", questions: [
-    { id: "itc-001", subjectId: "260210031002", difficulty: "easy", topic: "مكونات النظام", q: "ما المكونات الأساسية لنظام تقنية المعلومات؟", opts: ["العتاد والبرمجيات والبيانات والشبكات والمستخدمون","المعالج والشاشة فقط","الكابلات والراوترات فقط","البريد الإلكتروني والمتصفح"], a: 0, ex: "نظام تقنية المعلومات يتكامل من عتاد وبرمجيات وبيانات وشبكات وعنصر بشري — وإهمال تأمين أي مكون يُضعف النظام كله." },
-    { id: "itc-002", subjectId: "260210031002", difficulty: "easy", topic: "العتاد", q: "ما وظيفة وحدة المعالجة المركزية (CPU)؟", opts: ["تنفيذ التعليمات والعمليات الحسابية والمنطقية","تخزين الملفات نهائيًا","عرض الصور على الشاشة","الاستقبال اللاسلكي للشبكة"], a: 0, ex: "المعالج هو عقل الحاسب: ينفذ التعليمات ويجري العمليات الحسابية والمنطقية ويوجه عمل بقية المكونات." },
-    { id: "itc-003", subjectId: "260210031002", difficulty: "easy", topic: "العتاد", q: "ما الفرق الأساسي بين ذاكرة RAM ووحدة التخزين (كالقرص الصلب)؟", opts: ["RAM ذاكرة عمل مؤقتة متطايرة، والتخزين يحفظ البيانات دائمًا","RAM أبطأ من القرص الصلب","التخزين يفقد بياناته عند إطفاء الجهاز","لا فرق بينهما في الوظيفة"], a: 0, ex: "RAM ذاكرة عمل سريعة تفقد محتواها بانقطاع الكهرباء، بينما يحفظ القرص (HDD/SSD) البيانات دائمًا حتى بعد الإطفاء." },
+    { id: "itc-001", subjectId: "260210031002", difficulty: "easy", topic: "systems", q: "ما المكونات الخمسة لنظام المعلومات؟", opts: ["العتاد والبرمجيات والبيانات والإجراءات والأفراد", "الخوادم والشبكات ومحطات العمل فقط", "المعالج والذاكرة ولوحة المفاتيح والشاشة", "أنظمة التشغيل والتطبيقات وقواعد البيانات"], a: 0, ex: "نظام المعلومات أوسع من الحاسب: عتاد وبرمجيات وبيانات وإجراءات وأفراد يتكاملون معًا، وإغفال أي مكون يخل بتوازن النظام." },
+    { id: "itc-005", subjectId: "260210031002", difficulty: "easy", topic: "components", q: "ما وظيفة وحدة المعالجة المركزية في الحاسب؟", opts: ["تنفيذ التعليمات وإجراء العمليات الحسابية والمنطقية", "تخزين الملفات بشكل دائم بعد إطفاء الجهاز", "عرض الصور والفيديو على الشاشة", "توصيل الحاسب بشبكة الإنترنت"], a: 0, ex: "المعالج عقل الحاسب: ينفذ التعليمات ويعالج البيانات عبر وحدة الحساب والمنطق ووحدة السيطرة والمسجلات، ويوجه بقية المكونات." },
+    { id: "itc-009", subjectId: "260210031002", difficulty: "easy", topic: "cloud", q: "ما التعريف الأدق للحوسبة السحابية؟", opts: ["تقديم خدمات الحوسبة — خوادم وتخزينًا وبرمجيات — عبر الشبكة عند الطلب", "امتلاك المنظمة مراكز بيانات محلية خاصة بها", "تخزين الملفات على القرص الصلب الشخصي", "شبكة داخلية تربط أجهزة مكتب واحد"], a: 0, ex: "السحابة نموذج لتقديم موارد الحوسبة عبر الشبكة عند الطلب، فتصير الخدمة كالمرافق العامة بدل بناء بنية تحتية محلية مملوكة." },
+    { id: "itc-013", subjectId: "260210031002", difficulty: "easy", topic: "security", q: "ما الأركان الثلاثة لأمن المعلومات (ثلاثية CIA)؟", opts: ["السرية والسلامة والتوافر", "السرعة والدقة والسعة", "التشفير والضغط والنسخ", "المصادقة والتخويل والتسجيل"], a: 0, ex: "السرية حماية المعلومات من الإفصاح لغير المصرح لهم، والسلامة حفظها من التغيير غير المشروع، والتوافر إتاحتها حين الحاجة." },
+    { id: "itc-017", subjectId: "260210031002", difficulty: "easy", topic: "databases", q: "ما وظيفة نظام إدارة قواعد البيانات DBMS؟", opts: ["برمجيات تدير تخزين البيانات واسترجاعها والتحكم في الوصول إليها", "لغة برمجة لبناء واجهات المستخدم", "جهاز لتخزين النسخ الاحتياطية", "بروتوكول لنقل الملفات بين الشبكات"], a: 0, ex: "DBMS طبقة برمجية تنظم التخزين والاستعلام والتحديث وتفرض القيود والصلاحيات، فتفصل المستخدم عن تفاصيل الملفات الفعلية." },
+    { id: "itc-021", subjectId: "260210031002", difficulty: "easy", topic: "netsec", q: "ما التصيد الاحتيالي؟", opts: ["رسائل خادعة تنتحل جهة موثوقة لدفع الضحية إلى كشف بياناتها", "برنامج يقوي كلمات المرور ويديرها", "سياسة تشدد إعدادات الشبكة الداخلية", "نسخة احتياطية من البيانات الحساسة"], a: 0, ex: "التصيد خداع بشري: رسالة أو رابط ينتحل جهة موثوقة ليسلّم الضحية بياناته طوعًا؛ ولهذا يُدرَّب المستخدم لأنه خط الدفاع الأول." },
+    { id: "itc-025", subjectId: "260210031002", difficulty: "easy", topic: "analysis", q: "ما دور محلل الأنظمة؟", opts: ["حلقة وصل بين تقنية المعلومات وإدارات العمل يدرس الأنظمة ويحدد التحسينات", "مبرمج مسؤول عن كتابة الشيفرة كاملة", "مدقق مالي يراجع حسابات المشروع", "فني يركب الشبكات والأجهزة"], a: 0, ex: "المحلل جسر بين الجانب التقني واحتياجات العمل: يفهم المشكلة ويجمع المتطلبات ويحلل العمليات ويقترح الحلول ويوثقها." },
   ]},
   "260210031102": { name: "مبادئ التصميم في الأمن السيبراني", questions: [
-    { id: "des-001", subjectId: "260210031102", difficulty: "easy", topic: "مبادئ أساسية", q: "ما المقصود بالدفاع في العمق (Defense in Depth)؟", opts: ["تطبيق عدة طبقات من الضوابط الأمنية بحيث لا يعتمد الأمن على ضابط واحد","وضع جدار حماية واحد قوي","إخفاء أسماء الأنظمة عن المستخدمين","تشفير كلمات المرور فقط"], a: 0, ex: "يبني الدفاع في العمق طبقات متتابعة تقنية وإدارية وبشرية؛ فإذا فشلت طبقة ظلّت الطبقات التالية تحمي النظام." },
-    { id: "des-002", subjectId: "260210031102", difficulty: "easy", topic: "مبادئ أساسية", q: "ماذا يعني مبدأ أقل الصلاحيات (Least Privilege)؟", opts: ["منح كل مستخدم أو برنامج أدنى صلاحيات تكفي لإنجاز مهمته","منح الجميع صلاحيات كاملة","منع جميع الصلاحيات نهائيًا","توزيع الصلاحيات عشوائيًا"], a: 0, ex: "يقلل أقل الصلاحيات سطح الهجوم وحدود الضرر: فحتى لو اختُرق الحساب ظل أثره محدودًا بصلاحياته الضيقة." },
-    { id: "des-003", subjectId: "260210031102", difficulty: "easy", topic: "المصادقة والتحكم بالوصول", q: "ما الفرق بين المصادقة (Authentication) والتخويل (Authorization)؟", opts: ["المصادقة تثبت الهوية، والتخويل يحدد ما يُسمح لهذه الهوية بفعله","المصادقة تحدد الأذونات والتخويل يثبت الهوية","كلاهما مصطلحان لمعنى واحد","المصادقة للتشفير والتخويل للضغط"], a: 0, ex: "أولًا تُثبت الهوية (كلمة مرور أو بصمة) ثم تُحدد أذوناتها (قراءة/كتابة/إدارة) — تسلسل لا يصح عكسه." },
+    { id: "des-001", subjectId: "260210031102", difficulty: "easy", topic: "intro", q: "ما التعريف الأدق للتصميم الأمني؟", opts: ["بناء الحماية في بنية النظام وقراراته المعمارية منذ المراحل الأولى لا إلحاقها بعد اكتمال البناء","تركيب أقوى برامج الحماية على النظام بعد تشغيله","إخفاء أسماء الأنظمة وواجهاتها عن المستخدمين","تشفير الملفات المهمة عند الحاجة فقط"], a: 0, ex: "التصميم الأمني قرار هندسي يُبنى مع البنية نفسها: كل قرار معماري إما يضيّق الخسائر المحتملة أو يوسّعها، وإلحاق الأمن لاحقًا يجعله ترقيعًا مكلفًا." },
+    { id: "des-005", subjectId: "260210031102", difficulty: "easy", topic: "components", q: "لماذا يوصف الأمن بأنه خاصية ناشئة (Emergent Property)؟", opts: ["لأنه ينتج عن تفاعل المكونات عبر هندسة منضبطة لا عن أي جزء منفرد","لأنه يظهر تلقائيًا بمجرد تركيب المكونات","لأنه يُقاس بعدد المكونات المثبتة في النظام","لأنه يزول عند كل إعادة تشغيل للنظام"], a: 0, ex: "جودة الأجزاء وحدها لا تنتج أمنًا؛ فالأمن خاصية ناشئة من العلاقة بين المستخدمين والهويات والقرارات والموارد عبر هندسة تعكس احتياجات الحماية." },
+    { id: "des-009", subjectId: "260210031102", difficulty: "easy", topic: "threats", q: "من أي عناصر يبدأ تفكيك الخسارة في تحليل الخطر؟", opts: ["الأصل الذي يستحق الحماية والتهديد والثغرة والأثر المترتب","الخادم والشبكة والمستخدم ونظام التشغيل","الميزانية والجدول الزمني وحجم الفريق","الشيفرة والاختبارات ووثائق التسليم فقط"], a: 0, ex: "اجتماع تهديد بثغرة على أصل فينتج أثر محتمل؛ وبهذا التفكيك تُبنى القرارات على تصور واضح لا على انطباع عام." },
+    { id: "des-013", subjectId: "260210031102", difficulty: "easy", topic: "resilience", q: "ما أقوى بدائل معالجة الخسارة في ترتيب القوة؟", opts: ["القضاء على الخسارة أصلًا بإزالة الوظيفة الخطرة أو البيانات غير اللازمة","تركيب جدار حماية إضافي أمام النظام","زيادة عدد الخوادم للتوزيع","توثيق الحادثة بعد وقوعها وتحسين التقارير"], a: 0, ex: "الترتيب يبدأ بالقضاء على الخسارة حين يمكن — فما لا يوجد لا يُخترق — ثم التقليل، ثم الضوابط الهندسية، فالرؤية والمراقبة، فالإجراءات والتدريب." },
+    { id: "des-017", subjectId: "260210031102", difficulty: "easy", topic: "software", q: "ما الغاية من مراجعة التصميم الأمني في دورة تطوير البرمجيات؟", opts: ["تقييم البدائل المعمارية قبل التنفيذ واختيار الأكثر عزلًا للمكونات الحساسة","فحص تنسيق الشيفرة وإزالة التعليقات القديمة","قياس سرعة التطبيق قبل إطلاقه للعامة","تدقيق فواتير مزود الخدمة السحابية"], a: 0, ex: "المراجعة تسبق التنفيذ: تُقارن البدائل ويُختار ما يفصل المكونات الحساسة — مثل فصل حساب قاعدة البيانات عن واجهة العرض — قبل أن تُكتب الشيفرة." },
+    { id: "des-021", subjectId: "260210031102", difficulty: "medium", topic: "testing", q: "ما الذي يجيب عنه الاختبار الأمني ولا يجيب عنه الاختبار الوظيفي؟", opts: ["كيف يفشل النظام حين يُقصد به السوء بدل الاقتصار على تحقق الوظائف","هل ينفذ النظام كل الوظائف الموعودة","كم يستغرق البناء والاختبار قبل الإطلاق","ما تكلفة تشغيل النظام شهريًا"], a: 0, ex: "الوظيفي يسأل: هل يفعل النظام ما وُعد به؟ والأمني يسأل: كيف يفشل أمام قصد السوء؟ ولا يكفي أحدهما عن الآخر." },
+    { id: "des-025", subjectId: "260210031102", difficulty: "easy", topic: "modern", q: "ما جوهر مبدأ المسؤولية المشتركة في السحابة؟", opts: ["توزيع الواجبات بحسب نموذج الخدمة مع بقاء مسؤولية البيانات والهويات والإعدادات على العميل","إعفاء العميل من كل واجب بمجرد الاشتراك في الخدمة","بقاء كل المسؤولية على المزود في جميع النماذج","انتفاء الحاجة إلى الضوابط الأمنية عند استخدام السحابة"], a: 0, ex: "نموذج الخدمة يحدد أين تنتهي مسؤولية المزود وأين تبدأ مسؤولية العميل؛ ويبقى العميل مسؤولًا عن بياناته وهوياته وإعداداته في كل الأحوال." },
   ]}
 };
 
@@ -1977,6 +5256,9 @@ async function loadQuizData() {
     Object.assign(QUIZZES, MOCK_QUIZZES);
     console.info("Quizzes: using embedded fallback bank.");
   }
+  /* MODULE 98 · merge the real past-quiz bank (بنك الفترات) after the
+     main banks so its per-subject cards join the same quiz hub grid. */
+  await loadQuizBankData();
   if (app) renderPicks();
   /* The bank just arrived — subject keys in QUIZZES are now resolvable,
      so notify listeners (e.g. HeroContinue) to re-evaluate saved progress. */
@@ -2161,7 +5443,11 @@ function startTimer() {
  */
 function esc(s) { return escHtml(s); }
 
-/* MODULE 13a · MissedBank — localStorage persistence for missed questions */
+/* MODULE 13a · MissedBank — localStorage persistence for missed questions.
+   Contract: a subject card in the quiz picker ALWAYS opens the full bank;
+   a missed-only replay starts only from an explicit control (the «راجع
+   أخطاءك» button under the card, the result screen's retry button, or the
+   Progress hub's retry action). */
 const MissedBank = {
   KEY: "missed",
   read() {
@@ -2192,14 +5478,17 @@ function renderPicks() {
   const results = data.results || {};
   const progress = data.progress || {};
   const keys = Object.keys(QUIZZES);
+  /* MODULE 99 · bank:<id> keys drive the dedicated بنك الفترات hub below
+     the quiz grid — they no longer appear as subject cards in the grid. */
+  const subjectKeys = keys.filter((k) => k.indexOf("bank:") !== 0);
   const hasData = Object.keys(results).length > 0 || Object.keys(progress).length > 0;
-  const noBank = keys.length === 0;
+  const noBank = subjectKeys.length === 0;
   const curLang = Lang.current || "ar";
-  const completedCount = keys.filter((k) => results[k]).length;
-  const inProgressCount = keys.filter((k) => progress[k] && progress[k].idx > 0 && progress[k].idx < progress[k].total).length;
-  const reviewCount = keys.filter((k) => MissedBank.countForSubject(k) > 0).length;
-  const overallPct = keys.length ? Math.round(keys.reduce((sum, k) => sum + (results[k] && typeof results[k].pct === "number" ? results[k].pct : 0), 0) / keys.length) : 0;
-  const orderedKeys = keys.slice().sort((a, b) => {
+  const completedCount = subjectKeys.filter((k) => results[k]).length;
+  const inProgressCount = subjectKeys.filter((k) => progress[k] && progress[k].idx > 0 && progress[k].idx < progress[k].total).length;
+  const reviewCount = subjectKeys.filter((k) => MissedBank.countForSubject(k) > 0).length;
+  const overallPct = subjectKeys.length ? Math.round(subjectKeys.reduce((sum, k) => sum + (results[k] && typeof results[k].pct === "number" ? results[k].pct : 0), 0) / subjectKeys.length) : 0;
+  const orderedKeys = subjectKeys.slice().sort((a, b) => {
     const rank = (k) => {
       const saved = progress[k];
       if (saved && saved.idx > 0 && saved.idx < saved.total) return 0;
@@ -2233,13 +5522,33 @@ function renderPicks() {
         : (curLang === "en" ? "Start quiz" : "ابدأ الاختبار");
     const questionsText = curLang === "en" ? total + " questions" : total + " أسئلة";
     const missedText = curLang === "en" ? missedCount + " to review" : missedCount + " للمراجعة";
-    return `<button type="button" class="q-pick q-subject-card ${status.cls}" data-sub="${esc(k)}"${resumable ? ' data-resume="1"' : ""}>
+    const reviewText = curLang === "en" ? "Review missed answers (" + missedCount + ")" : "راجع أخطاءك (" + missedCount + ")";
+    /* BUGFIX (quiz "1 من 1" report): the subject card ALWAYS launches the
+       FULL bank (or resumes it). Previously a single saved entry in
+       MissedBank hijacked this click into a missed-only replay, so a card
+       advertising 32 questions opened a "السؤال 1 من 1" run. Missed review
+       moved to the explicit control rendered below the card. */
+    const card = `<button type="button" class="q-pick q-subject-card ${status.cls}" data-sub="${esc(k)}"${resumable ? ' data-resume="1"' : ""}>
       <span class="q-subject-card-top"><span class="q-subject-number">${String(index + 1).padStart(2, "0")}</span><span class="q-subject-status">${esc(statusText)}</span></span>
       <span class="q-subject-card-title">${esc(bank.name || k)}</span>
       <span class="q-subject-card-meta"><span>${esc(questionsText)}</span><span class="q-card-dot">•</span><span>${esc(bestText)}</span></span>
       ${missedCount ? `<span class="q-subject-missed">${esc(missedText)}</span>` : ""}
       <span class="q-subject-action">${esc(action)} <b aria-hidden="true">←</b></span>
     </button>`;
+    /* MODULE 99 · reference banks moved OUT of this grid into the
+       dedicated بنك الفترات hub (renderBankHub below). A FULL MCQ bank
+       still gets a sibling "question & answer sheet" button on its card
+       (its entries open the same revision sheet). */
+    const isBankKey = k.indexOf("bank:") === 0;
+    const sheetBtn = isBankKey
+      ? `<button type="button" class="q-subject-review q-bank-sheet" data-sheet-sub="${esc(k)}">${curLang === "en" ? "Question & answer sheet (" + total + ")" : "ورقة الأسئلة والإجابات (" + total + ")"}</button>`
+      : "";
+    /* Missed review stays one tap away — but as an EXPLICIT sibling control
+       (nested buttons are invalid HTML, hence the slot wrapper). */
+    if (missedCount || sheetBtn) {
+      return `<div class="q-pick-slot">${card}${missedCount ? `<button type="button" class="q-subject-review" data-review-sub="${esc(k)}">${esc(reviewText)}</button>` : ""}${sheetBtn}</div>`;
+    }
+    return card;
   }).join("");
 
   const modeRow = noBank
@@ -2264,9 +5573,126 @@ function renderPicks() {
 
   const picksHtml = noBank
     ? `<div class="q-data-error" role="alert"><p>${esc(Lang.qt("dataError"))}</p><button type="button" class="btn btn-sm btn-primary" id="qRetry">${esc(Lang.qt("retry"))}</button></div>`
-    : `<div class="q-dashboard"><div class="q-dashboard-head"><div><span class="q-kicker">${curLang === "en" ? "Your test library" : "مكتبة اختباراتك"}</span><h3>${curLang === "en" ? "Choose a subject" : "اختر المادة التي تريد اختبارها"}</h3></div><span class="q-library-count">${keys.length} ${curLang === "en" ? "subjects" : "مواد"}</span></div>${insight}<div class="q-subject-grid">${cards}</div></div>`;
+    : `<div class="q-dashboard"><div class="q-dashboard-head"><div><span class="q-kicker">${curLang === "en" ? "Your test library" : "مكتبة اختباراتك"}</span><h3>${curLang === "en" ? "Choose a subject" : "اختر المادة التي تريد اختبارها"}</h3></div><span class="q-library-count">${subjectKeys.length} ${curLang === "en" ? "subjects" : "مواد"}</span></div>${insight}<div class="q-subject-grid">${cards}</div></div>`;
 
   app.innerHTML = modeRow + picksHtml;
+  renderBankHub();
+}
+
+/**
+ * MODULE 99 · بنك الفترات — the revision lists live in ONE hub panel
+ * (#bankHub), placed after the quiz picker, outside the subject grid.
+ * Every past-quiz bank renders as one numbered row that opens its
+ * revision sheet directly. New subjects append automatically — the
+ * panel is rebuilt from QUIZZES whenever the picker repaints, so
+ * future additions to data/quiz-bank.json need zero code changes.
+ * @returns {void}
+ */
+function renderBankHub() {
+  const hub = $id("bankHub");
+  const list = $id("bankHubList");
+  if (!hub || !list) return;
+  const curLang = Lang.current || "ar";
+  const bankKeys = Object.keys(QUIZZES).filter((k) => k.indexOf("bank:") === 0);
+  /* No banks (missing file / empty data) → the panel simply never shows. */
+  if (!bankKeys.length) {
+    hub.hidden = true;
+    list.innerHTML = "";
+    return;
+  }
+  hub.hidden = false;
+  list.innerHTML = bankKeys.map((k, i) => {
+    const bank = QUIZZES[k] || {};
+    const refCount = Array.isArray(bank.refs) ? bank.refs.length : 0;
+    const qTotal = Array.isArray(bank.questions) ? bank.questions.length : 0;
+    const itemCount = refCount + qTotal;
+    const chip = curLang === "en" ? "Revision sheet" : "ورقة مراجعة";
+    const meta = curLang === "en" ? itemCount + " Q&A items" : itemCount + " سؤالاً وجوابًا";
+    const finals = curLang === "en" ? "Finals revision" : "مرجع الفاينل";
+    const cta = curLang === "en" ? "Open the revision sheet" : "افتح ورقة المراجعة";
+    return `<button type="button" class="q-subject-card bank-row" data-sheet-sub="${esc(k)}">
+      <span class="q-subject-card-top"><span class="q-subject-number">${String(i + 1).padStart(2, "0")}</span><span class="q-subject-status bank-hub-chip">${esc(chip)}</span></span>
+      <span class="q-subject-card-title">${esc(bank.name || k)}</span>
+      <span class="q-subject-card-meta"><span>${esc(meta)}</span><span class="q-card-dot">•</span><span>${esc(finals)}</span></span>
+      <span class="q-subject-action">${esc(cta)} <b aria-hidden="true">←</b></span>
+    </button>`;
+  }).join("");
+}
+
+/**
+ * MODULE 99 · one delegated click listener for the #bankHub panel.
+ * #quizApp delegation cannot receive clicks from outside its own
+ * subtree, so the hub carries its own binding (registered once — the
+ * hub element itself is never replaced, only the row list repaints).
+ * @returns {void}
+ */
+function bindBankHubDelegation() {
+  const hub = $id("bankHub");
+  if (!hub || hub.dataset.bankDelegated === "1") return;
+  hub.dataset.bankDelegated = "1";
+  hub.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+    const row = t.closest("[data-sheet-sub]");
+    if (!row) return;
+    renderSheet(row.getAttribute("data-sheet-sub"));
+  });
+}
+
+/**
+ * MODULE 98 · بنك الفترات — revision sheet: every past-quiz item with its
+ * answer and explanation, revealed one item at a time through native
+ * <details> (active recall: try to remember first, then check). Both
+ * sources render identically: engine MCQ questions answer from opts,
+ * reference items answer straight from answerText.
+ * @param {string} key Bank key ("bank:<subjectId>").
+ * @returns {void}
+ */
+function renderSheet(key) {
+  const bank = QUIZZES[key];
+  if (!app) return;
+  if (!bank) return;
+  const curLang = Lang.current || "ar";
+  const items = [];
+  (Array.isArray(bank.questions) ? bank.questions : []).forEach((q) => {
+    items.push({
+      q: q.q,
+      answer: q.opts && q.opts[q.a] != null ? q.opts[q.a] : "",
+      ex: typeof q.ex === "string" ? q.ex : "",
+      meta: q.topic || ""
+    });
+  });
+  (Array.isArray(bank.refs) ? bank.refs : []).forEach((r) => {
+    items.push({
+      q: r.q,
+      answer: r.answerText,
+      ex: typeof r.ex === "string" ? r.ex : "",
+      meta: [r.source, r.topic].filter(Boolean).join(" · ")
+    });
+  });
+  if (!items.length) return;
+  quizView = "sheet";
+  stopTimer();
+  const rendered = items.map((it, i) => {
+    const meta = it.meta;
+    return '<details class="q-sheet-item" role="listitem"><summary>' +
+      '<span class="q-sheet-qno" aria-hidden="true">' + String(i + 1).padStart(2, "0") + "</span>" +
+      '<span class="q-sheet-qtext">' + esc(it.q) + '</span>' +
+      '<span class="q-sheet-hint" aria-hidden="true">▾</span></summary>' +
+      '<div class="q-sheet-body"><p class="q-sheet-answer"><b>' + esc(curLang === "en" ? "Answer" : "الإجابة") + ':</b> ' + esc(it.answer) + "</p>" +
+      (it.ex ? '<p class="q-sheet-ex">' + esc(it.ex) + "</p>" : "") +
+      (meta ? '<span class="q-sheet-meta">' + esc(curLang === "en" ? "From" : "المرجع") + ": " + esc(meta) + "</span>" : "") +
+      "</div></details>";
+  }).join("");
+  app.innerHTML = '<div class="q-sheet">' +
+    '<div class="q-sheet-top">' +
+    `<button type="button" class="btn btn-ghost btn-sm" id="qSheetBack" aria-label="${esc(curLang === "en" ? "Back to test library" : "رجوع إلى مكتبة الاختبارات")}"><span aria-hidden="true">→</span> ${esc(curLang === "en" ? "Back" : "رجوع")}</button>` +
+    `<h3 class="q-sheet-title">${esc(bank.name)}</h3>` +
+    "</div>" +
+    `<p class="q-sheet-note">${esc(curLang === "en" ? "Try to recall the answer first, then open the item to check." : "جرّب أن تتذكر الإجابة أولًا، ثم افتح السطر لتحقق.")}</p>` +
+    `<div class="q-sheet-list" role="list">${rendered}</div>` +
+    "</div>";
+  app.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
 }
 
 /**
@@ -2384,7 +5810,9 @@ function handleAnswer(i) {
   const q = current();
   const correct = q.a === i;
   if (correct) score++;
-  /* Answer selection is silent by design; visual feedback is the primary cue. */
+  /* Grading cue: a bright arpeggio on a hit, a soft low pair on a miss.
+     Exam mode is silent by contract (same as the timeout cue below). */
+  if (!timedMode) { try { Sfx.play(correct ? "good" : "bad"); } catch (e0) { /* audio is optional */ } }
 
   const opts = $$(".q-option", app);
   opts.forEach((b) => b.setAttribute("disabled", ""));
@@ -2682,13 +6110,38 @@ function bindQuizDelegation() {
       return;
     }
 
+    /* Explicit missed-review control rendered under a subject card — the ONLY
+       picker entry that starts a filtered (missed-only) run. A stale badge
+       (entries pruned/repaired meanwhile) degrades to the full bank. */
+    const reviewBtn = t.closest("[data-review-sub]");
+    if (reviewBtn) {
+      const sub = reviewBtn.getAttribute("data-review-sub");
+      const missed = MissedBank.forSubject(sub);
+      startQuiz(sub, false, missed.length ? missed : null);
+      return;
+    }
+
+    /* MODULE 98 · بنك الفترات — the revision sheet (question + answer
+       + explanation, revealed one at a time through native <details>).
+       Checked BEFORE the card picker: reference bank cards carry the
+       sheet attribute on the card itself, and an empty engine bank
+       must never swallow that click. */
+    const sheetBtn = t.closest("[data-sheet-sub]");
+    if (sheetBtn) {
+      renderSheet(sheetBtn.getAttribute("data-sheet-sub"));
+      return;
+    }
+    if (t.closest("#qSheetBack")) {
+      renderPicks();
+      return;
+    }
+
+    /* Subject cards + resume chips — always the FULL bank. Never hijacked by
+       the missed bank: the card advertises the full question count, so it
+       must open exactly that count. */
     const pick = t.closest(".q-pick");
     if (pick) {
-      const sub = pick.dataset.sub;
-      /* Re-test missed questions for this subject when available. */
-      const missed = MissedBank.forSubject(sub);
-      if (missed.length) { startQuiz(sub, false, missed); return; }
-      startQuiz(sub, pick.dataset.resume === "1");
+      startQuiz(pick.dataset.sub, pick.dataset.resume === "1");
       return;
     }
 
@@ -2719,7 +6172,6 @@ function bindQuizDelegation() {
 
     const opt = t.closest(".q-option");
     if (opt && !opt.hasAttribute("disabled")) {
-      Sfx.play("tick");
       handleAnswer(parseInt(opt.dataset.i, 10));
     }
   });
@@ -2736,6 +6188,7 @@ async function clearQuizData() {
 (async function bootQuiz() {
   if (!app) return;
   bindQuizDelegation();
+  bindBankHubDelegation();
   try { await IdbStore.migrateFromLocalStorage(); } catch {}
   try {
     const saved = await IdbStore.get("quiz");
@@ -2777,6 +6230,7 @@ async function clearQuizData() {
     if (!app) return;
     if (quizView === "pick") renderPicks();
     else if (quizView === "result" && lastResult) renderResult();
+    else if (quizView === "sheet" && curKey && QUIZZES[curKey]) renderSheet(curKey);
   });
 })(); 
  
@@ -3450,6 +6904,18 @@ const Lang = (() => {
       "nav.flashcardsTimed": "المراجعة الموقوتة",
       "nav.games": "تحديات CTF", "nav.redteam": "المختبر الهجومي", "nav.ir": "الاستجابة للحوادث", "nav.cryptolab": "مختبر التشفير",
       "nav.cta": "ابدأ التعلم",
+      /* MODULE 95 · top-nav UX refresh — resume pill + richer More menu */
+      "nav.resumeChip": "متابعة",
+      "nav.semester.desc": "جدولك ومواد الترم الحالي",
+      "nav.guide.desc": "كيف تلتحق بالمحاضرة أسبوعيًا",
+      "nav.skills.desc": "خريطة مهارات ومستويات للدبلوم",
+      "nav.student.desc": "حاسبة المعدل وملاحظاتك",
+      "nav.labs.desc": "بيئات محاكاة عملية آمنة",
+      "nav.flash.desc": "راجع المصطلحات بالبطاقات",
+      "nav.theatre.desc": "هجمات واقعية بأسلوب قصصي",
+      "nav.about.desc": "قصة المنصة وفكرتها",
+      "nav.depth.desc": "طبقات الحماية بالصورة الكاملة",
+      "nav.contact.desc": "اسألني أو شارك ملاحظاتك",
       "hero.eyebrow": "منصة تعليمية وتدريبية عملية — دبلوم أمن المعلومات (تجسير مهني)",
       "hero.title1": "منصة تعليمية", "hero.title2": "وتدريبية عملية ", "hero.titleAccent": "لطلاب أمن المعلومات",
       "hero.sub": "منصة عربية متكاملة لطلاب أمن المعلومات: تعلّم أساسيات كل مادة، راجِع المصطلحات بالبطاقات، اختبر نفسك بأسئلة عملية، وطبّق ما تعلّمته بأدوات أمنية ومعامل محاكاة حقيقية — كل ذلك يعمل داخل متصفحك وبدون إنترنت.",
@@ -3460,6 +6926,33 @@ const Lang = (() => {
       "hero.credit": "صُمّم وطُوّر بواسطة <em class=\"grad\">أحمد مطمي</em>",
       "hero.statq": "سؤال تدريبي", "hero.stats": "مواد دراسية",
       "hero.statTools": "أدوات تفاعلية",
+      /* ---------- MODULE 92 · Cyber OS hero & Command Deck (v3.0.0) ---------- */
+      "hero.radarBadge": "دبلوم أمن المعلومات — الترم الحالي",
+      "hero.searchCta": "ابحث في المنصة — درس، أداة، اختبار…",
+      "deck.tabRadar": "رادار الترم",
+      "deck.tabTerminal": "طرفية سيبرانية",
+      "deck.tabConsole": "قياس الأداء",
+      "deck.radarKicker": "الترم الحالي · مباشر",
+      "deck.radarNext": "القادم: {name}",
+      "deck.radarEmpty": "لا توجد مواد مسجلة للترم الحالي بعد.",
+      "deck.live": "مباشر",
+      "deck.today": "اليوم",
+      "deck.termHint": "جرّب: scan · caesar · help",
+      "deck.termWelcome": "nova-shell v3.0.0 — اكتب help لعرض الأوامر.",
+      "deck.termHelp": "الأوامر: help · scan [host] · caesar <نص> [إزاحة] · clear",
+      "deck.termScanTitle": "بدء فحص المنافذ — {host}",
+      "deck.termScanDone": "اكتمل الفحص — {n} منفذًا مفحوصًا",
+      "deck.termUsage": "الاستخدام: {usage}",
+      "deck.termUnknown": "أمر غير معروف: {cmd} — اكتب help",
+      "deck.termLab": "افتح معمل المحاكاة الكامل ←",
+      "bento.semKicker": "نظرة سريعة",
+      "bento.semTitle": "الجدول الأسبوعي للترم الحالي",
+      "bento.semCta": "افتح لوحة الترم كاملة ←",
+      "bento.socKicker": "مختبرات المحاكاة",
+      "bento.socTitle": "غرفة العمليات الأمنية",
+      "bento.arsenalKicker": "الترسانة",
+      "bento.arsenalTitle": "12 أداة تعمل في متصفحك",
+      "bento.arsenalCta": "افتح كل الأدوات ←",
       "hero.continueLabel": "متابعة التعلم", "hero.continueBtn": "تابع من حيث توقفت",
       "hero.continueAt": "عند السؤال {i} من {total}",
       "hero.continueResults": "لديك نتائج محفوظة — أكمل مراجعتك", "hero.continueReviewBtn": "اعرض تقدمك",
@@ -3602,6 +7095,8 @@ const Lang = (() => {
       "quiz.eyebrow": "الاختبارات التجريبية", "quiz.title": "اختبر نفسك في كل مادة",
       "quiz.sub": "أسئلة لكل مادة مع شرح فوري لكل إجابة، وضع مؤقّت اختياري، وحفظ تلقائي للنتائج.",
       "quiz.hint": "اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.",
+      "bank.hubTitle": "بنك الفترات",
+      "bank.hubSub": "سؤال وجواب من كويزات الفترات السابقة — ورقة مراجعة مباشرة قبل الاختبار.",
       "flash.eyebrow": "البطاقات التعليمية",
       "flash.title": "راجع المصطلحات <em class=\"grad\">بالبطاقات</em>",
       "flash.sub": "اضغط على أي بطاقة لقلبها — مصطلح أمني بالعربية مقابل معناه بالإنجليزية مع شرح موجز.",
@@ -4048,6 +7543,38 @@ const Lang = (() => {
       "mock.summary": "نتيجة الاختبار الشامل",
       "mock.bySubject": "حسب المادة",
       "mock.close": "إغلاق",
+      /* ---------- MODULE 54c · CanvaStudio (#canva) ---------- */
+      "canva.fab": "استوديو كانفا",
+      "canva.title": "استوديو كانفا",
+      "canva.sub": "عشر تجارب بصرية تفاعلية — عروض، معرض تصاميم، بطاقات مواد، سبورة مشتركة والمزيد.",
+      "canva.close": "إغلاق",
+      "canva.tabsAria": "أقسام الاستوديو",
+      "canva.tab.home": "الرئيسية",
+      "canva.tab.media": "العروض والمعرض",
+      "canva.tab.explain": "الشرح البصري",
+      "canva.tab.cards": "بطاقات المواد",
+      "canva.tab.work": "الورشة",
+      "canva.unconfigured": "لم يُضَف رابط كانفا بعد — انسخ رابط التصميم من كانفا والصقه في إعدادات الاستوديو.",
+      "canva.openOnCanva": "فتح في كانفا في تبويب جديد",
+      "canva.deckSelect": "اختر عرضًا",
+      "canva.galleryTitle": "معرض التصاميم",
+      "canva.prev": "السابق",
+      "canva.next": "التالي",
+      "canva.explainTitle": "اشرح لي بصريًا",
+      "canva.cardsTitle": "بطاقات المواد المتحركة",
+      "canva.cardsHint": "اضغط أي بطاقة لتقلبها وتشاهد ملصق كانفا الخاص بالمادة.",
+      "canva.templatesTitle": "قوالب جاهزة للطلاب",
+      "canva.copy": "نسخ الرابط",
+      "canva.copied": "تم النسخ ✓",
+      "canva.whiteboardTitle": "السبورة الجماعية",
+      "canva.ambientOff": "شغّل الخلفية السينمائية",
+      "canva.ambientOn": "أوقف الخلفية السينمائية",
+      "canva.shareBtn": "مشاركة المنصة",
+      "canva.shareCopied": "نُسخ نص المشاركة ✓",
+      "canva.posterLink": "افتح ملصق الإنجاز في كانفا",
+      "canva.daily": "بطاقة اليوم",
+      "canva.dailyFlip": "اقلب البطاقة",
+      "canva.flyer": "نشرة الأسبوع",
       /* ---------- MODULE 68/69/70 · Student tools (#student) ---------- */
       "student.eyebrow": "أدوات الطالب",
       "student.title": "أدوات <em class=\"grad\">الطالب</em>",
@@ -4273,6 +7800,18 @@ const Lang = (() => {
       "nav.flashcardsTimed": "Timed Review",
       "nav.games": "CTF Lab", "nav.redteam": "Red Team Lab", "nav.ir": "Incident Response", "nav.cryptolab": "Crypto Lab",
       "nav.cta": "Start learning",
+      /* MODULE 95 · top-nav UX refresh — resume pill + richer More menu */
+      "nav.resumeChip": "Resume",
+      "nav.semester.desc": "This term's schedule and courses",
+      "nav.guide.desc": "Join each week's lecture, step by step",
+      "nav.skills.desc": "Skill map and levels for the diploma",
+      "nav.student.desc": "GPA calculator and your notes",
+      "nav.labs.desc": "Hands-on, safe simulation environments",
+      "nav.flash.desc": "Review terms with flashcards",
+      "nav.theatre.desc": "Real-world attacks, narrated",
+      "nav.about.desc": "The platform's story and purpose",
+      "nav.depth.desc": "Defense in depth, the full picture",
+      "nav.contact.desc": "Ask questions or share feedback",
       "hero.eyebrow": "An educational & practical training platform — Infosec Diploma (Professional Bridging)",
       "hero.title1": "An educational &", "hero.title2": "practical training platform ", "hero.titleAccent": "for Infosec students",
       "hero.sub": "An Arabic-first platform for Information Security students: learn the fundamentals of every subject, review terms with flashcards, quiz yourself with practical questions, then apply what you learned with security tools and real simulation labs — all in your browser, even offline.",
@@ -4283,6 +7822,33 @@ const Lang = (() => {
       "hero.credit": "Designed &amp; developed by <em class=\"grad\">Ahmed Motmi</em>",
       "hero.statq": "practice questions", "hero.stats": "courses",
       "hero.statTools": "interactive tools",
+      /* ---------- MODULE 92 · Cyber OS hero & Command Deck (v3.0.0) ---------- */
+      "hero.radarBadge": "Information Security Diploma — Current Semester",
+      "hero.searchCta": "Search the platform — lesson, tool, quiz…",
+      "deck.tabRadar": "Semester Radar",
+      "deck.tabTerminal": "Cyber Terminal",
+      "deck.tabConsole": "Telemetry",
+      "deck.radarKicker": "Current semester · live",
+      "deck.radarNext": "Next: {name}",
+      "deck.radarEmpty": "No current-semester subjects yet.",
+      "deck.live": "Live",
+      "deck.today": "Today",
+      "deck.termHint": "Try: scan · caesar · help",
+      "deck.termWelcome": "nova-shell v3.0.0 — type help for commands.",
+      "deck.termHelp": "Commands: help · scan [host] · caesar <text> [shift] · clear",
+      "deck.termScanTitle": "Port scan — {host}",
+      "deck.termScanDone": "Scan complete — {n} ports checked",
+      "deck.termUsage": "Usage: {usage}",
+      "deck.termUnknown": "Unknown command: {cmd} — type help",
+      "deck.termLab": "Open the full simulation lab →",
+      "bento.semKicker": "Quick view",
+      "bento.semTitle": "This semester's weekly plan",
+      "bento.semCta": "Open the full semester board →",
+      "bento.socKicker": "Simulation labs",
+      "bento.socTitle": "Security Operations Center",
+      "bento.arsenalKicker": "Arsenal",
+      "bento.arsenalTitle": "12 tools running in your browser",
+      "bento.arsenalCta": "Open all tools →",
       "hero.continueLabel": "Continue learning", "hero.continueBtn": "Resume quiz",
       "hero.continueAt": "At question {i} of {total}",
       "hero.continueResults": "You have saved results — keep up the review", "hero.continueReviewBtn": "View my progress",
@@ -4425,6 +7991,8 @@ const Lang = (() => {
       "quiz.eyebrow": "Practice Exams", "quiz.title": "Test yourself in every course",
       "quiz.sub": "Questions per course with instant explanations, an optional timer and automatic progress saving.",
       "quiz.hint": "Pick a course to begin — you can resume a previous attempt or retake it from scratch.",
+      "bank.hubTitle": "Past-Quiz Bank",
+      "bank.hubSub": "Question & answer from past class quizzes — a straight revision sheet before the final.",
       "flash.eyebrow": "Flashcards",
       "flash.title": "Review Terms with <em class=\"grad\">Flashcards</em>",
       "flash.sub": "Tap any card to flip it — a security term in English with its Arabic meaning and a short explanation.",
@@ -4820,6 +8388,38 @@ const Lang = (() => {
       "mock.summary": "Full exam result",
       "mock.bySubject": "By subject",
       "mock.close": "Close",
+      /* ---------- MODULE 54c · CanvaStudio (#canva) ---------- */
+      "canva.fab": "Canva studio",
+      "canva.title": "Canva Studio",
+      "canva.sub": "Ten interactive visual experiences — decks, a design gallery, subject cards, a shared whiteboard and more.",
+      "canva.close": "Close",
+      "canva.tabsAria": "Studio sections",
+      "canva.tab.home": "Home",
+      "canva.tab.media": "Decks & gallery",
+      "canva.tab.explain": "Visual explainers",
+      "canva.tab.cards": "Subject cards",
+      "canva.tab.work": "Workshop",
+      "canva.unconfigured": "No Canva link yet — copy a design link from Canva and paste it into the studio config.",
+      "canva.openOnCanva": "Open on Canva in a new tab",
+      "canva.deckSelect": "Pick a deck",
+      "canva.galleryTitle": "Design gallery",
+      "canva.prev": "Previous",
+      "canva.next": "Next",
+      "canva.explainTitle": "Explain it visually",
+      "canva.cardsTitle": "Animated subject cards",
+      "canva.cardsHint": "Tap any card to flip it over and see the subject's Canva poster.",
+      "canva.templatesTitle": "Ready-made student templates",
+      "canva.copy": "Copy link",
+      "canva.copied": "Copied ✓",
+      "canva.whiteboardTitle": "Shared whiteboard",
+      "canva.ambientOff": "Start the cinematic background",
+      "canva.ambientOn": "Stop the cinematic background",
+      "canva.shareBtn": "Share the platform",
+      "canva.shareCopied": "Share text copied ✓",
+      "canva.posterLink": "Open the achievement poster on Canva",
+      "canva.daily": "Card of the day",
+      "canva.dailyFlip": "Flip the card",
+      "canva.flyer": "The week's flyer",
       /* ---------- MODULE 68/69/70 · Student tools (#student) ---------- */
       "student.eyebrow": "Student tools",
       "student.title": "The <em class=\"grad\">Student Tools</em>",
@@ -5135,15 +8735,13 @@ let cur = "ar";
 window.Lang = Lang;
 
 /* ============================================================
-   MODULE 23 · PWA — service worker registration
-   Silently skipped on file:// or unsupported browsers.
+   MODULE 23 · PWA — RETIRED in online-only mode (v2.0.4).
+   The platform deliberately registers NO service worker anymore:
+   index.html actively unregisters any leftover registration from
+   older releases and wipes Cache Storage on every visit. sw.js
+   stays in the repo only as a historical record for the offline-
+   era test suite; nothing in the shipped site references it.
    ============================================================ */
-(function initPwa() {
-  if (!("serviceWorker" in navigator)) return;
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
-  });
-})();
 
 /* ============================================================
    MODULE 24 · CyberGames — Incident Response Simulator & CTF
@@ -9898,7 +13496,7 @@ function bindLessonDelegation(){
       opt.classList.add(ok?"is-correct":"is-wrong");
       const fb=card.querySelector(".lesson-check-fb");
       if(fb)fb.textContent=Lang.t(ok?"lesson.checkCorrect":"lesson.checkWrong");
-      try{ Sfx.play("tick"); }catch(e2){}
+      try{ Sfx.play(ok?"good":"bad"); }catch(e2){}
       return;
     }
     if(t.closest("[data-lsn-save-note]")||t.closest("[data-lsn-clear-note]")){
@@ -9934,6 +13532,23 @@ function initLessons(){
   }
   window.addEventListener('hashchange', function(){
     if(/^#lesson/.test(location.hash)) handleLessonHash();
+  });
+  /* Live locale switching — re-render the open lesson when the UI language
+     changes (lesson content is bilingual; it must follow the toggle). */
+  try {
+    var LSNLANG = (typeof Lang !== "undefined" && Lang) ||
+                  (typeof window !== "undefined" && window.Lang) || null;
+    if (LSNLANG && typeof LSNLANG.onSwitch === "function") {
+      LSNLANG.onSwitch(function () { if (/^#lesson/.test(location.hash)) handleLessonHash(); });
+    }
+  } catch (e) { /* locale switching is enhancement, never fatal */ }
+  /* Cold-boot deep links render before the subject bank arrives — when quiz
+     data lands, upgrade the self-check block once. Guarded: only while the
+     checks block is still absent, so reading is never interrupted. */
+  document.addEventListener("nova:progress-changed", function(){
+    if (/^#lesson/.test(location.hash) && !document.querySelector("#lessonBody .lesson-check")) {
+      handleLessonHash();
+    }
   });
   bindLessonDelegation();
   handleLessonHash();
@@ -10497,7 +14112,6 @@ const LABS_META = {
   }
 
   const L10N = resolveLang();
-  const cur = (L10N && L10N.current) || "ar";
 
   /**
    * Translation lookup with proper fallbacks (never returns the raw key).
@@ -10540,7 +14154,10 @@ const LABS_META = {
   function T(field) {
     if (field == null) return "";
     if (typeof field !== "object") return String(field);
-    const v = (field[cur] != null) ? field[cur] : (field.ar != null ? field.ar : field.en);
+    /* Resolve the locale per call — a frozen boot value would keep the data
+       (materials/outcomes/lessons…) in the boot language after a toggle. */
+    const lc = (L10N && L10N.current) || "ar";
+    const v = (field[lc] != null) ? field[lc] : (field.ar != null ? field.ar : field.en);
     return v == null ? "" : String(v);
   }
 
@@ -11223,7 +14840,7 @@ const LABS_META = {
    ------------------------------------------------------------
    Command-palette style search over the platform's REAL data —
    no duplicated index files:
-   - lessons            → window.PLATFORM_LESSONS (empty today)
+   - lessons            → window.PLATFORM_LESSONS (authored lessons only)
    - learning paths/topics → window.getLearningPaths()
    - the 12 tools       → window.PLATFORM_TOOLS_META
    - subject banks      → window.QUIZZES (+ PLATFORM_SUBJECTS names)
@@ -11322,7 +14939,7 @@ const LABS_META = {
       out.push({ kind: kind, title: t, sub: sub ? String(sub).trim() : "", view: view || "", data: data || {} });
     };
 
-    /* 1 · authored lessons (registry is empty until content ships) */
+    /* 1 · authored lessons (registry grows as content ships) */
     try {
       const lessons = window.PLATFORM_LESSONS || {};
       Object.keys(lessons).forEach((sub) => {
@@ -14658,6 +18275,693 @@ const LABS_META = {
 /* @@MATVIEW_END@@ */
 
 /* ============================================================
+   MODULE 54c · CanvaStudio — استوديو كانفا (10 تجارب بصرية)
+   ------------------------------------------------------------
+   The online-only Canva companion. One floating trigger opens a
+   slide-over studio bundling ten configurable Canva experiences:
+     1  presentation  — embedded course decks (theatre + select)
+     2  gallery       — design gallery with full-screen lightbox
+     3  subjectCards  — animated flip cards per subject
+     4  explainers    — per-topic visual explainers (accordion)
+     5  templates     — ready-made student templates (copy/open)
+     6  whiteboard    — collaborative study whiteboard embed
+     7  daily         — card of the day (deterministic rotation)
+     8  ambient       — cinematic HD video background (persisted)
+     9  sharePoster   — share text + achievement poster link
+     10 flyer         — pinned weekly flyer
+   Every slot is driven by CANVA_LINKS below — paste any Canva
+   share URL (…canva.com/design/<id>/…) and the slot goes live.
+   An empty slot stays honestly inert: it renders a "paste a link"
+   note and never fabricates an embed. Embeds are plain HTTPS
+   iframes (…/view?embed) and only ever point at canva.com.
+   @@CANVA_START@@
+   ============================================================ */
+(function initCanvaStudio() {
+  "use strict";
+
+  const fab = document.getElementById("canvaFab");
+  const panel = document.getElementById("canvaStudio");
+  const closeBtn = document.getElementById("canvaClose");
+  const tabs = ["canvaTabHome", "canvaTabMedia", "canvaTabExplain", "canvaTabCards", "canvaTabWork"]
+    .map((id) => document.getElementById(id));
+  const panels = ["canvaPanelHome", "canvaPanelMedia", "canvaPanelExplain", "canvaPanelCards", "canvaPanelWork"]
+    .map((id) => document.getElementById(id));
+  const tablist = document.getElementById("canvaTabs");
+  if (!fab || !panel || !closeBtn || !tablist) return;
+  if (tabs.some((t) => !t) || panels.some((p) => !p)) return;
+  if (typeof document.createElement !== "function") return;
+  if (typeof fab.addEventListener !== "function") return;
+
+  /* ---------- the single source of truth: paste Canva links here ----------
+     Titles are bilingual; "url" accepts a Canva share link such as
+     https://www.canva.com/design/DAFxxxxxxxxx/VIEW or the design's
+     address-bar URL. Leave "" to keep the slot honestly inert.
+     One official demo link ships preconfigured in the decks list below so
+     the embeddable page-through viewer works out of the box. */
+  const CANVA_LINKS = {
+    /* 1 · course decks */
+    presentation: [
+      { title: { ar: "عرض المقرر الكامل", en: "The full course deck" }, url: "" },
+      { title: { ar: "مراجعة ليلة الاختبار", en: "Night-before review deck" }, url: "" },
+      /* Live demo shipped on purpose — Canva's own official "AI Guidebook"
+         (18-page public view link, verified embeddable end-to-end). It keeps
+         the page-through deck viewer alive out of the box; delete this entry
+         whenever real course decks are pasted above. */
+      { title: { ar: "عرض توضيحي مباشر — دليل الذكاء الاصطناعي الرسمي من كانفا", en: "Live demo — Canva's official AI Guidebook" },
+        url: "https://www.canva.com/design/DAGcHX66RYA/7KfZfyJbzlLAWYeIfIkwWw/view" },
+    ],
+    /* 2 · gallery designs */
+    gallery: [
+      { title: { ar: "بصريات الأمن السيبراني", en: "Cybersecurity visual set" }, url: "", thumb: "" },
+      { title: { ar: "خرائط المفاهيم", en: "Concept maps" }, url: "", thumb: "" },
+      { title: { ar: "لوحات إحصائية", en: "Stats boards" }, url: "", thumb: "" },
+    ],
+    /* 3 · subject flip cards */
+    subjectCards: [
+      { title: { ar: "أساسيات الأمن", en: "Security basics" }, url: "" },
+      { title: { ar: "أمن الشبكات", en: "Network security" }, url: "" },
+      { title: { ar: "التشفير", en: "Cryptography" }, url: "" },
+    ],
+    /* 4 · visual explainers */
+    explainers: [
+      { title: { ar: "ما هو التشفير المتناظر؟", en: "What is symmetric encryption?" }, url: "" },
+      { title: { ar: "كيف يعمل هجوم التصيّد؟", en: "How does phishing work?" }, url: "" },
+      { title: { ar: "ماذا يفعل جدار الحماية؟", en: "What does a firewall do?" }, url: "" },
+    ],
+    /* 5 · templates for students */
+    templates: [
+      { title: { ar: "قالب ملخص محاضرة", en: "Lecture summary template" }, url: "" },
+      { title: { ar: "قالب بطاقات مراجعة", en: "Flashcard deck template" }, url: "" },
+      { title: { ar: "مخطط مذاكرة أسبوعي", en: "Weekly study planner" }, url: "" },
+    ],
+    /* 6 · shared whiteboard */
+    whiteboard: { title: { ar: "سبورة المراجعة الجماعية", en: "Group revision whiteboard" }, url: "" },
+    /* 7 · card of the day (rotates daily) */
+    daily: [
+      { title: { ar: "مبدأ أقل صلاحية ممكنة", en: "Least privilege, visually" }, url: "" },
+      { title: { ar: "طبقات الدفاع السبعة", en: "Seven layers of defence" }, url: "" },
+      { title: { ar: "دورة حياة الاستجابة للحوادث", en: "Incident response lifecycle" }, url: "" },
+      { title: { ar: "خريطة نموذج OSI الأمنية", en: "The security OSI map" }, url: "" },
+      { title: { ar: "مصفوفة المخاطر", en: "The risk matrix" }, url: "" },
+    ],
+    /* 8 · cinematic background (direct .mp4 URL from Canva video export) */
+    ambient: { url: "", poster: "" },
+    /* 9 · achievement poster template */
+    sharePoster: { url: "" },
+    /* 10 · pinned weekly flyer */
+    flyer: { title: { ar: "نشرة الأسبوع", en: "The week's flyer" }, url: "", thumb: "" },
+  };
+  const FEATURE_IDS = ["presentation", "gallery", "subjectCards", "explainers", "templates",
+    "whiteboard", "daily", "ambient", "sharePoster", "flyer"];
+
+  const CANONICAL = "https://motmii.github.io/MNCH/";
+
+  /* ---------- language + tiny helpers ---------- */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* noop */ }
+    return null;
+  }
+  const L10N = resolveLang();
+  function langCode() { return (L10N && L10N.current === "en") ? "en" : "ar"; }
+  function T(k, fb) {
+    let s = "";
+    try { s = L10N ? L10N.t(k) : ""; } catch (e) { s = ""; }
+    return (!s || s === k) ? (fb || "") : s;
+  }
+  function itemTitle(item) {
+    const t = item && item.title;
+    if (!t) return "";
+    return t[langCode()] || t.ar || "";
+  }
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function clearNode(n) {
+    if (!n) return;
+    while (n.firstChild) n.removeChild(n.firstChild);
+  }
+  function storeGet(k, fb) {
+    try {
+      const s = window.PLATFORM_STORE;
+      if (s && typeof s.get === "function") { const v = s.get(k, fb); return v == null ? fb : v; }
+    } catch (e) { /* noop */ }
+    try {
+      const raw = localStorage.getItem("motmi-portal:" + k);
+      return raw == null ? fb : raw;
+    } catch (e2) { return fb; }
+  }
+  function storeSet(k, v) {
+    try {
+      const s = window.PLATFORM_STORE;
+      if (s && typeof s.set === "function") { s.set(k, v); return; }
+    } catch (e) { /* noop */ }
+    try { localStorage.setItem("motmi-portal:" + k, String(v)); } catch (e2) { /* noop */ }
+  }
+
+  /* ---------- Canva link → embed ---------- */
+  function designId(url) {
+    const m = /canva\.com\/design\/([A-Za-z0-9_-]{6,})/.exec(String(url || ""));
+    return m ? m[1] : "";
+  }
+  /* Canva serves the embeddable viewer only on the full <id>/<slug> path;
+     the bare <id>/view form gets bot-walled (verified with headless Chrome),
+     so the slug is preserved whenever the pasted link carries it. */
+  function designPath(url) {
+    const m = /canva\.com\/design\/([A-Za-z0-9_-]{6,})(?:\/([A-Za-z0-9_-]{6,}))?/.exec(String(url || ""));
+    if (!m) return "";
+    return m[2] ? m[1] + "/" + m[2] : m[1];
+  }
+  function viewUrl(path) { return "https://www.canva.com/design/" + path + "/view?embed"; }
+
+  let liveEmbeds = [];
+  function emptyState(small) {
+    const box = el("p", "canva-empty" + (small ? " canva-empty--sm" : ""), T("canva.unconfigured", "لم يُضَف رابط كانفا بعد."));
+    return box;
+  }
+  /**
+   * Mount a Canva embed (or the honest empty state) into a host node.
+   * @param {HTMLElement} host Target container.
+   * @param {{url?:string,title?:object}} item Config entry with a Canva link.
+   * @returns {HTMLIFrameElement|null} The created iframe, or null when inert.
+   */
+  function mountEmbed(host, item) {
+    if (!host) return null;
+    clearNode(host);
+    liveEmbeds = liveEmbeds.filter((h) => h !== host);
+    const path = designPath(item && item.url);
+    if (!path) { host.appendChild(emptyState()); return null; }
+    const frame = document.createElement("iframe");
+    frame.className = "canva-frame";
+    frame.setAttribute("src", viewUrl(path));
+    frame.setAttribute("loading", "lazy");
+    frame.setAttribute("allowfullscreen", "");
+    frame.setAttribute("allow", "fullscreen; clipboard-write");
+    frame.setAttribute("title", itemTitle(item) || "Canva");
+    host.appendChild(frame);
+    const open = el("a", "canva-open", T("canva.openOnCanva", "فتح في كانفا في تبويب جديد"));
+    open.setAttribute("href", item.url);
+    open.setAttribute("target", "_blank");
+    open.setAttribute("rel", "noopener noreferrer");
+    host.appendChild(open);
+    liveEmbeds.push(host);
+    return frame;
+  }
+  function clearEmbeds() {
+    liveEmbeds = liveEmbeds.filter((h) => { clearNode(h); return false; });
+  }
+
+  /* ---------- sharing ---------- */
+  function copyText(s) {
+    try {
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(s);
+        return true;
+      }
+    } catch (e) { /* fall through */ }
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = s;
+      ta.setAttribute("readonly", "");
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      return true;
+    } catch (e2) { return false; }
+  }
+  function shareText() {
+    return langCode() === "en"
+      ? "I'm learning on the Information Security Platform — learning paths, quizzes, security tools and a Canva visual studio: " + CANONICAL
+      : "أتابع تعلّمي في منصة أمن المعلومات — مسارات تعلم واختبارات وأدوات أمنية واستوديو كانفا بصري: " + CANONICAL;
+  }
+  /** Native share sheet when available, clipboard otherwise. @returns {string} "shared"|"copied"|"failed" */
+  function doShare() {
+    const text = shareText();
+    try {
+      if (navigator && typeof navigator.share === "function") {
+        const p = navigator.share({ title: document.title || "منصة أمن المعلومات", text: text, url: CANONICAL });
+        if (p && typeof p.catch === "function") p.catch(() => {});
+        return "shared";
+      }
+    } catch (e) { /* fall through to clipboard */ }
+    return copyText(text) ? "copied" : "failed";
+  }
+
+  /* ---------- panel shell ---------- */
+  const lightbox = document.getElementById("canvaLightbox");
+  const lightboxTitle = document.getElementById("canvaLightboxTitle");
+  const lightboxHost = document.getElementById("canvaLightboxHost");
+  const lightboxPrev = document.getElementById("canvaLightboxPrev");
+  const lightboxNext = document.getElementById("canvaLightboxNext");
+  const lightboxClose = document.getElementById("canvaLightboxClose");
+
+  const flyerMount = document.getElementById("canvaFlyerMount");
+  const dailyMount = document.getElementById("canvaDaily");
+  const ambientBtn = document.getElementById("canvaAmbientBtn");
+  const ambientNote = document.getElementById("canvaAmbientNote");
+  const shareBtn = document.getElementById("canvaShareBtn");
+  const shareNote = document.getElementById("canvaShareNote");
+  const posterLink = document.getElementById("canvaPosterLink");
+  const deckSelect = document.getElementById("canvaDeckSelect");
+  const deckHost = document.getElementById("canvaDeckHost");
+  const galleryGrid = document.getElementById("canvaGalleryGrid");
+  const explainMount = document.getElementById("canvaExplainMount");
+  const cardsMount = document.getElementById("canvaCardsMount");
+  const templatesMount = document.getElementById("canvaTemplatesMount");
+  const whiteboardMount = document.getElementById("canvaWhiteboardMount");
+  const video = document.getElementById("canvaAmbient");
+
+  let activeTab = 0;
+  const rendered = {};
+
+  function isOpen() { return panel.hidden === false; }
+  function lightboxOpen() { return !!lightbox && lightbox.hidden === false; }
+
+  function open() {
+    panel.hidden = false;
+    panel.removeAttribute("inert");
+    panel.setAttribute("aria-hidden", "false");
+    fab.setAttribute("aria-expanded", "true");
+    renderHome();
+    renderTab(activeTab);
+    try { closeBtn.focus(); } catch (e) { /* noop */ }
+  }
+  function close() {
+    if (lightboxOpen()) closeLightbox();
+    clearEmbeds();
+    Object.keys(rendered).forEach((k) => { delete rendered[k]; });
+    panel.hidden = true;
+    panel.setAttribute("inert", "");
+    panel.setAttribute("aria-hidden", "true");
+    fab.setAttribute("aria-expanded", "false");
+    try { fab.focus(); } catch (e) { /* noop */ }
+  }
+
+  function activateTab(i, focusIt) {
+    if (i < 0 || i >= tabs.length) return;
+    activeTab = i;
+    tabs.forEach((t, n) => {
+      t.setAttribute("aria-selected", n === i ? "true" : "false");
+      t.setAttribute("tabindex", n === i ? "0" : "-1");
+      if (n === i) t.classList.add("is-active"); else t.classList.remove("is-active");
+      panels[n].hidden = n !== i;
+    });
+    renderTab(i);
+    if (focusIt) { try { tabs[i].focus(); } catch (e) { /* noop */ } }
+  }
+  function tabKeys(ev) {
+    const key = ev.key;
+    if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") return;
+    const ltr = !!(document.documentElement && document.documentElement.dir === "ltr");
+    const forward = ltr ? "ArrowRight" : "ArrowLeft";
+    const back = ltr ? "ArrowLeft" : "ArrowRight";
+    let next = activeTab;
+    if (key === "Home") next = 0;
+    else if (key === "End") next = tabs.length - 1;
+    else if (key === forward) next = (activeTab + 1) % tabs.length;
+    else if (key === back) next = (activeTab - 1 + tabs.length) % tabs.length;
+    if (ev.preventDefault) ev.preventDefault();
+    activateTab(next, true);
+  }
+
+  /* ---------- 8 · cinematic ambient background ---------- */
+  function ambientUrl() { return (CANVA_LINKS.ambient && CANVA_LINKS.ambient.url) || ""; }
+  function setAmbient(on) {
+    const url = ambientUrl();
+    const ok = !!(on && url);
+    if (video) {
+      if (ok) {
+        video.setAttribute("src", url);
+        if (CANVA_LINKS.ambient.poster) video.setAttribute("poster", CANVA_LINKS.ambient.poster);
+        video.hidden = false;
+        try { if (typeof video.play === "function") { const p = video.play(); if (p && p.catch) p.catch(() => {}); } } catch (e) { /* noop */ }
+      } else {
+        try { if (typeof video.pause === "function") video.pause(); } catch (e2) { /* noop */ }
+        video.removeAttribute("src");
+        video.hidden = true;
+      }
+    }
+    if (ambientBtn) {
+      ambientBtn.setAttribute("aria-pressed", ok ? "true" : "false");
+      ambientBtn.textContent = ok ? T("canva.ambientOn", "أوقف الخلفية السينمائية") : T("canva.ambientOff", "شغّل الخلفية السينمائية");
+    }
+    if (ambientNote) ambientNote.hidden = !!url;
+    storeSet("canva-ambient", ok ? "1" : "0");
+    return ok;
+  }
+
+  /* ---------- 7 · card of the day ---------- */
+  function dailyIndex(ts) {
+    const list = CANVA_LINKS.daily || [];
+    if (!list.length) return -1;
+    const day = Math.floor((ts == null ? Date.now() : ts) / 86400000);
+    return ((day % list.length) + list.length) % list.length;
+  }
+  function flipDaily() {
+    const card = dailyMount && dailyMount.firstChild;
+    if (!card) return;
+    const flipped = card.classList.toggle("is-flipped");
+    const back = card.querySelector ? card.querySelector(".canva-daily-back") : null;
+    if (back && flipped && !back.firstChild) mountEmbed(back, CANVA_LINKS.daily[dailyIndex()] || null);
+  }
+  function renderDaily() {
+    if (!dailyMount) return;
+    clearNode(dailyMount);
+    const item = CANVA_LINKS.daily[dailyIndex()] || null;
+    const card = el("div", "canva-daily-card");
+    const front = el("span", "canva-daily-face canva-daily-front");
+    front.appendChild(el("span", "canva-daily-kicker", T("canva.daily", "بطاقة اليوم")));
+    front.appendChild(el("span", "canva-daily-title", itemTitle(item)));
+    front.appendChild(el("span", "canva-daily-cta", T("canva.dailyFlip", "اقلب البطاقة")));
+    const back = el("span", "canva-daily-face canva-daily-back");
+    card.appendChild(front);
+    card.appendChild(back);
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-pressed", "false");
+    dailyMount.appendChild(card);
+  }
+
+  /* ---------- 10 · pinned weekly flyer ---------- */
+  function renderFlyer() {
+    if (!flyerMount) return;
+    clearNode(flyerMount);
+    const f = CANVA_LINKS.flyer || {};
+    const box = el("div", "canva-flyer");
+    const head = el("div", "canva-flyer-head");
+    head.appendChild(el("span", "canva-flyer-kicker", T("canva.flyer", "نشرة الأسبوع")));
+    head.appendChild(el("span", "canva-flyer-title", itemTitle(f)));
+    box.appendChild(head);
+    if (f.thumb) {
+      const img = document.createElement("img");
+      img.className = "canva-flyer-thumb";
+      img.setAttribute("src", f.thumb);
+      img.setAttribute("alt", "");
+      img.setAttribute("loading", "lazy");
+      box.appendChild(img);
+    }
+    const host = el("div", "canva-embed");
+    box.appendChild(host);
+    flyerMount.appendChild(box);
+    mountEmbed(host, f);
+  }
+
+  /* ---------- home tab + shared rows ---------- */
+  function refreshShare() {
+    const url = CANVA_LINKS.sharePoster && CANVA_LINKS.sharePoster.url;
+    if (posterLink) {
+      if (url) { posterLink.setAttribute("href", url); posterLink.hidden = false; }
+      else { posterLink.setAttribute("href", "#"); posterLink.hidden = true; }
+    }
+  }
+  function renderHome() {
+    renderFlyer();
+    renderDaily();
+    refreshShare();
+    if (ambientBtn) {
+      const on = ambientBtn.getAttribute("aria-pressed") === "true";
+      ambientBtn.textContent = on ? T("canva.ambientOn", "أوقف الخلفية السينمائية") : T("canva.ambientOff", "شغّل الخلفية السينمائية");
+    }
+    if (ambientNote) ambientNote.hidden = !!ambientUrl();
+  }
+
+  /* ---------- panel events ---------- */
+  fab.addEventListener("click", open);
+  closeBtn.addEventListener("click", close);
+  tabs.forEach((t, i) => t.addEventListener("click", () => activateTab(i)));
+  if (tablist.addEventListener) tablist.addEventListener("keydown", tabKeys);
+  if (deckSelect && deckSelect.addEventListener) deckSelect.addEventListener("change", () => {
+    const i = parseInt(deckSelect.value, 10);
+    const list = CANVA_LINKS.presentation || [];
+    mountEmbed(deckHost, list[isNaN(i) ? 0 : i] || null);
+  });
+
+  if (lightboxClose) lightboxClose.addEventListener("click", () => closeLightbox());
+  if (lightboxPrev) lightboxPrev.addEventListener("click", () => navigateLightbox(-1));
+  if (lightboxNext) lightboxNext.addEventListener("click", () => navigateLightbox(1));
+
+  if (ambientBtn) ambientBtn.addEventListener("click", () => {
+    setAmbient(ambientBtn.getAttribute("aria-pressed") !== "true");
+  });
+  if (shareBtn) shareBtn.addEventListener("click", () => {
+    const how = doShare();
+    if (shareNote && how !== "shared") {
+      shareNote.textContent = how === "copied" ? T("canva.shareCopied", "نُسخ نص المشاركة ✓") : "";
+      shareNote.hidden = how !== "copied";
+    }
+  });
+  if (deckSelect && deckSelect.addEventListener) deckSelect.addEventListener("change", () => {
+    const list = CANVA_LINKS.presentation || [];
+    const i = parseInt(deckSelect.value, 10) || 0;
+    mountEmbed(deckHost, list[i] || null);
+  });
+
+  /* one delegated click/keydown handler for all rendered lists */
+  panel.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!t || !t.closest) return;
+    const copy = t.closest("[data-canva-copy]");
+    if (copy) {
+      const ok = copyText(copy.getAttribute("data-canva-copy") || "");
+      if (ok) { copy.textContent = T("canva.copied", "تم النسخ ✓"); }
+      return;
+    }
+    if (t.closest("[data-canva-daily-flip]") || t.closest(".canva-daily-card")) { flipDaily(); return; }
+    const gal = t.closest("[data-canva-gal]");
+    if (gal) { openLightbox(parseInt(gal.getAttribute("data-canva-gal"), 10) || 0); return; }
+    const exp = t.closest("[data-canva-explain]");
+    if (exp) { toggleExplainer(parseInt(exp.getAttribute("data-canva-explain"), 10) || 0); return; }
+    const card = t.closest("[data-canva-card]");
+    if (card) { flipSubjectCard(card); return; }
+  });
+  panel.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const t = e.target;
+    if (!t || !t.closest) return;
+    const card = t.closest(".canva-daily-card, [data-canva-card]");
+    if (card) {
+      if (e.preventDefault) e.preventDefault();
+      if (card.classList.contains("canva-daily-card")) flipDaily(); else flipSubjectCard(card);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (lightboxOpen()) { closeLightbox(); return; }
+    if (isOpen()) close();
+  });
+  document.addEventListener("nova:view-changed", () => { if (isOpen()) close(); });
+
+  try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(() => {
+    Object.keys(rendered).forEach((k) => { delete rendered[k]; });
+    if (isOpen()) { renderHome(); renderTab(activeTab); }
+  }); } catch (e) { /* optional */ }
+
+  /* ---------- lazy tab rendering ---------- */
+  function renderTab(i) {
+    const key = "t" + i;
+    if (rendered[key]) return;
+    if (i === 1) { renderDeck(); renderGallery(); }
+    else if (i === 2) renderExplainers();
+    else if (i === 3) renderSubjectCards();
+    else if (i === 4) renderWorkshop();
+    rendered[key] = true;
+  }
+
+  /* ---------- 1 · presentation theatre ---------- */
+  function renderDeck() {
+    const list = CANVA_LINKS.presentation || [];
+    if (deckSelect) {
+      clearNode(deckSelect);
+      list.forEach((item, i) => {
+        const opt = document.createElement("option");
+        opt.setAttribute("value", String(i));
+        opt.textContent = itemTitle(item);
+        deckSelect.appendChild(opt);
+      });
+    }
+    /* default to the first configured deck so the viewer is never empty
+       while a live link exists (falls back to 0 when all slots are inert) */
+    let sel = 0;
+    for (let i = 0; i < list.length; i++) { if (list[i].url) { sel = i; break; } }
+    if (deckSelect) deckSelect.value = String(sel);
+    mountEmbed(deckHost, list[sel] || null);
+  }
+
+  /* ---------- 2 · design gallery + lightbox ---------- */
+  let galIndex = -1;
+  function renderGallery() {
+    if (!galleryGrid) return;
+    clearNode(galleryGrid);
+    (CANVA_LINKS.gallery || []).forEach((item, i) => {
+      const card = el("button", "canva-gal-card");
+      card.setAttribute("type", "button");
+      card.setAttribute("data-canva-gal", String(i));
+      card.appendChild(el("span", "canva-gal-num", "0" + (i + 1)));
+      card.appendChild(el("span", "canva-gal-title", itemTitle(item)));
+      if (item.thumb) {
+        const img = document.createElement("img");
+        img.className = "canva-gal-thumb";
+        img.setAttribute("src", item.thumb);
+        img.setAttribute("alt", "");
+        img.setAttribute("loading", "lazy");
+        card.appendChild(img);
+      }
+      galleryGrid.appendChild(card);
+    });
+  }
+  function updateLightbox() {
+    const list = CANVA_LINKS.gallery || [];
+    const item = list[galIndex] || null;
+    if (lightboxTitle) lightboxTitle.textContent = itemTitle(item);
+    mountEmbed(lightboxHost, item);
+    if (lightboxPrev) lightboxPrev.disabled = list.length < 2;
+    if (lightboxNext) lightboxNext.disabled = list.length < 2;
+  }
+  function openLightbox(i) {
+    const list = CANVA_LINKS.gallery || [];
+    if (!list.length || !lightbox || !lightboxHost) return;
+    galIndex = ((i % list.length) + list.length) % list.length;
+    lightbox.hidden = false;
+    lightbox.setAttribute("aria-hidden", "false");
+    updateLightbox();
+  }
+  function navigateLightbox(dir) {
+    const list = CANVA_LINKS.gallery || [];
+    if (list.length < 2) return;
+    galIndex = ((galIndex + dir) % list.length + list.length) % list.length;
+    updateLightbox();
+  }
+  function closeLightbox() {
+    if (!lightbox) return;
+    if (lightboxHost) {
+      clearNode(lightboxHost);
+      liveEmbeds = liveEmbeds.filter((h) => h !== lightboxHost);
+    }
+    lightbox.hidden = true;
+    lightbox.setAttribute("aria-hidden", "true");
+    galIndex = -1;
+  }
+
+  /* ---------- 4 · visual explainers (accordion) ---------- */
+  function renderExplainers() {
+    if (!explainMount) return;
+    clearNode(explainMount);
+    (CANVA_LINKS.explainers || []).forEach((item, i) => {
+      const row = el("div", "canva-explain");
+      const head = el("button", "canva-explain-head", itemTitle(item));
+      head.setAttribute("type", "button");
+      head.setAttribute("data-canva-explain", String(i));
+      head.setAttribute("aria-expanded", "false");
+      const body = el("div", "canva-explain-body");
+      body.hidden = true;
+      row.appendChild(head);
+      row.appendChild(body);
+      explainMount.appendChild(row);
+    });
+  }
+  function toggleExplainer(i) {
+    const list = CANVA_LINKS.explainers || [];
+    const item = list[i];
+    if (!item || !explainMount || !explainMount.children) return;
+    const rows = explainMount.children;
+    for (let n = 0; n < rows.length; n++) {
+      const row = rows[n];
+      const head = row.firstChild;
+      const body = row.children && row.children[1];
+      const willOpen = (n === i) && head && head.getAttribute("aria-expanded") !== "true";
+      if (head) head.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      if (body) {
+        body.hidden = !willOpen;
+        if (willOpen && !body.firstChild) mountEmbed(body, item);
+      }
+    }
+  }
+
+  /* ---------- 3 · animated subject flip cards ---------- */
+  function renderSubjectCards() {
+    if (!cardsMount) return;
+    clearNode(cardsMount);
+    (CANVA_LINKS.subjectCards || []).forEach((item, i) => {
+      const card = el("div", "canva-card");
+      card.setAttribute("role", "button");
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("aria-pressed", "false");
+      card.setAttribute("data-canva-card", String(i));
+      const front = el("span", "canva-card-face canva-card-front");
+      front.appendChild(el("span", "canva-card-title", itemTitle(item)));
+      front.appendChild(el("span", "canva-card-cta", T("canva.dailyFlip", "اقلب البطاقة")));
+      const back = el("span", "canva-card-face canva-card-back");
+      card.appendChild(front);
+      card.appendChild(back);
+      cardsMount.appendChild(card);
+    });
+  }
+  function flipSubjectCard(card) {
+    const flipped = card.classList.toggle("is-flipped");
+    card.setAttribute("aria-pressed", flipped ? "true" : "false");
+    if (flipped) {
+      const back = card.children && card.children[1];
+      const i = parseInt(card.getAttribute("data-canva-card"), 10) || 0;
+      if (back && !back.firstChild) mountEmbed(back, (CANVA_LINKS.subjectCards || [])[i] || null);
+    }
+  }
+
+  /* ---------- 5 + 6 · workshop: templates and whiteboard ---------- */
+  function renderWorkshop() {
+    if (templatesMount) {
+      clearNode(templatesMount);
+      (CANVA_LINKS.templates || []).forEach((item) => {
+        const row = el("div", "canva-template");
+        row.appendChild(el("span", "canva-template-title", itemTitle(item)));
+        if (designId(item.url)) {
+          const open = el("a", "btn btn-sm btn-ghost", T("canva.openOnCanva", "فتح في كانفا"));
+          open.setAttribute("href", item.url);
+          open.setAttribute("target", "_blank");
+          open.setAttribute("rel", "noopener noreferrer");
+          const copy = el("button", "btn btn-sm btn-ghost", T("canva.copy", "نسخ الرابط"));
+          copy.setAttribute("type", "button");
+          copy.setAttribute("data-canva-copy", item.url);
+          row.appendChild(open);
+          row.appendChild(copy);
+        } else {
+          row.appendChild(emptyState(true));
+        }
+        templatesMount.appendChild(row);
+      });
+    }
+    mountEmbed(whiteboardMount, CANVA_LINKS.whiteboard || null);
+  }
+
+  /* ---------- boot ---------- */
+  if (tablist.setAttribute) tablist.setAttribute("aria-label", T("canva.tabsAria", "أقسام الاستوديو"));
+  if (storeGet("canva-ambient", "0") === "1" && ambientUrl()) setAmbient(true);
+
+  window.PlatformCanvaStudio = {
+    FEATURE_IDS: FEATURE_IDS,
+    CANVA_LINKS: CANVA_LINKS,
+    designId: designId,
+    viewUrl: viewUrl,
+    mountEmbed: mountEmbed,
+    dailyIndex: dailyIndex,
+    shareText: shareText,
+    doShare: doShare,
+    setAmbient: setAmbient,
+    open: open,
+    close: close,
+    isOpen: isOpen,
+    activateTab: activateTab,
+    openLightbox: openLightbox,
+    closeLightbox: closeLightbox,
+  };
+})();
+/* @@CANVA_END@@ */
+
+/* ============================================================
    MODULE 55 · HeroNow — "الآن" في المنصة (شريط الترحيب والجدول)
    ------------------------------------------------------------
    Computes the next official class for the current semester
@@ -15200,6 +19504,24 @@ const LABS_META = {
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
     {
+      date: "2026-10-17",
+      tag: "new",
+      title: { ar: "استوديو كانفا — عشر تجارب بصرية ووضع «متصل دائمًا»", en: "Canva Studio — ten visual experiences + always-online mode" },
+      desc: {
+        ar: "وصل «استوديو كانفا» (الزر العائم أسفل الشاشة): لوحة واحدة تجمع عشر تجارب بصرية تفاعلية — عرض المقرر المدمج مع منتقي عروض، معرض تصاميم بعارض ملء الشاشة وتنقل سهمي، بطاقات مواد تُقلب للمسة، شرح بصري لكل محور بنظام أكورديون، قوالب جاهزة للنسخ والفتح، سبورة جماعية للتلخيص مع الزملاء، بطاقة اليوم التي تتبدل يوميًا بخوارزمية ثابتة، وضع خلفية سينمائية بفيديو HD يُحفظ اختيارك فيه، بطاقة مشاركة المنصة مع ملصق إنجاز اختياري، ونشرة أسبوعية مثبّتة. كل فتحة تبقى صامتة بأمان حتى تلصق رابط تصميم من كانفا داخل إعدادات الاستوديو (CANVA_LINKS)، وحينها تعمل العروض داخل الصفحة مباشرة من نطاق كانفا الرسمي. وفي هذا الإصدار أيضاً تحوّلت المنصة إلى «متصل دائمًا»: أُلغي تسجيل عامل الخدمة ويتنظّف الكاش تلقائيًا عند كل تحميل، مع سياسة أمان محتوى (CSP) تسمح بعروض كانفا وحدها دون أي جهات أخرى.",
+        en: "«Canva Studio» has landed (the floating button at the bottom of the screen): one panel bundling ten interactive visual experiences — an embedded course deck with a deck picker, a design gallery with a full-screen viewer and arrow navigation, subject cards that flip on touch, per-topic visual explainers in an accordion, ready templates to copy and open, a shared group whiteboard, a card of the day that rotates deterministically, a cinematic HD video background mode that remembers your choice, a platform share card with an optional achievement poster, and a pinned weekly flyer. Every slot stays safely inert until you paste a Canva design link into the studio config (CANVA_LINKS) — then the designs play right inside the page, straight from Canva's own origin. This release also flips the platform to «always online»: service-worker registration is gone, caches are wiped automatically on every load, and a Content-Security-Policy whitelists Canva embeds only."
+      }
+    },
+    {
+      date: "2026-10-17",
+      tag: "improve",
+      title: { ar: "أصوات مختارة فقط — تركيز بلا تشتيت", en: "Only the cues that matter — focus without noise" },
+      desc: {
+        ar: "خُفِّضت طبقة الصوت إلى الإشارات المفيدة وحدها: نبضة قصيرة راقية عند إجابة صحيحة، وتحية هادئة عند الخطأ، ونبضات هابطة عند نفاد الوقت في الاختبار، وجرس دافئ من ثلاث نغمات عند اكتمال جلسة المذاكرة (اختياري من إعدادات المؤقّت). أما نقرات الأزرار وفتح النوافذ والتمرير وتغيير الشاشات فأصبحت صامتة تمامًا — واجهة أهدأ تركّز انتباهك على المحتوى. كل الأصوات تبقى توليدًا لحظيًا عبر Web Audio بلا ملفات ولا شبكة، والكتم متاح برمجيًا عبر NovaSound، ووضع الاختبار المؤقوت يظل صامتًا. كل شيء محلي في متصفحك.",
+        en: "The sound layer now speaks only where it helps: a short elegant arpeggio on a correct answer, a calm low pair on a miss, descending bells when a quiz runs out of time, and a warm three-note chime when a study session completes (opt-in from the timer settings). Button taps, panel opens, scrolling and view changes are all silent now — a calmer interface that keeps your attention on the content. Every cue is still synthesised live through Web Audio, no files, no network; the layer stays muteable via NovaSound, and timed exam mode remains silent. All local to your browser."
+      }
+    },
+    {
       date: "2026-10-16",
       tag: "release",
       title: { ar: "الإصدار 2.0 — الهوية الجديدة «V0 Obsidian»", en: "v2.0.0 — the new «V0 Obsidian» identity" },
@@ -15484,179 +19806,6 @@ const LABS_META = {
   }
 })();
 
-
-/* ============================================================
-   MODULE 59 · HeroMedia — خلفية متحركة مشروطة (فيديو محلي)
-   ------------------------------------------------------------
-   The hero background is a still photo by default, animated by
-   the CSS layer `.hero-bg` (see MODULE 59 in style.css). This
-   module adds the optional video loop on top of it
-   (images/hero-bg.mp4 — 10s, 1280×720, silent, ~0.37 MB, shipped
-   with the site and precached by the service worker, so the
-   animated hero also works offline).
-
-   Playback is opt-in per device, checked in this order:
-     1. prefers-reduced-motion: reduce    → never load or play
-     2. Save-Data or a 2g-class link      → never load or play
-     3. viewport narrower than 700px      → never load or play
-     4. battery below 20% while unplugged → never load or play
-   Once allowed, the loop pauses whenever the tab is hidden or the
-   hero leaves the viewport (view switch / scroll), so an idle page
-   costs nothing. The markup carries no autoplay attribute and
-   preload="none", so a vetoed device downloads zero bytes.
-
-   No network calls, no storage, no personal data; the file is
-   same-origin and served from the SW cache when offline.
-   Exposes window.PlatformHeroMedia for manual control/tests.
-   ============================================================ */
-(function initHeroMedia() {
-  "use strict";
-
-  var hero = document.getElementById("hero");
-  var video = document.getElementById("heroMedia");
-  if (!hero || !video) return;
-  if (typeof video.play !== "function") return;
-  if (typeof video.addEventListener !== "function") return;
-
-  var PLAYING_CLASS = "is-playing";
-  var HERO_CLASS = "is-media-playing";
-
-  /* ---------- gates ---------- */
-  var reduced = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-  var narrow = window.matchMedia ? window.matchMedia("(max-width: 700px)") : null;
-
-  /** @returns {boolean} True when the visitor asked for no motion. */
-  function prefersReducedMotion() {
-    return Boolean(reduced && reduced.matches);
-  }
-
-  /** @returns {boolean} True on Save-Data or a 2g-class connection. */
-  function dataSaver() {
-    try {
-      var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      if (!c) return false;
-      if (c.saveData === true) return true;
-      return /(^|-)2g$/.test(String(c.effectiveType || ""));
-    } catch (e) { return false; }
-  }
-
-  /** @returns {boolean} True on phone-width viewports. */
-  function smallScreen() {
-    if (narrow) return narrow.matches;
-    try { return window.innerWidth > 0 && window.innerWidth < 700; } catch (e) { return true; }
-  }
-
-  var batteryBlocked = false;
-  /** Watch the battery once (Chromium-only API) — low + unplugged vetoes. */
-  function watchBattery() {
-    try {
-      if (typeof navigator.getBattery !== "function") return;
-      navigator.getBattery().then(function (b) {
-        if (!b) return;
-        var apply = function () {
-          batteryBlocked = b.level < 0.2 && b.charging === false;
-          evaluate();
-        };
-        apply();
-        if (typeof b.addEventListener === "function") {
-          b.addEventListener("levelchange", apply);
-          b.addEventListener("chargingchange", apply);
-        }
-      }).catch(function () {});
-    } catch (e) {}
-  }
-
-  /** @returns {boolean} True when every gate lets the loop run. */
-  function allowed() {
-    if (prefersReducedMotion()) return false;
-    if (dataSaver()) return false;
-    if (smallScreen()) return false;
-    if (batteryBlocked) return false;
-    return true;
-  }
-
-  /* ---------- playback ---------- */
-  var inView = true;
-  var started = false;
-
-  function tabVisible() {
-    try { return document.visibilityState !== "hidden"; } catch (e) { return true; }
-  }
-
-  function pause() {
-    try { if (video.paused !== true) video.pause(); } catch (e) {}
-  }
-
-  function play() {
-    if (!allowed() || !inView || !tabVisible()) return;
-    var attempt;
-    try { attempt = video.play(); } catch (e) { return; }
-    if (attempt && typeof attempt.catch === "function") attempt.catch(function () {});
-  }
-
-  /** Single decision point: allowed + on-screen + visible tab → play. */
-  function evaluate() {
-    if (!allowed() || !inView || !tabVisible()) { pause(); return; }
-    play();
-  }
-
-  /* Fade the loop in only after a real frame rendered (no black flash). */
-  video.addEventListener("playing", function () {
-    video.classList.add(PLAYING_CLASS);
-    hero.classList.add(HERO_CLASS);
-  });
-  video.addEventListener("pause", function () { video.classList.remove(PLAYING_CLASS); });
-  video.addEventListener("error", function () {
-    /* The drifting photo stays: a broken or unsupported file must never
-       leave the hero without a background. */
-    video.classList.remove(PLAYING_CLASS);
-    hero.classList.remove(HERO_CLASS);
-    video.hidden = true;
-  });
-
-  /* ---------- pause when the tab is hidden or the hero scrolls away ---------- */
-  document.addEventListener("visibilitychange", function () {
-    if (tabVisible()) evaluate(); else pause();
-  });
-
-  if (typeof IntersectionObserver === "function") {
-    try {
-      new IntersectionObserver(function (entries) {
-        var last = entries[entries.length - 1];
-        if (!last) return;
-        inView = last.isIntersecting;
-        evaluate();
-      }, { threshold: 0.15 }).observe(hero);
-    } catch (e) {}
-  }
-
-  /* ViewSwitcher hides the hero on every other view; re-check at once. */
-  document.addEventListener("nova:view-changed", evaluate);
-
-  /* Re-evaluate when the visitor flips a relevant preference mid-session. */
-  [reduced, narrow].forEach(function (mq) {
-    if (!mq || typeof mq.addEventListener !== "function") return;
-    mq.addEventListener("change", evaluate);
-  });
-
-  watchBattery();
-
-  /* Start after load: the loop must never compete with the first paint. */
-  function boot() { started = true; evaluate(); }
-  if (document.readyState === "complete") boot();
-  else window.addEventListener("load", boot);
-
-  window.PlatformHeroMedia = {
-    video: video,
-    allowed: allowed,
-    play: play,
-    pause: pause,
-    /** @returns {boolean} True while a video frame is on screen. */
-    isPlaying: function () { return video.classList.contains(PLAYING_CLASS); },
-    /** @returns {boolean} True once the post-load evaluation ran. */
-    started: function () { return started; }
-  };
-})();
 
 /* ============================================================
    MODULE 61 · LectureGuide — دليل الوصول إلى المحاضرات
@@ -17217,7 +21366,7 @@ const LABS_META = {
   /** Opt-in chime through the shared Web Audio synth (silent by default). @returns {void} */
   function playChime() {
     if (session.log.prefs.sound !== true) return;
-    try { if (typeof Sfx !== "undefined" && Sfx && typeof Sfx.play === "function") Sfx.play("good"); }
+    try { if (typeof Sfx !== "undefined" && Sfx && typeof Sfx.play === "function") Sfx.play("chime"); }
     catch (e) { /* audio is optional */ }
   }
   /** Start (or resume) the current mode. @returns {void} */
@@ -18437,6 +22586,692 @@ const LABS_META = {
       resize: resize,
       start: start,
       stop: stop
+    };
+  } catch (e) { /* read-only window */ }
+})();
+
+/* @@SKILL_GRAPH_START@@ */
+/* ============================================================
+   MODULE 91 · SkillGraph — connected-node edges for the skill tree
+   ------------------------------------------------------------
+   Draws hairline prerequisite edges behind the real .skill-card nodes,
+   using the existing PREREQS edge map exposed by MODULE 51
+   (window.PlatformSkillTree). This module is a pure DOM/SVG pass:
+   createElementNS only — no HTML-string writes, no network calls, no
+   stored data. Geometry is recomputed from live layout (offsetLeft /
+   offsetTop relative to the tree) whenever the tree changes, the view
+   switches, fonts settle or the window resizes. When the tree is
+   hidden or has fewer than two nodes the SVG stays empty, so the
+   static section works identically with or without this module.
+   ============================================================ */
+(function initSkillGraph() {
+  "use strict";
+
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var tree = document.getElementById("skillsTree");
+  if (!tree) return;
+
+  var svg = null;
+  var timer = 0;
+  var edgesDrawn = 0;
+
+  function buildSvg() {
+    if (svg && svg.parentNode === tree) return svg;
+    svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("class", "skill-graph");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+    svg.setAttribute("preserveAspectRatio", "none");
+    if (tree.firstChild) tree.insertBefore(svg, tree.firstChild);
+    else tree.appendChild(svg);
+    return svg;
+  }
+
+  function clearSvg() {
+    if (!svg) return;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+  }
+
+  function cardsById() {
+    var out = {};
+    var nodes = tree.querySelectorAll(".skill-card[data-skill-id]");
+    for (var i = 0; i < nodes.length; i += 1) {
+      out[nodes[i].getAttribute("data-skill-id")] = nodes[i];
+    }
+    return out;
+  }
+
+  function prereqMap() {
+    var api = window.PlatformSkillTree;
+    var raw = (api && api.PREREQS) || {};
+    return raw && typeof raw === "object" ? raw : {};
+  }
+
+  /* Anchor point on the card's border toward a target point, pushed a
+     few px outward so the dot stays visible in the grid gutter. */
+  function anchorPoint(card, tx, ty) {
+    var cx = card.offsetLeft + card.offsetWidth / 2;
+    var cy = card.offsetTop + card.offsetHeight / 2;
+    var dx = tx - cx;
+    var dy = ty - cy;
+    if (!dx && !dy) return { x: cx, y: cy };
+    var hw = card.offsetWidth / 2 + 4;
+    var hh = card.offsetHeight / 2 + 4;
+    var sx = dx ? hw / Math.abs(dx) : Infinity;
+    var sy = dy ? hh / Math.abs(dy) : Infinity;
+    var s = Math.min(sx, sy, 1);
+    return { x: cx + dx * s, y: cy + dy * s };
+  }
+
+  function curve(a, b, bend) {
+    var mx = (a.x + b.x) / 2;
+    var my = (a.y + b.y) / 2;
+    var dx = b.x - a.x;
+    var dy = b.y - a.y;
+    var len = Math.sqrt(dx * dx + dy * dy) || 1;
+    var nx = -dy / len;
+    var ny = dx / len;
+    var qx = mx + nx * bend;
+    var qy = my + ny * bend;
+    return "M" + a.x.toFixed(1) + " " + a.y.toFixed(1) +
+      " Q" + qx.toFixed(1) + " " + qy.toFixed(1) +
+      " " + b.x.toFixed(1) + " " + b.y.toFixed(1);
+  }
+
+  function addDot(x, y) {
+    var dot = document.createElementNS(SVG_NS, "circle");
+    dot.setAttribute("cx", x.toFixed(1));
+    dot.setAttribute("cy", y.toFixed(1));
+    dot.setAttribute("r", "2.6");
+    svg.appendChild(dot);
+  }
+
+  function addEdge(d, bend) {
+    var path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", d);
+    path.setAttribute("stroke-linecap", "round");
+    svg.appendChild(path);
+  }
+
+  function draw() {
+    edgesDrawn = 0;
+    buildSvg();
+    clearSvg();
+    if (!svg) return 0;
+
+    /* Nothing to wire while the view is hidden or unlaid-out. */
+    if (!tree.offsetParent || tree.clientWidth < 40) return 0;
+
+    var map = cardsById();
+    var ids = Object.keys(map);
+    if (ids.length < 2) return 0;
+
+    var w = tree.clientWidth;
+    var h = tree.scrollHeight || tree.offsetHeight;
+    if (w < 40 || h < 40) return 0;
+
+    svg.setAttribute("width", String(w));
+    svg.setAttribute("height", String(h));
+    svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+
+    var pres = prereqMap();
+    var index = 0;
+    var MAX_EDGES = 40;
+
+    ids.forEach(function (id) {
+      var card = map[id];
+      var list = pres[id];
+      if (!list || !list.length) return;
+      list.forEach(function (pid) {
+        if (index >= MAX_EDGES) return;
+        var pre = map[pid];
+        if (!pre || pre === card) return;
+        var ca = {
+          x: card.offsetLeft + card.offsetWidth / 2,
+          y: card.offsetTop + card.offsetHeight / 2
+        };
+        var pb = {
+          x: pre.offsetLeft + pre.offsetWidth / 2,
+          y: pre.offsetTop + pre.offsetHeight / 2
+        };
+        var a = anchorPoint(pre, ca.x, ca.y);
+        var b = anchorPoint(card, pb.x, pb.y);
+        var bend = Math.min(26, 8 + index * 3) * (index % 2 ? 1 : -1);
+        addEdge(curve(a, b, bend), bend);
+        addDot(a.x, a.y);
+        addDot(b.x, b.y);
+        edgesDrawn += 1;
+        index += 1;
+      });
+    });
+
+    return edgesDrawn;
+  }
+
+  /* Environment-safe wiring: the test VM stubs a minimal window that may
+     lack timers. These helpers degrade to no-ops instead of throwing. */
+  function timerSet(fn, ms) {
+    try {
+      if (typeof window.setTimeout === "function") return window.setTimeout(fn, ms);
+      if (typeof setTimeout === "function") return setTimeout(fn, ms);
+    } catch (e) { /* ignore */ }
+    return 0;
+  }
+  function timerClear(id) {
+    try {
+      if (typeof window.clearTimeout === "function") window.clearTimeout(id);
+      else if (typeof clearTimeout === "function") clearTimeout(id);
+    } catch (e) { /* ignore */ }
+  }
+  function on(target, type, fn) {
+    if (target && typeof target.addEventListener === "function") target.addEventListener(type, fn);
+  }
+
+  function schedule(delay) {
+    if (timer) timerClear(timer);
+    var id = timerSet(function () {
+      timer = 0;
+      try { draw(); } catch (e) { /* layout races are non-fatal */ }
+    }, delay);
+    if (!id) { try { draw(); } catch (e) { /* non-fatal */ } return; }
+    timer = id;
+  }
+
+  on(window, "resize", function () { schedule(160); });
+
+  on(document, "nova:view-changed", function (ev) {
+    if (ev && ev.detail && ev.detail.viewId !== "skills") return;
+    schedule(80);
+    schedule(450);
+  });
+  on(document, "nova:progress-changed", function () { schedule(120); });
+
+  var mo = null;
+  if (typeof MutationObserver === "function") {
+    mo = new MutationObserver(function () { schedule(120); });
+    mo.observe(tree, { childList: true });
+  }
+
+  try {
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === "function") {
+      document.fonts.ready.then(function () { schedule(200); });
+    }
+  } catch (e) { /* optional */ }
+
+  on(window, "load", function () { schedule(200); });
+
+  try {
+    window.PlatformSkillGraph = {
+      draw: draw,
+      count: function () { return edgesDrawn; },
+      destroy: function () {
+        if (mo) { mo.disconnect(); mo = null; }
+        if (timer) { timerClear(timer); timer = 0; }
+        if (svg && svg.parentNode) svg.parentNode.removeChild(svg);
+        svg = null;
+      }
+    };
+  } catch (e) { /* read-only window */ }
+
+  schedule(0);
+})();
+/* @@SKILL_GRAPH_END@@ */
+
+
+/* ============================================================
+   MODULE 92 · PlatformCommandDeck — تشغيل منصة القيادة (الصفحة الرئيسية v3.0.0)
+   ------------------------------------------------------------
+   The hero's cyber "Command Deck" engine. Three jobs, all local:
+     1. Radar tab   — paints this semester's weekly schedule from
+        window.PLATFORM_CURRENT_SEMESTER (pure DOM text, no network)
+        and flags today's / the next class via window.PlatformHeroNow.
+     2. Terminal tab — a tiny in-browser shell (help / scan / caesar /
+        clear). Deterministic canned scan output — no sockets, no
+        network access of any kind.
+     3. Console tab — radial HUD gauges that MIRROR the existing mounts
+        (#heroDashLevel #heroDashXp #heroDashXpBar #heroDashDailyBar
+        #heroDashBar #heroDashPct) by reading DOM values only, so
+        MODULE 50/47 keep single ownership of the real data.
+   Also renders the bento semester list, the 12-tool arsenal chips
+   (labels read from .tool-title) and forwards the search trigger to
+   the MODULE 48 palette button. Stub-safe: every mount is optional
+   and every DOM API is guarded.
+   ============================================================ */
+(function initCommandDeck() {
+  "use strict";
+
+  var doc = document;
+
+  /* ---------- guarded DOM helpers (stub-boot safe) ---------- */
+  function get(id) {
+    try { return (doc && typeof doc.getElementById === "function") ? doc.getElementById(id) : null; }
+    catch (e) { return null; }
+  }
+  function mk(tag) {
+    try { return (doc && typeof doc.createElement === "function") ? doc.createElement(tag) : null; }
+    catch (e) { return null; }
+  }
+  function clear(el) {
+    if (!el) return;
+    try { while (el.firstChild) el.removeChild(el.firstChild); } catch (e) { /* stop early */ }
+  }
+  function attach(parent, child) {
+    if (!parent || !child) return;
+    try { if (typeof parent.appendChild === "function") parent.appendChild(child); } catch (e) { /* non-fatal */ }
+  }
+  function txt(el, s) {
+    if (!el) return;
+    try { el.textContent = String(s == null ? "" : s); } catch (e) { /* non-fatal */ }
+  }
+  function cls(el, name) {
+    if (!el) return;
+    try { el.className = name; } catch (e) { /* non-fatal */ }
+  }
+  function addCls(el, name) {
+    if (!el) return;
+    try { if (el.classList && typeof el.classList.add === "function") el.classList.add(name); } catch (e) { /* non-fatal */ }
+  }
+  function listen(el, ev, fn) {
+    if (!el || typeof fn !== "function") return;
+    try { if (typeof el.addEventListener === "function") el.addEventListener(ev, fn); } catch (e) { /* non-fatal */ }
+  }
+
+  /* ---------- i18n resolution (same pattern as MODULE 43/57) ---------- */
+  function resolveLang() {
+    try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) { /* TDZ */ }
+    try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) { /* unreachable */ }
+    return null;
+  }
+  var L10N = resolveLang();
+  function L() { try { return (L10N && L10N.current) || "ar"; } catch (e) { return "ar"; } }
+  function T(key, params) {
+    var s = "";
+    try { s = (L10N && typeof L10N.t === "function") ? L10N.t(key, params) : ""; } catch (e) { s = ""; }
+    if (typeof s !== "string" || !s || s === key) return "";
+    return s;
+  }
+
+  /* ---------- semester data ---------- */
+  function semesterData() {
+    try {
+      var d = window.PLATFORM_CURRENT_SEMESTER;
+      if (d && d.subjects && d.subjects.length) return d;
+    } catch (e) { /* registry optional */ }
+    return null;
+  }
+  function subjectName(s) {
+    if (!s) return "";
+    var n = s.name || null;
+    if (n) return n[L()] || n.ar || n.en || s.code || "";
+    return s.code || "";
+  }
+  function schDay(sch) {
+    if (!sch || !sch.day) return "";
+    return sch.day[L()] || sch.day.ar || sch.day.en || "";
+  }
+  function timeMinutes(v) {
+    try {
+      if (window.PlatformHeroNow && typeof window.PlatformHeroNow.parseTimeMinutes === "function") {
+        return window.PlatformHeroNow.parseTimeMinutes(v);
+      }
+    } catch (e) { /* fall through to the local parser */ }
+    var m = String(v || "").match(/^(\d{1,2}):(\d{2})/);
+    if (!m) return null;
+    var h = parseInt(m[1], 10);
+    var mi = parseInt(m[2], 10);
+    if (isNaN(h) || isNaN(mi)) return null;
+    return h * 60 + mi;
+  }
+  var DAY_IDX = {
+    "الأحد": 0, "Sunday": 0,
+    "الاثنين": 1, "الإثنين": 1, "Monday": 1,
+    "الثلاثاء": 2, "Tuesday": 2,
+    "الأربعاء": 3, "الاربعاء": 3, "Wednesday": 3,
+    "الخميس": 4, "Thursday": 4,
+    "الجمعة": 5, "Friday": 5,
+    "السبت": 6, "Saturday": 6
+  };
+
+  /* ---------- mounts ---------- */
+  var deck = get("heroDash");
+  var radarList = get("heroRadarList");
+  var radarNext = get("heroRadarNext");
+  var radarEmpty = get("heroRadarEmpty");
+  var termLog = get("heroTermLog");
+  var termForm = get("heroTermForm");
+  var termInput = get("heroTermInput");
+  var semList = get("bentoSemList");
+  var arsenalStrip = get("arsenalStrip");
+  var gaugeLevelArc = get("heroGaugeLevelArc");
+  var gaugeLevelValue = get("heroGaugeLevelValue");
+  var gaugeXpArc = get("heroGaugeXpArc");
+  var gaugeXpValue = get("heroGaugeXpValue");
+  var gaugeDoneArc = get("heroGaugeDoneArc");
+  var searchTrigger = get("heroSearchTrigger");
+  var searchOpenBtn = get("searchOpenBtn");
+  var dashLevel = get("heroDashLevel");
+  var dashXp = get("heroDashXp");
+  var dashXpBar = get("heroDashXpBar");
+  var dashDailyBar = get("heroDashDailyBar");
+  var dashBar = get("heroDashBar");
+  var dashPct = get("heroDashPct");
+
+  /* ---------- 1) Semester radar (deck tab 1) ---------- */
+  function renderRadar() {
+    if (!radarList) return;
+    var data = semesterData();
+    var subjects = data ? data.subjects : [];
+    clear(radarList);
+    if (!subjects.length) {
+      if (radarEmpty) { try { radarEmpty.hidden = false; } catch (e) { /* non-fatal */ } }
+      txt(radarNext, "");
+      return;
+    }
+    if (radarEmpty) { try { radarEmpty.hidden = true; } catch (e) { /* non-fatal */ } }
+
+    var now = new Date();
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    var dayNow = now.getDay();
+    var next = null;
+    try {
+      if (window.PlatformHeroNow && typeof window.PlatformHeroNow.findNextClass === "function") {
+        next = window.PlatformHeroNow.findNextClass(now);
+      }
+    } catch (e) { next = null; }
+    var nextSubject = (next && next.item && next.item.subject) || null;
+    var nextId = (nextSubject && nextSubject.id) || "";
+
+    subjects.forEach(function (s) {
+      if (!s) return;
+      var sch = (s.meta && s.meta.schedule) || s.schedule || null;
+      var isToday = false;
+      var isLive = false;
+      if (sch) {
+        var rawDay = (sch.day && (sch.day.ar || sch.day.en)) || sch.day || "";
+        isToday = DAY_IDX[rawDay] === dayNow;
+        if (isToday) {
+          var start = timeMinutes(sch.startTime);
+          var end = timeMinutes(sch.endTime);
+          isLive = start !== null && end !== null && nowMin >= start && nowMin < end;
+        }
+      }
+
+      var li = mk("li");
+      var a = mk("a");
+      if (!li || !a) return;
+      cls(a, "radar-item");
+      try { a.setAttribute("href", "#semester"); } catch (e) { /* non-fatal */ }
+      if (isLive) addCls(a, "is-live");
+      if (isToday) addCls(a, "is-today");
+      if (s.id && s.id === nextId) addCls(a, "is-next");
+
+      var day = mk("span");
+      cls(day, "radar-item-day");
+      if (sch) {
+        var label = schDay(sch);
+        var time = sch.startTime ? String(sch.startTime) : "";
+        txt(day, time ? label + " · " + time : label);
+      }
+
+      var nameEl = mk("span");
+      cls(nameEl, "radar-item-name");
+      txt(nameEl, subjectName(s));
+
+      var codeEl = mk("span");
+      cls(codeEl, "radar-item-code");
+      txt(codeEl, s.code || "");
+
+      var flag = mk("span");
+      cls(flag, "radar-item-flag");
+      txt(flag, isLive ? (T("deck.live") || "مباشر") : (isToday ? (T("deck.today") || "اليوم") : ""));
+
+      attach(a, day); attach(a, nameEl); attach(a, codeEl); attach(a, flag);
+      attach(li, a);
+      attach(radarList, li);
+    });
+
+    if (radarNext) {
+      if (nextSubject) {
+        txt(radarNext, T("deck.radarNext", { name: subjectName(nextSubject) }) || subjectName(nextSubject));
+      } else {
+        txt(radarNext, "");
+      }
+    }
+  }
+
+  /* ---------- 2) Bento semester list ---------- */
+  function renderBento() {
+    if (!semList) return;
+    clear(semList);
+    var data = semesterData();
+    var subjects = data ? data.subjects : [];
+    subjects.forEach(function (s) {
+      if (!s) return;
+      var li = mk("li");
+      var strong = mk("strong");
+      var span = mk("span");
+      if (!li || !strong || !span) return;
+      cls(li, "bento-sched-item");
+      txt(strong, subjectName(s));
+      cls(span, "bento-sched-day");
+      var sch = (s.meta && s.meta.schedule) || s.schedule || null;
+      txt(span, sch ? (schDay(sch) + (sch.startTime ? " · " + sch.startTime : "")) : "");
+      attach(li, strong); attach(li, span);
+      attach(semList, li);
+    });
+  }
+
+  /* ---------- 3) Arsenal chips (read-only from the tools grid) ---------- */
+  function renderArsenal() {
+    if (!arsenalStrip) return;
+    clear(arsenalStrip);
+    var cards = [];
+    try { if (doc && typeof doc.querySelectorAll === "function") cards = doc.querySelectorAll("[id^='tool-']"); }
+    catch (e) { cards = []; }
+    var made = 0;
+    for (var i = 0; i < cards.length && made < 12; i++) {
+      var card = cards[i];
+      var cCls = "";
+      try { cCls = String((card && card.className) || ""); } catch (e) { cCls = ""; }
+      if (cCls.indexOf("tool-card") === -1) continue;
+
+      var label = "";
+      try {
+        var titleEl = (card && typeof card.querySelector === "function") ? card.querySelector(".tool-title") : null;
+        label = (titleEl && titleEl.textContent) ? String(titleEl.textContent).trim() : "";
+      } catch (e) { label = ""; }
+      if (!label) {
+        var idAttr = "";
+        try { idAttr = (card && typeof card.getAttribute === "function") ? String(card.getAttribute("id") || "") : ""; } catch (e) { idAttr = ""; }
+        label = idAttr.replace(/^tool-/, "");
+      }
+
+      var chip = mk("a");
+      if (!chip) return;
+      cls(chip, "arsenal-chip");
+      try { chip.setAttribute("href", "#tools"); } catch (e) { /* non-fatal */ }
+      var tick = mk("span");
+      cls(tick, "arsenal-chip-ico");
+      txt(tick, ">");
+      var nameEl = mk("span");
+      txt(nameEl, label);
+      attach(chip, tick); attach(chip, nameEl);
+      attach(arsenalStrip, chip);
+      made++;
+    }
+  }
+
+  /* ---------- 4) Cyber terminal (deck tab 2) ---------- */
+  var TERM_MAX_LINES = 60;
+  function termPush(kind, text) {
+    if (!termLog) return;
+    var line = mk("div");
+    if (!line) return;
+    cls(line, "term-line" + (kind ? " term-" + kind : ""));
+    txt(line, text);
+    attach(termLog, line);
+    try {
+      while (termLog.childNodes && termLog.childNodes.length > TERM_MAX_LINES && termLog.firstChild) {
+        termLog.removeChild(termLog.firstChild);
+      }
+    } catch (e) { /* non-fatal */ }
+    try { termLog.scrollTop = termLog.scrollHeight; } catch (e) { /* non-fatal */ }
+  }
+  function caesarShift(text, shift) {
+    return String(text).replace(/[a-zA-Z]/g, function (ch) {
+      var base = ch <= "Z" ? 65 : 97;
+      return String.fromCharCode(((ch.charCodeAt(0) - base + shift) % 26 + 26) % 26 + base);
+    });
+  }
+  var SCAN_PORTS = [
+    ["22", "ssh", "open"],
+    ["80", "http", "open"],
+    ["443", "https", "open"],
+    ["3306", "mysql", "filtered"],
+    ["8080", "http-alt", "closed"]
+  ];
+  function runCommand(raw) {
+    var line = String(raw == null ? "" : raw).trim();
+    if (!line) return;
+    termPush("cmd", "guest@nova:~$ " + line);
+    var parts = line.split(/\s+/);
+    var cmd = parts[0].toLowerCase();
+    var rest = parts.slice(1);
+
+    if (cmd === "help") {
+      termPush("dim", T("deck.termHelp") || "help · scan [host] · caesar <text> [shift] · clear");
+      return;
+    }
+    if (cmd === "clear") {
+      clear(termLog);
+      return;
+    }
+    if (cmd === "scan") {
+      var host = rest[0] || "localhost";
+      termPush("dim", T("deck.termScanTitle", { host: host }) || "scan " + host);
+      SCAN_PORTS.forEach(function (p) {
+        termPush(p[2] === "open" ? "ok" : "dim", "PORT " + p[0] + "/tcp  " + p[2] + "  (" + p[1] + ")");
+      });
+      termPush("ok", T("deck.termScanDone", { n: SCAN_PORTS.length }) || "scan done");
+      return;
+    }
+    if (cmd === "caesar") {
+      if (!rest.length) {
+        termPush("dim", T("deck.termUsage", { usage: "caesar <text> [shift]" }) || "caesar <text> [shift]");
+        return;
+      }
+      var shift = 3;
+      var words = rest;
+      if (rest.length > 1 && /^-?\d+$/.test(rest[rest.length - 1])) {
+        var n = parseInt(rest[rest.length - 1], 10);
+        shift = ((n % 26) + 26) % 26;
+        words = rest.slice(0, -1);
+      }
+      var phrase = words.join(" ");
+      termPush("ok", phrase + "  ->  " + caesarShift(phrase, shift) + "  (shift " + shift + ")");
+      return;
+    }
+    termPush("err", T("deck.termUnknown", { cmd: cmd }) || "unknown: " + cmd);
+  }
+
+  if (termLog) {
+    termPush("dim", T("deck.termWelcome") || "nova-shell v3.0.0 — type help");
+    listen(termLog, "click", function () {
+      try { if (termInput && typeof termInput.focus === "function") termInput.focus(); } catch (e) { /* non-fatal */ }
+    });
+  }
+  if (termForm) {
+    listen(termForm, "submit", function (ev) {
+      try { if (ev && typeof ev.preventDefault === "function") ev.preventDefault(); } catch (e) { /* non-fatal */ }
+      runCommand(termInput ? termInput.value : "");
+      if (termInput) { try { termInput.value = ""; } catch (e) { /* non-fatal */ } }
+    });
+  }
+
+  /* ---------- 5) HUD gauges (reverse mirror of MODULE 50/47 DOM) ---------- */
+  function pctFromBar(bar) {
+    try {
+      if (bar && bar.style && bar.style.width) {
+        var v = parseFloat(bar.style.width);
+        if (!isNaN(v)) return Math.max(0, Math.min(100, v));
+      }
+    } catch (e) { /* fall through */ }
+    return 0;
+  }
+  function setArc(arc, pct) {
+    if (!arc || !arc.style) return;
+    try { arc.style.strokeDashoffset = String(100 - Math.max(0, Math.min(100, pct))); } catch (e) { /* non-fatal */ }
+  }
+  function syncGauges() {
+    var levelTxt = "";
+    var xpTxt = "";
+    try { levelTxt = (dashLevel && dashLevel.textContent) ? String(dashLevel.textContent).trim() : ""; } catch (e) { levelTxt = ""; }
+    try { xpTxt = (dashXp && dashXp.textContent) ? String(dashXp.textContent).trim() : ""; } catch (e) { xpTxt = ""; }
+    var levelPct = pctFromBar(dashXpBar);
+    var dailyPct = pctFromBar(dashDailyBar);
+    var donePct = pctFromBar(dashBar);
+    if (donePct === 0 && dashPct) {
+      try {
+        var p = parseFloat(String(dashPct.textContent));
+        if (!isNaN(p)) donePct = Math.max(0, Math.min(100, p));
+      } catch (e) { /* non-fatal */ }
+    }
+    if (levelTxt) txt(gaugeLevelValue, levelTxt);
+    if (xpTxt) txt(gaugeXpValue, xpTxt);
+    setArc(gaugeLevelArc, levelPct);
+    setArc(gaugeXpArc, dailyPct);
+    setArc(gaugeDoneArc, donePct);
+  }
+
+  /* ---------- 6) Search trigger → MODULE 48 palette ---------- */
+  if (searchTrigger && searchOpenBtn) {
+    listen(searchTrigger, "click", function () {
+      try { searchOpenBtn.click(); } catch (e) { /* palette manages its own state */ }
+    });
+  }
+
+  /* ---------- wiring & boot ---------- */
+  function refresh() {
+    renderRadar();
+    renderBento();
+  }
+  function refreshAll() {
+    refresh();
+    renderArsenal();
+    syncGauges();
+  }
+
+  /* Only hook events when the v3 deck actually exists on this page, so
+     stub boots and older fixtures stay untouched. */
+  var hasAnyMount = Boolean(
+    deck || radarList || termLog || semList || arsenalStrip ||
+    gaugeLevelArc || searchTrigger
+  );
+  if (hasAnyMount) {
+    listen(document, "nova:progress-changed", syncGauges);
+    listen(document, "nova:view-changed", function (ev) {
+      var id = (ev && ev.detail) ? ev.detail.viewId : "";
+      if (id === "home" || !id) refresh();
+    });
+    try { if (L10N && typeof L10N.onSwitch === "function") L10N.onSwitch(refreshAll); } catch (e) { /* optional */ }
+
+    refreshAll();
+    /* Cold boot: MODULE 50/47 may still be painting — re-sync a few times. */
+    [0, 400, 1200, 2500].forEach(function (ms) {
+      try { setTimeout(syncGauges, ms); } catch (e) { /* timers optional */ }
+    });
+    /* Keep the "live now" flags honest without user interaction. */
+    try { setInterval(renderRadar, 60000); } catch (e) { /* optional */ }
+    if (deck) addCls(deck, "is-ready");
+  }
+
+  try {
+    window.PlatformCommandDeck = {
+      renderRadar: renderRadar,
+      renderBento: renderBento,
+      renderArsenal: renderArsenal,
+      syncGauges: syncGauges,
+      run: runCommand
     };
   } catch (e) { /* read-only window */ }
 })();

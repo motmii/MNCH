@@ -129,10 +129,8 @@ check("section labelled by its heading (aria-labelledby ↔ title id)",
 check("mount + empty-state nodes present",
   html.includes('id="flashcards-timed-mount"') &&
   html.includes('id="flashcards-timed-empty"'));
-check("route linked from >= 3 surfaces (desktop nav, mobile menu, footer, flash band)",
-  (html.match(/href="#flashcards\/timed"/g) || []).length >= 3);
-check("desktop nav entry sits before the «المزيد» menu",
-  html.indexOf('href="#flashcards/timed"') < html.indexOf("nav-more-details"));
+check("route linked from >= 2 surfaces (flash band CTA + footer sitemap)",
+  (html.match(/href="#flashcards\/timed"/g) || []).length >= 2);
 check("every link carries the bilingual i18n key",
   (html.match(/data-i18n="nav\.flashcardsTimed"/g) || []).length ===
   (html.match(/href="#flashcards\/timed"/g) || []).length);
@@ -583,7 +581,12 @@ check("precache covers the whole offline shell (html/css/js + bank)",
     .every((a) => sw.includes('"' + a + '"')));
 check("offline navigation falls back to the cached app shell",
   sw.includes('return (await cache.match("./index.html")) || Response.error();'));
-check("service worker registered by the page", html.includes("serviceWorker.register"));
+check("online-only: the page no longer registers a service worker",
+  !html.includes("serviceWorker.register"));
+check("online-only: old registrations are unregistered on load",
+  html.includes("getRegistrations") && html.includes(".unregister()"));
+check("online-only: Cache Storage is wiped automatically",
+  html.includes("caches.keys") && html.includes("caches.delete"));
 
 /* ---- CSS layer integrity: the MODULE 34 block must be TOP-LEVEL.
    Regression: it was once spliced INSIDE the .timer-clock rule,
