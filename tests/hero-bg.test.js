@@ -260,7 +260,7 @@ function boot(opts) {
   [
     "heroDash", "heroRadarList", "heroRadarNext", "heroRadarEmpty",
     "heroTermLog", "heroTermForm", "heroTermInput",
-    "bentoSemList", "arsenalStrip",
+    "bentoSemList", "bentoSemSummary", "arsenalStrip",
     "heroGaugeLevelArc", "heroGaugeLevelValue", "heroGaugeXpArc", "heroGaugeXpValue", "heroGaugeDoneArc",
     "heroSearchTrigger", "searchOpenBtn",
     "heroDashLevel", "heroDashXp", "heroDashXpBar", "heroDashDailyBar", "heroDashBar", "heroDashPct",
@@ -358,6 +358,8 @@ console.log("\n— MODULE 92: radar —");
   const empty = boot({ semester: { subjects: [] } });
   check("no subjects → honest empty state shown",
     empty.byId.heroRadarList.children.length === 0 && empty.byId.heroRadarEmpty.hidden === false);
+  check("empty semester → bento summary is honest",
+    empty.byId.bentoSemSummary.textContent.includes("deck.radarEmpty"));
 }
 
 console.log("\n— MODULE 92: terminal —");
@@ -426,6 +428,13 @@ console.log("\n— MODULE 92: bento, arsenal & wiring —");
   check("bento schedule lists every subject",
     app.byId.bentoSemList.children.length === cs.subjects.length &&
     walkText(app.byId.bentoSemList.children[0]).includes(cs.subjects[0].meta.schedule.startTime));
+  const bentoNote = walkText(app.byId.bentoSemSummary);
+  const firstSch = cs.subjects[0].meta.schedule;
+  check("bento summary points at the week's opening lecture, not the counts",
+    bentoNote.includes("محاضراتك تبدأ") &&
+    bentoNote.includes(firstSch.day.ar) &&
+    bentoNote.includes(firstSch.startTime) &&
+    !bentoNote.includes("أسبوعيًا"));
   check("arsenal strip only takes real tool cards",
     app.byId.arsenalStrip.children.length === 3 &&
     walkText(app.byId.arsenalStrip.children[0]).includes("Hash Toolkit") &&

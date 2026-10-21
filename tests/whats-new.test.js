@@ -1,6 +1,6 @@
 "use strict";
 /**
- * WhatsNew (MODULE 58) smoke test - navbar thumbs-up button and its
+ * WhatsNew (MODULE 58) smoke test - navbar bell button and its
  * "latest updates" popover: markup placement, i18n (ar + en), styles,
  * module wiring, honest dated changelog sorted newest-first, and the
  * service-worker cache bump.
@@ -34,7 +34,7 @@ check("panel is a labelled dialog, hidden by default",
   /id="updatesPanel"[^>]*hidden/.test(html));
 check("trigger sits in the red-box slot (inside .nav-main, before .nav-actions)",
   html.indexOf("navUpdates") > -1 && html.indexOf("navUpdates") < html.indexOf("class=\"nav-actions\""));
-check("thumbs-up icon rendered", /class="updates-ico"[\s\S]{0,500}M7 10v11/.test(html));
+check("bell icon rendered", /class="updates-ico"[\s\S]{0,500}M18 8a6 6 0 0 0-12 0/.test(html));
 check("close button labelled bilingually", /id="updatesClose"[^>]*aria-label="إغلاق \/ Close"/.test(html));
 
 console.log("- i18n: ar + en dictionaries -");

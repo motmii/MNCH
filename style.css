@@ -423,9 +423,9 @@ button { font-family: inherit; cursor: pointer; color: inherit; background: none
 /* ---------- Reveal animation ---------- */
 .reveal {
   opacity: 0;
-  transform: translateY(34px);
-  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(18px);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 .reveal.is-visible { opacity: 1; transform: none; }
@@ -471,12 +471,12 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
   display: grid;
   place-items: center;
   z-index: 10000;
-  transition: opacity 0.7s ease, visibility 0.7s ease;
-  /* Safety net: force-hide after 5s even if the JS .is-done toggle never fires */
-  animation: preloaderFallback 5s ease forwards;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+  /* Safety net: force-hide quickly even if the JS .is-done toggle never fires */
+  animation: preloaderFallback 0.9s ease forwards;
 }
 @keyframes preloaderFallback {
-  0%, 92% { opacity: 1; visibility: visible; pointer-events: auto; }
+  0%, 40% { opacity: 1; visibility: visible; pointer-events: auto; }
   100% { opacity: 0; visibility: hidden; pointer-events: none; }
 }
 .preloader.is-done { opacity: 0; visibility: hidden; }
@@ -1195,8 +1195,8 @@ html[data-cursor-active="true"] .t-dot { cursor: none; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
-  /* Keep the preloader's 5s safety net alive even with animations disabled */
-  .preloader { animation: preloaderFallback 5s ease forwards !important; }
+  /* Keep the preloader's safety net alive even with animations disabled */
+  .preloader { animation: preloaderFallback 0.9s ease forwards !important; }
   html { scroll-behavior: auto; }
   .cursor-dot, .cursor-ring { display: none; }
 }
@@ -12253,3 +12253,583 @@ html.motion-on .bento-card { will-change: transform; }
 @media (prefers-reduced-motion: reduce) {
   .bank-hub-list .q-subject-card { transition: none; }
 }
+
+/* ============================================================
+   MODULE 100 · Homepage editorial polish (additive)
+   The homepage reads as one page, not a stack of glass cards:
+   1) the hero sits on the page surface (no panel-in-a-panel),
+   2) the headline is one flat brand accent, no glow or italics,
+   3) one supporting sentence, one primary action, quiet links,
+   4) a quiet brand signature closes the copy block,
+   5) the bento becomes flat editorial panels with scannable rows,
+   6) supporting type never drops below ~13px on this screen.
+   Identity tokens, markup hooks and script-wired classes untouched.
+   ============================================================ */
+
+/* ---------- 1 · Hero surface ---------- */
+.hero-content {
+  max-width: 1360px;
+  padding: 0 clamp(1.1rem, 3.2vw, 2rem);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.hero-split {
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  gap: clamp(1.4rem, 3vw, 2.6rem);
+}
+.hero-main { row-gap: 0.95rem; }
+.hero-main .hero-title { margin-block: 0.2rem 0.1rem; }
+.hero-main .hero-tagline { margin: 0; }
+.cmd-deck {
+  border-color: rgb(var(--wash-hi-rgb) / 0.08);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px -48px rgb(var(--shadow-rgb) / 0.85);
+}
+
+/* ---------- 2 · Headline ---------- */
+.hero-title {
+  display: block;
+  font-size: clamp(2.05rem, 4.4vw, 3.3rem);
+  line-height: 1.12;
+  gap: 0.18rem;
+  text-wrap: balance;
+}
+.hero-title .line { display: inline; }
+.hero-title em { font-style: normal; }
+html[lang="en"] .hero-title { letter-spacing: -0.012em; }
+.grad,
+.hero .grad {
+  background: none;
+  background-image: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--accent-2);
+  filter: none;
+  text-shadow: none;
+}
+.hero-title .grad { color: var(--deck-green); }
+.hero-title,
+.hero-title *,
+.hero-tagline,
+.hero-brand,
+.hero-brand *,
+.hero-stat,
+.hero-stat *,
+.hero-now,
+.hero-now *,
+.hero-search,
+.hero-search *,
+.hero-start,
+.hero-start *,
+.hero-dash,
+.hero-dash *,
+.bento-card,
+.bento-card *,
+.nav,
+.nav * { text-shadow: none; }
+
+/* ---------- 3 · Copy + action hierarchy ---------- */
+.hero-tagline {
+  max-width: 52ch;
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
+  line-height: 1.72;
+  color: var(--on-media-2);
+}
+.hero-actions { gap: 0.55rem; margin-top: 0.4rem; }
+.hero-actions .btn { border-radius: 11px; }
+.hero-actions .btn-lg { min-inline-size: 0; padding-inline: 1.35rem; }
+.hero .btn { box-shadow: none; }
+.hero .btn-primary {
+  background: var(--deck-green);
+  background-image: none;
+  color: #07120D;
+  border-color: transparent;
+  box-shadow: none;
+}
+.hero .btn-primary:hover {
+  background: #63F7B8;
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+.hero-actions .btn-ghost {
+  min-inline-size: 0;
+  padding-inline: 0.8rem;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--muted);
+  font-weight: 600;
+}
+.hero-actions .btn-ghost:hover {
+  color: var(--text);
+  background: rgb(var(--wash-hi-rgb) / 0.05);
+  border-color: transparent;
+  transform: none;
+}
+
+/* Start-here / next-step strip: a quiet note, not a dashed alert box */
+.hero-start {
+  width: 100%;
+  margin-block-start: 0.3rem;
+  padding: 0.85rem 0.95rem;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 0;
+  border-radius: 14px;
+  background: rgb(var(--wash-hi-rgb) / 0.035);
+  box-shadow: none;
+}
+.hero-start-ico {
+  inline-size: 34px;
+  block-size: 34px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 1.15rem;
+  background: rgb(var(--accent-2-rgb) / 0.1);
+}
+.hero-start-text strong { font-size: 0.95rem; line-height: 1.4; }
+.hero-start-text span { font-size: 0.87rem; line-height: 1.6; }
+.hero-start-actions { gap: 0.35rem; align-items: center; }
+.hero-start-actions .btn { border-radius: 9px; }
+.hero-start-actions .btn-ghost {
+  padding-inline: 0.55rem;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+/* ---------- 4 · Numbers + brand signature ---------- */
+.hero-meta--compact {
+  gap: 0.35rem 1.6rem;
+  margin-top: 0.7rem;
+  opacity: 1;
+  align-items: baseline;
+}
+.hero-stat {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+.hero-stat + .hero-stat { padding-inline-start: 0; border-inline-start: 0; }
+.hero-meta--compact .hero-stat strong {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 750;
+  color: var(--text);
+}
+.hero-meta--compact .hero-stat span { font-size: 0.85rem; color: var(--muted); }
+.hero-main .hero-brand {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-block-start: 0.35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.hero-brand-ar { font-size: 0.9rem; font-weight: 700; color: var(--muted); }
+.hero-brand-sep { color: var(--dim); }
+.hero-brand-en {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--dim);
+}
+
+/* ---------- 5 · Now strip + command deck type ---------- */
+.hero-search { box-shadow: none; }
+.hero-search:hover { box-shadow: none; }
+.nav { border-bottom: 0; }
+.footer { border-top: 0; }
+.cmd-deck { box-shadow: none; }
+.deck-chrome { border-bottom: 0; background: rgb(0 0 0 / 0.26); }
+.hero-dash-head { border-bottom: 0; }
+.radar-item {
+  padding: 0.55rem 0.4rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+.radar-item:hover { border: 0; background: rgb(var(--wash-hi-rgb) / 0.04); }
+.radar-item.is-live { border: 0; }
+.radar-item.is-next { box-shadow: none; background: rgb(var(--wash-hi-rgb) / 0.04); }
+.radar-item-day {
+  min-inline-size: 5.6rem;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+}
+.radar-item-code { font-size: 0.78rem; }
+.radar-kicker { font-size: 0.8rem; letter-spacing: 0; }
+.radar-next { font-size: 0.82rem; }
+.radar-item-flag { border: 0; background: rgb(var(--wash-hi-rgb) / 0.06); font-size: 0.75rem; }
+.deck-chrome-title { font-size: 0.8rem; }
+.deck-term-sug { font-size: 0.8rem; }
+.hero-now { padding: 0.5rem 0.85rem; border-radius: 10px; font-size: 0.88rem; }
+.hero-now-text { font-size: 0.88rem; }
+.radar-badge {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0;
+  color: var(--on-media-2);
+  border-color: rgb(var(--wash-hi-rgb) / 0.12);
+  background: rgb(var(--wash-hi-rgb) / 0.05);
+}
+.hero-now-chip { font-family: var(--font-display); font-size: 0.8rem; }
+.hero-now-guide,
+.hero-now-quiz { font-size: 0.82rem; }
+.hero-dash-kicker {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.hero-dash-title { font-size: clamp(1.2rem, 2.4vw, 1.5rem); }
+.hero-dash-welcome { font-size: 0.9rem; }
+.hero-dash-label { font-size: 0.8rem; }
+.hero-tabs { border: 0; border-radius: 12px; }
+.hero-tab { border-radius: 9px; font-size: 0.86rem; }
+
+/* ---------- 6 · Bento as editorial panels ---------- */
+.bento-matrix {
+  gap: 1rem;
+  margin-top: clamp(1.8rem, 4vw, 2.6rem);
+}
+.bento-card {
+  gap: 1rem;
+  padding: clamp(1.1rem, 2.2vw, 1.5rem);
+  border: 0;
+  border-radius: 16px;
+  background: rgb(var(--wash-hi-rgb) / 0.032);
+  box-shadow: none;
+  transition: background-color 0.2s ease;
+}
+.bento-card:hover {
+  border: 0;
+  background: rgb(var(--wash-hi-rgb) / 0.05);
+  box-shadow: none;
+  transform: none;
+}
+.bento-glow { display: none; }
+.bento-kicker {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--muted);
+}
+.bento-title {
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.3;
+  font-weight: 700;
+}
+.bento-sched { gap: 0; }
+.bento-sched-item {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.2rem 0.8rem;
+  padding: 0.55rem 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.bento-sched-item strong { font-size: 0.94rem; font-weight: 600; }
+.bento-sched-day {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: var(--dim);
+}
+.bento-cta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+.bento-cta:hover { color: var(--deck-green); }
+.bento-labs { gap: 0.15rem; }
+.soc-lab {
+  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 0.7rem;
+  row-gap: 0.05rem;
+  padding: 0.55rem 0.5rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+.soc-lab-ico { grid-row: 1 / span 2; color: var(--dim); }
+.soc-lab-ico svg { inline-size: 20px; block-size: 20px; }
+.soc-lab strong { grid-column: 2; font-size: 0.93rem; font-weight: 600; }
+.soc-lab-meta {
+  grid-column: 2;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: var(--dim);
+}
+.soc-lab:hover {
+  border: 0;
+  background: rgb(var(--wash-hi-rgb) / 0.05);
+}
+.soc-lab:hover .soc-lab-ico { color: var(--accent-2); }
+.arsenal-chip {
+  padding: 0.45rem 0.7rem;
+  border-color: transparent;
+  border-radius: 9px;
+  background: rgb(var(--wash-hi-rgb) / 0.045);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+}
+a.arsenal-chip:hover {
+  border-color: transparent;
+  background: rgb(var(--wash-hi-rgb) / 0.08);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1020px) {
+  .hero-split { grid-template-columns: minmax(0, 1fr); }
+  .hero-content { padding-inline: clamp(1rem, 4vw, 1.6rem); }
+}
+@media (max-width: 640px) {
+  .hero { padding-top: calc(var(--nav-h) + 1.5rem); }
+  .hero-title { font-size: clamp(1.75rem, 7.2vw, 2.15rem); }
+  .hero-meta--compact { gap: 0.3rem 1.1rem; }
+  .hero-stat { flex-direction: column; gap: 0; }
+  .hero-start { flex-wrap: wrap; }
+  .hero-start-actions { inline-size: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-actions .btn-primary:hover { transform: none; }
+  .bento-card,
+  .bento-card:hover { transition: none; }
+}
+
+/* ---------- 7 · Follow-up: type floor + flat chrome ---------- */
+/* Residual glow removal. These selectors outrank `.nav *` / `.hero-stat *`,
+   which is why the earlier blanket reset left ten shadows behind. */
+.nav:not(.is-scrolled) .nav-links a,
+.nav.is-scrolled .nav-links a,
+.hero-stat strong,
+.hero-stat span { text-shadow: none; }
+
+/* 13px type floor for small UI labels */
+.lang-toggle,
+.lang-toggle .lang-current,
+.hero-brand-en,
+.hero-now-chip,
+.radar-badge,
+.radar-kicker,
+.radar-item-code,
+.radar-item-flag,
+.hero-dash-kicker,
+.deck-chrome-title,
+.hero-search kbd,
+.bento-kicker,
+.bento-sched-day,
+.soc-lab-meta,
+.footer-local,
+.footer-bottom p,
+.footer-social a,
+.canva-fab-label { font-size: 0.82rem; }
+
+/* Mono only for real code/data; chrome uses the display face */
+.lang-toggle,
+.lang-toggle .lang-current,
+.footer-local { font-family: var(--font-display); }
+
+/* Footer closes with space, not a rule */
+.footer-bottom { border-top: 0; }
+.footer-local { color: var(--muted); }
+
+/* Flat controls: the inner top highlight reads as sculpture on buttons */
+.updates-toggle,
+.nav-gh,
+.lang-toggle,
+.hero-tabs,
+.hero-tab,
+.hero-tab.is-active,
+.hero-tab[aria-selected="true"],
+.to-top,
+.a-chip,
+.assistant-chips button { box-shadow: none; }
+
+/* Nav reads as a plain bar: no capsule, no chip fills */
+.nav-cluster,
+.nav-links a,
+.nav-links a:hover,
+.nav-links a[aria-current="true"] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* One flat primary action, site-wide (matches the hero) */
+.btn-primary,
+.btn-primary:hover {
+  background: var(--accent);
+  background-image: none;
+  color: var(--on-grad);
+  box-shadow: none;
+}
+.btn-primary:hover { transform: none; filter: brightness(1.05); }
+
+/* Flat hero backdrop + flat assistant trigger */
+.hero-fx .hero-grid { display: none; }
+.assistant-fab {
+  background: var(--accent);
+  background-image: none;
+  border-color: rgb(var(--shadow-rgb) / 0.45);
+  box-shadow: none;
+}
+.assistant-fab:hover {
+  box-shadow: none;
+}
+
+/* Reduced motion: reveals render in their final state */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Mobile: one clear primary CTA, ghosts share a row; compact FAB */
+@media (max-width: 640px) {
+  .hero-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .hero-actions .btn { inline-size: 100%; justify-content: center; }
+  .hero-actions .btn-primary { grid-column: 1 / -1; }
+  .hero-start { margin-block-start: 0.5rem; }
+  .canva-fab {
+    inset-inline-end: 12px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 5.2rem);
+    inline-size: 44px;
+    block-size: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .canva-fab-label { display: none; }
+}
+
+/* END MODULE 100 · Homepage editorial polish */
+
+/* ============================================================
+   MODULE 101 · Homepage focus pass
+   ------------------------------------------------------------
+   - one primary start action on the homepage
+   - one timetable surface (the bento card summarises the week)
+   - quieter, compacter phone hero
+   - assistant FAB never covers the first-screen CTA
+   ============================================================ */
+
+/* The hero CTA is the homepage's start action; the navbar duplicate is
+   hidden only there and returns on every other view. */
+html[data-view="hero"] .nav-cta { display: none; }
+
+/* Secondary hero actions read as controls, not as plain text. */
+.hero-actions .btn-ghost,
+#heroStartHere .btn-ghost {
+  border-color: rgb(var(--wash-hi-rgb) / 0.16);
+  background: rgb(var(--wash-hi-rgb) / 0.035);
+  color: var(--on-media-2);
+}
+.hero-actions .btn-ghost:hover,
+#heroStartHere .btn-ghost:hover {
+  border-color: rgb(var(--wash-hi-rgb) / 0.3);
+  background: rgb(var(--wash-hi-rgb) / 0.07);
+  color: var(--text);
+}
+
+/* Start-here strip: two equal tour buttons, no second primary CTA. */
+#heroStartHere .hero-start-actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  inline-size: min(100%, 17rem);
+  gap: 0.4rem;
+}
+
+/* The semester badge repeated the hero subtitle; dropping it lets the
+   status line stay on one row on every width. */
+.hero-now .radar-badge { display: none; }
+@media (min-width: 641px) {
+  .hero-now { flex-wrap: nowrap; }
+  .hero-now-text { min-inline-size: 0; }
+}
+
+/* Bento schedule: the radar already carries the timetable rows; this card
+   becomes a compact weekly summary that still links to the full board.
+   The list stays in the DOM (MODULE 92 paints it) but is not duplicated
+   visually. */
+#bentoSemList { display: none; }
+
+/* The empty quiz/guide slots ship with [hidden]; their chip styling sets
+   display, so honour the attribute explicitly. */
+.hero-now-quiz[hidden],
+.hero-now-guide[hidden],
+.hero-now-chip[hidden] { display: none; }
+.bento-sem-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 640px) {
+  /* Now pill: drop the semester badge + decorative icon so it stays two
+     compact lines instead of a tall block. */
+  .hero-now .radar-badge,
+  .hero-now .hero-now-ico { display: none; }
+  .hero-now {
+    inline-size: 100%;
+    padding: 0.5rem 0.7rem;
+    border-radius: 12px;
+  }
+  .hero-now-text { font-size: 0.82rem; line-height: 1.5; }
+  .hero-now-chip { display: none; }
+  .hero-main { row-gap: 0.82rem; }
+
+  .hero-start { padding: 0.62rem 0.75rem; gap: 0.5rem; }
+  #heroStartHere .hero-start-actions {
+    inline-size: 100%;
+    grid-auto-flow: row;
+    grid-template-columns: 1fr 1fr;
+  }
+  #heroStartHere .hero-start-actions .btn {
+    inline-size: 100%;
+    justify-content: center;
+  }
+  /* Phones already scroll back with a gesture; keep a single floating
+     control (the assistant). Large screens keep the button. */
+  #toTop { display: none; }
+}
+
+/* The floating assistant is muted at the top of mobile pages, where it
+   otherwise sits on top of the hero CTA. Short pages keep it visible. */
+.assistant-fab {
+  transition: opacity 0.18s ease, visibility 0.18s,
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s;
+}
+.assistant-root.is-fab-muted .assistant-fab {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .assistant-fab { width: 3rem; height: 3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assistant-fab { transition: none; }
+}
+
+/* END MODULE 101 · Homepage focus pass */
+

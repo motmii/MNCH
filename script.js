@@ -38,6 +38,41 @@ const ICON = {
   grad: '<svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v4c0 1.66 2.69 3 6 3s6-1.34 6-3v-4"/></svg>'
 };
 
+/**
+ * Render a stored schedule time for the active locale.
+ * The registry keeps canonical 12-hour English values ("09:00 AM");
+ * Arabic surfaces show Arabic-Indic digits with ص/م instead.
+ * Lives outside the application IIFE so every module (inside and after it)
+ * can localise schedule text without reaching into private scope.
+ * @param {string} v Stored time, e.g. "09:00 AM".
+ * @returns {string} Locale-appropriate clock text.
+ */
+function formatDisplayTime(v) {
+  const raw = String(v == null ? "" : v).trim();
+  const m = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!m) return raw;
+  let loc = "ar";
+  try {
+    loc = (window.Lang && window.Lang.current) ||
+      (document.documentElement && document.documentElement.lang) || "ar";
+  } catch (e) { loc = "ar"; }
+  if (loc !== "ar") return raw;
+  let h = parseInt(m[1], 10);
+  const min = m[2];
+  const mer = m[3] ? m[3].toUpperCase() : "";
+  let period = "";
+  if (mer) {
+    if (mer === "PM" && h < 12) h += 12;
+    if (mer === "AM" && h === 12) h = 0;
+    period = h >= 12 ? "م" : "ص";
+    h = h % 12 || 12;
+  }
+  const digits = "٠١٢٣٤٥٦٧٨٩";
+  const toArabic = (d) => digits.charAt(parseInt(d, 10));
+  return String(h).replace(/\d/g, toArabic) + ":" + min.replace(/\d/g, toArabic) +
+    (period ? " " + period : "");
+}
+
 (() => {
 "use strict";
 
@@ -4070,6 +4105,9 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
   const grid = document.getElementById("subjectsGrid");
   if (!grid) return;
   const escS = (v) => escHtml(String(v));
+  const displayTime = (v) => (typeof formatDisplayTime === "function"
+    ? formatDisplayTime(v)
+    : String(v == null ? "" : v));
 
   /* Seeded question counts so cards never show empty badges before
      Stats.Live overwrites them from the live question bank. */
@@ -4104,7 +4142,7 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
   }
 
   function descHtml(s) {
-    const meta = `رمز المقرر ${escS(s.code)} • ${s.creditHours} ساعات معتمدة • ${escS(s.day)} ${escS(s.startTime)} – ${escS(s.endTime)}`;
+    const meta = `رمز المقرر ${escS(s.code)} • ${s.creditHours} ساعات معتمدة • ${escS(s.day)} ${escS(displayTime(s.startTime))} – ${escS(displayTime(s.endTime))}`;
     return meta + (s.descriptionAr ? ` — ${escS(s.descriptionAr)}` : "");
   }
 
@@ -6896,6 +6934,16 @@ const Lang = (() => {
       "meta.description": "منصة أمن المعلومات (Information Security Platform) — منصة عربية تعليمية لطلاب دبلوم أمن المعلومات: مسارات تعلم منظمة، اختبارات تفاعلية، أدوات أمنية ومعامل محاكاة تعمل دون اتصال.",
       "a11y.skip": "تخطي إلى المحتوى الرئيسي",
       "nav.more": "المزيد",
+      "nav.groupLearn": "تعلّم", "nav.groupPractice": "تدرّب",
+      "nav.groupProgress": "تقدّمك وأدواتك", "nav.groupPlatform": "المنصة",
+      "nav.allPages": "كل الصفحات", "nav.footerCanva": "استوديو كانفا",
+      "nav.workspace": "مساحة العمل", "nav.myBoard": "لوحتي",
+      "tools.searchPlaceholder": "ابحث في الأدوات…",
+      "tools.catAll": "الكل", "tools.catCrypto": "تشفير وبصمات",
+      "tools.catWeb": "ويب", "tools.catNetwork": "شبكات",
+      "tools.catPasswords": "كلمات المرور", "tools.catAnalysis": "تحليل",
+      "contact.note": "أرسل رسالتك وسأعود إليك خلال ٢–٣ أيام عمل. لا تُرسل كلمات مرور أو بيانات حساسة.",
+      "tools.eduToggle": "الشرح والتمرين",
       "nav.home": "الرئيسية", "nav.semester": "الترم الحالي",
       "nav.paths": "مسارات التعلم", "nav.subjects": "المواد",
       "nav.skills": "شجرة المهارات", "nav.student": "أدوات الطالب",
@@ -6932,7 +6980,7 @@ const Lang = (() => {
       "deck.tabRadar": "رادار الترم",
       "deck.tabTerminal": "طرفية سيبرانية",
       "deck.tabConsole": "قياس الأداء",
-      "deck.radarKicker": "الترم الحالي · مباشر",
+      "deck.radarKicker": "الترم الحالي",
       "deck.radarNext": "القادم: {name}",
       "deck.radarEmpty": "لا توجد مواد مسجلة للترم الحالي بعد.",
       "deck.live": "مباشر",
@@ -6957,8 +7005,8 @@ const Lang = (() => {
       "hero.continueAt": "عند السؤال {i} من {total}",
       "hero.continueResults": "لديك نتائج محفوظة — أكمل مراجعتك", "hero.continueReviewBtn": "اعرض تقدمك",
       /* ---------- MODULE 47/49 · Start-Here strip + HeroDash (Phase 6) ---------- */
-      "starthere.title": "جديد هنا؟ ابدأ من هنا",
-      "starthere.desc": "مسار «الأساسيات» مصمم للمبتدئين — خمس خطوات قصيرة تنقلك من الصفر إلى أول اختبار.",
+      "starthere.title": "جديد هنا؟",
+      "starthere.desc": "مسار «الأساسيات» جاهز أعلاه — أو ابدأ بجولة سريعة.",
       "starthere.cta": "ابدأ مسار الأساسيات",
       "starthere.wizard": "جولة التعريف",
       "starthere.tour": "جولة الأقسام",
@@ -7792,6 +7840,16 @@ const Lang = (() => {
       "guide.cardCta": "Open the lecture guide",
       "guide.cardChip": "Lecture guide",
       "nav.more": "More",
+      "nav.groupLearn": "Learn", "nav.groupPractice": "Practice",
+      "nav.groupProgress": "Progress & tools", "nav.groupPlatform": "Platform",
+      "nav.allPages": "All pages", "nav.footerCanva": "Canva studio",
+      "nav.workspace": "Workspace", "nav.myBoard": "My board",
+      "tools.searchPlaceholder": "Search tools…",
+      "tools.catAll": "All", "tools.catCrypto": "Crypto & hashing",
+      "tools.catWeb": "Web", "tools.catNetwork": "Network",
+      "tools.catPasswords": "Passwords", "tools.catAnalysis": "Analysis",
+      "contact.note": "Send your message and I will reply within 2–3 business days. Never send passwords or sensitive data.",
+      "tools.eduToggle": "Explanation & practice",
       "nav.home": "Home", "nav.semester": "Current Semester",
       "nav.paths": "Learning Paths", "nav.subjects": "Subjects",
       "nav.skills": "Skill Tree", "nav.student": "Student Tools",
@@ -7813,7 +7871,7 @@ const Lang = (() => {
       "nav.depth.desc": "Defense in depth, the full picture",
       "nav.contact.desc": "Ask questions or share feedback",
       "hero.eyebrow": "An educational & practical training platform — Infosec Diploma (Professional Bridging)",
-      "hero.title1": "An educational &", "hero.title2": "practical training platform ", "hero.titleAccent": "for Infosec students",
+      "hero.title1": "An infosec platform", "hero.title2": "built for ", "hero.titleAccent": "practice",
       "hero.sub": "An Arabic-first platform for Information Security students: learn the fundamentals of every subject, review terms with flashcards, quiz yourself with practical questions, then apply what you learned with security tools and real simulation labs — all in your browser, even offline.",
       "hero.ctaStart": "Start Learning", "hero.ctaTools": "Try the Tools", "hero.ctaLabs": "Enter the Labs",
       "hero.ctaQuiz": "Start the Quiz", "hero.ctaSubjects": "Browse Subjects",
@@ -7828,7 +7886,7 @@ const Lang = (() => {
       "deck.tabRadar": "Semester Radar",
       "deck.tabTerminal": "Cyber Terminal",
       "deck.tabConsole": "Telemetry",
-      "deck.radarKicker": "Current semester · live",
+      "deck.radarKicker": "Current semester",
       "deck.radarNext": "Next: {name}",
       "deck.radarEmpty": "No current-semester subjects yet.",
       "deck.live": "Live",
@@ -7853,8 +7911,8 @@ const Lang = (() => {
       "hero.continueAt": "At question {i} of {total}",
       "hero.continueResults": "You have saved results — keep up the review", "hero.continueReviewBtn": "View my progress",
       /* ---------- MODULE 47/49 · Start-Here strip + HeroDash (Phase 6) ---------- */
-      "starthere.title": "New here? Start here",
-      "starthere.desc": "The «Fundamentals» path is built for beginners — five short steps from zero to your first quiz.",
+      "starthere.title": "New here?",
+      "starthere.desc": "The «Fundamentals» path is one click above — or take a quick tour.",
       "starthere.cta": "Start the Fundamentals path",
       "starthere.wizard": "Intro tour",
       "starthere.tour": "Sections tour",
@@ -12229,19 +12287,25 @@ function rxMatch(node, s, i) {
       pathPct = total ? Math.round((d / total) * 100) : null;
     }
 
-    const cells = [
-      '<span class="progress-stat"><b>' + quizAttempts + '</b><span>' + escP(Lang.t("progress.attempts")) + '</span></span>',
-      '<span class="progress-stat"><b>' + lessonsDone + '</b><span>' + escP(Lang.t("progress.lessons")) + '</span></span>',
-      '<span class="progress-stat"><b>' + labsDone + '</b><span>' + escP(Lang.t("progress.labs")) + '</span></span>',
-      '<span class="progress-stat"><b>' + flashDone + '</b><span>' + escP(Lang.t("progress.flashcards")) + '</span></span>',
-      '<span class="progress-stat"><b>' + theatreDone + '</b><span>' + escP(Lang.t("progress.theatre")) + '</span></span>',
-      (pathPct !== null
-        ? '<span class="progress-stat"><b>' + pathPct + '%</b><span>' + escP(Lang.t("progress.paths")) + '</span></span>'
-        : ''),
-      '<span class="progress-stat is-overall"><b>' + overall + '%</b><span>' + escP(Lang.t("progress.overall")) + '</span></span>'
-    ].filter(Boolean).join("");
+    /* Empty progress owns a dedicated panel below — never surround it with
+       six zero tiles. Once activity exists, show only the metrics that
+       actually moved, plus the overall score. */
+    const metrics = [
+      { value: quizAttempts, label: "progress.attempts", suffix: "" },
+      { value: lessonsDone, label: "progress.lessons", suffix: "" },
+      { value: labsDone, label: "progress.labs", suffix: "" },
+      { value: flashDone, label: "progress.flashcards", suffix: "" },
+      { value: theatreDone, label: "progress.theatre", suffix: "" },
+      { value: pathPct, label: "progress.paths", labelText: Lang.t("progress.paths"), suffix: "%" }
+    ].filter((m) => typeof m.value === "number" && m.value > 0);
+    if (!metrics.length) return "";
 
-    return '<div class="progress-stats" role="list" aria-label="' + escP(Lang.t("progress.overall")) + '">' + cells + '</div>';
+    const cells = metrics.map((m) =>
+      '<span class="progress-stat"><b>' + m.value + m.suffix + '</b><span>' + escP(m.labelText || Lang.t(m.label)) + '</span></span>'
+    );
+    cells.push('<span class="progress-stat is-overall"><b>' + overall + '%</b><span>' + escP(Lang.t("progress.overall")) + '</span></span>');
+
+    return '<div class="progress-stats" role="list" aria-label="' + escP(Lang.t("progress.overall")) + '">' + cells.join("") + '</div>';
   }
 
   /** "Review incorrect answers" — subjects with saved missed questions. @returns {string} */
@@ -14005,7 +14069,7 @@ const LABS_META = {
     var grid = toolsSec.querySelector(".tools-grid");
     if (!grid || grid.parentNode.querySelector(".tool-safety-notice")) return;
     var notice = document.createElement("p");
-    notice.className = "tool-safety-notice reveal";
+    notice.className = "tool-safety-notice";
     notice.setAttribute("role", "note");
     notice.textContent = Lang.t("toolsEdu.notice");
     grid.parentNode.insertBefore(notice, grid);
@@ -14131,6 +14195,12 @@ const LABS_META = {
   /* Local escHtml — this module cannot see the IIFE-internal helper either. */
   const escHtmlL = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (m) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+
+  /* Local display-time helper — raw canonical text when the page-level
+     helper is not reachable (a standalone module load in tests). */
+  const displayTime = (v) => (typeof formatDisplayTime === "function"
+    ? formatDisplayTime(v)
+    : String(v == null ? "" : v));
 
   const DATA = window.PLATFORM_CURRENT_SEMESTER;
   if (!DATA || !Array.isArray(DATA.subjects)) {
@@ -14305,7 +14375,7 @@ const LABS_META = {
     const sch = s.meta && s.meta.schedule;
     if (!sch) return "";
     const day = T(sch.day);
-    return day ? day + " · " + esc(sch.startTime) + " – " + esc(sch.endTime) : "";
+    return day ? day + " · " + esc(displayTime(sch.startTime)) + " – " + esc(displayTime(sch.endTime)) : "";
   }
 
   function cardHtml(s) {
@@ -18981,6 +19051,14 @@ const LABS_META = {
   const guideEl = document.getElementById("heroNowGuide");
   if (!strip || !textEl) return;
 
+  /* Local display-time helper — raw canonical text when the page-level
+     helper is not reachable (a standalone module load in tests). */
+  function displayTime(v) {
+    return typeof formatDisplayTime === "function"
+      ? formatDisplayTime(v)
+      : String(v == null ? "" : v);
+  }
+
   function resolveLang() {
     try { if (typeof Lang !== "undefined" && Lang) return Lang; } catch (e) {}
     try { if (typeof window !== "undefined" && window.Lang) return window.Lang; } catch (e2) {}
@@ -19150,7 +19228,7 @@ const LABS_META = {
 
     const s = found.item.subject;
     const sName = (s.name && (s.name[curLocale()] || s.name.ar || s.name.en)) || s.id;
-    const startsAt = T("now.startsAt", { day: found.item.dayLabel, time: found.item.startTime });
+    const startsAt = T("now.startsAt", { day: found.item.dayLabel, time: displayTime(found.item.startTime) });
 
     textEl.textContent = greeting + " · " + T("now.nextClass", { name: sName }) + " (" + startsAt + ")";
 
@@ -20080,12 +20158,17 @@ const LABS_META = {
       thead.appendChild(htr);
       table.appendChild(thead);
       const tb = el("tbody");
+      const cell = (cls, labelKey, value) => {
+        const td = el("td", cls, value);
+        td.setAttribute("data-label", T(labelKey));
+        return td;
+      };
       rows.forEach((r) => {
         const tr = el("tr");
-        tr.appendChild(el("td", "guide-td-subject", r.name));
-        tr.appendChild(el("td", "guide-td-code", r.code));
-        tr.appendChild(el("td", "guide-td-day", r.day));
-        tr.appendChild(el("td", "guide-td-time", r.time));
+        tr.appendChild(cell("guide-td-subject", "guide.thSubject", r.name));
+        tr.appendChild(cell("guide-td-code", "guide.thCode", r.code));
+        tr.appendChild(cell("guide-td-day", "guide.thDay", r.day));
+        tr.appendChild(cell("guide-td-time", "guide.thTime", r.time));
         tb.appendChild(tr);
       });
       table.appendChild(tb);
@@ -21837,7 +21920,7 @@ const LABS_META = {
     }
 
     list.forEach(function (sc) {
-      var card = el("button", "theatre-card reveal");
+      var card = el("button", "theatre-card");
       card.type = "button";
       card.setAttribute("data-sc", sc.id);
 
@@ -22871,6 +22954,13 @@ const LABS_META = {
     if (!el) return;
     try { if (el.classList && typeof el.classList.add === "function") el.classList.add(name); } catch (e) { /* non-fatal */ }
   }
+  /* Local display-time helper — raw canonical text when the page-level
+     helper is not reachable (a standalone module load in tests). */
+  function displayTime(v) {
+    return typeof formatDisplayTime === "function"
+      ? formatDisplayTime(v)
+      : String(v == null ? "" : v);
+  }
   function listen(el, ev, fn) {
     if (!el || typeof fn !== "function") return;
     try { if (typeof el.addEventListener === "function") el.addEventListener(ev, fn); } catch (e) { /* non-fatal */ }
@@ -22941,6 +23031,7 @@ const LABS_META = {
   var termForm = get("heroTermForm");
   var termInput = get("heroTermInput");
   var semList = get("bentoSemList");
+  var semSummary = get("bentoSemSummary");
   var arsenalStrip = get("arsenalStrip");
   var gaugeLevelArc = get("heroGaugeLevelArc");
   var gaugeLevelValue = get("heroGaugeLevelValue");
@@ -23009,7 +23100,7 @@ const LABS_META = {
       cls(day, "radar-item-day");
       if (sch) {
         var label = schDay(sch);
-        var time = sch.startTime ? String(sch.startTime) : "";
+        var time = sch.startTime ? displayTime(String(sch.startTime)) : "";
         txt(day, time ? label + " · " + time : label);
       }
 
@@ -23059,6 +23150,35 @@ const LABS_META = {
       attach(li, strong); attach(li, span);
       attach(semList, li);
     });
+
+    if (semSummary) {
+      /* The stat row above already carries the counts; this note points at
+         the week's opening lecture instead of repeating them. */
+      var first = null;
+      var firstKey = Infinity;
+      subjects.forEach(function (s) {
+        if (!s) return;
+        var sch = (s.meta && s.meta.schedule) || s.schedule || null;
+        if (!sch) return;
+        var rawDay = (sch.day && (sch.day.ar || sch.day.en)) || sch.day || "";
+        var dayIdx = DAY_IDX[rawDay];
+        var startMin = timeMinutes(sch.startTime);
+        if (dayIdx === undefined || startMin === null) return;
+        var key = dayIdx * 1440 + startMin;
+        if (key < firstKey) { firstKey = key; first = sch; }
+      });
+      if (!first) {
+        txt(semSummary, T("deck.radarEmpty") || (L() === "ar"
+          ? "لا توجد مواد مسجلة للترم الحالي بعد."
+          : "No current-semester subjects yet."));
+        return;
+      }
+      var firstDay = schDay(first);
+      var firstTime = first.startTime ? displayTime(String(first.startTime)) : "";
+      txt(semSummary, L() === "ar"
+        ? "محاضراتك تبدأ " + firstDay + (firstTime ? " " + firstTime : "")
+        : "Your classes start " + firstDay + (firstTime ? " at " + firstTime : ""));
+    }
   }
 
   /* ---------- 3) Arsenal chips (read-only from the tools grid) ---------- */

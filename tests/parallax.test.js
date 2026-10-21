@@ -74,7 +74,7 @@ const layerCode = layer.replace(/\/\*[\s\S]*?\*\//g, "");
 /* ---------- index.html ---------- */
 console.log("\u2014 index.html: the #depth view \u2014");
 check("section#depth ships as a real view", sec.includes('id="depth"') && sec.includes('aria-labelledby="depthTitle"'));
-check("its heading carries the bilingual (html) key", /<h2 class="section-title" id="depthTitle" data-i18n-html="px\.title">/.test(sec));
+check("its heading carries the bilingual (html) key", /<h1 class="section-title" id="depthTitle" data-i18n-html="px\.title">/.test(sec));
 check("three plates, one per depth", (sec.match(/class="px-plate px-plate--(back|mid|front)"/g) || []).length === 3);
 check("the decorative planes are hidden from assistive tech",
   /<div class="px-decor" aria-hidden="true">/.test(sec) && sec.includes('class="px-grid"') && sec.includes('class="px-halo"'));
