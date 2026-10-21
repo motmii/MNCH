@@ -4,6 +4,13 @@ backend/
 # Tooling / agent workspaces
 .kerno/
 .agents/
+.cline/
+.scratch/
+.taste-skill/
+skills-lock.json
+
+# Local review artifacts
+review/
 
 # Dependencies & env
 node_modules/
