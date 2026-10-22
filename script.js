@@ -6986,7 +6986,7 @@ const Lang = (() => {
       "deck.live": "مباشر",
       "deck.today": "اليوم",
       "deck.termHint": "جرّب: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.0.0 — اكتب help لعرض الأوامر.",
+      "deck.termWelcome": "nova-shell v3.0.1 — اكتب help لعرض الأوامر.",
       "deck.termHelp": "الأوامر: help · scan [host] · caesar <نص> [إزاحة] · clear",
       "deck.termScanTitle": "بدء فحص المنافذ — {host}",
       "deck.termScanDone": "اكتمل الفحص — {n} منفذًا مفحوصًا",
@@ -7892,7 +7892,7 @@ const Lang = (() => {
       "deck.live": "Live",
       "deck.today": "Today",
       "deck.termHint": "Try: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.0.0 — type help for commands.",
+      "deck.termWelcome": "nova-shell v3.0.1 — type help for commands.",
       "deck.termHelp": "Commands: help · scan [host] · caesar <text> [shift] · clear",
       "deck.termScanTitle": "Port scan — {host}",
       "deck.termScanDone": "Scan complete — {n} ports checked",
@@ -23295,7 +23295,7 @@ const LABS_META = {
   }
 
   if (termLog) {
-    termPush("dim", T("deck.termWelcome") || "nova-shell v3.0.0 — type help");
+    termPush("dim", T("deck.termWelcome") || "nova-shell v3.0.1 — type help");
     listen(termLog, "click", function () {
       try { if (termInput && typeof termInput.focus === "function") termInput.focus(); } catch (e) { /* non-fatal */ }
     });

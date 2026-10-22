@@ -27,6 +27,7 @@ const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const css = fs.readFileSync(path.join(root, "style.css"), "utf8");
 const js = fs.readFileSync(path.join(root, "script.js"), "utf8");
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const cs = require(path.join(root, "current-semester.js"));
 
 let failures = 0;
@@ -144,7 +145,7 @@ console.log("\n— style.css: legacy hero layers purged —");
 
 /* ---------- static: sw.js ---------- */
 console.log("\n— sw.js: cache & media —");
-check("cache version bumped to v3.0.0", /CACHE_VERSION\s*=\s*"v3\.0\.0"/.test(sw));
+check("cache version matches release", sw.includes('CACHE_VERSION = "v' + pkg.version + '"'));
 check("hero loop no longer precached", !sw.includes('"./images/hero-bg.mp4"'));
 check("old hero photo no longer precached", !sw.includes('"./images/backweb.jpg"'));
 check("range-request handler fully removed", !sw.includes("handleRangeRequest") && !/request\.headers\.has\("range"\)/.test(sw));

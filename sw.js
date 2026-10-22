@@ -1,6 +1,6 @@
 /* ============================================================
    منصة أمن المعلومات — الترم الحالي | Service Worker
-   Strategy (v3.0.0):
+   Strategy (v3.0.1):
    - Precache the app shell on install (versioned cache).
    - Navigations: network-first with cached-shell fallback.
    - Static assets + JSON: Stale-While-Revalidate.
@@ -13,7 +13,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v3.0.0";
+const CACHE_VERSION = "v3.0.1";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 
@@ -28,6 +28,8 @@ const PRECACHE_ASSETS = [
   "./assistant.js",
   "./motion.css",
   "./motion.js",
+  "./ui-overhaul.css",
+  "./ui-overhaul.js",
   "./vendor/gsap.min.js",
   "./vendor/ScrollTrigger.min.js",
   "./vendor/lenis.min.js",
@@ -83,6 +85,10 @@ const PRECACHE_ASSETS = [
   "./images/kali/kali-installer.svg",
   "./images/kali/kali-firstboot.svg"];
 
+/* Force network reads during install so a version bump can never precache
+   a stale HTTP-cached copy of an app-shell asset. */
+const PRECACHE_REQUESTS = PRECACHE_ASSETS.map((url) => new Request(url, { cache: "reload" }));
+
 
 /**
  * Same-origin API endpoints cached for offline study.
@@ -103,7 +109,7 @@ const OUTBOX_STORE = "pending";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_ASSETS))
+      .then((cache) => cache.addAll(PRECACHE_REQUESTS))
       .then(() => self.skipWaiting())
   );
 });
@@ -160,7 +166,10 @@ async function handleNavigation(request) {
  */
 async function staleWhileRevalidate(request, event) {
   const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
+  /* Style/script URLs carry a ?v= release query while the precache keys do
+     not, so match while ignoring the search string. Without this the first
+     offline load after install can miss the precached stylesheet. */
+  const cached = await cache.match(request, { ignoreSearch: true });
 
   let networkResponse = null;
   const refresh = fetch(request)
@@ -216,7 +225,7 @@ async function makeOfflineFallback(request) {
   try {
     const cache = await caches.open(CACHE_NAME);
     const fallbackUrl = isNavigate ? "./index.html" : request.url;
-    const response = await cache.match(fallbackUrl);
+    const response = await cache.match(fallbackUrl, { ignoreSearch: true });
     if (response) return response.clone();
   } catch {}
 

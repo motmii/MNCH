@@ -24,10 +24,10 @@ function check(name, cond) {
   else { failures++; console.error("  ✗ FAIL: " + name); }
 }
 
-console.log("— version agreement (3.0.0) —");
-check("package.json is 3.0.0", pkg.version === "3.0.0");
-check("index.html links style.css?v=3.0.0", html.includes('style.css?v=3.0.0'));
-check("sw.js cache is v3.0.0", sw.includes('CACHE_VERSION = "v3.0.0"'));
+console.log("— version agreement (" + pkg.version + ") —");
+check("package.json version is semver", /^\d+\.\d+\.\d+$/.test(pkg.version));
+check("index.html links style.css?v=" + pkg.version, html.includes("style.css?v=" + pkg.version));
+check("sw.js cache is v" + pkg.version, sw.includes('CACHE_VERSION = "v' + pkg.version + '"'));
 
 const L81 = css.indexOf("MODULE 81 · V0 OBSIDIAN 2.0");
 const L81END = css.indexOf("END MODULE 81 · V0 OBSIDIAN 2.0");
@@ -126,7 +126,7 @@ console.log("— DOM + motion contracts preserved —");
 ["heroDashPct", "semesterGrid", "skillsTree", "announceBar", "searchResults", "heroNowText", "searchInput"].forEach((id) => {
   check("#" + id + " still present", html.includes('id="' + id + '"'));
 });
-check("motion.css still linked after style.css", html.indexOf("motion.css") > html.indexOf("style.css?v=3.0.0"));
+check("motion.css still linked after style.css", html.indexOf("motion.css") > html.indexOf("style.css?v=" + pkg.version));
 check("motion word units untouched", motionCss.includes(".m-word"));
 check("motion card glow untouched", motionCss.includes("html.motion-on .skill-card::after"));
 check("motion.js loader untouched", html.includes("vendor/gsap.min.js") && html.includes("motion.js"));
