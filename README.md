@@ -138,7 +138,7 @@ python -m http.server 8080
 ## 📁 Project Structure
 
 ```
-nova-studio/
+MNCH/
 ├── index.html          # Main page (RTL Arabic) — includes Learning Paths, Labs hub, IR center, Progress & About
 ├── style.css           # Full stylesheet (V0 Obsidian identity · RTL · glass & neon layers · MODULE 80)
 ├── script.js           # All application logic (modular IIFE) incl. MODULE 80 CyberField canvas, learning paths (39) & lessons (40) + Red Team · IR · Crypto labs
