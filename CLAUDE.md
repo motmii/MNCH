@@ -4,8 +4,8 @@ description: |
   - remove backend dependencies
   - fix asset paths
   - disable unavailable features
-  - register SW with correct scope
-  - add offline fallback
+  - retire the legacy service worker
+  - enforce online-only (unregister SW, clear caches)
   - inject new QA helpers
   - more...? (ask user)
  invocations:
@@ -20,9 +20,9 @@ subtasks:
     status: completed
   - task: Fix asset paths for project site
     status: completed
-  - task: Register service worker with subpath scope
+  - task: Retire service worker registration (online-only)
     status: completed
-  - task: Verify precache assets and add offline fallback
+  - task: Verify online-only cleanup (unregister SW, clear caches)
     status: completed
   - task: Add "Reset my progress / Clear local data"
     status: completed
@@ -40,7 +40,7 @@ subtasks:
     status: completed
   - task: Remove any exposed API keys
     status: completed
-  - task: Make assistant offline/local
+  - task: Make assistant local (no backend)
     status: completed
   - task: Add AbortController + timeout to external requests
     status: completed

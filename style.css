@@ -9,7 +9,7 @@
    palette were removed (see MODULE 80).
    ============================================================ */
 
-/* ---------- Self-hosted typefaces (offline-first, no CDN) ----------
+/* ---------- Self-hosted typefaces (no CDN requests) ----------
    IBM Plex Sans Arabic carries BOTH scripts: its latin subset is
    IBM Plex Sans, so Arabic and English share one voice. IBM Plex
    Mono handles code, ciphers, terminals and data. Both are
@@ -1320,7 +1320,7 @@ html[dir="rtl"] .work-search input { background-position: right 1rem center; }
   position: relative;
 }
 .tool-out.is-fallback::before {
-  content: "محتوى غير متوفرOffline — Web Crypto غير متاح";
+  content: "Web Crypto غير متاح — افتح الصفحة عبر HTTPS";
   position: absolute;
   top: 0;
   left: 0;
@@ -1329,6 +1329,9 @@ html[dir="rtl"] .work-search input { background-position: right 1rem center; }
   letter-spacing: 0.04em;
   text-transform: uppercase;
   opacity: 0.9;
+}
+html[lang="en"] .tool-out.is-fallback::before {
+  content: "Web Crypto unavailable — open this page over HTTPS";
 }
 .tool-input {
   direction: ltr;
@@ -7087,7 +7090,7 @@ body.search-open { overflow: hidden; }
 /* ============================================================
    MODULE 72 · KaliGuide — the Kali-on-VirtualBox install guide
    ------------------------------------------------------------
-   Static, honest, offline-first: copy only, no JS behaviour.
+   Static and honest: copy only, no JS behaviour.
    RTL-safe logical properties throughout (margin-inline-start,
    inset-inline-start, text-align: start). Numbered steps alternate
    figure/text on wide screens and stack on phones.

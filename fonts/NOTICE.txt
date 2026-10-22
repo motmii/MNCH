@@ -3,4 +3,4 @@ Licensed under the SIL Open Font License, Version 1.1.
 Copyright © 2017 IBM Corp. with Reserved Font Name "Plex".
 Source: https://github.com/IBM/plex — files retrieved via the Google Fonts
 CSS API (subset woff2, weights 400–700) and self-hosted so the platform
-keeps its offline-first guarantee.
+avoids any third-party font requests.

@@ -1,5 +1,8 @@
 # Timed Flashcard Review Mode (InfoSec terms)
 
+> **Status:** historical. The platform is now online-only; the offline/PWA
+> references below describe the original spec and no longer apply.
+
 ## Problem Statement
 
 Students need a fast, low-friction, fully-offline way to drill Arabic-first InfoSec term knowledge between lessons, without disturbing the existing timed quiz or requiring a network connection. The drill should be structured, scoreable, mistake-reviewable, and composable with the platform's local progress story.

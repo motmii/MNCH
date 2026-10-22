@@ -10,8 +10,8 @@
       key server-side and answers { reply: string }).
       Never put an API key in frontend code or storage.
    2) Always-available fallback: a local rule-based knowledge
-      engine (this file) answers from the platform's data, so the
-      assistant works offline / without any backend at all.
+      engine (this file) answers from the platform's data after the
+      page loads, without any backend at all.
    ============================================================ */
 (function () {
   "use strict";
@@ -226,7 +226,7 @@
 
     /* Troubleshooting */
     if (has("مشكلة", "لا يعمل", "لا تظهر", "خطا", "خطأ", "بطيء", "offline", "بدون اتصال", "حفظ", "localStorage", "اختفى")) {
-      return "حلول سريعة للمشكلات الشائعة:\n• **بيانات المواد لا تظهر**: حدّث الصفحة — تُحمّل من الشبكة أول مرة ثم تُخزَّن للعمل دون اتصال.\n• **النتائج/التقدم اختفى**: محفوظة في متصفحك فقط (IndexedDB) — لا تحذف بيانات الموقع من إعدادات المتصفح.\n• **العمل دون اتصال**: مدعوم — بعد أول زيارة تُخزَّن المنصة كاملة (PWA).\n• **الوضع المؤقّت**: يُفعّل من المفتاح في شاشة اختيار الاختبار.\nإذا استمرت المشكلة راسلنا من قسم التواصل (#contact).";
+      return "حلول سريعة للمشكلات الشائعة:\n• **بيانات المواد لا تظهر**: حدّث الصفحة — تُحمّل من الشبكة عند فتح المنصة.\n• **النتائج/التقدم اختفى**: محفوظة في متصفحك فقط (IndexedDB) — لا تحذف بيانات الموقع من إعدادات المتصفح.\n• **العمل دون اتصال**: غير مدعوم حاليًا — المنصة تعمل عبر الإنترنت فقط وتحتاج اتصالًا لتحميل الصفحة.\n• **الوضع المؤقّت**: يُفعّل من المفتاح في شاشة اختيار الاختبار.\nإذا استمرت المشكلة راسلنا من قسم التواصل (#contact).";
     }
 
     /* Contact */
