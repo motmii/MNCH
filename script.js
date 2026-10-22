@@ -5522,6 +5522,7 @@ function renderPicks() {
   const hasData = Object.keys(results).length > 0 || Object.keys(progress).length > 0;
   const noBank = subjectKeys.length === 0;
   const curLang = Lang.current || "ar";
+  const arrow = curLang === "en" ? "→" : "←";
   const completedCount = subjectKeys.filter((k) => results[k]).length;
   const inProgressCount = subjectKeys.filter((k) => progress[k] && progress[k].idx > 0 && progress[k].idx < progress[k].total).length;
   const reviewCount = subjectKeys.filter((k) => MissedBank.countForSubject(k) > 0).length;
@@ -5566,12 +5567,20 @@ function renderPicks() {
        MissedBank hijacked this click into a missed-only replay, so a card
        advertising 32 questions opened a "السؤال 1 من 1" run. Missed review
        moved to the explicit control rendered below the card. */
+    const cardPct = resumable
+      ? Math.max(0, Math.min(100, Math.round((saved.idx / saved.total) * 100)))
+      : best && typeof best.pct === "number"
+        ? Math.max(0, Math.min(100, best.pct))
+        : 0;
     const card = `<button type="button" class="q-pick q-subject-card ${status.cls}" data-sub="${esc(k)}"${resumable ? ' data-resume="1"' : ""}>
-      <span class="q-subject-card-top"><span class="q-subject-number">${String(index + 1).padStart(2, "0")}</span><span class="q-subject-status">${esc(statusText)}</span></span>
-      <span class="q-subject-card-title">${esc(bank.name || k)}</span>
-      <span class="q-subject-card-meta"><span>${esc(questionsText)}</span><span class="q-card-dot">•</span><span>${esc(bestText)}</span></span>
-      ${missedCount ? `<span class="q-subject-missed">${esc(missedText)}</span>` : ""}
-      <span class="q-subject-action">${esc(action)} <b aria-hidden="true">←</b></span>
+      <span class="q-subject-number" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+      <span class="q-subject-main">
+        <span class="q-subject-card-top"><span class="q-subject-card-title">${esc(bank.name || k)}</span><span class="q-subject-status">${esc(statusText)}</span></span>
+        <span class="q-subject-card-meta"><span>${esc(questionsText)}</span><span class="q-card-dot">•</span><span>${esc(bestText)}</span></span>
+        <span class="q-subject-meter" aria-hidden="true"><i style="width:${cardPct}%"></i></span>
+        ${missedCount ? `<span class="q-subject-missed">${esc(missedText)}</span>` : ""}
+      </span>
+      <span class="q-subject-action"><span class="q-subject-action-label">${esc(action)}</span> <b aria-hidden="true">${arrow}</b></span>
     </button>`;
     /* MODULE 99 · reference banks moved OUT of this grid into the
        dedicated بنك الفترات hub (renderBankHub below). A FULL MCQ bank
@@ -5594,26 +5603,30 @@ function renderPicks() {
     : `<div class="q-dashboard-mode">
       <div class="q-dashboard-mode-head"><div><span class="q-kicker">${curLang === "en" ? "Choose your mode" : "اختر طريقة الاختبار"}</span><strong>${curLang === "en" ? "How do you want to test yourself?" : "كيف تريد أن تختبر نفسك؟"}</strong></div><span class="q-mode-orbit" aria-hidden="true">✦</span></div>
       <div class="q-mode-selector" role="group" aria-label="${esc(Lang.qt("modePractice"))}">
-        <button type="button" class="q-mode-btn${timedMode ? "" : " is-active"}" data-mode="practice" aria-pressed="${timedMode ? "false" : "true"}"><b>${esc(Lang.qt("modePractice"))}</b><small>${curLang === "en" ? "Learn with instant explanations" : "تعلّم مع شرح فوري لكل إجابة"}</small></button>
-        <button type="button" class="q-mode-btn${timedMode ? " is-active" : ""}" data-mode="exam" aria-pressed="${timedMode ? "true" : "false"}"><b>${esc(Lang.qt("modeExam"))}</b><small>${curLang === "en" ? "Timed challenge, exam-style" : "تحدٍ زمني بأسلوب الامتحان"}</small></button>
+        <button type="button" class="q-mode-btn${timedMode ? "" : " is-active"}" data-mode="practice" aria-pressed="${timedMode ? "false" : "true"}"><b>${esc(Lang.qt("modePractice"))}</b><small>${curLang === "en" ? "Instant feedback after every question" : "شرح فوري بعد كل سؤال"}</small></button>
+        <button type="button" class="q-mode-btn${timedMode ? " is-active" : ""}" data-mode="exam" aria-pressed="${timedMode ? "true" : "false"}"><b>${esc(Lang.qt("modeExam"))}</b><small>${curLang === "en" ? "A timed, exam-style run" : "جولة موقوتة بأسلوب الامتحان"}</small></button>
       </div>
       ${hasData ? `<button type="button" class="btn btn-ghost btn-sm q-clear" id="qClear">${esc(Lang.qt("clear"))}</button>` : ""}
     </div>`;
 
-  const insight = noBank ? "" : `<div class="q-insight-grid">
-    <section class="q-progress-card" aria-label="${curLang === "en" ? "Your overall progress" : "تقدمك العام"}">
-      <div class="q-progress-copy"><span class="q-kicker">${curLang === "en" ? "Your learning pulse" : "نبض تعلمك"}</span><strong>${curLang === "en" ? "Keep your momentum" : "حافظ على تقدمك"}</strong><small>${curLang === "en" ? "One focused quiz today makes you stronger." : "اختبار واحد مركّز اليوم يجعلك أقوى."}</small></div>
+  const pulse = noBank ? "" : `<section class="q-progress-card" aria-label="${curLang === "en" ? "Your overall progress" : "تقدمك العام"}">
+    <div class="q-progress-head">
       <div class="q-progress-ring" style="--pct:${overallPct * 3.6}deg"><b>${overallPct}%</b><small>${curLang === "en" ? "overall" : "المتوسط"}</small></div>
-    </section>
-    <section class="q-stats-card"><div><b>${completedCount}</b><small>${curLang === "en" ? "completed" : "مكتملة"}</small></div><div><b>${inProgressCount}</b><small>${curLang === "en" ? "in progress" : "جارية"}</small></div><div><b>${reviewCount}</b><small>${curLang === "en" ? "to review" : "للمراجعة"}</small></div></section>
-    ${recommendedBank ? `<section class="q-recommended-card"><span class="q-kicker">${curLang === "en" ? "Recommended next" : "الاختبار المقترح"}</span><strong>${esc(recommendedBank.name)}</strong><small>${curLang === "en" ? "Start here and make this subject your next win." : "ابدأ من هنا وحوّل المادة إلى إنجازك التالي."}</small><button type="button" class="btn btn-primary btn-sm" data-sub="${esc(recommended)}"${progress[recommended] && progress[recommended].idx > 0 && progress[recommended].idx < progress[recommended].total ? ' data-resume="1"' : ""}>${curLang === "en" ? "Start recommended" : "ابدأ الاختبار المقترح"} <span aria-hidden="true">←</span></button></section>` : ""}
-  </div>`;
+      <div class="q-progress-copy"><span class="q-kicker">${curLang === "en" ? "Your learning pulse" : "نبض تعلمك"}</span><strong>${curLang === "en" ? "Keep your momentum" : "حافظ على تقدمك"}</strong><small>${curLang === "en" ? "One focused quiz today makes you stronger." : "اختبار واحد مركّز اليوم يجعلك أقوى."}</small></div>
+    </div>
+    <div class="q-stats-card"><div><b>${completedCount}</b><small>${curLang === "en" ? "completed" : "مكتملة"}</small></div><div><b>${inProgressCount}</b><small>${curLang === "en" ? "in progress" : "جارية"}</small></div><div><b>${reviewCount}</b><small>${curLang === "en" ? "to review" : "للمراجعة"}</small></div></div>
+  </section>`;
+
+  const recommendedCard = recommendedBank ? `<section class="q-recommended-card">
+    <div class="q-recommend-copy"><span class="q-kicker">${curLang === "en" ? "Recommended next" : "الاختبار المقترح"}</span><strong>${esc(recommendedBank.name)}</strong><small>${curLang === "en" ? "Start here and make this subject your next win." : "ابدأ من هنا وحوّل المادة إلى إنجازك التالي."}</small></div>
+    <button type="button" class="btn btn-primary btn-sm q-recommend-btn" data-recommend-sub="${esc(recommended)}"${progress[recommended] && progress[recommended].idx > 0 && progress[recommended].idx < progress[recommended].total ? ' data-resume="1"' : ""}>${curLang === "en" ? "Start recommended" : "ابدأ الاختبار المقترح"} <span aria-hidden="true">${arrow}</span></button>
+  </section>` : "";
 
   const picksHtml = noBank
     ? `<div class="q-data-error" role="alert"><p>${esc(Lang.qt("dataError"))}</p><button type="button" class="btn btn-sm btn-primary" id="qRetry">${esc(Lang.qt("retry"))}</button></div>`
-    : `<div class="q-dashboard"><div class="q-dashboard-head"><div><span class="q-kicker">${curLang === "en" ? "Your test library" : "مكتبة اختباراتك"}</span><h3>${curLang === "en" ? "Choose a subject" : "اختر المادة التي تريد اختبارها"}</h3></div><span class="q-library-count">${subjectKeys.length} ${curLang === "en" ? "subjects" : "مواد"}</span></div>${insight}<div class="q-subject-grid">${cards}</div></div>`;
+    : `<div class="q-dashboard"><div class="q-dashboard-head"><div><span class="q-kicker">${curLang === "en" ? "Your test library" : "مكتبة اختباراتك"}</span><h3>${curLang === "en" ? "Choose a subject" : "اختر المادة التي تريد اختبارها"}</h3></div><span class="q-library-count">${subjectKeys.length} ${curLang === "en" ? "subjects" : "مواد"}</span></div><div class="q-hub-layout"><div class="q-hub-aside">${modeRow}${pulse}</div><div class="q-hub-main">${recommendedCard}<div class="q-subject-grid">${cards}</div></div></div></div>`;
 
-  app.innerHTML = modeRow + picksHtml;
+  app.innerHTML = picksHtml;
   renderBankHub();
 }
 
@@ -5631,6 +5644,7 @@ function renderBankHub() {
   const list = $id("bankHubList");
   if (!hub || !list) return;
   const curLang = Lang.current || "ar";
+  const arrow = curLang === "en" ? "→" : "←";
   const bankKeys = Object.keys(QUIZZES).filter((k) => k.indexOf("bank:") === 0);
   /* No banks (missing file / empty data) → the panel simply never shows. */
   if (!bankKeys.length) {
@@ -5652,7 +5666,7 @@ function renderBankHub() {
       <span class="q-subject-card-top"><span class="q-subject-number">${String(i + 1).padStart(2, "0")}</span><span class="q-subject-status bank-hub-chip">${esc(chip)}</span></span>
       <span class="q-subject-card-title">${esc(bank.name || k)}</span>
       <span class="q-subject-card-meta"><span>${esc(meta)}</span><span class="q-card-dot">•</span><span>${esc(finals)}</span></span>
-      <span class="q-subject-action">${esc(cta)} <b aria-hidden="true">←</b></span>
+      <span class="q-subject-action">${esc(cta)} <b aria-hidden="true">${arrow}</b></span>
     </button>`;
   }).join("");
 }
@@ -6180,6 +6194,11 @@ function bindQuizDelegation() {
     const pick = t.closest(".q-pick");
     if (pick) {
       startQuiz(pick.dataset.sub, pick.dataset.resume === "1");
+      return;
+    }
+    const recommendPick = t.closest("[data-recommend-sub]");
+    if (recommendPick) {
+      startQuiz(recommendPick.getAttribute("data-recommend-sub"), recommendPick.getAttribute("data-resume") === "1");
       return;
     }
 
@@ -6986,7 +7005,7 @@ const Lang = (() => {
       "deck.live": "مباشر",
       "deck.today": "اليوم",
       "deck.termHint": "جرّب: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.0.1 — اكتب help لعرض الأوامر.",
+      "deck.termWelcome": "nova-shell v3.1.0 — اكتب help لعرض الأوامر.",
       "deck.termHelp": "الأوامر: help · scan [host] · caesar <نص> [إزاحة] · clear",
       "deck.termScanTitle": "بدء فحص المنافذ — {host}",
       "deck.termScanDone": "اكتمل الفحص — {n} منفذًا مفحوصًا",
@@ -7892,7 +7911,7 @@ const Lang = (() => {
       "deck.live": "Live",
       "deck.today": "Today",
       "deck.termHint": "Try: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.0.1 — type help for commands.",
+      "deck.termWelcome": "nova-shell v3.1.0 — type help for commands.",
       "deck.termHelp": "Commands: help · scan [host] · caesar <text> [shift] · clear",
       "deck.termScanTitle": "Port scan — {host}",
       "deck.termScanDone": "Scan complete — {n} ports checked",
@@ -17842,7 +17861,8 @@ const LABS_META = {
   function renderShell() {
     const deck = buildDeck();
     if (summary) { renderSummary(); return; }
-    mount.innerHTML = '<div class="mk-shell">' +
+    mount.innerHTML = '<div class="mk-shell mk-launch">' +
+      '<span class="mk-orb" aria-hidden="true"></span>' +
       '<div class="mk-head"><h3>' + esc(T("mock.title")) + "</h3><p>" + esc(T("mock.sub")) + "</p></div>" +
       (deck.length
         ? '<div class="mk-actions"><button type="button" class="btn btn-sm btn-primary" data-mock-start="1">' + esc(T("mock.start")) + "</button>" +
@@ -19581,6 +19601,15 @@ const LABS_META = {
   if (typeof btn.addEventListener !== "function") return;
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
+    {
+      date: "2026-10-22",
+      tag: "release",
+      title: { ar: "الإصدار 3.1.0 — مساحة اختبارات أوضح وتنقّل أسرع", en: "v3.1.0 — a clearer, faster quiz workspace" },
+      desc: {
+        ar: "أُعيد تصميم صفحة الاختبارات كمساحة عمل واحدة: لوحة جانبية تجمع نمط الاختبار ونبض تقدّمك العام، وبطاقة «الاختبار المقترح» بجانب قائمة مواد تعرض عدد الأسئلة وأفضل نتيجة وشريط التقدّم وحالة كل مادة، مع بنك الفترات واختبار الفاينل في صفّين متناسقين. تحسّنت الاستجابة على الجوال، وأصبحت الأسهم تنعكس مع اتجاه اللغة، وأُصلح زر بدء الاختبار المقترح. ورُفعت نسخة المنصة إلى 3.1.0 مع مزامنة نسخة الكاش ومسار style.css.",
+        en: "Rebuilt the quiz page as one focused workspace: a side rail combines the practice/exam mode with an overall progress pulse, a recommended-next card sits beside a cleaner subject list showing question counts, best scores, progress bars and status, and the past-quiz bank and full mock exam now share one balanced lower row. Mobile layouts are tighter, directional arrows follow the active language, and the recommended-quiz button now actually starts the quiz. The platform version was bumped to 3.1.0 with the cache version and style.css query kept in sync."
+      }
+    },
     {
       date: "2026-10-22",
       tag: "release",
@@ -23304,7 +23333,7 @@ const LABS_META = {
   }
 
   if (termLog) {
-    termPush("dim", T("deck.termWelcome") || "nova-shell v3.0.1 — type help");
+    termPush("dim", T("deck.termWelcome") || "nova-shell v3.1.0 — type help");
     listen(termLog, "click", function () {
       try { if (termInput && typeof termInput.focus === "function") termInput.focus(); } catch (e) { /* non-fatal */ }
     });

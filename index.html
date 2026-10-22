@@ -52,7 +52,7 @@
        Preload the two faces that paint the first screen. -->
   <link rel="preload" as="font" type="font/woff2" href="fonts/plex-arabic-arabic-400.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="fonts/inter-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="style.css?v=3.0.1" />
+  <link rel="stylesheet" href="style.css?v=3.1.0" />
   <link rel="stylesheet" href="ui-overhaul.css?v=1.0.0" />
   <!-- MODULE 90 · Motion stylesheet (Lenis baseline, BlurText word units,
        pointer glow). Additive only — everything is scoped to
@@ -1125,32 +1125,36 @@
         <h1 class="section-title" data-i18n="quiz.title">اختبر نفسك في كل مادة</h1>
         <p class="section-sub" data-i18n="quiz.sub">أسئلة لكل مادة مع شرح فوري لكل إجابة، وضع مؤقّت اختياري، وحفظ تلقائي للنتائج.</p>
       </div>
-      <!-- Collapsible hub: the quiz surface expands on demand; default open
-           so keyboard/screen-reader users land directly on the picker. -->
-      <details class="collapsible reveal" open>
-        <summary class="collapsible-summary">
-          <span data-i18n="collapsible.showQuizzes">عرض بنوك الأسئلة</span>
-          <span class="collapsible-chev" aria-hidden="true">▾</span>
-        </summary>
-        <div class="collapsible-body">
-          <div id="quizApp" class="quiz-grid"></div>
-          <p class="quiz-hint" data-i18n="quiz.hint"> اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
+      <div class="quiz-workspace">
+        <!-- Collapsible hub: the quiz surface expands on demand; default open
+             so keyboard/screen-reader users land directly on the picker. -->
+        <details class="collapsible reveal" open>
+          <summary class="collapsible-summary">
+            <span data-i18n="collapsible.showQuizzes">عرض بنوك الأسئلة</span>
+            <span class="collapsible-chev" aria-hidden="true">▾</span>
+          </summary>
+          <div class="collapsible-body">
+            <div id="quizApp" class="quiz-grid"></div>
+            <p class="quiz-hint" data-i18n="quiz.hint"> اختر مادة للبدء — يمكنك استكمال محاولة سابقة أو إعادة الاختبار من الصفر.</p>
+          </div>
+        </details>
+        <div class="quiz-extras">
+          <!-- MODULE 99 · بنك الفترات — past-quiz revision lists. One hub for ALL
+               subjects (outside the quiz grid): each row opens a question &
+               answer sheet. New subjects append automatically as
+               data/quiz-bank.json grows; the panel stays hidden until banks
+               exist, so a failed load never leaves an empty shell. -->
+          <div id="bankHub" class="bank-hub" hidden>
+            <div class="bank-hub-head">
+              <h3 class="bank-hub-title" data-i18n="bank.hubTitle">بنك الفترات</h3>
+              <p class="bank-hub-sub" data-i18n="bank.hubSub">سؤال وجواب من كويزات الفترات السابقة — ورقة مراجعة مباشرة قبل الاختبار.</p>
+            </div>
+            <div id="bankHubList" class="bank-hub-list"></div>
+          </div>
+          <!-- MODULE 64 · MockExam — one full paper from every bank, one total timer. -->
+          <div id="mockApp" class="mock-app reveal" aria-live="polite"></div>
         </div>
-      </details>
-      <!-- MODULE 99 · بنك الفترات — past-quiz revision lists. One hub for ALL
-           subjects (outside the quiz grid): each row opens a question &
-           answer sheet. New subjects append automatically as
-           data/quiz-bank.json grows; the panel stays hidden until banks
-           exist, so a failed load never leaves an empty shell. -->
-      <div id="bankHub" class="bank-hub" hidden>
-        <div class="bank-hub-head">
-          <h3 class="bank-hub-title" data-i18n="bank.hubTitle">بنك الفترات</h3>
-          <p class="bank-hub-sub" data-i18n="bank.hubSub">سؤال وجواب من كويزات الفترات السابقة — ورقة مراجعة مباشرة قبل الاختبار.</p>
-        </div>
-        <div id="bankHubList" class="bank-hub-list"></div>
       </div>
-      <!-- MODULE 64 · MockExam — one full paper from every bank, one total timer. -->
-      <div id="mockApp" class="mock-app reveal" aria-live="polite"></div>
     </section>
 
     <!-- KALI-SEC-START -->

@@ -1,6 +1,6 @@
 /* ============================================================
    منصة أمن المعلومات — الترم الحالي | Service Worker
-   Strategy (v3.0.1):
+   Strategy (v3.1.0):
    - Precache the app shell on install (versioned cache).
    - Navigations: network-first with cached-shell fallback.
    - Static assets + JSON: Stale-While-Revalidate.
@@ -13,7 +13,7 @@
    ============================================================ */
 "use strict";
 
-const CACHE_VERSION = "v3.0.1";
+const CACHE_VERSION = "v3.1.0";
 const CACHE_NAME = `motmi-portal-${CACHE_VERSION}`;
 const API_CACHE_NAME = `motmi-api-${CACHE_VERSION}`;
 

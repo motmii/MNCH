@@ -221,6 +221,9 @@ function drain() {
     check("bank cards removed from the subject grid", html.indexOf("بنك الفترات — ") === -1);
     check("subject grid holds no sheet targets (no data-sheet-sub)", html.indexOf("data-sheet-sub") === -1);
     check("subject grid keeps only official subject cards (prefix-tolerant match: q-pick q-subject-card)", (html.match(/q-pick q-subject-card/g) || []).length === OFFICIAL.length);
+    check("quiz workspace renders one dashboard shell", html.indexOf("q-dashboard") !== -1 && html.indexOf("q-hub-layout") !== -1 && html.indexOf("q-hub-aside") !== -1 && html.indexOf("q-hub-main") !== -1);
+    check("subject rows carry progress meters", (html.match(/q-subject-meter/g) || []).length === OFFICIAL.length);
+    check("recommended CTA is wired to its own action", html.indexOf("q-recommend-btn") !== -1 && html.indexOf("data-recommend-sub=") !== -1);
 
     const hubEl = sandbox.document.getElementById("bankHub");
     const hubList = sandbox.document.getElementById("bankHubList");
@@ -260,6 +263,20 @@ function drain() {
     const osSheet = app.innerHTML;
     check("hub row click opens the OS revision sheet (5 items)", osSheet.indexOf("q-sheet-item") !== -1 && (osSheet.match(/<details /g) || []).length === 5);
     click(back);
+
+    /* The recommended CTA is a standalone button, not a .q-pick card. */
+    const recRun = {
+      preventDefault() {}, stopPropagation() {},
+      target: {
+        closest(sel) {
+          return sel === "[data-recommend-sub]"
+            ? { getAttribute(name) { return name === "data-recommend-sub" ? "260210030702" : null; } }
+            : null;
+        },
+      },
+    };
+    click(recRun);
+    check("recommended CTA starts the suggested quiz", app.innerHTML.indexOf("q-question") !== -1 && app.innerHTML.indexOf("q-option") !== -1);
 
     /* The engine still runs a REAL MCQ bank exactly as before. */
     const openRun = { preventDefault() {}, stopPropagation() {}, target: { closest(sel) { return sel === ".q-pick" ? { dataset: { sub: "260210030702" } } : null; } } };
@@ -315,6 +332,8 @@ function drain() {
     } catch (e) { return false; }
   })());
   check("CSS MODULE 99 present", css.indexOf("MODULE 99") !== -1 && css.indexOf(".bank-hub") !== -1);
+  check("CSS MODULE 102 ships the quiz workspace layer", css.indexOf("MODULE 102") !== -1 && css.indexOf(".quiz-workspace") !== -1 && css.indexOf(".q-hub-layout") !== -1);
+  check("directional arrows follow the active language", js.indexOf('const arrow = curLang === "en" ? "\u2192" : "\u2190"') !== -1);
   check("no network in the bank layer beyond the JSON", !/WebSocket|XMLHttpRequest|sendBeacon/.test(layer));
   check("CSS MODULE 98 present", css.indexOf("MODULE 98") !== -1 && css.indexOf(".q-sheet-item") !== -1);
   check("CSS reduced-motion guard for the sheet", css.indexOf(".q-sheet-hint { transition: none; }") !== -1);

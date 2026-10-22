@@ -3,7 +3,7 @@
 ## Overview
 Single-page application (SPA) built with zero dependencies. All code runs client-side. No build step required.
 
-> **Runtime mode (v3.0.1):** online-only. `index.html` unregisters every legacy service worker and clears Cache Storage at boot; nothing registers `sw.js`, and the hero loads no photo/video. Service-worker and hero-media notes below are historical records kept for the test suite.
+> **Runtime mode (v3.1.0):** online-only. `index.html` unregisters every legacy service worker and clears Cache Storage at boot; nothing registers `sw.js`, and the hero loads no photo/video. Service-worker and hero-media notes below are historical records kept for the test suite.
 
 ## Module Map (`script.js`)
 
@@ -36,9 +36,10 @@ Main IIFE ("use strict")
 ├── M13  QuizEngine       6 archived previous-semester banks · 20 questions
 │                         (each tagged with a topic category) · practice vs
 │                         timed-exam modes
-│    ├── renderPicks()     Subject picker w/ best-score & resume badges +
-│    │                     explicit practice/exam mode selector (persisted
-│    │                     under the legacy "timed" key)
+│    ├── renderPicks()     Quiz workspace: mode rail, recommended next,
+│    │                     progress pulse + subject rows with meters and
+│    │                     best-score/resume labels (practice/exam mode is
+│    │                     persisted under the legacy "timed" key)
 │    ├── startQuiz()       Start or resume from saved progress; accepts an
 │    │                     optional index filter (retry-incorrect replays)
 │    ├── showQuestion()    Timer bar, ARIA options group, "Question i of n"
