@@ -103,6 +103,7 @@ Fully in-browser, zero-dependency simulation labs (all client-side, GDPR-friendl
 
 ### Progress Hub (تقدمك)
 - Reads your locally-saved quiz store and shows a **"continue where you left off"** resume card for any mid-quiz session plus best-score cards per subject
+- **«ملاحظاتي» / "My notes" hub (v3.1.4)** — one panel collects every local lesson note (written inside any lesson) with its bilingual lesson and subject titles, a text excerpt, instant diacritics-insensitive **search**, **subject filter chips** with per-subject counts, a **Quick review** card deck over the filtered notes (reveal, wrapped previous/next, Esc and direction-aware arrow keys), inline **Edit** (Ctrl+Enter saves, Esc cancels), per-note **Open lesson** and **Delete** (confirmed) actions, a notes counter in the stats strip, and a one-click **Markdown export** that downloads everything to your device
 - Honest empty state until you complete your first quiz; fully private (your device only)
 
 ### Study Materials

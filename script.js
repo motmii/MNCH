@@ -7005,7 +7005,7 @@ const Lang = (() => {
       "deck.live": "مباشر",
       "deck.today": "اليوم",
       "deck.termHint": "جرّب: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.1.1 — اكتب help لعرض الأوامر.",
+      "deck.termWelcome": "nova-shell v3.1.4 — اكتب help لعرض الأوامر.",
       "deck.termHelp": "الأوامر: help · scan [host] · caesar <نص> [إزاحة] · clear",
       "deck.termScanTitle": "بدء فحص المنافذ — {host}",
       "deck.termScanDone": "اكتمل الفحص — {n} منفذًا مفحوصًا",
@@ -7492,6 +7492,35 @@ const Lang = (() => {
       "progress.reviewWrong": "راجع أخطاءك",
       "progress.overall": "التقدم الكلي",
       "progress.theatre": "سيناريوهات مكتملة",
+      "progress.notes": "ملاحظات محفوظة",
+      "progress.notesTitle": "ملاحظاتي",
+      "progress.notesSub": "ملاحظات تكتبها داخل أي درس وتُحفظ على جهازك فقط.",
+      "progress.notesEmpty": "لا توجد ملاحظات بعد. افتح أي درس واكتب ملاحظة قصيرة، وستظهر هنا للمراجعة.",
+      "progress.notesEmptyCta": "تصفّح الدروس",
+      "progress.notesCount": "ملاحظات: {count}",
+      "progress.noteOpen": "افتح الدرس",
+      "progress.noteDelete": "حذف",
+      "progress.noteDeleteConfirm": "هل تريد حذف هذه الملاحظة نهائيًا؟",
+      "progress.notesExport": "تصدير الملاحظات",
+      "progress.notesExportName": "ملاحظات-المنصة",
+      "progress.notesSearch": "ابحث في ملاحظاتك…",
+      "progress.notesShowing": "عرض {shown} من {total}",
+      "progress.notesSearchNone": "لا توجد ملاحظة تطابق البحث أو تصفية المادة.",
+      "progress.noteEdit": "تعديل",
+      "progress.noteSave": "حفظ",
+      "progress.noteCancel": "إلغاء",
+      "progress.noteField": "نص الملاحظة",
+      "progress.notesFilter": "تصفية حسب المادة",
+      "progress.notesAll": "كل المواد",
+      "progress.notesReview": "مراجعة سريعة",
+      "progress.notesReviewTitle": "مراجعة الملاحظات",
+      "progress.notesReviewHint": "اضغط البطاقة لكشف الملاحظة كاملة.",
+      "progress.notesReviewShow": "عرض الملاحظة",
+      "progress.notesReviewHide": "إخفاء الملاحظة",
+      "progress.notesReviewProgress": "{i} من {n}",
+      "progress.notesReviewPrev": "السابقة",
+      "progress.notesReviewNext": "التالية",
+      "progress.notesReviewClose": "إغلاق المراجعة",
       "semester.eyebrow": "دليل الترم الحالي",
       "semester.title": "لوحة <em class=\"grad\">الترم الحالي</em>",
       "semester.sub": "خطة الترم الحالي كاملة في مكان واحد: المواد الرسمية، الجدول الأسبوعي، الساعات المعتمدة، وحلقات الوصول إلى الاختبارات والأدوات والمعامل.",
@@ -7911,7 +7940,7 @@ const Lang = (() => {
       "deck.live": "Live",
       "deck.today": "Today",
       "deck.termHint": "Try: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.1.1 — type help for commands.",
+      "deck.termWelcome": "nova-shell v3.1.4 — type help for commands.",
       "deck.termHelp": "Commands: help · scan [host] · caesar <text> [shift] · clear",
       "deck.termScanTitle": "Port scan — {host}",
       "deck.termScanDone": "Scan complete — {n} ports checked",
@@ -8394,6 +8423,35 @@ const Lang = (() => {
       "progress.reviewWrong": "Review incorrect answers",
       "progress.overall": "Overall progress",
       "progress.theatre": "Scenarios completed",
+      "progress.notes": "Saved notes",
+      "progress.notesTitle": "My notes",
+      "progress.notesSub": "Notes you write inside any lesson — saved on your device only.",
+      "progress.notesEmpty": "No notes yet. Open any lesson, write a short note, and it will appear here for review.",
+      "progress.notesEmptyCta": "Browse lessons",
+      "progress.notesCount": "Notes: {count}",
+      "progress.noteOpen": "Open lesson",
+      "progress.noteDelete": "Delete",
+      "progress.noteDeleteConfirm": "Delete this note permanently?",
+      "progress.notesExport": "Export notes",
+      "progress.notesExportName": "mnch-notes",
+      "progress.notesSearch": "Search your notes…",
+      "progress.notesShowing": "Showing {shown} of {total}",
+      "progress.notesSearchNone": "No note matches your search or subject filter.",
+      "progress.noteEdit": "Edit",
+      "progress.noteSave": "Save",
+      "progress.noteCancel": "Cancel",
+      "progress.noteField": "Note text",
+      "progress.notesFilter": "Filter by subject",
+      "progress.notesAll": "All subjects",
+      "progress.notesReview": "Quick review",
+      "progress.notesReviewTitle": "Notes review",
+      "progress.notesReviewHint": "Tap the card to reveal the full note.",
+      "progress.notesReviewShow": "Show note",
+      "progress.notesReviewHide": "Hide note",
+      "progress.notesReviewProgress": "{i} of {n}",
+      "progress.notesReviewPrev": "Previous",
+      "progress.notesReviewNext": "Next",
+      "progress.notesReviewClose": "Close review",
       /* ---------- MODULE 48 · GlobalSearch (Phase 6) ---------- */
       "search.title": "Search the platform",
       "search.placeholder": "Search: lesson, path, tool, quiz, term…",
@@ -12195,6 +12253,10 @@ function rxMatch(node, s, i) {
   const mount = $id("progressApp");
   if (!mount) return;
   const escP = (v) => escHtml(String(v));
+  let notesQuery = "";
+  let notesSubject = "";
+  let reviewDeck = [];
+  let reviewIndex = 0;
 
   /** @returns {string} Saved display name for a quiz subject. */
   function subjectName(key) {
@@ -12266,6 +12328,394 @@ function rxMatch(node, s, i) {
     } catch { return {}; }
   }
 
+  /** Bilingual subject label from the official semester plan. @param {string} key @returns {string} */
+  function noteSubjectLabel(key) {
+    const sem = window.PLATFORM_CURRENT_SEMESTER;
+    const list = (sem && Array.isArray(sem.subjects)) ? sem.subjects : [];
+    const match = list.find((s) => s && (s.code === key || s.id === key));
+    if (match && match.name) return match.name[Lang.current] || match.name.ar || key;
+    return subjectName(key);
+  }
+
+  /** Subject code part of a notes key ("<subject>/<topic>"). @param {string} lkey @returns {string} */
+  function noteSubjectCode(lkey) {
+    return String(lkey).split("/")[0] || "";
+  }
+
+  /**
+   * Normalize search text: lowercase, drop Arabic diacritics/tatweel, and
+   * unify alef/ya/ta-marbuta so a query without them still matches.
+   * @param {string} v Raw text.
+   * @returns {string} Comparable form.
+   */
+  function noteSearchText(v) {
+    return String(v == null ? "" : v)
+      .toLowerCase()
+      .replace(/[\u064B-\u0652\u0670\u0640]/g, "")
+      .replace(/[\u0623\u0625\u0622\u0671]/g, "\u0627")
+      .replace(/\u0649/g, "\u064A")
+      .replace(/\u0629/g, "\u0647");
+  }
+
+  /** Non-empty local lesson notes: { "<subject>/<topic>": "text" }. @returns {Object} */
+  function localNotes() {
+    const st = readStored("lesson-notes");
+    const notes = (st.notes && typeof st.notes === "object" && !Array.isArray(st.notes)) ? st.notes : {};
+    const out = {};
+    Object.keys(notes).forEach((k) => {
+      const text = notes[k];
+      if (typeof text === "string" && text.trim()) out[k] = text;
+    });
+    return out;
+  }
+
+  /** Reader-facing lesson title for a notes key. @param {string} lkey @returns {string} */
+  function noteTitle(lkey) {
+    const parts = String(lkey).split("/");
+    const sub = parts[0] || "";
+    const topic = parts[1] || "";
+    const registry = (window.PLATFORM_LESSONS && typeof window.PLATFORM_LESSONS === "object")
+      ? window.PLATFORM_LESSONS : {};
+    const lesson = registry[sub] && registry[sub][topic];
+    const title = lesson && lesson.title;
+    return (title && (title[Lang.current] || title.ar)) || topic || String(lkey);
+  }
+
+  /** Paragraph direction from the dominant script, so mixed notes read naturally. @param {string} v @returns {string} */
+  function noteDir(v) {
+    const s = String(v == null ? "" : v);
+    const ar = (s.match(/[\u0600-\u06FF]/g) || []).length;
+    const lat = (s.match(/[A-Za-z]/g) || []).length;
+    if (ar || lat) return ar >= lat ? "rtl" : "ltr";
+    return Lang.current === "ar" ? "rtl" : "ltr";
+  }
+
+  /** Download every local lesson note as one Markdown file. @returns {void} */
+  function exportNotes() {
+    const notes = localNotes();
+    const keys = Object.keys(notes).sort();
+    if (!keys.length) return;
+    const lines = ["# " + Lang.t("progress.notesTitle"), ""];
+    keys.forEach((k) => {
+      lines.push("## " + noteTitle(k), "");
+      lines.push("_" + noteSubjectLabel(String(k).split("/")[0] || "") + " · " + k + "_", "");
+      lines.push(notes[k], "");
+    });
+    try {
+      const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = Lang.t("progress.notesExportName") + "-" + new Date().toISOString().slice(0, 10) + ".md";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 1000);
+    } catch { /* download is a progressive enhancement */ }
+  }
+
+  /** Notes hub panel: every saved note with search, filters, review, edit, open and delete. @returns {string} */
+  function notesHubHtml() {
+    const notes = localNotes();
+    const keys = Object.keys(notes).sort();
+    const hasNotes = keys.length > 0;
+    const subjectCounts = {};
+    keys.forEach((k) => {
+      const code = noteSubjectCode(k);
+      if (code) subjectCounts[code] = (subjectCounts[code] || 0) + 1;
+    });
+    const subjectKeys = Object.keys(subjectCounts).sort((a, b) =>
+      noteSubjectLabel(a).localeCompare(noteSubjectLabel(b), Lang.current === "ar" ? "ar" : "en"));
+    if (notesSubject && !subjectCounts[notesSubject]) notesSubject = "";
+    const tools = hasNotes
+      ? '<span class="progress-notes-count">' + escP(Lang.t("progress.notesCount", { count: keys.length })) + '</span>' +
+        '<button type="button" class="btn btn-sm btn-ghost" data-progress-notes-review-open="1">' + escP(Lang.t("progress.notesReview")) + '</button>' +
+        '<button type="button" class="btn btn-sm btn-ghost" data-progress-notes-export="1">' + escP(Lang.t("progress.notesExport")) + '</button>'
+      : "";
+    const search = hasNotes
+      ? '<div class="progress-notes-search"><input type="search" value="' + escP(notesQuery) + '" placeholder="' +
+        escP(Lang.t("progress.notesSearch")) + '" aria-label="' + escP(Lang.t("progress.notesSearch")) +
+        '" autocomplete="off" spellcheck="false" data-progress-notes-search="1" /></div>'
+      : "";
+    const filters = hasNotes
+      ? '<div class="progress-notes-filters" role="group" aria-label="' + escP(Lang.t("progress.notesFilter")) + '">' +
+        '<button type="button" class="progress-filter-chip' + (notesSubject ? "" : " is-active") + '" data-progress-notes-subject="" aria-pressed="' + (notesSubject ? "false" : "true") + '">' +
+        escP(Lang.t("progress.notesAll")) + ' <span class="progress-filter-count">' + keys.length + '</span></button>' +
+        subjectKeys.map((code) =>
+          '<button type="button" class="progress-filter-chip' + (notesSubject === code ? " is-active" : "") + '" data-progress-notes-subject="' + escP(code) + '" aria-pressed="' + (notesSubject === code ? "true" : "false") + '">' +
+          escP(noteSubjectLabel(code)) + ' <span class="progress-filter-count">' + subjectCounts[code] + '</span></button>'
+        ).join("") +
+        '</div>'
+      : "";
+    let body;
+    if (!hasNotes) {
+      body =
+        '<p class="progress-meta">' + escP(Lang.t("progress.notesEmpty")) + '</p>' +
+        '<div class="progress-actions"><a href="#paths" class="btn btn-ghost btn-sm">' + escP(Lang.t("progress.notesEmptyCta")) + '</a></div>';
+    } else {
+      body = '<div class="progress-notes-list">' + keys.map((k) => {
+        const text = notes[k];
+        const snippet = text.length > 240 ? text.slice(0, 240).trim() + "…" : text;
+        const code = noteSubjectCode(k);
+        const haystack = noteSearchText(noteTitle(k) + " " + noteSubjectLabel(code) + " " + text);
+        return '<article class="progress-note" data-note-key="' + escP(k) + '" data-note-subject="' + escP(code) + '" data-note-search="' + escP(haystack) + '">' +
+          '<div class="progress-note-head"><h4>' + escP(noteTitle(k)) + '</h4>' +
+          '<span class="progress-note-subject">' + escP(noteSubjectLabel(code)) + '</span></div>' +
+          '<p class="progress-note-text" dir="' + noteDir(text) + '">' + escP(snippet) + '</p>' +
+          '<div class="progress-note-actions">' +
+          '<a class="btn btn-sm btn-ghost" href="#lesson/' + escP(k) + '">' + escP(Lang.t("progress.noteOpen")) + '</a>' +
+          '<button type="button" class="btn btn-sm btn-ghost" data-progress-note-edit="' + escP(k) + '">' + escP(Lang.t("progress.noteEdit")) + '</button>' +
+          '<button type="button" class="btn btn-sm btn-ghost" data-progress-note-delete="' + escP(k) + '">' + escP(Lang.t("progress.noteDelete")) + '</button>' +
+          '</div></article>';
+      }).join("") + '</div>' +
+        '<p class="progress-meta progress-notes-none" data-progress-notes-none hidden>' + escP(Lang.t("progress.notesSearchNone")) + '</p>' +
+        '<div class="progress-notes-review" data-progress-notes-review role="region" aria-label="' + escP(Lang.t("progress.notesReviewTitle")) + '" hidden></div>';
+    }
+    return '<section class="progress-notes" aria-labelledby="progressNotesTitle">' +
+      '<div class="progress-notes-head"><div>' +
+      '<h3 class="progress-subhead" id="progressNotesTitle">' + escP(Lang.t("progress.notesTitle")) + '</h3>' +
+      '<p class="progress-meta">' + escP(Lang.t("progress.notesSub")) + '</p></div>' +
+      (tools ? '<div class="progress-notes-tools">' + tools + '</div>' : '') +
+      '</div>' + search + filters + body + '</section>';
+  }
+
+  /** Hide notes outside the active subject/search and keep chips, counter and review honest. @returns {void} */
+  function applyNoteFilter() {
+    const rows = mount.querySelectorAll(".progress-note");
+    if (!rows.length) return;
+    const q = noteSearchText(notesQuery).trim();
+    let shown = 0;
+    rows.forEach((row) => {
+      const subjectOk = !notesSubject || row.getAttribute("data-note-subject") === notesSubject;
+      const hit = subjectOk && (!q || String(row.getAttribute("data-note-search") || "").indexOf(q) >= 0);
+      row.hidden = !hit;
+      if (hit) shown++;
+    });
+    const filtering = !!q || !!notesSubject;
+    const none = mount.querySelector("[data-progress-notes-none]");
+    if (none) none.hidden = !filtering || shown > 0;
+    const count = mount.querySelector(".progress-notes-count");
+    if (count) {
+      count.textContent = filtering
+        ? Lang.t("progress.notesShowing", { shown: shown, total: rows.length })
+        : Lang.t("progress.notesCount", { count: rows.length });
+    }
+    mount.querySelectorAll("[data-progress-notes-subject]").forEach((chip) => {
+      const active = (chip.getAttribute("data-progress-notes-subject") || "") === notesSubject;
+      chip.classList.toggle("is-active", active);
+      chip.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    const reviewBtn = mount.querySelector("[data-progress-notes-review-open]");
+    if (reviewBtn) reviewBtn.disabled = shown === 0;
+  }
+
+  /** Keys of the note rows currently passing search + subject filters. @returns {string[]} */
+  function visibleNoteKeys() {
+    const out = [];
+    mount.querySelectorAll(".progress-note").forEach((row) => {
+      if (row.hidden) return;
+      const key = row.getAttribute("data-note-key") || "";
+      if (key) out.push(key);
+    });
+    return out;
+  }
+
+  /** Fill the review panel with the current card. @returns {void} */
+  function showReviewNote() {
+    const panel = mount.querySelector("[data-progress-notes-review]");
+    if (!panel || !reviewDeck.length) return;
+    const key = reviewDeck[reviewIndex];
+    const text = localNotes()[key] || "";
+    const lesson = panel.querySelector("[data-progress-review-lesson]");
+    const subject = panel.querySelector("[data-progress-review-subject]");
+    const body = panel.querySelector("[data-progress-review-text]");
+    const hint = panel.querySelector("[data-progress-review-hint]");
+    const card = panel.querySelector("[data-progress-review-card]");
+    const progress = panel.querySelector("[data-progress-review-progress]");
+    if (lesson) lesson.textContent = noteTitle(key);
+    if (subject) subject.textContent = noteSubjectLabel(noteSubjectCode(key));
+    if (body) {
+      body.textContent = text;
+      body.setAttribute("dir", noteDir(text));
+      body.hidden = true;
+    }
+    if (hint) hint.textContent = Lang.t("progress.notesReviewHint");
+    if (card) card.setAttribute("aria-expanded", "false");
+    if (progress) progress.textContent = Lang.t("progress.notesReviewProgress", { i: reviewIndex + 1, n: reviewDeck.length });
+  }
+
+  /** Enter review mode over the notes currently visible. @returns {void} */
+  function openNotesReview() {
+    const section = mount.querySelector(".progress-notes");
+    const panel = mount.querySelector("[data-progress-notes-review]");
+    if (!section || !panel) return;
+    const keys = visibleNoteKeys();
+    if (!keys.length) return;
+    reviewDeck = keys;
+    reviewIndex = 0;
+
+    const head = document.createElement("div");
+    head.className = "progress-notes-review-head";
+    const title = document.createElement("h4");
+    title.textContent = Lang.t("progress.notesReviewTitle");
+    const progress = document.createElement("span");
+    progress.className = "progress-notes-review-progress";
+    progress.setAttribute("data-progress-review-progress", "1");
+    progress.setAttribute("aria-live", "polite");
+    progress.setAttribute("aria-atomic", "true");
+    head.appendChild(title);
+    head.appendChild(progress);
+
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "progress-notes-review-card";
+    card.setAttribute("data-progress-review-card", "1");
+    card.setAttribute("aria-expanded", "false");
+    const lesson = document.createElement("span");
+    lesson.className = "progress-notes-review-lesson";
+    lesson.setAttribute("data-progress-review-lesson", "1");
+    const subject = document.createElement("span");
+    subject.className = "progress-notes-review-subject";
+    subject.setAttribute("data-progress-review-subject", "1");
+    const hint = document.createElement("span");
+    hint.className = "progress-notes-review-hint";
+    hint.setAttribute("data-progress-review-hint", "1");
+    const text = document.createElement("span");
+    text.className = "progress-notes-review-text";
+    text.setAttribute("data-progress-review-text", "1");
+    text.hidden = true;
+    card.appendChild(lesson);
+    card.appendChild(subject);
+    card.appendChild(hint);
+    card.appendChild(text);
+
+    const nav = document.createElement("div");
+    nav.className = "progress-notes-review-nav";
+    const prev = document.createElement("button");
+    prev.type = "button";
+    prev.className = "btn btn-sm btn-ghost";
+    prev.setAttribute("data-progress-review-prev", "1");
+    prev.textContent = Lang.t("progress.notesReviewPrev");
+    const next = document.createElement("button");
+    next.type = "button";
+    next.className = "btn btn-sm btn-ghost";
+    next.setAttribute("data-progress-review-next", "1");
+    next.textContent = Lang.t("progress.notesReviewNext");
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "btn btn-sm btn-ghost progress-notes-review-close";
+    close.setAttribute("data-progress-review-close", "1");
+    close.textContent = Lang.t("progress.notesReviewClose");
+    nav.appendChild(prev);
+    nav.appendChild(next);
+    nav.appendChild(close);
+
+    panel.textContent = "";
+    panel.appendChild(head);
+    panel.appendChild(card);
+    panel.appendChild(nav);
+    panel.hidden = false;
+    section.classList.add("is-reviewing");
+    showReviewNote();
+    try { card.focus(); } catch { /* focus is an enhancement */ }
+  }
+
+  /** Reveal or hide the full note on the review card. @param {Element} card Card button. @returns {void} */
+  function toggleReviewCard(card) {
+    if (!card) return;
+    const body = card.querySelector("[data-progress-review-text]");
+    const hint = card.querySelector("[data-progress-review-hint]");
+    const open = card.getAttribute("aria-expanded") !== "true";
+    card.setAttribute("aria-expanded", open ? "true" : "false");
+    if (body) body.hidden = !open;
+    if (hint) hint.textContent = Lang.t(open ? "progress.notesReviewHide" : "progress.notesReviewHint");
+  }
+
+  /** Move through the deck; wraps in both directions. @param {number} step @returns {void} */
+  function stepReview(step) {
+    if (!reviewDeck.length) return;
+    reviewIndex = (reviewIndex + step + reviewDeck.length) % reviewDeck.length;
+    showReviewNote();
+  }
+
+  /** Leave review mode and return focus to its trigger. @returns {void} */
+  function closeNotesReview() {
+    const section = mount.querySelector(".progress-notes");
+    const panel = mount.querySelector("[data-progress-notes-review]");
+    if (section) section.classList.remove("is-reviewing");
+    if (panel) {
+      panel.hidden = true;
+      panel.textContent = "";
+    }
+    reviewDeck = [];
+    reviewIndex = 0;
+    const trigger = mount.querySelector("[data-progress-notes-review-open]");
+    try { if (trigger) trigger.focus(); } catch { /* focus is an enhancement */ }
+  }
+
+  /** Swap a note's excerpt/actions for an inline editor. @param {Element} row Note article. @returns {void} */
+  function openNoteEditor(row) {
+    if (!row || row.querySelector("[data-progress-note-editor]")) return;
+    const key = row.getAttribute("data-note-key") || "";
+    if (!key) return;
+    const text = localNotes()[key] || "";
+    const textEl = row.querySelector(".progress-note-text");
+    const actions = row.querySelector(".progress-note-actions");
+
+    const editor = document.createElement("div");
+    editor.className = "progress-note-editor";
+    editor.setAttribute("data-progress-note-editor", key);
+
+    const ta = document.createElement("textarea");
+    ta.className = "progress-note-input";
+    ta.maxLength = 2000;
+    ta.rows = 3;
+    ta.value = text;
+    ta.setAttribute("dir", noteDir(text));
+    ta.setAttribute("data-progress-note-input", "1");
+    ta.setAttribute("aria-label", Lang.t("progress.noteField"));
+    ta.addEventListener("input", () => { ta.setAttribute("dir", noteDir(ta.value)); });
+
+    const bar = document.createElement("div");
+    bar.className = "progress-note-edit-actions";
+    const save = document.createElement("button");
+    save.type = "button";
+    save.className = "btn btn-sm btn-primary";
+    save.setAttribute("data-progress-note-save", "1");
+    save.textContent = Lang.t("progress.noteSave");
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "btn btn-sm btn-ghost";
+    cancel.setAttribute("data-progress-note-cancel", "1");
+    cancel.textContent = Lang.t("progress.noteCancel");
+    bar.appendChild(save);
+    bar.appendChild(cancel);
+    editor.appendChild(ta);
+    editor.appendChild(bar);
+
+    if (textEl) textEl.hidden = true;
+    if (actions) actions.hidden = true;
+    row.classList.add("is-editing");
+    row.appendChild(editor);
+    try {
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    } catch { /* focus is an enhancement */ }
+  }
+
+  /** Persist the open inline editor; empty notes are never saved. @param {Element} editor Editor box. @returns {void} */
+  function saveNoteEditor(editor) {
+    if (!editor) return;
+    const key = editor.getAttribute("data-progress-note-editor");
+    const input = editor.querySelector("[data-progress-note-input]");
+    if (!key || !input) return;
+    if (!String(input.value || "").trim()) {
+      try { input.focus(); } catch { /* non-fatal */ }
+      return;
+    }
+    saveLessonNote(key, input.value);
+  }
+
   /** Aggregate statistics strip (lessons / attempts / labs / flashcards / paths). @returns {string} */
   function statsHtml() {
     const countMap = (m) => Object.keys(m).length;
@@ -12273,6 +12723,7 @@ function rxMatch(node, s, i) {
     const flash = readStored("flash");
     const labs = readStored("labs");
     const theatre = readStored("theatre");
+    const notes = localNotes();
     const store = readStore();
     const results = store.results || {};
     const quizAttempts = Object.keys(results).filter((k) => QUIZZES[k]).length;
@@ -12315,6 +12766,7 @@ function rxMatch(node, s, i) {
       { value: labsDone, label: "progress.labs", suffix: "" },
       { value: flashDone, label: "progress.flashcards", suffix: "" },
       { value: theatreDone, label: "progress.theatre", suffix: "" },
+      { value: Object.keys(notes).length, label: "progress.notes", suffix: "" },
       { value: pathPct, label: "progress.paths", labelText: Lang.t("progress.paths"), suffix: "%" }
     ].filter((m) => typeof m.value === "number" && m.value > 0);
     if (!metrics.length) return "";
@@ -12363,12 +12815,14 @@ function rxMatch(node, s, i) {
     const flash = readStored("flash");
     const labs = readStored("labs");
     const paths = readStored("paths");
+    const notesCount = Object.keys(localNotes()).length;
     const anyPathDone = Object.keys((paths.done && typeof paths.done === "object") ? paths.done : {}).length > 0;
     const anyActivity =
       Object.keys(results).length > 0 || Object.keys(progress).length > 0 ||
       (lessons.done && Object.keys(lessons.done).length > 0) ||
       (flash.reviewed && Object.keys(flash.reviewed).length > 0) ||
-      (labs.done && Object.keys(labs.done).length > 0) || anyPathDone;
+      (labs.done && Object.keys(labs.done).length > 0) ||
+      notesCount > 0 || anyPathDone;
 
     const resumeKeys = Object.keys(progress).filter((k) => {
       const p = progress[k];
@@ -12379,8 +12833,10 @@ function rxMatch(node, s, i) {
     let html = statsHtml() + reviewWrongHtml();
     if (resumeKeys.length) html += resumeCard(resumeKeys[0], progress[resumeKeys[0]]);
     html += resultsHtml(results);
+    html += notesHubHtml();
     if (!anyActivity) html += emptyHtml();
     mount.innerHTML = html;
+    applyNoteFilter();
   }
 
   /* Delegate clicks: resume/restart/retry-wrong switch to the quiz view first. */
@@ -12403,12 +12859,108 @@ function rxMatch(node, s, i) {
       startQuiz(key, false, missed.length ? missed : null);
       return;
     }
+    const editNote = t.closest("[data-progress-note-edit]");
+    if (editNote) {
+      openNoteEditor(editNote.closest(".progress-note"));
+      return;
+    }
+    const saveNote = t.closest("[data-progress-note-save]");
+    if (saveNote) {
+      saveNoteEditor(saveNote.closest("[data-progress-note-editor]"));
+      return;
+    }
+    const cancelNote = t.closest("[data-progress-note-cancel]");
+    if (cancelNote) {
+      render();
+      return;
+    }
+    const delNote = t.closest("[data-progress-note-delete]");
+    if (delNote) {
+      const key = delNote.getAttribute("data-progress-note-delete");
+      if (!key) return;
+      const confirmFn = window.confirm;
+      if (typeof confirmFn === "function" && !confirmFn(Lang.t("progress.noteDeleteConfirm"))) return;
+      saveLessonNote(key, "");
+      return;
+    }
+    const exportNotesBtn = t.closest("[data-progress-notes-export]");
+    if (exportNotesBtn) {
+      exportNotes();
+      return;
+    }
+    const subjectChip = t.closest("[data-progress-notes-subject]");
+    if (subjectChip) {
+      notesSubject = subjectChip.getAttribute("data-progress-notes-subject") || "";
+      applyNoteFilter();
+      return;
+    }
+    const openReview = t.closest("[data-progress-notes-review-open]");
+    if (openReview) {
+      openNotesReview();
+      return;
+    }
+    const reviewCard = t.closest("[data-progress-review-card]");
+    if (reviewCard) {
+      toggleReviewCard(reviewCard);
+      return;
+    }
+    const reviewPrev = t.closest("[data-progress-review-prev]");
+    if (reviewPrev) {
+      stepReview(-1);
+      return;
+    }
+    const reviewNext = t.closest("[data-progress-review-next]");
+    if (reviewNext) {
+      stepReview(1);
+      return;
+    }
+    const reviewClose = t.closest("[data-progress-review-close]");
+    if (reviewClose) {
+      closeNotesReview();
+      return;
+    }
     const restart = t.closest("[data-progress-restart]");
     if (restart) {
       const key = restart.dataset.progressRestart;
       clearProgress(key);
       if (window.NovaViews && window.NovaViews.activate) window.NovaViews.activate("quiz");
       startQuiz(key, false);
+    }
+  });
+
+  /* Live note search filters the rendered rows without re-rendering (keeps
+     the caret); the query survives note saves/deletes and language switches. */
+  mount.addEventListener("input", (e) => {
+    const input = (e.target && e.target.closest) ? e.target.closest("[data-progress-notes-search]") : null;
+    if (!input) return;
+    notesQuery = input.value;
+    applyNoteFilter();
+  });
+
+  /* Esc closes the inline editor; Ctrl/Cmd+Enter saves it. In review mode,
+     Esc closes and the horizontal arrows follow the reading direction. */
+  mount.addEventListener("keydown", (e) => {
+    const editor = (e.target && e.target.closest) ? e.target.closest("[data-progress-note-editor]") : null;
+    if (editor) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        render();
+      } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        saveNoteEditor(editor);
+      }
+      return;
+    }
+    const reviewing = mount.querySelector(".progress-notes.is-reviewing");
+    if (!reviewing) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeNotesReview();
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      const rtl = Lang.current === "ar";
+      if (e.key === "ArrowLeft") stepReview(rtl ? 1 : -1);
+      else stepReview(rtl ? -1 : 1);
     }
   });
 
@@ -16742,6 +17294,11 @@ const LABS_META = {
     const b = banks();
     return (b[key] && b[key].name) || key;
   }
+  /* Wrap a dynamic label in Unicode isolates so an Arabic name inside an
+     English sentence (or vice versa) keeps its own direction. @param {string} v */
+  function isolate(v) {
+    return "\u2068" + String(v == null ? "" : v) + "\u2069";
+  }
   function resultsMap() {
     try {
       const d = (typeof window.readStore === "function") ? window.readStore() : null;
@@ -16846,18 +17403,18 @@ const LABS_META = {
     /* Close to the exam → fixing known mistakes first. */
     if (missed > 0) recs.push({ kind: "review", text: T("exam.recReview", { count: missed }), href: "#progress" });
     weak.slice(0, urgent ? 1 : 2).forEach((w) => {
-      recs.push({ kind: "weak", text: T("exam.recWeak", { topic: w.topic, subject: subjectName(w.subject) }),
+      recs.push({ kind: "weak", text: T("exam.recWeak", { topic: isolate(w.topic), subject: isolate(subjectName(w.subject)) }),
                   href: "#lesson/" + w.subject + "/" + w.topic });
     });
     const ls = lessonsState();
     const undoneKeys = Object.keys(ls.undone);
     if (undoneKeys.length) {
       const k = undoneKeys[0];
-      recs.push({ kind: "lesson", text: T("exam.recLesson", { lesson: k.split("/").pop() }), href: "#lesson/" + k });
+      recs.push({ kind: "lesson", text: T("exam.recLesson", { lesson: isolate(k.split("/").pop()) }), href: "#lesson/" + k });
     }
     if (!urgent) recs.push({ kind: "practice", text: T("exam.recPractice"), href: "#progress" });
     readiness.slice().sort((a, z) => a.pct - z.pct).slice(0, 2).forEach((r) => {
-      recs.push({ kind: "subject", text: T("exam.recSubject", { subject: subjectName(r.key), pct: r.pct }), href: "#quiz" });
+      recs.push({ kind: "subject", text: T("exam.recSubject", { subject: isolate(subjectName(r.key)), pct: r.pct }), href: "#quiz" });
     });
     return recs.slice(0, REC_CAP);
   }
@@ -19601,6 +20158,33 @@ const LABS_META = {
   if (typeof btn.addEventListener !== "function") return;
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
+    {
+      date: "2026-10-23",
+      tag: "release",
+      title: { ar: "الإصدار 3.1.4 — صفِّ ملاحظاتك وراجعها ببطاقات سريعة", en: "v3.1.4 — filter your notes and review them as quick cards" },
+      desc: {
+        ar: "أصبحت «ملاحظاتي» أسرع في المراجعة: شرائح لتصفية الملاحظات حسب المادة (مع عدد ملاحظات كل مادة وزرّ «كل المواد») تعمل مع البحث الفوري في الوقت نفسه، ووضع «مراجعة سريعة» يعرض الملاحظات المصفّاة بطاقةً واحدة تلو الأخرى مع كشف الملاحظة كاملة والتنقل بينها وإغلاقها، واختصارات Esc والأسهم التي تتبع اتجاه القراءة. ويُعطَّل زر المراجعة حين لا تظهر أي ملاحظة، وتبقى كل البيانات محلية. ورُفعت نسخة المنصة إلى 3.1.4 مع مزامنة نسخة الكاش ومسار style.css.",
+        en: "The My notes hub is faster to review: subject chips filter the notes by course (with per-subject counts and an All subjects chip) and combine with instant search, while a Quick review mode walks the filtered notes one card at a time with reveal, previous/next, close, and Esc/arrow shortcuts that follow the reading direction. The review button disables when no note is visible, and every note stays local. The platform version was bumped to 3.1.4 with the cache version and style.css query kept in sync."
+      }
+    },
+    {
+      date: "2026-10-23",
+      tag: "release",
+      title: { ar: "الإصدار 3.1.3 — ابحث في ملاحظاتك وعدّلها في مكانها", en: "v3.1.3 — search and edit your notes in place" },
+      desc: {
+        ar: "أصبحت لوحة «ملاحظاتي» أسهل استخدامًا: بحث فوري داخل الملاحظات يتجاهل التشكيل وفروق الهمزة والياء والتاء المربوطة، وتعديل مباشر داخل اللوحة بزرّي «حفظ» و«إلغاء» مع اختصارات Ctrl+Enter للحفظ وEsc للإلغاء، إلى جانب التصدير والحذف الحاليين. ويُختار اتجاه كل ملاحظة من لغتها الغالبة كي تُقرأ الملاحظات المختلطة (أوامر إنجليزية داخل شرح عربي) بترتيب صحيح، وأُصلح اتجاه النص المختلط في توصيات «تركيز اليوم» عند ظهور أسماء عربية داخل جملة إنجليزية. ورُفعت نسخة المنصة إلى 3.1.3 مع مزامنة نسخة الكاش ومسار style.css.",
+        en: "The My notes hub is now easier to use: instant search across your notes (ignoring Arabic diacritics and alef/ya/ta-marbuta variants), inline editing with Save and Cancel plus Ctrl+Enter to save and Esc to cancel, alongside the existing export and delete actions. Each note now takes its paragraph direction from the dominant script, so mixed notes (English commands inside an Arabic explanation) read in the right order. Mixed-direction text in Today's focus recommendations is now bidi-isolated when Arabic subject names appear inside English sentences. The platform version was bumped to 3.1.3 with the cache version and style.css query kept in sync."
+      }
+    },
+    {
+      date: "2026-10-22",
+      tag: "release",
+      title: { ar: "الإصدار 3.1.2 — لوحة «ملاحظاتي» تجمع كل ما كتبته", en: "v3.1.2 — “My notes” hub collects everything you wrote" },
+      desc: {
+        ar: "أُضيفت لوحة «ملاحظاتي» إلى صفحة «تقدمك»: تجمع كل ملاحظة كتبتها داخل الدروس في مكان واحد، مع عنوان الدرس والمادة من الخطة الرسمية (ثنائي اللغة)، ومقتطف من النص، وزرّي «افتح الدرس» و«حذف» (مع تأكيد)، وعدّاد للملاحظات ضمن إحصاءات التقدّم. ويمكن تصدير كل الملاحظات في ملف Markdown واحد يُنزَّل على جهازك — بلا شبكة وبلا حسابات، وكل شيء يبقى في التخزين المحلي. ورُفعت نسخة المنصة إلى 3.1.2 مع مزامنة نسخة الكاش ومسار style.css.",
+        en: "A new “My notes” hub now lives in the Progress view: it collects every note you wrote inside lessons in one place, with the lesson title and the subject label from the official plan (bilingual), a text excerpt, per-note “Open lesson” and “Delete” actions (with confirmation), and a notes counter in the progress stats. All notes can be exported as a single Markdown file that downloads to your device — no network, no accounts, everything stays in local storage. The platform version was bumped to 3.1.2 with the cache version and style.css query kept in sync."
+      }
+    },
     {
       date: "2026-10-22",
       tag: "release",
@@ -23342,7 +23926,7 @@ const LABS_META = {
   }
 
   if (termLog) {
-    termPush("dim", T("deck.termWelcome") || "nova-shell v3.1.1 — type help");
+    termPush("dim", T("deck.termWelcome") || "nova-shell v3.1.4 — type help");
     listen(termLog, "click", function () {
       try { if (termInput && typeof termInput.focus === "function") termInput.focus(); } catch (e) { /* non-fatal */ }
     });

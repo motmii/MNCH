@@ -3,7 +3,7 @@
 ## Overview
 Single-page application (SPA) built with zero dependencies. All code runs client-side. No build step required.
 
-> **Runtime mode (v3.1.1):** online-only. `index.html` unregisters every legacy service worker and clears Cache Storage at boot; nothing registers `sw.js`, and the hero loads no photo/video. Service-worker and hero-media notes below are historical records kept for the test suite.
+> **Runtime mode (v3.1.4):** online-only. `index.html` unregisters every legacy service worker and clears Cache Storage at boot; nothing registers `sw.js`, and the hero loads no photo/video. Service-worker and hero-media notes below are historical records kept for the test suite.
 
 ## Module Map (`script.js`)
 
@@ -88,8 +88,22 @@ Main IIFE ("use strict")
 │                         attempts, labs completed, flashcards reviewed, overall
 │                         learning-path progress and an overall %) plus a
 │                         "Review incorrect answers" action (MissedBank) that
-│                         replays only missed questions. Refresher wires:
-│                         "nova:progress-changed" + "nova:view-changed" + locale.
+│                         replays only missed questions. v3.1.2 adds the
+│                         "ملاحظاتي / My notes" hub: every non-empty
+│                         "motmi-portal:lesson-notes" entry, titled from the
+│                         official semester plan + lesson registry (bilingual),
+│                         with per-note open/delete (confirmed) and a local
+│                         Markdown export — notes count joins the stats strip.
+│                         v3.1.3 adds instant note search (diacritics- and
+│                         alef/ya/ta-marbuta-insensitive), inline editing with
+│                         save/cancel (Ctrl+Enter / Esc), and script-aware note
+│                         direction for mixed Arabic/English text. v3.1.4 adds
+│                         subject filter chips with counts, combined
+│                         search+subject filtering, and a quick review deck
+│                         over the visible notes (reveal, wrapped prev/next,
+│                         Esc and direction-aware arrows).
+│                         Refresher wires: "nova:progress-changed" +
+│                         "nova:view-changed" + locale.
 ├── M37b HeroContinue     Homepage hero "تابع من حيث توقفت" card — visible only
 │                         when the quiz store has a resumable session or saved
 │                         results; refreshes on the "nova:progress-changed"

@@ -1,6 +1,6 @@
 "use strict";
 /**
- * PWA + social-preview hardening for release v3.1.1.
+ * PWA + social-preview hardening for release v3.1.4.
  *
  * Guards the release wiring that is easy to break silently:
  *   - package version ↔ style.css?v= ↔ sw.js CACHE_VERSION
@@ -39,7 +39,7 @@ function sameSize(rel, width, height) {
 }
 
 console.log("— release wiring —");
-check("package release is 3.1.1", pkg.version === "3.1.1");
+check("package release is 3.1.4", pkg.version === "3.1.4");
 check("index.html style.css?v matches the release", html.includes("style.css?v=" + pkg.version));
 check("sw.js CACHE_VERSION matches the release", sw.includes('CACHE_VERSION = "v' + pkg.version + '"'));
 

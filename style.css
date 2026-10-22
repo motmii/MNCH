@@ -3031,6 +3031,160 @@ html[lang="en"] .lesson-example { border-right: none; border-left: 3px solid var
 .progress-review-subject { font-weight: 700; font-size: 0.95rem; }
 .progress-review-subject b { color: var(--bad); }
 
+/* ---------- Notes hub (Progress view) ---------- */
+.progress-notes {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.progress-notes-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.progress-notes-tools { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.progress-notes-count { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.progress-notes-list { display: grid; gap: 0.6rem; }
+.progress-note {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--wash-neutral);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.progress-note-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.progress-note-head h4 { font-size: 0.95rem; font-family: var(--font-display); }
+.progress-note-subject { font-size: 0.78rem; color: var(--muted); }
+.progress-note-text {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.progress-note-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.progress-notes [hidden] { display: none; }
+.progress-notes-search input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: rgb(var(--wash-hi-rgb) / 0.04);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.progress-notes-search input::placeholder { color: var(--dim); }
+.progress-notes-search input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgb(var(--accent-2-rgb) / 0.14);
+}
+.progress-notes-none { margin: 0; }
+.progress-note-editor { display: grid; gap: 0.55rem; }
+.progress-note-input {
+  width: 100%;
+  min-height: 92px;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  resize: vertical;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.progress-note-input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 4px rgb(var(--accent-2-rgb) / 0.14);
+}
+.progress-note-edit-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.progress-notes-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.progress-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: rgb(var(--wash-hi-rgb) / 0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.progress-filter-chip:hover { color: var(--text); border-color: var(--accent-2); }
+.progress-filter-chip.is-active {
+  color: var(--text);
+  background: rgb(var(--accent-2-rgb) / 0.12);
+  border-color: var(--accent-2);
+}
+.progress-filter-count { font-variant-numeric: tabular-nums; color: var(--dim); font-weight: 700; }
+.progress-filter-chip.is-active .progress-filter-count { color: var(--accent-2); }
+.progress-notes [data-progress-notes-review-open][disabled] { opacity: 0.5; cursor: not-allowed; }
+.progress-notes.is-reviewing .progress-notes-search,
+.progress-notes.is-reviewing .progress-notes-filters,
+.progress-notes.is-reviewing .progress-notes-list,
+.progress-notes.is-reviewing .progress-notes-none,
+.progress-notes.is-reviewing [data-progress-notes-review-open] { display: none; }
+.progress-notes-review { display: grid; gap: 0.6rem; }
+.progress-notes-review-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.progress-notes-review-head h4 { font-size: 0.95rem; font-family: var(--font-display); }
+.progress-notes-review-progress { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.progress-notes-review-card {
+  display: grid;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font: inherit;
+  text-align: start;
+  color: var(--text);
+  background: var(--wash-neutral);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.progress-notes-review-card:hover { border-color: var(--accent-2); }
+.progress-notes-review-card:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.progress-notes-review-lesson { font-weight: 700; font-size: 0.95rem; font-family: var(--font-display); }
+.progress-notes-review-subject { font-size: 0.78rem; color: var(--muted); }
+.progress-notes-review-hint { font-size: 0.78rem; color: var(--dim); }
+.progress-notes-review-text {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.progress-notes-review-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+.progress-notes-review-close { margin-inline-start: auto; }
+
 .about-lead { margin-top: 1rem; color: var(--muted); max-width: 72ch; line-height: 1.8; font-size: 0.98rem; }
 .about-points { margin-top: 1.6rem; }
 
