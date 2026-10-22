@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#09090b" />
+  <title>الصفحة غير موجودة | منصة أمن المعلومات</title>
+  <link rel="icon" href="/MNCH/images/icon.svg" type="image/svg+xml" />
+  <style>
+    @font-face {
+      font-family: "PlexArabic";
+      src: url("/MNCH/fonts/plex-arabic-arabic-400.woff2") format("woff2");
+      font-weight: 400;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "PlexArabic";
+      src: url("/MNCH/fonts/plex-arabic-arabic-600.woff2") format("woff2");
+      font-weight: 600;
+      font-display: swap;
+    }
+    :root {
+      color-scheme: dark;
+      --bg: #09090b;
+      --panel: rgba(255, 255, 255, 0.045);
+      --line: rgba(255, 255, 255, 0.1);
+      --fg: #f4f4f5;
+      --muted: #a1a1aa;
+      --accent: #22d3ee;
+      --accent-2: #a78bfa;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+      background:
+        radial-gradient(900px 520px at 18% -10%, rgba(34, 211, 238, 0.16), transparent 60%),
+        radial-gradient(760px 480px at 88% 12%, rgba(167, 139, 250, 0.14), transparent 62%),
+        var(--bg);
+      color: var(--fg);
+      font-family: "PlexArabic", Tahoma, Arial, sans-serif;
+      line-height: 1.8;
+    }
+    .card {
+      width: min(620px, 100%);
+      padding: clamp(28px, 6vw, 52px);
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(18px);
+    }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 78px;
+      height: 78px;
+      margin: 0 auto 18px;
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      border-radius: 20px;
+      background: rgba(34, 211, 238, 0.08);
+      color: var(--accent);
+    }
+    .mark svg { width: 42px; height: 42px; }
+    .code {
+      margin: 0;
+      font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 0.24em;
+      color: var(--accent);
+      direction: ltr;
+    }
+    h1 { margin: 10px 0 8px; font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 600; }
+    p { margin: 0 auto 10px; max-width: 46ch; color: var(--muted); }
+    .en { font-size: 0.9rem; opacity: 0.82; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 26px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 20px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: linear-gradient(135deg, var(--accent), #38bdf8);
+      color: #041014;
+      font: inherit;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .btn.ghost { background: transparent; border-color: var(--line); color: var(--fg); }
+    .btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+    @media (max-width: 420px) { .actions .btn { width: 100%; } }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3 4.5 6v5.4c0 4.6 3.1 8.5 7.5 9.6 4.4-1.1 7.5-5 7.5-9.6V6L12 3Z" />
+        <path d="M9.5 12.2 11.3 14l3.4-3.6" />
+      </svg>
+    </div>
+    <p class="code">404</p>
+    <h1>الصفحة غير موجودة</h1>
+    <p>الرابط الذي فتحته غير صحيح أو أن الصفحة انتقلت. يمكنك العودة إلى المنصة ومتابعة مسارات التعلم.</p>
+    <p class="en" dir="ltr" lang="en">The page you requested could not be found. Head back to the platform and continue learning.</p>
+    <div class="actions">
+      <a class="btn" href="/MNCH/">العودة إلى المنصة</a>
+      <a class="btn ghost" href="/MNCH/#semester">الترم الحالي</a>
+    </div>
+  </main>
+</body>
+</html>

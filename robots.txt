@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /materials/
+
+Sitemap: https://motmii.github.io/MNCH/sitemap.xml

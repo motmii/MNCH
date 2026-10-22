@@ -11191,6 +11191,7 @@ html[lang="en"] .hero-title { letter-spacing: -0.015em; }
 }
 .hero-main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: start;
   align-content: start;
   row-gap: 1.05rem;

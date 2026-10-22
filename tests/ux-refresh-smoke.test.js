@@ -14,6 +14,9 @@ const js = fs.readFileSync(path.join(root, "script.js"), "utf8");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const css = fs.readFileSync(path.join(root, "style.css"), "utf8");
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+const robots = fs.readFileSync(path.join(root, "robots.txt"), "utf8");
+const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
+const notFound = fs.readFileSync(path.join(root, "404.html"), "utf8");
 
 let failures = 0;
 function check(name, cond) {
@@ -28,6 +31,8 @@ check("primary CTA is Start Learning", html.includes('href="#paths" class="btn b
 check("Start Here strip mounts #heroStartHere", html.includes('id="heroStartHere"'));
 check("Start Here links to Fundamentals path", html.includes('href="#path/fundamentals"'));
 check("onboarding reopen trigger present", html.includes("data-onboarding-reopen"));
+check("hero copy grid cannot overflow narrow viewports",
+  /\.hero-main\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s.test(css));
 
 console.log("— index.html: compact dashboard —");
 ["heroDash", "heroDashTitle", "heroDashWelcome", "heroDashPct", "heroDashBar", "heroDashOverallMeter",
@@ -79,6 +84,14 @@ check("canonical link", html.includes('rel="canonical"'));
 check("Twitter card metadata", html.includes('name="twitter:card"'));
 check("JSON-LD structured data", html.includes('application/ld+json'));
 check("bilingual title", html.includes("منصة أمن المعلومات | Information Security Platform"));
+check("OG image dimensions + alt", html.includes('property="og:image:width"') && html.includes('property="og:image:alt"'));
+check("apple touch icon declared", html.includes('rel="apple-touch-icon"'));
+check("robots.txt allows the site and points at the sitemap",
+  robots.includes("Allow: /") && robots.includes("Sitemap: https://motmii.github.io/MNCH/sitemap.xml"));
+check("robots.txt keeps lecture PDFs out of search indexes", robots.includes("Disallow: /materials/"));
+check("sitemap.xml lists the canonical page", sitemap.includes("<loc>https://motmii.github.io/MNCH/</loc>"));
+check("custom 404 is bilingual and noindex",
+  notFound.includes('lang="ar"') && notFound.includes("noindex") && notFound.includes('lang="en"'));
 check("hero media fully retired (v3 cyber shell)", !html.includes('images/backweb.jpg') && !html.includes('images/hero-bg.mp4'));
 
 console.log("— index.html: regressions —");

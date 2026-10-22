@@ -24,12 +24,17 @@
   <meta property="og:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية، واستوديو كانفا بصري. An Arabic-first infosec learning platform: paths, quizzes, tools, labs and a Canva visual studio." />
   <meta property="og:url" content="https://motmii.github.io/MNCH/" />
   <meta property="og:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="616" />
+  <meta property="og:image:height" content="657" />
+  <meta property="og:image:alt" content="شعار منصة أمن المعلومات — درع رقمي" />
   <meta property="og:locale" content="ar_SA" />
   <meta property="og:locale:alternate" content="en_US" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="منصة أمن المعلومات | Information Security Platform" />
   <meta name="twitter:description" content="منصة عربية تعليمية لطلاب أمن المعلومات: مسارات تعلم، اختبارات، أدوات ومعامل تفاعلية، واستوديو كانفا بصري." />
   <meta name="twitter:image" content="https://motmii.github.io/MNCH/images/icon.jpg" />
+  <meta name="twitter:image:alt" content="شعار منصة أمن المعلومات — درع رقمي" />
   <!-- Structured data (JSON-LD) — language switchable via Lang hook in script.js -->
   <script type="application/ld+json">
   {
@@ -56,7 +61,9 @@
   <link rel="stylesheet" href="motion.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#09090b" />
+  <meta name="color-scheme" content="dark" />
   <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png" />
   <noscript>
     <style>
       /* Without JS: never trap the user behind the preloader, and show
@@ -916,7 +923,7 @@
         <article class="tool-card reveal" id="tool-jwt">
           <h3 class="tool-title">محلّل JWT</h3>
           <p class="tool-desc">فكّ رموز JWT وافحص الترويسة والحمولة وتاريخ الانتهاء.</p>
-          <textarea id="jwtIn" class="tool-input" rows="4" dir="ltr" placeholder="eyJhbGciOiJIUzI1NiIs…"></textarea>
+          <textarea id="jwtIn" class="tool-input" rows="4" dir="ltr" placeholder="eyJhbGciOiJIUzI1NiIs…" aria-label="رمز JWT"></textarea>
           <p id="jwtWarn" class="jwt-warn" role="status"></p>
           <div id="jwtParts" hidden>
             <div class="jwt-seg"><span class="jwt-tag jwt-h">Header</span><pre id="jwtHeader" class="tool-out"></pre></div>
@@ -989,17 +996,17 @@
           <h3 class="tool-title">محاكي قواعد الجدار الناري</h3>
           <p class="tool-desc">أضف قواعد allow/deny ثم اختبر مرور حزمة مسارًا بمسار حتى القاعدة المطابقة.</p>
           <div class="fw-edit">
-            <select id="fwAct" class="tool-input"><option value="deny">deny</option><option value="allow">allow</option></select>
-            <select id="fwProto" class="tool-input"><option value="*">*</option><option value="tcp">tcp</option><option value="udp">udp</option></select>
-            <input id="fwDst" class="tool-input" placeholder="وجهة أو *" dir="ltr" />
-            <input id="fwPort" class="tool-input" type="number" placeholder="منفذ أو *" dir="ltr" />
+            <select id="fwAct" class="tool-input" aria-label="إجراء القاعدة"><option value="deny">deny</option><option value="allow">allow</option></select>
+            <select id="fwProto" class="tool-input" aria-label="بروتوكول القاعدة"><option value="*">*</option><option value="tcp">tcp</option><option value="udp">udp</option></select>
+            <input id="fwDst" class="tool-input" placeholder="وجهة أو *" dir="ltr" aria-label="وجهة القاعدة" />
+            <input id="fwPort" class="tool-input" type="number" placeholder="منفذ أو *" dir="ltr" aria-label="منفذ القاعدة" />
             <button type="button" id="fwAdd" class="btn btn-sm btn-primary">+ قاعدة</button>
           </div>
           <table class="cidr-table"><thead><tr><th>#</th><th>إجراء</th><th>بروتوكول</th><th>وجهة</th><th>منفذ</th><th></th></tr></thead><tbody id="fwBody"></tbody></table>
           <div class="fw-probe">
-            <input id="fwProbeIp" class="tool-input" value="203.0.113.9" dir="ltr" />
-            <input id="fwProbePort" class="tool-input" type="number" value="443" dir="ltr" />
-            <select id="fwProbeProto" class="tool-input"><option value="tcp">tcp</option><option value="udp">udp</option></select>
+            <input id="fwProbeIp" class="tool-input" value="203.0.113.9" dir="ltr" aria-label="عنوان IP للاختبار" />
+            <input id="fwProbePort" class="tool-input" type="number" value="443" dir="ltr" aria-label="منفذ الاختبار" />
+            <select id="fwProbeProto" class="tool-input" aria-label="بروتوكول الاختبار"><option value="tcp">tcp</option><option value="udp">udp</option></select>
             <button type="button" id="fwTest" class="btn btn-sm btn-primary">اختبر حزمة</button>
           </div>
           <pre id="fwTrace" class="tool-out" dir="ltr"></pre>
@@ -1009,7 +1016,7 @@
         <article class="tool-card reveal" id="tool-vuln">
           <h3 class="tool-title">ماسح ثغرات (محاكاة)</h3>
           <p class="tool-desc">افحص هدفًا معرّفًا محليًا واكتشف الثغرات بخطوراتها وحلولها المقترحة.</p>
-          <select id="vulnTarget" class="tool-input"></select>
+          <select id="vulnTarget" class="tool-input" aria-label="هدف الفحص"></select>
           <button type="button" id="vulnRun" class="btn btn-sm btn-primary">ابدأ الفحص</button>
           <div class="pw-meter"><span id="vulnFill" class="pw-meter-fill"></span></div>
           <div id="vulnFindings" class="tool-out" role="status">اختر هدفًا وابدأ الفحص.</div>
@@ -1018,7 +1025,7 @@
         <article class="tool-card reveal" id="tool-sniffer">
           <h3 class="tool-title">مستنشق حزم (فك ترميز)</h3>
           <p class="tool-desc">فك إطار Ethernet/IPv4/TCP/UDP من سداسي عشري بايتًا بايت مع خريطة أوكتِت.</p>
-          <textarea id="sniffHex" class="tool-input" rows="3" dir="ltr" placeholder="(فارغ = توليد نموذج)"></textarea>
+          <textarea id="sniffHex" class="tool-input" rows="3" dir="ltr" placeholder="(فارغ = توليد نموذج)" aria-label="بيانات الحزمة hex"></textarea>
           <div class="regex-actions"><button type="button" id="sniffDecode" class="btn btn-sm btn-primary">فك</button><button type="button" id="sniffSample" class="btn btn-sm btn-ghost">مثال</button></div>
           <div class="sniff-octets" id="sniffOctets" dir="ltr"></div>
           <pre id="sniffOut" class="tool-out" dir="ltr"></pre>
@@ -1027,7 +1034,7 @@
         <article class="tool-card reveal" id="tool-portscan">
           <h3 class="tool-title">ماسح منافذ (مرئي)</h3>
           <p class="tool-desc">امسح مضيفًا على شبكتك الافتراضية وراقب حالات المنافذ open/closed/filtered.</p>
-          <div class="regex-actions"><input id="portHost" class="tool-input" value="10.0.0.5" dir="ltr" /><button type="button" id="portRun" class="btn btn-sm btn-primary">امسح</button></div>
+          <div class="regex-actions"><input id="portHost" class="tool-input" value="10.0.0.5" dir="ltr" aria-label="المضيف المستهدف" /><button type="button" id="portRun" class="btn btn-sm btn-primary">امسح</button></div>
           <div id="portViz" class="port-viz"></div>
           <pre id="portOut" class="tool-out" dir="ltr"></pre>
         </article>
@@ -1035,7 +1042,7 @@
         <article class="tool-card reveal" id="tool-playground">
           <h3 class="tool-title">ملعب التشفير/فك التشفير</h3>
           <p class="tool-desc">Caesar · Vigenere · XOR · RC4 · A1Z26 · Base64 — لأغراض تعليمية فقط.</p>
-          <select id="cpAlgo" class="tool-input">
+          <select id="cpAlgo" class="tool-input" aria-label="خوارزمية التشفير">
             <option value="caesar">Caesar (shift)</option>
             <option value="vigenere">Vigenere</option>
             <option value="xor">XOR</option>
@@ -1043,8 +1050,8 @@
             <option value="a1z26">A1Z26</option>
             <option value="b64">Base64</option>
           </select>
-          <input id="cpKey" class="tool-input" placeholder="المفتاح" dir="ltr" />
-          <textarea id="cpIn" class="tool-input" rows="2" placeholder="النص" dir="auto"></textarea>
+          <input id="cpKey" class="tool-input" placeholder="المفتاح" dir="ltr" aria-label="مفتاح التشفير" />
+          <textarea id="cpIn" class="tool-input" rows="2" placeholder="النص" dir="auto" aria-label="نص الإدخال"></textarea>
           <div class="regex-actions"><button type="button" id="cpEnc" class="btn btn-sm btn-primary">تشفير</button><button type="button" id="cpDec" class="btn btn-sm btn-ghost">فك</button></div>
           <pre id="cpOut" class="tool-out" dir="ltr"></pre>
         </article>
@@ -1467,7 +1474,7 @@
         <div class="siem-toolbar">
           <select class="tool-input" id="siemType" aria-label="نوع الحدث"><option value="all">كل الأنواع</option></select>
           <select class="tool-input" id="siemSev" aria-label="الخطورة"><option value="all">كل الخطورة</option></select>
-          <input class="tool-input siem-query" id="siemQuery" placeholder='استعلام: type=brute src=203.0.113.7 sev&gt;=high' dir="ltr" />
+          <input class="tool-input siem-query" id="siemQuery" placeholder='استعلام: type=brute src=203.0.113.7 sev&gt;=high' dir="ltr" aria-label="استعلام SIEM" />
           <button type="button" class="btn btn-sm btn-primary" id="siemRun">بحث</button>
           <button type="button" class="btn btn-sm btn-ghost" id="siemReset">إعادة</button>
         </div>
@@ -1501,7 +1508,7 @@
             <div class="team-head"><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> فريق الاستجابة <span class="team-badge" id="teamPhase"></span></div>
             <div class="team-log" id="teamLog" role="log" aria-live="polite"></div>
             <form class="team-form" id="teamForm">
-              <input class="console-input" id="teamInput" placeholder="اسأل الفريق أو اكتب ملاحظة…" dir="ltr" />
+              <input class="console-input" id="teamInput" placeholder="اسأل الفريق أو اكتب ملاحظة…" dir="ltr" aria-label="اسأل الفريق أو اكتب ملاحظة" />
               <button type="submit" class="btn btn-sm btn-primary">إرسال</button>
             </form>
           </div>
@@ -1526,8 +1533,8 @@
         <article class="lab-card">
           <h3><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg> فيجينير</h3>
           <div class="c-form">
-            <input id="vigText" class="tool-input" placeholder="النص" dir="auto" />
-            <input id="vigKey" class="tool-input" placeholder="المفتاح (A-Z)" dir="ltr" />
+            <input id="vigText" class="tool-input" placeholder="النص" dir="auto" aria-label="نص Vigenère" />
+            <input id="vigKey" class="tool-input" placeholder="المفتاح (A-Z)" dir="ltr" aria-label="مفتاح Vigenère" />
           </div>
           <div class="c-actions"><button type="button" class="btn btn-sm btn-primary" id="vigEnc">تشفير</button><button type="button" class="btn btn-sm btn-ghost" id="vigDec">فك</button></div>
           <p id="vigOut" class="tool-out" dir="ltr">—</p>
@@ -1540,16 +1547,16 @@
             <label>المواضع <input id="enigmaPos" class="tool-input" value="ABC" dir="ltr" /></label>
             <label>الأسلاك (مثال AB CD) <input id="enigmaPlug" class="tool-input" value="AB CD EF" dir="ltr" /></label>
           </div>
-          <div class="c-actions"><input id="enigmaIn" class="tool-input" placeholder="الرسالة" dir="auto" /><button type="button" class="btn btn-sm btn-primary" id="enigmaRun">شغّل الدارة</button></div>
+          <div class="c-actions"><input id="enigmaIn" class="tool-input" placeholder="الرسالة" dir="auto" aria-label="رسالة Enigma" /><button type="button" class="btn btn-sm btn-primary" id="enigmaRun">شغّل الدارة</button></div>
           <p id="enigmaOut" class="tool-out" dir="ltr">—</p>
         </article>
 
         <article class="lab-card">
           <h3><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg> RSA خطوة بخطوة</h3>
           <div class="c-form">
-            <input id="rsaP" class="tool-input" type="number" placeholder="p أولي (مثال 61)" dir="ltr" />
-            <input id="rsaQ" class="tool-input" type="number" placeholder="q أولي (مثال 53)" dir="ltr" />
-            <input id="rsaMsg" class="tool-input" placeholder="رسالة (أحرف)" dir="auto" />
+            <input id="rsaP" class="tool-input" type="number" placeholder="p أولي (مثال 61)" dir="ltr" aria-label="العدد الأولي p" />
+            <input id="rsaQ" class="tool-input" type="number" placeholder="q أولي (مثال 53)" dir="ltr" aria-label="العدد الأولي q" />
+            <input id="rsaMsg" class="tool-input" placeholder="رسالة (أحرف)" dir="auto" aria-label="رسالة RSA" />
           </div>
           <button type="button" class="btn btn-sm btn-primary" id="rsaRun">توليد المفاتيح وتشفير</button>
           <pre id="rsaOut" class="tool-out" dir="ltr"></pre>
@@ -1558,8 +1565,8 @@
         <article class="lab-card">
           <h3><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m22 12.65-10 5-10-5"/><path d="m22 17.65-10 5-10-5"/></svg> دورة DES الأولى</h3>
           <div class="c-form">
-            <input id="desKey" class="tool-input" value="133457799BBCDFF1" placeholder="مفتاح 16-hex" dir="ltr" />
-            <input id="desBlock" class="tool-input" value="0123456789ABCDEF" placeholder="بلوك 16-hex" dir="ltr" />
+            <input id="desKey" class="tool-input" value="133457799BBCDFF1" placeholder="مفتاح 16-hex" dir="ltr" aria-label="مفتاح DES" />
+            <input id="desBlock" class="tool-input" value="0123456789ABCDEF" placeholder="بلوك 16-hex" dir="ltr" aria-label="كتلة DES" />
           </div>
           <button type="button" class="btn btn-sm btn-primary" id="desRun">اعرض الدورة</button>
           <pre id="desOut" class="tool-out" dir="ltr"></pre>
@@ -1567,7 +1574,7 @@
 
         <article class="lab-card">
           <h3><svg class="ui-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20V10M18 20V4M6 20v-4"/></svg> تحليل التردد</h3>
-          <textarea id="freqIn" class="tool-input" rows="3" placeholder="نص للتحليل… (إنجليزي/عربي)" dir="auto"></textarea>
+          <textarea id="freqIn" class="tool-input" rows="3" placeholder="نص للتحليل… (إنجليزي/عربي)" dir="auto" aria-label="نص تحليل التكرار"></textarea>
           <button type="button" class="btn btn-sm btn-primary" id="freqRun">حلل</button>
           <div id="freqSvg" class="freq-svg"></div>
           <div id="freqOut" class="tool-out"></div>

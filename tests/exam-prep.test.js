@@ -63,6 +63,7 @@ check("edit + remove exam date supported", m53.includes("data-exam-edit") && m53
 check("practice exam sampled from real banks", m53.includes("buildDeck") && m53.includes("EXAM_PER_SUBJECT"));
 check("summary stored locally then shown", m53.includes("ep.runs") && m53.includes("renderSummary"));
 check("exposed for diagnostics/tests", m53.includes("window.PlatformExamPrep"));
+check("open-lessons CTA targets the live semester view", m53.includes('href="#semester"') && !m53.includes('href="#lessons"'));
 
 console.log("\n— mounts, styles, cache, dicts —");
 check("exam mount added to the progress view", html.includes('id="examApp"'));

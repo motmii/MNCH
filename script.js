@@ -16977,7 +16977,7 @@ const LABS_META = {
         '<p class="exam-muted">' + esc(T("exam.finalNoData")) + '</p>' +
         '<div class="exam-actions">' +
         '<a class="btn btn-primary btn-sm" href="#quiz">' + esc(T("exam.openQuiz")) + '</a>' +
-        '<a class="btn btn-ghost btn-sm" href="#lessons">' + esc(T("exam.openLessons")) + '</a>' +
+        '<a class="btn btn-ghost btn-sm" href="#semester">' + esc(T("exam.openLessons")) + '</a>' +
         '</div></section>'
       );
     }
