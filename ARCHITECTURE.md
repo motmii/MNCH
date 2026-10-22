@@ -3,6 +3,8 @@
 ## Overview
 Single-page application (SPA) built with zero dependencies. All code runs client-side. No build step required.
 
+> **Runtime mode (v3.0.1):** online-only. `index.html` unregisters every legacy service worker and clears Cache Storage at boot; nothing registers `sw.js`, and the hero loads no photo/video. Service-worker and hero-media notes below are historical records kept for the test suite.
+
 ## Module Map (`script.js`)
 
 ```
@@ -62,7 +64,8 @@ Main IIFE ("use strict")
 │                         ↑ M14–M19 = the 6 cybersecurity tools (hero counts 6)
 ├── M21  MaterialsFilter  Live search + tag chips for .work-grid
 ├── M22  Lang             AR/EN interface switcher (navbar toggle, persisted)
-├── M23  PWA Registration navigator.serviceWorker.register("./sw.js")
+├── M23  PWA Registration REMOVED — online-only boot unregisters legacy
+│                         workers and clears Cache Storage; sw.js is historical
 ├── M24  CyberGames       Incident Response Simulator & CTF (console)
 ├── M25  TerminalFX       Typewriter console driver (help/scan/block-ip → Flag)
 ├── M29  Tools.Flash      18 bilingual flashcards (study feature — separate
@@ -189,37 +192,22 @@ Main IIFE ("use strict")
 │                         overlay is open; plus an opt-in read-aloud flashcards
 │                         toggle (Web Speech API, ar-SA, cancelled on view change).
 │                         Touches no existing control.
-├── M66  SwUpdate         Replaces the silent SW swap with an honest optional bar:
-│                         shown only for a worker that installed while a controller
-│                         existed. DOM built with createElement/textContent only;
-│                         reload posts SKIP_WAITING (answered in sw.js) and
-│                         "later" just dismisses.
+├── M66  SwUpdate         Dormant legacy path: retained code for the retired
+│                         service worker's optional update bar. No worker is
+│                         registered, so the bar never appears in online-only
+│                         mode. DOM is built with createElement/textContent only.
 ├── M67  MaterialViewer   Chapter PDFs open in place inside a hidden, inert
 │                         role="dialog" instead of only downloading. isLocalPdf()
 │                         accepts relative "materials/*.pdf" only (absolute,
 │                         protocol-relative, data: and non-PDF are refused), the
 │                         click delegation upgrades the existing chapter links,
 │                         and the embedded document is released on close/Escape.
-├── M59  HeroMedia        Animated hero background — two pointer-inert layers:
-                          `.hero-bg` (the hero photo, drifting with a pure-CSS
-                          heroDrift zoom/pan) and `.hero-media` (a 10s, 1280×720,
-                          silent local loop `images/hero-bg.mp4` derived from the
-                          same photo — replace that one file to ship a different
-                          animation, and keep backweb.jpg as poster/fallback).
-                          It is regenerated from that same JPEG with ffmpeg
-                          (`zoompan` driven by a cosine, 300 frames @30fps, no
-                          audio track), which keeps it ~0.37 MB and makes the
-                          loop seamless; tests/hero-bg.test.js holds it under 3 MB
-                          and also reads the MP4 boxes to prove the loop stays a
-                          short, silent cycle. Recipe: README.md.
-                          Playback is opt-in per device and vetoed for
-                          prefers-reduced-motion, Save-Data/slow links, screens
-                          narrower than 700px, and batteries below 20% while
-                          unplugged; it pauses on hidden tabs and whenever the
-                          hero leaves the viewport. No autoplay attribute plus
-                          preload="none" means a vetoed device downloads 0 bytes.
-                          Publishes window.PlatformHeroMedia; covered by
-                          tests/hero-bg.test.js.
+├── M59  HeroMedia        RETIRED — the page loads no hero photo or video.
+                          The hero is painted by CSS gradients, the V0 Obsidian
+                          grid, and the CyberField canvas. images/backweb.jpg and
+                          images/hero-bg.mp4 remain as unused assets;
+                          tests/hero-bg.test.js enforces that the legacy layers
+                          stay purged.
 ├── M60  BrandLockup      Top bar gains the platform shield lockup and one clearly
                           primary action (index.html markup + style.css layer —
                           CSS-only module, no script.js block; documented in
@@ -253,7 +241,7 @@ Main IIFE ("use strict")
                           requirement cards, official download links
                           (virtualbox.org / kali.org, https only,
                           target="_blank" + rel="noopener noreferrer"), six
-                          local SVG figures in images/kali/ (precached, honest
+                          local SVG figures in images/kali/ (local assets, honest
                           «not a real screenshot» captions), two LTR command
                           blocks, 5 troubleshooting <details> entries and an
                           ethical-use reminder. Own shareable route (#kali)
@@ -275,7 +263,7 @@ Main IIFE ("use strict")
                            wash + engineering grid onto html (body stays
                            transparent so the field reads through), frosts
                            the navbar/cluster/overlays, styles the GitHub
-                           CTA (nav-gh), dims the hero media behind the
+                           CTA (nav-gh), frames the CSS-painted hero behind the
                            neon typography, and self-hosts Inter +
                            JetBrains Mono. The theme switch (M36) and the
                            second palette (M36b) are gone: one identity.
@@ -409,8 +397,8 @@ with `backdrop-filter: var(--glass-blur)`) split into `.nav-main` (logo lockup
 inline-start divider.
 
 - **Logo lockup** — `.logo` holds a decorative `.logo-mark` (the same shield
-  path `images/icon.svg` is built from, inlined so it needs no extra asset and
-  no precache entry) plus a `.logo-word` gradient wordmark. The mark's colours
+  path `images/icon.svg` is built from, inlined so it needs no extra asset or
+  network request) plus a `.logo-word` gradient wordmark. The mark's colours
   are live tokens (`.logo-disc` = `var(--bg)`, `.logo-glyph` = `var(--text)`,
   stops = `var(--accent)` / `var(--accent-2)`), so the navbar mark follows the
   V0 Obsidian palette while the PWA icon keeps its fixed stops.
@@ -418,7 +406,7 @@ inline-start divider.
   `letter-spacing: 0`; tracking breaks the joins between letters.
 - **Primary CTA** — `.nav-cta` reuses the existing `nav.cta` i18n key and the
   `#paths` target. It renders outlined while the bar is transparent (contrast
-  over the hero photo) and becomes the filled gradient primary once the bar
+  over the hero backdrop) and becomes the filled gradient primary once the bar
   frosts; it is hidden ≤1180px, where the mobile menu already carries it.
 - **GitHub CTA (MODULE 80)** — `.nav-gh` is a ghost pill linking to
   `https://github.com/motmii/MNCH` (`target="_blank"` + `rel="noopener
@@ -426,10 +414,8 @@ inline-start divider.
   the bar floats, gains the cyan hover halo once scrolled, and collapses to
   an icon-only circle ≤860px.
 - **Glass layer (MODULE 80)** — `.nav-cluster`, `.nav-more-menu` and
-  `.mobile-menu` share the same frosted treatment, and the hero media loop is
-  dimmed to `opacity: 0.26` behind an obsidian scrim while keeping the
-  MODULE 59 contract strings (`.hero-media.is-playing { opacity: 1; }`, etc.)
-  untouched for the tests.
+  `.mobile-menu` share the same frosted treatment over the CSS-painted hero
+  backdrop; legacy `.hero-media` layer rules have been removed.
 - The layer is **additive**: no pre-existing selector (`.logo`, `.logo-dot`,
   `.nav-main`, `.nav-actions`) is overridden beyond the intended additions.
 
@@ -443,16 +429,14 @@ All directional properties use CSS logical equivalents:
 - `text-align: start` instead of `text-align: right`
 - `transform-origin: right` for nav underline animation
 
-## Service Worker Strategy
-| Request Type | Strategy |
-|---|---|
-| Navigations | Network-first → cached `index.html` shell fallback |
-| Statics + API/JSON (HTML/CSS/JS/images/fonts/fetched data) | Stale-while-revalidate into the versioned runtime cache |
-| Precache (app shell + subject images + flashcards + `backweb.jpg` + the animated `hero-bg.mp4`) | Versioned cache refreshed on each `CACHE_VERSION` bump |
-| Media byte-range requests (the animated hero loop) | Cached full copy when one exists, otherwise streamed straight from the network — a `206` response is never stored |
+## Service Worker Strategy (retired)
+The platform is **online-only**. `index.html` unregisters every legacy worker
+and deletes all Cache Storage buckets at boot; nothing calls
+`navigator.serviceWorker.register`. `sw.js` and its versioned cache remain in the
+repository only so the historical offline-era tests can verify the retired
+implementation — it is not a live caching layer.
 
-Notes: `OFFLINE_API_PATTERNS` / `API_CACHE_NAME` are declared hooks for future
-network-first API caching but are currently unused — the fetch handler routes
-every non-navigation GET through stale-while-revalidate.
-
-Cache versioning: bump `CACHE_VERSION` in `sw.js` to invalidate (currently `v1.22.19`).
+The retired implementation still documents its old contract for those tests:
+navigations were network-first with a cached shell, static assets used
+stale-while-revalidate with `ignoreSearch` for `?v=` URLs, and install read
+`PRECACHE_REQUESTS` with `cache: "reload"` to avoid HTTP-cache staleness.

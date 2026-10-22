@@ -46,10 +46,10 @@ node tests/full-boot.test.js
 
 - `index.html` — the single page (all sections/views)
 - `script.js` — all logic, organized as numbered MODULEs inside one IIFE (see `ARCHITECTURE.md` for the module map)
-- `style.css` — full stylesheet (dark + light themes, RTL-first)
+- `style.css` — full stylesheet (V0 Obsidian dark-only, RTL-first)
 - `current-semester.js` — the official curriculum data (`window.PLATFORM_CURRENT_SEMESTER`), single source of truth for the `#semester` dashboard
 - `data/quizzes.json` — the question bank (an embedded fallback ships in `script.js`)
-- `sw.js` — service worker; **bump `CACHE_VERSION` whenever you change any shipped asset**
+- `sw.js` — retired historical service worker; **never register it**. Bump `CACHE_VERSION` only when changing `sw.js` itself, so the historical tests stay aligned.
 
 ## إرشادات الـ Pull Request · PR guidelines
 

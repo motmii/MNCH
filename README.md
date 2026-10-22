@@ -23,8 +23,8 @@ A responsive cybersecurity education platform for Information Security diploma s
 ### Phase 5)
 - **Current Semester dashboard (`#semester`) — implemented** — a dedicated view rendered by `script.js` (MODULE 43 · SemesterDashboard) from `window.PLATFORM_CURRENT_SEMESTER` in `current-semester.js` (single source of truth, no data duplication). It shows the semester title, program name, description, subject count and total credit hours, plus one card per official subject: course code, credit hours, weekly day/time schedule, difficulty, estimated study hours, short description, prerequisites, learning outcomes, common mistakes and key terms — with honest links to existing quiz banks (via the `data-quiz-jump` flow), tool cards (`data-tool-jump`) and lab views only; missing entries are never faked. Lesson arrays are currently empty, so each card shows the honest «سيتم إضافة الدروس قريبًا» (lessons will be added soon) empty state until authored lessons ship. The `#semester` route is a real view: desktop and mobile nav links scroll to it, mobile menu closes on tap, Back/Forward work, and opening `…/#semester` directly renders the dashboard (bilingual AR/EN, re-rendered on locale switch).
 - **Lecture access guide (`#guide`) — implemented** — MODULE 61 · LectureGuide renders the official "how do I join my live class" walkthrough from `current-semester.js → lectureGuide` (single source of truth): a phishing-awareness warning, the weekly timetable **derived** from each subject's `meta.schedule`, 6 ordered joining steps, 3 real Microsoft endpoints (https only, `target="_blank"` + `rel="noopener noreferrer"`, one-tap copy) and 5 troubleshooting disclosures in native `<details>` — plus an honest note that the actual meeting link is published by the department inside Teams, never here. Reachable from the desktop «المزيد» menu, the mobile menu, a compact inline card in `#semester` (`#semesterGuide`, outside `#semesterGrid`), a chip on every subject card (MODULE 00b / 43), and a contextual link in the hero "Now" strip shown only when a class is live, today or tomorrow (MODULE 55). It is its own shareable `…/#guide` route, fully bilingual, re-rendered on locale switch, DOM built with `createElement`/`textContent` (no raw HTML, no network) — covered by `tests/lecture-guide.test.js`.
-- **Kali install guide (`#kali`) — MODULE 72 · KaliGuide** — an illustrated, bilingual, offline-capable walkthrough for installing **Kali Linux on VirtualBox**: four requirement cards, official download links only (`virtualbox.org`, `kali.org` — https + `target="_blank"` + `rel="noopener noreferrer"`, SHA256 verification docs), 8 numbered steps each with a local SVG figure in `images/kali/` (honest «رسم توضيحي — ليست لقطة حقيقية» caption) and LTR command blocks (`apt update && full-upgrade`, `virtualbox-guest-x11`), 5 troubleshooting disclosures (VT-x, black screen, resolution, performance, networking) and an ethical-use reminder. The link sits beside **المواد/الاختبارات** in the desktop nav, mobile menu and footer; the view is registered in the ViewSwitcher, all strings have `kali.*` keys in both dictionaries, and the figures are precached by the service worker — covered by `tests/kali-guide.test.js`.
-- **Course announcements bar (`#announceBar`) — MODULE 74 · AnnouncementsBar** — a dated student-reminder banner (e.g. a short quiz) rendered from the single source of truth `announcements.js` (`window.PLATFORM_ANNOUNCEMENTS`, bilingual, keyed by a real course code that already exists in the official plan). It mounts **outside** every view so it stays visible on all routes, appears only while a reminder is live/today/within its `leadDays` window, and then hides itself. Each entry shows the subject, the long-form date, the clock time, the duration and the honest weight, plus two local actions: **«أضف للتقويم»** (hands a one-off, floating-local-time `.ics` VEVENT — the same RFC 5545 shape as MODULE 69 — to the device calendar, because a static site cannot push real notifications) and a **review** deep-link to the real quiz view. Dismiss is local-only (`motmi-portal:announcements-dismissed`) and never blocks a live/today exam. Timing is day-granular from the visitor's own clock — **no timers, no Notification/Push APIs, no network, no innerHTML** — and MODULE 55 (`HeroNow`) additionally surfaces a red **quiz chip** on the "Now" strip when a dated quiz is near/live/today (`findUrgentQuiz`). Fully bilingual, re-renders on locale switch, and precached by the service worker — covered by `tests/announcements.test.js`.
+- **Kali install guide (`#kali`) — MODULE 72 · KaliGuide** — an illustrated, bilingual, self-contained walkthrough for installing **Kali Linux on VirtualBox**: four requirement cards, official download links only (`virtualbox.org`, `kali.org` — https + `target="_blank"` + `rel="noopener noreferrer"`, SHA256 verification docs), 8 numbered steps each with a local SVG figure in `images/kali/` (honest «رسم توضيحي — ليست لقطة حقيقية» caption) and LTR command blocks (`apt update && full-upgrade`, `virtualbox-guest-x11`), 5 troubleshooting disclosures (VT-x, black screen, resolution, performance, networking) and an ethical-use reminder. The link sits beside **المواد/الاختبارات** in the desktop nav, mobile menu and footer; the view is registered in the ViewSwitcher, all strings have `kali.*` keys in both dictionaries, and the figures ship as local SVGs in `images/kali/` — covered by `tests/kali-guide.test.js`.
+- **Course announcements bar (`#announceBar`) — MODULE 74 · AnnouncementsBar** — a dated student-reminder banner (e.g. a short quiz) rendered from the single source of truth `announcements.js` (`window.PLATFORM_ANNOUNCEMENTS`, bilingual, keyed by a real course code that already exists in the official plan). It mounts **outside** every view so it stays visible on all routes, appears only while a reminder is live/today/within its `leadDays` window, and then hides itself. Each entry shows the subject, the long-form date, the clock time, the duration and the honest weight, plus two local actions: **«أضف للتقويم»** (hands a one-off, floating-local-time `.ics` VEVENT — the same RFC 5545 shape as MODULE 69 — to the device calendar, because a static site cannot push real notifications) and a **review** deep-link to the real quiz view. Dismiss is local-only (`motmi-portal:announcements-dismissed`) and never blocks a live/today exam. Timing is day-granular from the visitor's own clock — **no timers, no Notification/Push APIs, no network, no innerHTML** — and MODULE 55 (`HeroNow`) additionally surfaces a red **quiz chip** on the "Now" strip when a dated quiz is near/live/today (`findUrgentQuiz`). Fully bilingual, re-renders on locale switch, and bundled locally — covered by `tests/announcements.test.js`.
 - **Single-page SPA preserved** — pure HTML/CSS/JS, no build step
 - **AI Assistant** — Arabic-first study assistant (MODULE 33) grounded in the platform's own content. It prefers platform material, adapts to the student's level, gives examples and step-by-step explanations, recommends lessons/tools/quizzes/labs, honestly flags topics outside its content, and refuses (or safely redirects) requests targeting real systems, credential theft, malware or unauthorized access. Ships with Arabic example prompts: «اشرح لي الفرق بين التشفير والترميز», «اختبرني في أساسيات الشبكات», «اشرح لي معنى هذا الجزء من JWT بشكل آمن», «ما المسار المناسب للمبتدئ في أمن المعلومات؟»
 - **Optional first-time Onboarding (MODULE 38)** — a skippable 3-step wizard (level → subjects of interest → learning style) that recommends a starting path and lands you on `#path/fundamentals`. No registration required; choice persists in `motmi-portal:onboarding`.
@@ -40,7 +40,7 @@ A responsive cybersecurity education platform for Information Security diploma s
 - **Global search (MODULE 48)** — a command palette (`/` or `Ctrl+K`, or the navbar button) that searches lessons, learning paths, tools, quizzes, flashcards and glossary terms. Fully keyboard navigable (combobox + listbox).
 - **Collapsible hubs** — the quiz bank and flashcard grids are wrapped in expandable/collapsible sections to reduce page clutter.
 - **Accessibility & mobile** — skip-to-content link, a standardized button system (44px touch targets, one clear primary style), improved mobile drawer, modal and assistant panel behavior, and RTL-safe logical properties throughout.
-- **SEO** — bilingual `<title>` + meta description, Open Graph / Twitter cards, canonical URL, JSON-LD structured data, and a preloaded hero image.
+- **SEO & sharing** — bilingual `<title>` + meta description, canonical URL, JSON-LD structured data, `robots.txt` + `sitemap.xml`, a bilingual custom `404.html`, and Open Graph / Twitter `summary_large_image` metadata pointing at a local 1200×630 card (`images/og-cover.png`).
 - **Honest "Coming Soon" states preserved** — empty lessons/paths still show the Arabic «قريبًا» placeholders; no fake content.
 
 ### Study & motivation features
@@ -54,20 +54,16 @@ A responsive cybersecurity education platform for Information Security diploma s
 - **Progress backup (MODULE 63 · Backup)** — because privacy means "yours, on this device", progress can now leave the device **with you**: export every platform key (`motmi-portal:*` + the quiz store) as one JSON file, and import it back on another device. Imports are validated (tagged payload, platform keys only, structured values only) before a single byte is written. Still zero network.
 - **Full mock exam (MODULE 64 · MockExam)** — one paper built from the **real** banks: 4 questions from every subject, shuffled, with a **single total countdown** (45s/question, clamped 2–90 min) instead of a per-question timer, answers hidden until the end, and a per-subject breakdown on the result screen. It owns its own state and never touches the quiz engine or the missed bank.
 - **Accessibility extras (MODULE 65 · A11yExtras)** — `1-9` pick a quiz answer and `Enter` presses «التالي» (only while a question is on screen, never while typing, never while another overlay is open), plus an opt-in **read-aloud flashcards** toggle (`#flashSpeakBtn`) that speaks a card through the browser's own Web Speech API in Arabic and stops when you leave the section.
-- **Honest update prompt (MODULE 66 · SwUpdate)** — the service worker used to swap versions silently; now a small bar offers «تحديث الآن / لاحقًا» and the worker answers a `SKIP_WAITING` message. Built with `createElement`/`textContent` only.
+- **Legacy update prompt (MODULE 66 · SwUpdate)** — retained in `script.js` as a dormant historical path for the retired service worker. Online-only mode never registers a worker, so the «تحديث الآن / لاحقًا» bar is not part of the live experience.
 - **In-place chapter reader (MODULE 67 · MaterialViewer)** — chapter PDFs open inside the page in a focus-safe dialog instead of only downloading, with an honest «فتح في تبويب جديد» escape hatch. Only local `materials/*.pdf` paths are ever embedded, and the embedded document is released on close.
-- **Install polish** — `manifest.json` now ships real **wide + narrow screenshots** (generated by the dependency-free `tools/make-screenshots.js` PNG encoder) and three **app shortcuts** (الاختبارات · المراجعة · البطاقات). CI fails if a manifest asset goes missing or if `style.css?v=` drifts from `CACHE_VERSION`.
+- **Install metadata** — `manifest.json` ships **192×192 / 512×512 / 512×512 maskable PNG icons**, real **wide + narrow screenshots** (generated by the dependency-free `tools/make-screenshots.js` PNG encoder), and three **app shortcuts** (الاختبارات · المراجعة · البطاقات). CI verifies every manifest asset, exact PNG dimensions, `style.css?v=` / `package.json` / `sw.js` version agreement, and the social-card contract.
 
 ### What's New (MODULE 58)
 - **Navbar 👍 button** — sits next to «المزيد» and opens a dated **«آخر التحديثات»** popover: the platform changelog sorted newest-first, bilingual (AR/EN), with a locally-stored unread dot. No network, no accounts — everything stays on the device.
 
-### Animated hero background (MODULE 59)
-- **Two-layer hero** — the hero photo keeps drifting on its own with pure CSS (`@keyframes heroDrift`), so the homepage is never static even when video is unavailable.
-- **Optional local video loop** — `images/hero-bg.mp4` (10s, 1280×720, silent, ~0.37 MB — a zoom + pan of the same photo, driven by a cosine so the 300-frame loop is seamless) fades in over that photo only when the device allows it. Playback is vetoed for `prefers-reduced-motion`, Save-Data / 2g links, screens under 700px, and batteries under 20% while unplugged; it also pauses whenever the tab is hidden or the hero leaves the viewport. The markup has no `autoplay` and uses `preload="none"`, so a vetoed device downloads zero bytes. To rebuild the loop (ffmpeg is a build-time tool only — nothing at runtime needs it):
-  ```
-  ffmpeg -i images/backweb.jpg -vf "scale=1600:900,zoompan=z='1.09-0.03*cos(2*PI*on/300)':x='iw*(0.5-0.001-0.013*cos(2*PI*on/300))-iw/(2*zoom)':y='ih*(0.5+0.0015-0.0125*cos(2*PI*on/300))-ih/(2*zoom)':d=300:s=1280x720:fps=30" -frames:v 300 -an -c:v libx264 -profile:v high -crf 26 -movflags +faststart images/hero-bg.mp4
-  ```
-- **Offline-ready** — the loop is precached by the service worker, and byte-range requests are answered from that cached full copy (a `206` response is never stored).
+### Hero background
+- **CSS-first hero** — the homepage is painted by CSS gradients, the V0 Obsidian grid, and the global CyberField particle canvas; the hero downloads no photo or video.
+- **Legacy media retired** — `images/backweb.jpg` and `images/hero-bg.mp4` remain in the repo as unused assets but are no longer loaded by the page or precached. `tests/hero-bg.test.js` enforces that the legacy hero layers stay purged.
 
 ### Cyber Tools Suite (6 cybersecurity tools)
 | Tool | Description |
@@ -115,18 +111,18 @@ Fully in-browser, zero-dependency simulation labs (all client-side, GDPR-friendl
 
 ### AI Assistant (مساعد المنصة)
 - Floating Arabic-first chat assistant — answers from the platform's own content (subjects, quiz rules, tools, flashcard terms, CTF lab)
-- Works fully offline via a local knowledge engine; the conversation never leaves the browser
+- Runs entirely in the browser via a local knowledge engine after the page loads; the conversation never leaves the browser
 - Optional LLM mode: point `window.PLATFORM_AI.endpoint` at your own server proxy — API keys stay server-side (see `ASSISTANT.md`)
 
-### PWA Ready
-- Service Worker for offline caching
-- Web App Manifest (`manifest.json`)
-- Installable on mobile/desktop
+### PWA metadata (online-only)
+- Web App Manifest (`manifest.json`) with 192/512/maskable PNG icons and install shortcuts
+- Apple touch icon + 1200×630 social card
+- **No service worker:** `index.html` unregisters legacy workers and clears Cache Storage at boot; `sw.js` is a retired historical record kept for the test suite, not registered.
 
 ## 🚀 Getting Started
 
 1. Open `index.html` in any modern browser.
-2. For full PWA support, serve over `https://` or `localhost`.
+2. Serve over `https://` or `localhost` for the manifest, social metadata, and local fonts.
 
 ```bash
 # Example: serve locally
@@ -139,32 +135,48 @@ python -m http.server 8080
 
 ```
 MNCH/
-├── index.html          # Main page (RTL Arabic) — includes Learning Paths, Labs hub, IR center, Progress & About
-├── style.css           # Full stylesheet (V0 Obsidian identity · RTL · glass & neon layers · MODULE 80)
-├── script.js           # All application logic (modular IIFE) incl. MODULE 80 CyberField canvas, learning paths (39) & lessons (40) + Red Team · IR · Crypto labs
-├── current-semester.js # Official current-semester curriculum data (window.PLATFORM_CURRENT_SEMESTER) — consumed by the #semester dashboard (MODULE 43)
-├── assistant.js        # AI assistant — MODULE 33 (local engine + widget UI)
+├── index.html          # Single-page shell (RTL Arabic, bilingual AR/EN)
+├── style.css           # V0 Obsidian stylesheet (RTL · glass · neon · CyberField)
+├── ui-overhaul.css/js  # Additive UI refinement layer loaded after the core
+├── motion.css/js       # Optional GSAP/ScrollTrigger/Lenis motion layer
+├── script.js           # All application logic (one modular IIFE)
+├── current-semester.js # Official curriculum data (window.PLATFORM_CURRENT_SEMESTER)
+├── announcements.js    # Dated course reminders (window.PLATFORM_ANNOUNCEMENTS)
+├── assistant.js        # Local-first AI assistant (MODULE 33)
 ├── worker.js           # Web Worker (entropy/hash off the main thread)
-├── sw.js               # Service Worker (offline caching)
-├── manifest.json       # PWA manifest
+├── sw.js               # Retired service worker (historical only; not registered)
+├── manifest.json       # PWA manifest (PNG icons + screenshots + shortcuts)
+├── robots.txt          # Crawl rules + sitemap pointer
+├── sitemap.xml         # Canonical URL index
+├── 404.html            # Bilingual custom GitHub Pages 404
 ├── data/
 │   └── quizzes.json    # Question bank (fetched at runtime)
 ├── images/
-│   ├── icon.svg        # Favicon
-│   ├── icon-maskable.svg # PWA icon
-│   ├── backweb.jpg     # Hero background (still photo + video poster)
-│   ├── hero-bg.mp4     # Animated hero loop (10s, 1280×720, silent, precached · MODULE 59)
+│   ├── icon.svg        # Favicon / inlined brand mark
+│   ├── icon-192.png    # PWA icon 192×192
+│   ├── icon-512.png    # PWA icon 512×512
+│   ├── icon-maskable-512.png # Maskable PWA icon 512×512
+│   ├── apple-touch-icon.png  # iOS home-screen icon 180×180
+│   ├── og-cover.png    # 1200×630 Open Graph / Twitter card
+│   ├── screenshots/    # Manifest screenshots (wide + narrow)
 │   ├── algorithms.svg  # Current-semester subject thumbnails (×5)
 │   ├── os-concepts.svg
 │   ├── policies-ethics.svg
 │   ├── it-components.svg
 │   ├── security-design.svg
-│   └── flashcards/     # Flashcard illustrations (×18 SVGs)
+│   ├── kali/           # Kali guide figures (local SVGs)
+│   ├── flashcards/     # Flashcard illustrations (×18 SVGs)
+│   ├── backweb.jpg     # Legacy hero photo (unused)
+│   └── hero-bg.mp4     # Legacy hero loop (unused)
+├── fonts/              # Self-hosted Inter + IBM Plex Sans Arabic
+├── vendor/             # Local GSAP, ScrollTrigger and Lenis copies
+├── materials/          # Course PDFs served by the static host
 ├── tests/              # Zero-dependency Node test suites (run: npm test)
 ├── .github/workflows/  # CI — runs all suites on every push/PR
 ├── ASSISTANT.md        # AI assistant setup & optional LLM proxy guide
 ├── ARCHITECTURE.md     # Module map & data contracts
 ├── CONTRIBUTING.md     # How to contribute (bilingual)
+├── package.json        # Release version + test script
 ├── LICENSE             # MIT
 └── README.md
 ```
@@ -178,7 +190,7 @@ npm test                     # runs every suite in tests/
 node tests/full-boot.test.js # or run a single suite
 ```
 
-CI runs the same suites on every push and pull request, plus a guard that verifies every asset precached by the service worker actually exists.
+CI runs the same suites on every push and pull request, including guards for every precached asset, exact PWA/OG image dimensions, release-version agreement, and the social-card metadata.
 
 ## 🤝 Contributing
 
@@ -216,7 +228,7 @@ light in the single theme so it always carries dark ink (`--on-grad`).
 | `--grad` | `linear-gradient(135deg, #3DF5A5, #2BD98F 55%, #17BF7C)` — carries **ink** text (`--on-grad` `#04150D`) | Primary buttons / brand ribbon |
 | `--glass` / `--glass-blur` | `rgba(255,255,255,0.03)` / `blur(14px) saturate(1.35)` | Glassmorphism (navbar, cluster, overlays, command centre) |
 | `--ok` / `--bad` / `--warn` | `#4ADE80` / `#F87171` / `#FBBF24` | Semantic states — intentionally **not** the accent |
-| `--on-media` / `--on-media-2` | `#F4F4F5` / `#A1A1AA` | Ink over the hero photo, which always carries a dark scrim |
+| `--on-media` / `--on-media-2` | `#F4F4F5` / `#A1A1AA` | Ink over the hero backdrop, which carries a dark scrim |
 | `--hue-sat` / `--hue-light` | `68%` / `64%` | Five per-subject accent hues declared in `script.js`; only the hue travels in JS, so the ramp follows the identity for free |
 | `--shadow-rgb` | `0 0 0` | Every shadow and dark scrim composes its alpha from this one ink |
 | `--font-display` / `--font-body` | `"Inter"` with `"IBM Plex Sans Arabic"` for Arabic glyphs (both self-hosted) | Headings & body — Inter ships no Arabic, so the pair is seamless |
@@ -242,12 +254,11 @@ narrow bars. The logo is the **same shield mark the favicon & PWA icon
 use**, inlined and token-tinted (no extra asset), beside a gradient
 wordmark; Arabic text keeps `letter-spacing: 0` because tracking would
 break the letter joins. One **primary CTA** (`nav.cta` → `#paths`) closes
-the bar: outlined over the hero photo, filled once the bar frosts, and
+the bar: outlined over the hero backdrop, filled once the bar frosts, and
 hidden ≤1180px where the mobile menu already carries it. The scrolled bar,
 the `.nav-cluster` capsule, the `.nav-more-menu` dropdown and the mobile
 drawer are all true glass (`backdrop-filter: var(--glass-blur)`), and the
-hero media loop is dimmed to a faint texture behind the neon typography
-while keeping the MODULE 59 media contract intact.
+CSS-painted hero stays a faint texture behind the neon typography.
 
 V0 Obsidian single identity · CyberField particle canvas · Frosted glass chrome · RTL layout · Custom cursor · GitHub CTA
 
@@ -268,10 +279,10 @@ Designed & Developed by **Ahmed Motmi** — `motmi757@gmail.com`
 
 This is a **fully static site** — no build step, no server, no dependencies. It works on any static host:
 
-- **GitHub Pages**: push to `main`, then enable *Settings → Pages → Deploy from branch* (root). All asset paths and the service-worker scope are relative, so project sites (`user.github.io/repo/`) work out of the box.
+- **GitHub Pages**: push to `main`, then enable *Settings → Pages → Deploy from branch* (root). All asset paths are relative, so project sites (`user.github.io/repo/`) work out of the box.
 - Any static server locally: `npx serve .` or `python -m http.server 8080`.
 
-An optional Node.js/Express backend (accounts, synced progress) is maintained separately and is **not required** — the platform is fully functional offline-first without it.
+An optional Node.js/Express backend (accounts, synced progress) is maintained separately and is **not required** — the static frontend is fully functional without it (a network connection is required to load the site).
 
 ---
 
@@ -282,5 +293,5 @@ An optional Node.js/Express backend (accounts, synced progress) is maintained se
 - **Web Worker**: Password entropy and hash computations offloaded to `worker.js` (graceful fallback to main thread).
 - **Learning modules**: `index.html` adds the Current Semester dashboard (`#semester`, rendered from `window.PLATFORM_CURRENT_SEMESTER` by MODULE 43), Learning Paths (`#paths` + shared detail view `#path`), the Labs hub (`#labs`) linking to the Red Team (`#redteam`), Cryptography (`#cryptolab`), IR (`#ir`) and CTF (`#games`) labs, plus a Progress hub (`#progress`) and About (`#about`) — all wired in `script.js` (MODULE 36 theme switch, MODULE 37 paths/progress/about, MODULE 39 structured learning paths, MODULE 43 semester dashboard, plus the Red Team · IR · Crypto · tools block).
 - **Contact Form**: Submits via Formspree API with honeypot spam protection.
-- **AI Assistant**: `assistant.js` (MODULE 33) — Arabic-first chat widget grounded in platform content, fully offline by default; optional server-side LLM proxy via `window.PLATFORM_AI.endpoint` (see `ASSISTANT.md`).
-- **Offline**: Service Worker precaches all static assets including JSON data files and the hero background (`images/backweb.jpg`).
+- **AI Assistant**: `assistant.js` (MODULE 33) — Arabic-first chat widget grounded in platform content, local-first by default; optional server-side LLM proxy via `window.PLATFORM_AI.endpoint` (see `ASSISTANT.md`).
+- **Online-only**: no service worker is registered; legacy registrations are removed and Cache Storage is cleared at boot. `sw.js` is retained only as a historical test fixture.
