@@ -19582,6 +19582,15 @@ const LABS_META = {
   /* ---------- changelog data: single source of truth ---------- */
   var UPDATES = [
     {
+      date: "2026-10-22",
+      tag: "release",
+      title: { ar: "الإصدار 3.0.1 — مشاركة أوضح، جوال أنظف، وصدق في الوصف", en: "v3.0.1 — clearer sharing, cleaner mobile, honest copy" },
+      desc: {
+        ar: "تحديث جودة شامل: بطاقة مشاركة اجتماعية جديدة بمقاس 1200×630 مع وسوم Open Graph وTwitter، وأيقونات PWA بصيغة PNG (192 و512 و512 maskable) وأيقونة Apple للمس، وملفّا robots.txt وsitemap.xml وصفحة 404 ثنائية اللغة. أُصلح زر بدء الاختبار في لوحة الترم الحالي، وأُصلحت مشكلة قصّ الواجهة على الجوال، وأُضيفت 25 تسمية ARIA لعناصر تحكم كانت بلا اسم، مع اختبارات انحدار تحمي كل ذلك. ورُفِّعت نسخة المنصة إلى 3.0.1 مع مزامنة نسخة الكاش ومسار style.css، ونُظّفت النصوص والمانيفست والمساعد من أي ادعاء بالعمل دون اتصال لأن المنصة online-only، وأُضيفت أبعاد لصور البطاقات لمنع اهتزاز التخطيط.",
+        en: "A broad quality release: a new 1200×630 social card with Open Graph and Twitter tags, PNG PWA icons (192, 512 and 512 maskable) plus an Apple touch icon, and robots.txt, sitemap.xml and a bilingual 404 page. The current-semester exam CTA was fixed, the mobile hero clipping bug was resolved, 25 ARIA labels were added to previously unnamed controls, and regression tests now guard all of it. The platform version was bumped to 3.0.1 with the cache version and style.css query kept in sync; user-facing copy, the manifest and the assistant were cleaned of offline claims because the platform is online-only; and flashcard images now carry dimensions to prevent layout shift."
+      }
+    },
+    {
       date: "2026-10-17",
       tag: "new",
       title: { ar: "استوديو كانفا — عشر تجارب بصرية ووضع «متصل دائمًا»", en: "Canva Studio — ten visual experiences + always-online mode" },
