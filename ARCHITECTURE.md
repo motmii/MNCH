@@ -3,7 +3,7 @@
 ## Overview
 Single-page application (SPA) built with zero dependencies. All code runs client-side. No build step required.
 
-> **Runtime mode (v3.1.0):** online-only. `index.html` unregisters every legacy service worker and clears Cache Storage at boot; nothing registers `sw.js`, and the hero loads no photo/video. Service-worker and hero-media notes below are historical records kept for the test suite.
+> **Runtime mode (v3.1.1):** online-only. `index.html` unregisters every legacy service worker and clears Cache Storage at boot; nothing registers `sw.js`, and the hero loads no photo/video. Service-worker and hero-media notes below are historical records kept for the test suite.
 
 ## Module Map (`script.js`)
 
@@ -397,12 +397,12 @@ with `backdrop-filter: var(--glass-blur)`) split into `.nav-main` (logo lockup
 `.nav-actions` (search · language · burger), separated by a logical
 inline-start divider.
 
-- **Logo lockup** — `.logo` holds a decorative `.logo-mark` (the same shield
-  path `images/icon.svg` is built from, inlined so it needs no extra asset or
-  network request) plus a `.logo-word` gradient wordmark. The mark's colours
-  are live tokens (`.logo-disc` = `var(--bg)`, `.logo-glyph` = `var(--text)`,
-  stops = `var(--accent)` / `var(--accent-2)`), so the navbar mark follows the
-  V0 Obsidian palette while the PWA icon keeps its fixed stops.
+- **Logo lockup** — `.logo` pairs the new MNCH crest
+  (`images/mnch-logo.webp`, an optimized 512px render of the supplied artwork)
+  inside a clipped circular `.logo-mark` with the `.logo-word` gradient
+  wordmark. The same crest is the source of `icon-32.png`, the 192/512 PWA
+  icons, the maskable icon and `og-cover.png`, so the brand never drifts
+  between surfaces. The raster mark is decorative; the link carries the name.
 - **Arabic rule** — a wordmark (or any Arabic text) must keep
   `letter-spacing: 0`; tracking breaks the joins between letters.
 - **Primary CTA** — `.nav-cta` reuses the existing `nav.cta` i18n key and the

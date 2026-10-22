@@ -4155,7 +4155,7 @@ window.PLATFORM_SUBJECTS = SUBJECTS;
       `>` +
       `<div class="work-card-inner">` +
       `<div class="work-thumb" style="--hue: ${s.hue}"><span class="thumb-label">${label}${s.panel}</span>` +
-      `<img class="thumb-img" src="${escS(s.icon)}" alt="${escS(s.nameAr)}" onerror="this.onerror=null;this.src='images/icon-maskable.svg'" width="800" height="600" loading="lazy" decoding="async" /></div>` +
+      `<img class="thumb-img" src="${escS(s.icon)}" alt="${escS(s.nameAr)}" onerror="this.onerror=null;this.src='images/icon-maskable-512.png'" width="800" height="600" loading="lazy" decoding="async" /></div>` +
       `<div class="work-info">` +
       `<h3>${escS(s.nameAr)} <span class="arrow">↖</span></h3>` +
       `<p>${descHtml(s)}</p>` +
@@ -7005,7 +7005,7 @@ const Lang = (() => {
       "deck.live": "مباشر",
       "deck.today": "اليوم",
       "deck.termHint": "جرّب: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.1.0 — اكتب help لعرض الأوامر.",
+      "deck.termWelcome": "nova-shell v3.1.1 — اكتب help لعرض الأوامر.",
       "deck.termHelp": "الأوامر: help · scan [host] · caesar <نص> [إزاحة] · clear",
       "deck.termScanTitle": "بدء فحص المنافذ — {host}",
       "deck.termScanDone": "اكتمل الفحص — {n} منفذًا مفحوصًا",
@@ -7911,7 +7911,7 @@ const Lang = (() => {
       "deck.live": "Live",
       "deck.today": "Today",
       "deck.termHint": "Try: scan · caesar · help",
-      "deck.termWelcome": "nova-shell v3.1.0 — type help for commands.",
+      "deck.termWelcome": "nova-shell v3.1.1 — type help for commands.",
       "deck.termHelp": "Commands: help · scan [host] · caesar <text> [shift] · clear",
       "deck.termScanTitle": "Port scan — {host}",
       "deck.termScanDone": "Scan complete — {n} ports checked",
@@ -14403,7 +14403,7 @@ const LABS_META = {
     const diffKey = "paths.level." + (s.difficulty || "");
     const diffRaw = T10(diffKey);
     const diffLabel = diffRaw ? esc(diffRaw) : esc(s.difficulty || "");
-    const icon = meta.icon || "images/icon-maskable.svg";
+    const icon = meta.icon || "images/icon-maskable-512.png";
     const schedule = scheduleHtml(s);
 
     return (
@@ -14411,7 +14411,7 @@ const LABS_META = {
       '<div class="work-card-inner">' +
       '<div class="work-thumb" style="--hue: ' + hue + '">' +
       '<img class="thumb-img" src="' + esc(icon) + '" alt="' + esc(T(s.name)) + '"' +
-      ' onerror="this.onerror=null;this.src=\'images/icon-maskable.svg\'" width="800" height="600" loading="lazy" decoding="async" /></div>' +
+      ' onerror="this.onerror=null;this.src=\'images/icon-maskable-512.png\'" width="800" height="600" loading="lazy" decoding="async" /></div>' +
       '<div class="sem-body">' +
       '<header class="sem-head">' +
       "<h3>" + esc(T(s.name)) + "</h3>" +
@@ -19604,6 +19604,15 @@ const LABS_META = {
     {
       date: "2026-10-22",
       tag: "release",
+      title: { ar: "الإصدار 3.1.1 — شعار MNCH الجديد يوحّد هوية المنصة", en: "v3.1.1 — the new MNCH crest unifies the brand" },
+      desc: {
+        ar: "اعتمدت المنصة شعار MNCH الجديد في شريط التنقل وأيقونة المتصفح وأيقونات PWA وصورة المشاركة الاجتماعية وبطاقة «عن المنصة». يظهر الشعار داخل علامة دائرية في الشريط، مع نسخ مربعة عالية الدقة للأيقونات ونسخة maskable محمية ضمن المنطقة الآمنة، ونص بديل ثنائي اللغة لصورة «عن المنصة». ورُفعت نسخة المنصة إلى 3.1.1 مع مزامنة نسخة الكاش ومسار style.css.",
+        en: "The new MNCH crest now carries the navbar, browser favicon, PWA icons, social card and the About brand plate. The navbar renders it inside a clipped circular mark, while high-resolution square icons and a safe-zone maskable icon keep every install surface sharp. The About artwork retains its bilingual alternative description. The platform version was bumped to 3.1.1 with the cache version and style.css query kept in sync."
+      }
+    },
+    {
+      date: "2026-10-22",
+      tag: "release",
       title: { ar: "الإصدار 3.1.0 — مساحة اختبارات أوضح وتنقّل أسرع", en: "v3.1.0 — a clearer, faster quiz workspace" },
       desc: {
         ar: "أُعيد تصميم صفحة الاختبارات كمساحة عمل واحدة: لوحة جانبية تجمع نمط الاختبار ونبض تقدّمك العام، وبطاقة «الاختبار المقترح» بجانب قائمة مواد تعرض عدد الأسئلة وأفضل نتيجة وشريط التقدّم وحالة كل مادة، مع بنك الفترات واختبار الفاينل في صفّين متناسقين. تحسّنت الاستجابة على الجوال، وأصبحت الأسهم تنعكس مع اتجاه اللغة، وأُصلح زر بدء الاختبار المقترح. ورُفعت نسخة المنصة إلى 3.1.0 مع مزامنة نسخة الكاش ومسار style.css.",
@@ -23333,7 +23342,7 @@ const LABS_META = {
   }
 
   if (termLog) {
-    termPush("dim", T("deck.termWelcome") || "nova-shell v3.1.0 — type help");
+    termPush("dim", T("deck.termWelcome") || "nova-shell v3.1.1 — type help");
     listen(termLog, "click", function () {
       try { if (termInput && typeof termInput.focus === "function") termInput.focus(); } catch (e) { /* non-fatal */ }
     });

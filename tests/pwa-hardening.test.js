@@ -1,6 +1,6 @@
 "use strict";
 /**
- * PWA + social-preview hardening for release v3.1.0.
+ * PWA + social-preview hardening for release v3.1.1.
  *
  * Guards the release wiring that is easy to break silently:
  *   - package version ↔ style.css?v= ↔ sw.js CACHE_VERSION
@@ -39,7 +39,7 @@ function sameSize(rel, width, height) {
 }
 
 console.log("— release wiring —");
-check("package release is 3.1.0", pkg.version === "3.1.0");
+check("package release is 3.1.1", pkg.version === "3.1.1");
 check("index.html style.css?v matches the release", html.includes("style.css?v=" + pkg.version));
 check("sw.js CACHE_VERSION matches the release", sw.includes('CACHE_VERSION = "v' + pkg.version + '"'));
 
@@ -79,6 +79,9 @@ check("wide screenshot exists at 1280x720",
 check("narrow screenshot exists at 720x1280",
   sameSize("images/screenshots/home-narrow.png", 720, 1280));
 check("apple touch icon is 180x180", sameSize("images/apple-touch-icon.png", 180, 180));
+check("favicon is a 32x32 PNG wired from index.html",
+  html.includes('href="images/icon-32.png" sizes="32x32" type="image/png"') &&
+  sameSize("images/icon-32.png", 32, 32));
 
 console.log("— social preview —");
 check("OG image points at the social card", html.includes('property="og:image" content="https://motmii.github.io/MNCH/images/og-cover.png"'));

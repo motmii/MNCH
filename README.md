@@ -152,7 +152,8 @@ MNCH/
 ├── data/
 │   └── quizzes.json    # Question bank (fetched at runtime)
 ├── images/
-│   ├── icon.svg        # Favicon / inlined brand mark
+│   ├── mnch-logo.webp  # Navbar crest (512px, optimized)
+│   ├── icon-32.png     # Browser favicon
 │   ├── icon-192.png    # PWA icon 192×192
 │   ├── icon-512.png    # PWA icon 512×512
 │   ├── icon-maskable-512.png # Maskable PWA icon 512×512

@@ -52,7 +52,7 @@
        Preload the two faces that paint the first screen. -->
   <link rel="preload" as="font" type="font/woff2" href="fonts/plex-arabic-arabic-400.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="fonts/inter-latin.woff2" crossorigin />
-  <link rel="stylesheet" href="style.css?v=3.1.0" />
+  <link rel="stylesheet" href="style.css?v=3.1.1" />
   <link rel="stylesheet" href="ui-overhaul.css?v=1.0.0" />
   <!-- MODULE 90 · Motion stylesheet (Lenis baseline, BlurText word units,
        pointer glow). Additive only — everything is scoped to
@@ -62,7 +62,7 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#09090b" />
   <meta name="color-scheme" content="dark" />
-  <link rel="icon" href="images/icon.svg" type="image/svg+xml" />
+  <link rel="icon" href="images/icon-32.png" sizes="32x32" type="image/png" />
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png" />
   <noscript>
     <style>
@@ -94,25 +94,12 @@
   <nav class="nav" id="nav">
     <div class="nav-inner">
       <div class="nav-main">
-        <!-- MODULE 60 · brand lockup — the same shield mark the favicon/PWA
-             icon is built from (images/icon.jpg), inlined here so its colours
-             come from the theme tokens (the inner disc is var(--bg), the «م»
-             is var(--text)) instead of shipping a second dark-only raster.
-             The mark is decorative: the link already carries an Arabic name. -->
+        <!-- MODULE 60 · brand lockup — the new MNCH crest is the single source
+             of the favicon, PWA icons and social card. The mark is decorative:
+             the link already carries an Arabic name. -->
         <a href="#hero" class="logo" aria-label="منصة أمن المعلومات — الصفحة الرئيسية">
           <span class="logo-mark" aria-hidden="true">
-            <svg viewBox="0 0 100 100" focusable="false">
-              <defs>
-                <linearGradient id="navLogoGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop class="logo-stop-a" offset="0" />
-                  <stop class="logo-stop-b" offset="1" />
-                </linearGradient>
-              </defs>
-              <path class="logo-shield" d="M50 12 L82 24 V52 C82 71 68 84 50 90 C32 84 18 71 18 52 V24 Z" />
-              <circle class="logo-disc" cx="50" cy="52" r="17" />
-              <text class="logo-glyph" x="50" y="63" text-anchor="middle"
-                    font-family="Tahoma, Arial, sans-serif" font-size="26" font-weight="700">م</text>
-            </svg>
+            <img src="images/mnch-logo.webp" width="512" height="512" alt="" decoding="async" fetchpriority="high" />
           </span>
           <span class="logo-text"><span class="logo-word">منصة</span><span class="logo-dot">.</span></span>
         </a>
@@ -1661,11 +1648,19 @@
     </section>
 
     <!-- ABOUT -->
-    <section class="section about" id="about">
+    <section class="section about" id="about" aria-labelledby="aboutTitle">
       <div class="about-inner reveal">
-        <p class="eyebrow" data-i18n="about.eyebrow">عن المنصة</p>
-        <h1 class="section-title" data-i18n-html="about.title">لماذا هذه <em class="grad">المنصة؟</em></h1>
-        <p class="section-sub" data-i18n="about.sub">منصة عربية لطلاب دبلوم أمن المعلومات تجمع بين التعليم والتدريب العملي — تعلّم المادة نظريًا ثم طبّقها بالأدوات والمعامل.</p>
+        <div class="about-intro">
+          <div class="about-copy">
+            <p class="eyebrow" data-i18n="about.eyebrow">عن المنصة</p>
+            <h1 class="section-title" id="aboutTitle" data-i18n-html="about.title">لماذا هذه <em class="grad">المنصة؟</em></h1>
+            <p class="section-sub" data-i18n="about.sub">منصة عربية لطلاب دبلوم أمن المعلومات تجمع بين التعليم والتدريب العملي — تعلّم المادة نظريًا ثم طبّقها بالأدوات والمعامل.</p>
+          </div>
+          <figure class="about-brand">
+            <img src="images/mnch-brand.jpg" width="1600" height="1000" loading="lazy" decoding="async"
+                 alt="شعار منصة MNCH — أمن المعلومات | MNCH Information Security Platform" />
+          </figure>
+        </div>
         <ul class="about-points">
           <li><strong data-i18n="about.p1">محتوى منظم</strong><span data-i18n="about.p1d">لكل مادة: تجميعة، ملخصات، وبنك أسئلة جاهز للطباعة.</span></li>
           <li><strong data-i18n="about.p2">اختبارات ذكية</strong><span data-i18n="about.p2d">شرح فوري لكل إجابة، تتبّع أفضل نتيجة، واستكمال المحاولة السابقة.</span></li>

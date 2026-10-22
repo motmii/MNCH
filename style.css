@@ -5936,19 +5936,23 @@ body.search-open { overflow: hidden; }
   gap: var(--nav-rhythm-xs);
 }
 .logo-mark {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   flex: 0 0 auto;
   display: block;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 0 20px -12px rgb(var(--accent-2-rgb) / 0.85);
 }
-.logo-mark svg { display: block; width: 100%; height: 100%; }
-/* The shield gradient is painted from CSS so the mark picks up the
-   live palette (images/icon.svg keeps its fixed stops for the favicon/PWA). */
-.logo-mark .logo-stop-a { stop-color: var(--accent); }
-.logo-mark .logo-stop-b { stop-color: var(--accent-2); }
-.logo-mark .logo-shield { fill: url(#navLogoGrad); }
-.logo-mark .logo-disc { fill: var(--bg); }      /* punches the inner disc out */
-.logo-mark .logo-glyph { fill: var(--text); }   /* 17.9:1 on --surface */
+.logo-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .logo-word {
   font-family: var(--font-display);
   font-weight: 800;
@@ -6011,7 +6015,7 @@ body.search-open { overflow: hidden; }
   .nav-cta { display: none; }
 }
 @media (max-width: 760px) {
-  .logo-mark { width: 28px; height: 28px; }
+  .logo-mark { width: 32px; height: 32px; }
   .logo, .logo-word { font-size: 1.3rem; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -13346,3 +13350,52 @@ html[lang="en"] .quiz-workspace .q-subject-card:hover .q-subject-action b { tran
   html[lang="en"] .quiz-workspace .q-recommend-btn:focus-visible span[aria-hidden="true"] { transform: none; }
 }
 /* END MODULE 102 · Quiz workspace redesign */
+
+/* ============================================================
+   MODULE 103 · About brand plate
+   ------------------------------------------------------------
+   The About view opens with a split intro: the existing copy on
+   the start side and the new MNCH brand artwork on the opposite
+   side. The artwork is a real image (not a background) with its
+   intrinsic dimensions declared, so it reserves space before it
+   loads and never shifts the page.
+   ============================================================ */
+.about-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: clamp(1.5rem, 4vw, 3.25rem);
+  align-items: center;
+  margin-block: 0.2rem 1.6rem;
+}
+.about-copy { min-inline-size: 0; }
+.about-intro .eyebrow { margin-block-start: 0; }
+.about-brand {
+  margin: 0;
+  inline-size: 100%;
+  max-inline-size: 520px;
+  justify-self: end;
+  overflow: hidden;
+  background: #06110c;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: 0 30px 65px -48px rgb(var(--shadow-rgb) / 0.92);
+}
+.about-brand img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+@media (max-width: 900px) {
+  .about-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .about-brand {
+    justify-self: stretch;
+    max-inline-size: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-brand { box-shadow: none; }
+}
+/* END MODULE 103 · About brand plate */

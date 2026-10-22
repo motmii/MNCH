@@ -23,6 +23,24 @@ function check(name, cond) {
   if (cond) console.log("  ✓ " + name);
   else { failures++; console.error("  ✗ FAIL: " + name); }
 }
+function jpegSize(rel) {
+  const file = path.join(root, rel);
+  if (!fs.existsSync(file)) return null;
+  const b = fs.readFileSync(file);
+  let i = 2;
+  while (i + 9 < b.length) {
+    if (b[i] !== 0xFF) { i++; continue; }
+    const marker = b[i + 1];
+    i += 2;
+    if (marker === 0xD9 || marker === 0xDA) break;
+    const len = b.readUInt16BE(i);
+    if ([0xC0, 0xC1, 0xC2, 0xC3].includes(marker)) {
+      return { height: b.readUInt16BE(i + 3), width: b.readUInt16BE(i + 5) };
+    }
+    i += len;
+  }
+  return null;
+}
 
 console.log("— index.html: hero & identity —");
 check("platform brand AR+EN", html.includes("hero-brand-ar") && html.includes("Information Security Platform"));
@@ -67,10 +85,13 @@ check("wordmark + accent dot share one line box (baseline kept)",
   /class="logo-text"><span class="logo-word">/.test(html));
 check("logo mark is decorative (aria-hidden inside the named link)",
   /class="logo-mark" aria-hidden="true"/.test(html));
-check("logo mark reuses the same shield path as images/icon.svg",
-  html.includes("M50 12 L82 24 V52 C82 71 68 84 50 90 C32 84 18 71 18 52 V24 Z"));
-check("logo mark colours come from theme tokens (no hardcoded dark rect)",
-  html.includes('class="logo-disc"') && html.includes('class="logo-glyph"'));
+check("logo mark ships the new MNCH crest",
+  /class="logo-mark"[^>]*>[\s\S]{0,220}src="images\/mnch-logo\.webp"/.test(html));
+check("logo mark declares its intrinsic size and stays eager",
+  /src="images\/mnch-logo\.webp" width="512" height="512"/.test(html) &&
+  !/src="images\/mnch-logo\.webp"[^>]*loading="lazy"/.test(html));
+check("logo mark image is decorative (empty alt)",
+  /src="images\/mnch-logo\.webp"[^>]*alt=""/.test(html));
 check("navbar CTA present, reusing the existing nav.cta key",
   html.includes('class="btn btn-primary btn-sm nav-cta"') && html.includes('data-i18n="nav.cta"'));
 check("navbar CTA sits after the updates trigger and before nav-actions", (() => {
@@ -159,8 +180,7 @@ console.log("— style.css: new component styles —");
   check("style for " + sel, css.includes(sel));
 });
 console.log("— style.css: MODULE 60 navbar brand layer —");
-[".logo-mark", ".logo-word", ".logo-text", ".logo-shield", ".logo-disc", ".logo-glyph",
- ".logo-stop-a", ".logo-stop-b", ".nav-cta"].forEach((sel) => {
+[".logo-mark", ".logo-mark img", ".logo-word", ".logo-text", ".nav-cta"].forEach((sel) => {
   check("style for " + sel, css.includes(sel));
 });
 check("module markers present",
@@ -169,9 +189,11 @@ check("wordmark keeps Arabic letter-spacing at 0",
   /\.logo-word\s*\{[\s\S]{0,320}letter-spacing: 0;/.test(css));
 check("wordmark clips the shared text gradient",
   /\.logo-word\s*\{[\s\S]{0,520}background: var\(--grad-text\);/.test(css));
-check("logo gradient stops stay token-painted (single identity, v2.0.0)",
-  css.includes(".logo-mark .logo-stop-a { stop-color: var(--accent); }") &&
-  css.includes(".logo-mark .logo-stop-b { stop-color: var(--accent-2); }"));
+check("logo crest is clipped to a circular mark",
+  /\.logo-mark\s*\{[\s\S]{0,340}border-radius: 50%;/.test(css) &&
+  /\.logo-mark\s*\{[\s\S]{0,340}overflow: hidden;/.test(css));
+check("logo crest fills its mark without distortion",
+  /\.logo-mark img\s*\{[\s\S]{0,280}object-fit: cover;/.test(css));
 check("CTA outlined while the bar is transparent (contrast over the photo)",
   /\.nav:not\(\.is-scrolled\) \.nav-cta\s*\{[\s\S]{0,220}border-color: rgba\(255, 255, 255, 0\.42\);/.test(css));
 
@@ -204,6 +226,23 @@ check("reduced-motion guard for the CTA",
 
 check("mobile assistant panel rule", css.includes("max-height: 72dvh"));
 check("mobile drawer scrollable", css.includes("overflow-y: auto"));
+
+console.log("— index.html: about brand plate (MODULE 103) —");
+check("About intro uses the new local artwork",
+  html.includes('src="images/mnch-brand.jpg"'));
+check("About artwork declares intrinsic dimensions",
+  html.includes('width="1600" height="1000"'));
+check("About artwork is lazy + async",
+  html.includes('loading="lazy"') && html.includes('decoding="async"'));
+check("About artwork carries a bilingual alt",
+  html.includes('alt="شعار منصة MNCH — أمن المعلومات | MNCH Information Security Platform"'));
+check("About section names its heading",
+  html.includes('id="about" aria-labelledby="aboutTitle"') && html.includes('id="aboutTitle"'));
+check("MODULE 103 CSS present",
+  css.includes("MODULE 103 · About brand plate"));
+const brandJpeg = jpegSize("images/mnch-brand.jpg");
+check("About brand image exists at 1600x1000",
+  !!brandJpeg && brandJpeg.width === 1600 && brandJpeg.height === 1000);
 
 console.log("— sw.js: cache —");
 const verMatch = sw.match(/CACHE_VERSION\s*=\s*"v(\d+)\.(\d+)\.(\d+)"/);
